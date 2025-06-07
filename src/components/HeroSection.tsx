@@ -1,12 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 const HeroSection = () => {
+  const { city, loading } = useUserLocation();
+
   return (
     <section className="bg-gradient-to-br from-orange-500 to-orange-600 text-white py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-5xl md:text-6xl font-bold mb-6 font-rubik">
           Ищете работу со
-          <span className="block text-orange-200">свободой и заработком?</span>
+          <span className="block text-orange-200">
+            свободой и заработком {city && `в ${city}`}?
+          </span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-orange-100 max-w-2xl mx-auto leading-relaxed">
           Станьте курьером! Сочетайте активность, гибкий график и возможность
