@@ -41,46 +41,51 @@ const CourierTypes = () => {
   };
 
   return (
-    <section className="py-20 px-4 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-6 text-gray-800 font-rubik">
+    <section className="py-16 px-4 bg-gray-50">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 font-rubik">
           Выбери свой способ доставки
         </h2>
-        <p className="text-xl text-center mb-16 text-gray-600 max-w-2xl mx-auto">
-          Три варианта работы — один клик до старта карьеры курьера
+        <p className="text-xl text-center mb-12 text-gray-600 max-w-2xl mx-auto">
+          Каждый тип курьерской работы имеет свои преимущества. Выбери
+          подходящий для тебя!
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8">
           {courierTypes.map((courier, index) => (
-            <div
+            <Card
               key={index}
-              className={`${courier.bgColor} border-2 border-transparent hover:border-orange-400 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 rounded-2xl p-8 text-center cursor-pointer`}
-              onClick={() => handleCourierTypeClick(courier.type)}
+              className={`${courier.bgColor} border-2 border-transparent hover:border-orange-300 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1`}
             >
-              <div className="text-7xl mb-6">{courier.icon}</div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800 font-rubik">
-                {courier.type}
-              </h3>
-              <p className="text-gray-600 mb-6 text-lg">
-                {courier.description}
-              </p>
+              <CardContent className="p-8 text-center flex flex-col h-full">
+                <div className="text-6xl mb-4">{courier.icon}</div>
+                <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
+                  {courier.type}
+                </h3>
+                <p className="text-gray-600 mb-6 text-lg">
+                  {courier.description}
+                </p>
 
-              <div className="space-y-3 mb-8">
-                {courier.benefits.map((benefit, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-center gap-2 text-gray-700 font-medium"
-                  >
-                    <span className="text-green-500 text-lg">✓</span>
-                    <span>{benefit}</span>
-                  </div>
-                ))}
-              </div>
+                <div className="space-y-3 mb-8 flex-grow">
+                  {courier.benefits.map((benefit, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-center gap-2 text-gray-700"
+                    >
+                      <span className="text-green-500">✓</span>
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
 
-              <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 px-6 text-lg hover:scale-105 transition-all shadow-lg rounded-xl">
-                Стать {courier.type.toLowerCase()}ом
-              </Button>
-            </div>
+                <Button
+                  onClick={() => handleCourierTypeClick(courier.type)}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto"
+                >
+                  Стать курьером
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
