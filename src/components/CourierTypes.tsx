@@ -82,7 +82,7 @@ const CourierTypes = () => {
                   onClick={() => handleCourierTypeClick(courier.type)}
                   className={`w-full ${courier.buttonColor} text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto`}
                 >
-                  Стать {courier.type.toLowerCase()}ом
+                  Стать курьером
                 </Button>
               </CardContent>
             </Card>
