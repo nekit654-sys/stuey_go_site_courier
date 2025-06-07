@@ -7,7 +7,7 @@ const CourierTypes = () => {
 
   const courierTypes = [
     {
-      type: "Авто курьер",
+      type: "Доставка на автомобиле",
       icon: "🚗",
       description: "Доставка на собственном автомобиле",
       benefits: [
@@ -80,11 +80,9 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={() => handleCourierTypeClick(courier.type)}
-                  className={`w-full ${courier.buttonColor} text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto`}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto"
                 >
-                  {courier.type === "Авто курьер"
-                    ? "Доставка на автомобиле"
-                    : "Стать курьером"}
+                  Стать курьером
                 </Button>
               </CardContent>
             </Card>
