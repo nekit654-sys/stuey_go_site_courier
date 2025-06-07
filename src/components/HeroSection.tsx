@@ -2,8 +2,15 @@ import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   return (
-    <section className="bg-gradient-to-br from-orange-500 to-orange-600 text-white py-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
+    <section
+      className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4"
+      style={{
+        backgroundImage:
+          "url(https://cdn.poehali.dev/files/1c1374fd-6234-405d-8f82-37762c3660a6.jpg)",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="relative max-w-4xl mx-auto text-center">
         <h1 className="text-5xl md:text-6xl font-bold mb-6 font-rubik">
           Ищете работу со
           <span className="block text-orange-200">свободой и заработком?</span>
