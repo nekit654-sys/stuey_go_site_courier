@@ -57,7 +57,7 @@ const CourierTypes = () => {
               key={index}
               className={`${courier.bgColor} border-2 border-transparent hover:border-orange-300 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1`}
             >
-              <CardContent className="p-8 text-center">
+              <CardContent className="p-8 text-center flex flex-col h-full">
                 <div className="text-6xl mb-4">{courier.icon}</div>
                 <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
                   {courier.type}
@@ -66,7 +66,7 @@ const CourierTypes = () => {
                   {courier.description}
                 </p>
 
-                <div className="space-y-3 mb-8">
+                <div className="space-y-3 mb-8 flex-grow">
                   {courier.benefits.map((benefit, idx) => (
                     <div
                       key={idx}
@@ -80,7 +80,7 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={() => handleCourierTypeClick(courier.type)}
-                  className={`w-full ${courier.buttonColor} text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform`}
+                  className={`w-full ${courier.buttonColor} text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto`}
                 >
                   Стать {courier.type.toLowerCase()}ом
                 </Button>
