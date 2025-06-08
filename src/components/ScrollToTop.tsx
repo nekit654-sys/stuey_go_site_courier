@@ -28,7 +28,7 @@ const ScrollToTop = () => {
     <button
       onClick={scrollToTop}
       className={`fixed bottom-6 right-6 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-md 
-        text-gray-700 hover:text-gray-900 rounded-full shadow-lg hover:shadow-xl 
+        text-yellow-500 hover:text-yellow-400 rounded-full shadow-lg hover:shadow-xl 
         transition-all duration-300 ease-in-out z-50 group border border-white/20
         ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95 pointer-events-none"}`}
       aria-label="Вернуться наверх"
@@ -37,7 +37,7 @@ const ScrollToTop = () => {
         <Icon
           name="ArrowUp"
           size={24}
-          className="transition-all duration-300 ease-in-out 
+          className="transition-all duration-300 ease-in-out drop-shadow-lg
             group-hover:-translate-y-1 group-hover:scale-110 group-active:scale-95"
         />
         <div
