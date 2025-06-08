@@ -37,9 +37,7 @@ const HeroSection = () => {
         </div>
 
         <div className="flex justify-center">
-          <p className="text-lg text-gray-200 italic">
-            Выберите подходящий способ доставки ниже
-          </p>
+          <p className="text-lg text-gray-200 italic"></p>
         </div>
       </div>
     </section>
