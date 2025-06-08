@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Icon from "@/components/ui/icon";
 
 const CourierTypes = () => {
   const referralLink =
@@ -8,7 +9,7 @@ const CourierTypes = () => {
   const courierTypes = [
     {
       type: "Авто курьер",
-      icon: "🚗",
+      icon: "Car",
       description: "Доставка на автомобиле",
       benefits: [
         "До 8000₽ в день",
@@ -20,7 +21,7 @@ const CourierTypes = () => {
     },
     {
       type: "Вело курьер",
-      icon: "🚴",
+      icon: "Bike",
       description: "Доставка на велосипеде",
       benefits: ["До 6000₽ в день", "Экологично", "Отличная физическая форма"],
       bgColor: "bg-green-50 hover:bg-green-100",
@@ -28,7 +29,7 @@ const CourierTypes = () => {
     },
     {
       type: "Пеший курьер",
-      icon: "🚶",
+      icon: "User",
       description: "Доставка пешком",
       benefits: ["До 4000₽ в день", "Не нужен транспорт", "Гибкий график"],
       bgColor: "bg-purple-50 hover:bg-purple-100",
@@ -59,7 +60,13 @@ const CourierTypes = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-100/20 via-yellow-100/20 to-amber-100/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <CardContent className="p-8 text-center flex flex-col h-full">
-                <div className="text-6xl mb-4">{courier.icon}</div>
+                <div className="mb-6 flex justify-center">
+                  <Icon
+                    name={courier.icon}
+                    size={48}
+                    className="text-orange-600 hover:text-orange-700 transition-colors duration-300"
+                  />
+                </div>
                 <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
                   {courier.type}
                 </h3>
@@ -73,7 +80,7 @@ const CourierTypes = () => {
                       key={idx}
                       className="flex items-center justify-center gap-2 text-gray-700"
                     >
-                      <span className="text-green-500">✓</span>
+                      <Icon name="Check" size={16} className="text-green-500" />
                       <span>{benefit}</span>
                     </div>
                   ))}

@@ -1,3 +1,5 @@
+import Icon from "@/components/ui/icon";
+
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-12 px-4 border-t-4 border-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 shadow-2xl relative overflow-hidden">
@@ -14,15 +16,15 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-300 mb-8">
           <div className="flex items-center gap-2">
-            <span>📞</span>
+            <Icon name="Phone" size={18} className="text-orange-400" />
             <span>Поддержка 24/7</span>
           </div>
           <div className="flex items-center gap-2">
-            <span>🛡️</span>
+            <Icon name="Shield" size={18} className="text-orange-400" />
             <span>Страхование</span>
           </div>
           <div className="flex items-center gap-2">
-            <span>💼</span>
+            <Icon name="Briefcase" size={18} className="text-orange-400" />
             <span>Официальное трудоустройство</span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Icon from "@/components/ui/icon";
 
 const HeroSection = () => {
   return (
@@ -22,15 +23,15 @@ const HeroSection = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <div className="flex items-center gap-2 text-gray-100">
-            <span className="text-2xl">🚀</span>
+            <Icon name="Car" size={20} className="text-yellow-300" />
             <span>Авто, вело, пешие</span>
           </div>
           <div className="flex items-center gap-2 text-gray-100">
-            <span className="text-2xl">⭐</span>
+            <Icon name="Star" size={20} className="text-yellow-300" />
             <span>Ведущие сервисы</span>
           </div>
           <div className="flex items-center gap-2 text-gray-100">
-            <span className="text-2xl">💪</span>
+            <Icon name="Zap" size={20} className="text-yellow-300" />
             <span>Активный образ жизни</span>
           </div>
         </div>
