@@ -27,18 +27,34 @@ const ScrollToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center group ${
-        isVisible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-4 pointer-events-none"
-      }`}
+      className={`fixed bottom-8 right-8 z-50 w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 
+        shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]
+        hover:shadow-[0_12px_40px_rgb(0,0,0,0.18)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)]
+        border border-gray-200/50 dark:border-gray-700/50
+        backdrop-blur-sm transition-all duration-500 ease-out
+        hover:scale-110 hover:-translate-y-1 active:scale-95
+        flex items-center justify-center group
+        ${
+          isVisible
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-8 pointer-events-none"
+        }`}
       aria-label="Наверх"
     >
-      <Icon
-        name="ChevronUp"
-        size={20}
-        className="text-white group-hover:text-gray-100 transition-colors duration-200"
-      />
+      <div className="relative">
+        <Icon
+          name="ChevronUp"
+          size={22}
+          className="text-gray-700 dark:text-gray-300 
+            group-hover:text-blue-600 dark:group-hover:text-blue-400
+            transition-all duration-300 ease-out
+            group-hover:-translate-y-0.5 group-active:translate-y-0"
+        />
+        <div
+          className="absolute inset-0 rounded-full bg-blue-500/20 scale-0 
+          group-hover:scale-150 transition-transform duration-300 ease-out -z-10"
+        />
+      </div>
     </button>
   );
 };
