@@ -27,27 +27,17 @@ const ScrollToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 z-50 w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 
-        shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]
-        hover:shadow-[0_12px_40px_rgb(0,0,0,0.18)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)]
-        border border-gray-200/50 dark:border-gray-700/50
-        backdrop-blur-sm transition-all duration-500 ease-out
-        hover:scale-110 hover:-translate-y-1 active:scale-95
-        flex items-center justify-center group bounce-hint
-        ${
-          isVisible
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 translate-y-8 pointer-events-none"
-        }`}
-      aria-label="Наверх"
+      className={`fixed bottom-6 right-6 p-3 bg-blue-600 hover:bg-blue-700 text-white 
+        rounded-full shadow-lg transition-all duration-300 z-50 group bounce-hint-delay-2 magic-dust
+        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+      aria-label="Вернуться наверх"
     >
       <div className="relative">
+        <div className="magic-particles"></div>
         <Icon
-          name="ChevronUp"
-          size={22}
-          className="text-gray-700 dark:text-gray-300 
-            group-hover:text-blue-600 dark:group-hover:text-blue-400
-            transition-all duration-300 ease-out
+          name="ArrowUp"
+          size={20}
+          className="transition-transform duration-200 
             group-hover:-translate-y-0.5 group-active:translate-y-0"
         />
         <div

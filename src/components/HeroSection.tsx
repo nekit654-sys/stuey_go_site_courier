@@ -21,7 +21,7 @@ const HeroSection = () => {
           Станьте курьером! Сочетайте активность, гибкий график и возможность
           хорошо зарабатывать
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <div className="flex items-center gap-2 text-gray-100">
             <Icon name="Car" size={20} className="text-yellow-300" />
             <span>Авто, вело, пешие</span>
@@ -34,6 +34,14 @@ const HeroSection = () => {
             <Icon name="Zap" size={20} className="text-yellow-300" />
             <span>Активный образ жизни</span>
           </div>
+        </div>
+
+        <div className="flex justify-center">
+          <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 text-xl rounded-full bounce-hint magic-dust">
+            <div className="magic-particles"></div>
+            Начать работать курьером
+            <Icon name="ArrowRight" size={20} className="ml-2" />
+          </Button>
         </div>
       </div>
     </section>
