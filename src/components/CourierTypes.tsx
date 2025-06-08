@@ -88,7 +88,7 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={() => handleCourierTypeClick(courier.type)}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto bounce-hint"
                 >
                   Стать курьером
                 </Button>
