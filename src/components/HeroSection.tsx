@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import CorgiCharacter from "@/components/CorgiCharacter";
 
 const HeroSection = () => {
   const { cityInPrepositional, loading } = useUserLocation();
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4 border-t-4 border-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 shadow-2xl"
+      className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4 border-t-4 border-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 shadow-2xl overflow-hidden"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
@@ -14,6 +15,10 @@ const HeroSection = () => {
       }}
     >
       <div className="absolute inset-0 bg-black/40 border-t border-yellow-300/30"></div>
+
+      {/* Corgi Character */}
+      <CorgiCharacter />
+
       <div className="relative max-w-4xl mx-auto text-center border border-white/10 rounded-2xl backdrop-blur-sm bg-white/5 p-8 shadow-xl">
         <h1 className="md:text-6xl font-bold mb-6 font-rubik text-white text-4xl">
           Ищете работу со свободой и заработком{" "}
