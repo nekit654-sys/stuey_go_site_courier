@@ -6,7 +6,7 @@ const HeroSection = () => {
       className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4"
       style={{
         backgroundImage:
-          "url(https://cdn.poehali.dev/files/1c1374fd-6234-405d-8f82-37762c3660a6.jpg)",
+          "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
       }}
     >
       <div className="absolute inset-0 bg-black/40"></div>
