@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 const HeroSection = () => {
+  const { cityInPrepositional, loading } = useUserLocation();
   return (
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4 border-t-4 border-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 shadow-2xl"
@@ -14,8 +16,14 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/40 border-t border-yellow-300/30"></div>
       <div className="relative max-w-4xl mx-auto text-center border border-white/10 rounded-2xl backdrop-blur-sm bg-white/5 p-8 shadow-xl">
         <h1 className="md:text-6xl font-bold mb-6 font-rubik text-white text-4xl">
-          Ищете работу со
-          <span className="block text-yellow-300">свободой и заработком?</span>
+          Ищете работу со свободой и заработком{" "}
+          {loading ? (
+            <span className="text-yellow-300">в вашем городе?</span>
+          ) : cityInPrepositional ? (
+            <span className="text-yellow-300">в {cityInPrepositional}?</span>
+          ) : (
+            <span className="text-yellow-300">в вашем городе?</span>
+          )}
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-2xl mx-auto leading-relaxed">
           Станьте курьером! Сочетайте активность, гибкий график и возможность
