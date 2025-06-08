@@ -71,168 +71,26 @@
   }
 }
 
-/* Анимация подпрыгивания для кнопок с интервалом 7 секунд */
+/* Анимация подпрыгивания для кнопок */
 @keyframes bounce-hint {
   0%,
-  2%,
-  4%,
-  6%,
-  8%,
-  10%,
-  12%,
-  14%,
-  16%,
-  18%,
   20%,
-  96%,
-  98%,
+  50%,
+  80%,
   100% {
     transform: translateY(0);
   }
-  1%,
-  3%,
-  5% {
+  40% {
     transform: translateY(-8px);
   }
-  7%,
-  9% {
+  60% {
     transform: translateY(-4px);
   }
 }
 
-@keyframes sparkle {
-  0%,
-  100% {
-    transform: scale(0) rotate(0deg);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1) rotate(180deg);
-    opacity: 1;
-  }
-}
-
-@keyframes float-sparkle {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-20px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
 .bounce-hint {
-  animation: bounce-hint 7s ease-in-out infinite;
-  position: relative;
-}
-
-.bounce-hint-delay-1 {
-  animation: bounce-hint 7s ease-in-out infinite;
-  animation-delay: 2.3s;
-  position: relative;
-}
-
-.bounce-hint-delay-2 {
-  animation: bounce-hint 7s ease-in-out infinite;
-  animation-delay: 4.6s;
-  position: relative;
-}
-
-/* Волшебная пыль */
-.magic-dust {
-  position: relative;
-  overflow: visible;
-}
-
-.magic-dust::before,
-.magic-dust::after {
-  content: "✨";
-  position: absolute;
-  font-size: 12px;
-  animation: sparkle 2s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.magic-dust::before {
-  top: -8px;
-  right: -8px;
-  animation-delay: 0s;
-}
-
-.magic-dust::after {
-  bottom: -8px;
-  left: -8px;
-  animation-delay: 1s;
-}
-
-.magic-particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.magic-particles::before,
-.magic-particles::after {
-  content: "⭐";
-  position: absolute;
-  font-size: 8px;
-  animation: float-sparkle 3s ease-in-out infinite;
-  z-index: 5;
-}
-
-.magic-particles::before {
-  top: 50%;
-  right: -15px;
-  animation-delay: 0.5s;
-}
-
-.magic-particles::after {
-  top: 50%;
-  left: -15px;
-  animation-delay: 1.5s;
-}
-
-/* Плавная анимация подпрыгивания для кнопок с последовательным запуском */
-@keyframes bounce-smooth {
-  0%,
-  96%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  2%,
-  6% {
-    transform: translateY(-12px) scale(1.02);
-  }
-  4% {
-    transform: translateY(-16px) scale(1.05);
-  }
-  8%,
-  12% {
-    transform: translateY(-6px) scale(1.01);
-  }
-  10% {
-    transform: translateY(-8px) scale(1.02);
-  }
-}
-
-.animate-bounce-sequence-1 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.animate-bounce-sequence-2 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 0.8s;
-}
-
-.animate-bounce-sequence-3 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 1.6s;
+  animation: bounce-hint 2s ease-in-out;
+  animation-delay: 3s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
 }
