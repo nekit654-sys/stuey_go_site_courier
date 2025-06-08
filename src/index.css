@@ -94,3 +94,184 @@
   animation-iteration-count: infinite;
   animation-fill-mode: both;
 }
+
+/* Анимация подпрыгивания для кнопок с панелькой */
+@keyframes bounce-with-panel {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+  60% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Анимация статичной тени */
+@keyframes shadow-static {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+  60% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* Анимация волшебной пыли */
+@keyframes magic-dust {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(360deg) translateY(-30px);
+  }
+}
+
+/* Частицы пыли */
+@keyframes dust-particle {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0);
+  }
+}
+
+/* Базовый класс для кнопок с анимацией */
+.bounce-hint {
+  position: relative;
+  animation: bounce-with-panel 3s ease-in-out infinite;
+}
+
+/* Задержки для разных кнопок */
+.bounce-hint-1 {
+  animation-delay: 0s;
+}
+
+.bounce-hint-2 {
+  animation-delay: 1s;
+}
+
+.bounce-hint-3 {
+  animation-delay: 2s;
+}
+
+.bounce-hint-4 {
+  animation-delay: 3s;
+}
+
+/* Статичная тень */
+.bounce-hint::before {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 8px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: shadow-static 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+.bounce-hint-1::before {
+  animation-delay: 0s;
+}
+.bounce-hint-2::before {
+  animation-delay: 1s;
+}
+.bounce-hint-3::before {
+  animation-delay: 2s;
+}
+.bounce-hint-4::before {
+  animation-delay: 3s;
+}
+
+/* Волшебная пыль */
+.magic-dust {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.magic-dust::after {
+  content: "✨";
+  position: absolute;
+  top: -10px;
+  left: 10%;
+  font-size: 12px;
+  animation: magic-dust 2s ease-out infinite;
+}
+
+.magic-dust::before {
+  content: "⭐";
+  position: absolute;
+  top: -15px;
+  right: 10%;
+  font-size: 10px;
+  animation: dust-particle 2.5s ease-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Дополнительные частицы */
+.dust-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dust-particles span {
+  position: absolute;
+  font-size: 8px;
+  animation: dust-particle 3s ease-out infinite;
+}
+
+.dust-particles span:nth-child(1) {
+  left: 20%;
+  top: 10%;
+  animation-delay: 0.2s;
+}
+
+.dust-particles span:nth-child(2) {
+  right: 20%;
+  top: 20%;
+  animation-delay: 0.8s;
+}
+
+.dust-particles span:nth-child(3) {
+  left: 60%;
+  top: 5%;
+  animation-delay: 1.2s;
+}

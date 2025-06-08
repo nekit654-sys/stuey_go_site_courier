@@ -88,9 +88,14 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={() => handleCourierTypeClick(courier.type)}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto bounce-hint"
+                  className={`w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 text-lg hover:scale-105 transition-transform mt-auto bounce-hint bounce-hint-${index + 1} magic-dust relative`}
                 >
                   Стать курьером
+                  <div className="dust-particles">
+                    <span>✨</span>
+                    <span>⭐</span>
+                    <span>💫</span>
+                  </div>
                 </Button>
               </CardContent>
             </Card>
