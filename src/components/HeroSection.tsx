@@ -12,7 +12,7 @@ const HeroSection = () => {
     >
       <div className="absolute inset-0 bg-black/40 border-t border-yellow-300/30"></div>
       <div className="relative max-w-4xl mx-auto text-center border border-white/10 rounded-2xl backdrop-blur-sm bg-white/5 p-8 shadow-xl">
-        <h1 className="md:text-6xl font-bold mb-6 font-rubik text-white text-7xl">
+        <h1 className="md:text-6xl font-bold mb-6 font-rubik text-white text-8xl">
           Ищете работу со
           <span className="block text-yellow-300">свободой и заработком?</span>
         </h1>
