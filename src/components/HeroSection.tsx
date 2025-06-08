@@ -37,11 +37,9 @@ const HeroSection = () => {
         </div>
 
         <div className="flex justify-center">
-          <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 text-xl rounded-full bounce-hint magic-dust">
-            <div className="magic-particles"></div>
-            Начать работать курьером
-            <Icon name="ArrowRight" size={20} className="ml-2" />
-          </Button>
+          <p className="text-lg text-gray-200 italic">
+            Выберите подходящий способ доставки ниже
+          </p>
         </div>
       </div>
     </section>

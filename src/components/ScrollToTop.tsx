@@ -27,22 +27,22 @@ const ScrollToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-6 right-6 p-3 bg-blue-600 hover:bg-blue-700 text-white 
-        rounded-full shadow-lg transition-all duration-300 z-50 group bounce-hint-delay-2 magic-dust
-        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+      className={`fixed bottom-6 right-6 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-md 
+        text-gray-700 hover:text-gray-900 rounded-full shadow-lg hover:shadow-xl 
+        transition-all duration-300 ease-in-out z-50 group border border-white/20
+        ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95 pointer-events-none"}`}
       aria-label="Вернуться наверх"
     >
       <div className="relative">
-        <div className="magic-particles"></div>
         <Icon
           name="ArrowUp"
-          size={20}
-          className="transition-transform duration-200 
-            group-hover:-translate-y-0.5 group-active:translate-y-0"
+          size={24}
+          className="transition-all duration-300 ease-in-out 
+            group-hover:-translate-y-1 group-hover:scale-110 group-active:scale-95"
         />
         <div
-          className="absolute inset-0 rounded-full bg-blue-500/20 scale-0 
-          group-hover:scale-150 transition-transform duration-300 ease-out -z-10"
+          className="absolute inset-0 rounded-full bg-white/10 scale-0 
+          group-hover:scale-150 transition-transform duration-500 ease-out -z-10"
         />
       </div>
     </button>
