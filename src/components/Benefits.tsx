@@ -52,15 +52,18 @@ const Benefits = () => {
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-xl bg-gray-50 hover:bg-orange-50 transition-colors duration-300"
+              className="text-center p-6 rounded-xl bg-gray-50 hover:bg-orange-50 transition-all duration-300 border-2 border-gradient-to-br from-orange-200 via-yellow-200 to-amber-200 hover:border-orange-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 backdrop-blur-sm ring-1 ring-orange-100/50 hover:ring-orange-200/70 relative overflow-hidden"
             >
-              <div className="text-5xl mb-4">{benefit.icon}</div>
-              <h3 className="text-xl font-bold mb-3 text-gray-800 font-rubik">
-                {benefit.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {benefit.description}
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-yellow-50/30 to-amber-50/30 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="text-5xl mb-4">{benefit.icon}</div>
+                <h3 className="text-xl font-bold mb-3 text-gray-800 font-rubik">
+                  {benefit.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {benefit.description}
+                </p>
+              </div>
             </div>
           ))}
         </div>
