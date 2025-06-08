@@ -33,7 +33,7 @@ const ScrollToTop = () => {
         border border-gray-200/50 dark:border-gray-700/50
         backdrop-blur-sm transition-all duration-500 ease-out
         hover:scale-110 hover:-translate-y-1 active:scale-95
-        flex items-center justify-center group bounce-hint bounce-hint-4 magic-dust
+        flex items-center justify-center group bounce-hint
         ${
           isVisible
             ? "opacity-100 translate-y-0 pointer-events-auto"
@@ -54,11 +54,6 @@ const ScrollToTop = () => {
           className="absolute inset-0 rounded-full bg-blue-500/20 scale-0 
           group-hover:scale-150 transition-transform duration-300 ease-out -z-10"
         />
-      </div>
-      <div className="dust-particles">
-        <span>✨</span>
-        <span>⭐</span>
-        <span>💫</span>
       </div>
     </button>
   );
