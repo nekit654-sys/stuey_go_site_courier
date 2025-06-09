@@ -4,14 +4,6 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 
 const HeroSection = () => {
   const { cityInPrepositional, loading } = useUserLocation();
-
-  const referralLink =
-    "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
-
-  const handleBecomeClick = () => {
-    window.open(referralLink, "_blank");
-  };
-
   return (
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6 border-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl"
@@ -79,23 +71,6 @@ const HeroSection = () => {
                 Активный образ жизни
               </span>
             </div>
-          </div>
-
-          {/* Кнопка призыва к действию */}
-          <div className="mt-8">
-            <Button
-              onClick={handleBecomeClick}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 text-xl 
-                shadow-xl hover:shadow-2xl active:shadow-lg
-                rounded-xl hover:scale-105 transition-all duration-300 ease-out
-                ring-4 ring-yellow-300/50 hover:ring-yellow-400/70
-                border-0 backdrop-blur-sm
-                relative overflow-hidden
-                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent
-                before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-            >
-              🚀 Стать курьером прямо сейчас!
-            </Button>
           </div>
         </div>
       </div>
