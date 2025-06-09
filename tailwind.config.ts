@@ -80,26 +80,11 @@ const config: Config = {
             animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
           },
         },
-        "corgi-jump": {
-          "0%, 15%, 85%, 100%": {
-            transform: "translateY(0px) scale(1)",
-          },
-          "7.5%": {
-            transform: "translateY(-8px) scale(1.05)",
-          },
-          "50%": {
-            transform: "translateY(-80px) scale(0.95)",
-          },
-          "92.5%": {
-            transform: "translateY(-8px) scale(1.05)",
-          },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "gentle-bounce": "gentle-bounce 4s ease-in-out infinite",
-        "corgi-jump": "corgi-jump 8s ease-in-out infinite",
       },
     },
   },

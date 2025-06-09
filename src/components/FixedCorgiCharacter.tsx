@@ -43,7 +43,7 @@ const FixedCorgiCharacter = () => {
       </div>
 
       {/* Corgi Character */}
-      <div className="animate-[corgi-jump_8s_ease-in-out_infinite] relative">
+      <div className="animate-[gentle-bounce_4s_ease-in-out_infinite] relative">
         <img
           src="https://cdn.poehali.dev/files/c6fa10e8-a325-4715-80fa-6d1ea959e58d.png"
           alt="Стю - корги курьер"
