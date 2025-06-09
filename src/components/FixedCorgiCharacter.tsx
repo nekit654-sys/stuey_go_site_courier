@@ -28,7 +28,7 @@ const FixedCorgiCharacter = () => {
   if (!isCharacterVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 md:right-4 md:left-auto z-50">
+    <div className="fixed bottom-4 left-4 md:left-8 z-50">
       {/* Speech Bubble */}
       <div
         className={`absolute -top-28 left-1/2 -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
