@@ -82,7 +82,7 @@ const HeroSection = () => {
           </div>
 
           {/* Кнопка призыва к действию */}
-          <div className="mt-8">
+          <div className="mt-8 hidden md:block">
             <Button
               onClick={handleBecomeClick}
               className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 text-xl 
