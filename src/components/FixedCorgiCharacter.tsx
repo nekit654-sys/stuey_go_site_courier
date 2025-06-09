@@ -33,12 +33,12 @@ const FixedCorgiCharacter = () => {
       <div
         className={`absolute -top-28 left-1/2 -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
-        <div className="bg-white/95 backdrop-blur-sm text-gray-800 rounded-2xl px-3 py-4 shadow-xl border border-gray-100 w-48 h-20 relative flex items-center justify-center">
-          <p className="text-sm font-medium leading-relaxed text-center">
+        <div className="md-card md-elevation-3 text-gray-800 rounded-2xl px-3 py-4 w-48 h-20 relative flex items-center justify-center backdrop-blur-sm">
+          <p className="md-body-2 font-medium leading-relaxed text-center">
             {phrases[currentPhrase]}
           </p>
           {/* Speech bubble tail */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45 border-r border-b border-gray-100"></div>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 md-surface rotate-45 border-r border-b border-gray-200"></div>
         </div>
       </div>
 
@@ -51,10 +51,10 @@ const FixedCorgiCharacter = () => {
         />
       </div>
 
-      {/* Close button - fixed below the corgi */}
+      {/* Close button */}
       <button
         onClick={() => setIsCharacterVisible(false)}
-        className="absolute -bottom-4 -left-6 w-8 h-8 opacity-30 hover:opacity-50 bg-red-500 rounded-full transition-opacity duration-200 flex items-center justify-center"
+        className="absolute -bottom-4 -left-6 w-8 h-8 opacity-30 hover:opacity-50 bg-red-500 rounded-full md-elevation-1 hover:md-elevation-2 transition-all duration-200 flex items-center justify-center"
         title="Скрыть персонажа"
       >
         <span className="text-white text-lg font-bold leading-none">×</span>

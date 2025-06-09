@@ -1,0 +1,228 @@
+/* Material Design Variables */
+:root {
+  /* Material Design Colors */
+  --md-primary: #1976d2;
+  --md-primary-dark: #1565c0;
+  --md-primary-light: #42a5f5;
+  --md-secondary: #f57c00;
+  --md-secondary-dark: #ef6c00;
+  --md-secondary-light: #ffb74d;
+  --md-surface: #ffffff;
+  --md-surface-variant: #f5f5f5;
+  --md-background: #fafafa;
+  --md-on-primary: #ffffff;
+  --md-on-secondary: #ffffff;
+  --md-on-surface: #212121;
+  --md-on-background: #212121;
+  --md-outline: #e0e0e0;
+  --md-outline-variant: #eeeeee;
+
+  /* Material Design Elevations */
+  --md-elevation-1:
+    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-elevation-2:
+    0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --md-elevation-3:
+    0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --md-elevation-4:
+    0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --md-elevation-8:
+    0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  /* Material Design Typography */
+  --md-font-family: "Roboto", -apple-system, BlinkMacSystemFont, sans-serif;
+  --md-headline-1: 96px;
+  --md-headline-2: 60px;
+  --md-headline-3: 48px;
+  --md-headline-4: 34px;
+  --md-headline-5: 24px;
+  --md-headline-6: 20px;
+  --md-body-1: 16px;
+  --md-body-2: 14px;
+  --md-button-text: 14px;
+
+  /* Material Design Spacing */
+  --md-spacing-1: 4px;
+  --md-spacing-2: 8px;
+  --md-spacing-3: 12px;
+  --md-spacing-4: 16px;
+  --md-spacing-5: 20px;
+  --md-spacing-6: 24px;
+  --md-spacing-8: 32px;
+  --md-spacing-10: 40px;
+  --md-spacing-12: 48px;
+  --md-spacing-16: 64px;
+
+  /* Material Design Border Radius */
+  --md-shape-corner-small: 4px;
+  --md-shape-corner-medium: 8px;
+  --md-shape-corner-large: 16px;
+  --md-shape-corner-extra-large: 28px;
+}
+
+/* Material Design Base Styles */
+.md-surface {
+  background-color: var(--md-surface);
+  color: var(--md-on-surface);
+}
+
+.md-background {
+  background-color: var(--md-background);
+  color: var(--md-on-background);
+}
+
+.md-primary {
+  background-color: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.md-secondary {
+  background-color: var(--md-secondary);
+  color: var(--md-on-secondary);
+}
+
+/* Material Design Elevations */
+.md-elevation-1 {
+  box-shadow: var(--md-elevation-1);
+}
+.md-elevation-2 {
+  box-shadow: var(--md-elevation-2);
+}
+.md-elevation-3 {
+  box-shadow: var(--md-elevation-3);
+}
+.md-elevation-4 {
+  box-shadow: var(--md-elevation-4);
+}
+.md-elevation-8 {
+  box-shadow: var(--md-elevation-8);
+}
+
+/* Material Design Cards */
+.md-card {
+  background-color: var(--md-surface);
+  border-radius: var(--md-shape-corner-medium);
+  box-shadow: var(--md-elevation-1);
+  transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-card:hover {
+  box-shadow: var(--md-elevation-3);
+}
+
+/* Material Design Buttons */
+.md-button {
+  font-family: var(--md-font-family);
+  font-size: var(--md-button-text);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.0892857143em;
+  border-radius: var(--md-shape-corner-small);
+  padding: var(--md-spacing-2) var(--md-spacing-4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.md-button-filled {
+  background-color: var(--md-primary);
+  color: var(--md-on-primary);
+  box-shadow: var(--md-elevation-2);
+}
+
+.md-button-filled:hover {
+  box-shadow: var(--md-elevation-4);
+  background-color: var(--md-primary-dark);
+}
+
+.md-button-secondary {
+  background-color: var(--md-secondary);
+  color: var(--md-on-secondary);
+}
+
+.md-button-secondary:hover {
+  background-color: var(--md-secondary-dark);
+}
+
+/* Material Design Typography */
+.md-headline-1 {
+  font-size: var(--md-headline-1);
+  font-weight: 300;
+}
+.md-headline-2 {
+  font-size: var(--md-headline-2);
+  font-weight: 300;
+}
+.md-headline-3 {
+  font-size: var(--md-headline-3);
+  font-weight: 400;
+}
+.md-headline-4 {
+  font-size: var(--md-headline-4);
+  font-weight: 400;
+}
+.md-headline-5 {
+  font-size: var(--md-headline-5);
+  font-weight: 400;
+}
+.md-headline-6 {
+  font-size: var(--md-headline-6);
+  font-weight: 500;
+}
+.md-body-1 {
+  font-size: var(--md-body-1);
+  font-weight: 400;
+}
+.md-body-2 {
+  font-size: var(--md-body-2);
+  font-weight: 400;
+}
+
+/* Material Design FAB */
+.md-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--md-secondary);
+  color: var(--md-on-secondary);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--md-elevation-3);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-fab:hover {
+  box-shadow: var(--md-elevation-8);
+  transform: scale(1.05);
+}
+
+/* Material Design Ripple Effect */
+.md-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.md-ripple::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.6s,
+    height 0.6s;
+}
+
+.md-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
