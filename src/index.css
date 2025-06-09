@@ -236,3 +236,80 @@
   animation: bounce-smooth 6s ease-in-out infinite;
   animation-delay: 1.6s;
 }
+
+/* Плавная анимация прыжков корги с кроссбраузерными префиксами */
+@-webkit-keyframes gentle-bounce {
+  0%,
+  100% {
+    -webkit-transform: translateY(0px);
+    transform: translateY(0px);
+  }
+  25% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+  50% {
+    -webkit-transform: translateY(-12px);
+    transform: translateY(-12px);
+  }
+  75% {
+    -webkit-transform: translateY(-4px);
+    transform: translateY(-4px);
+  }
+}
+
+@-moz-keyframes gentle-bounce {
+  0%,
+  100% {
+    -moz-transform: translateY(0px);
+    transform: translateY(0px);
+  }
+  25% {
+    -moz-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+  50% {
+    -moz-transform: translateY(-12px);
+    transform: translateY(-12px);
+  }
+  75% {
+    -moz-transform: translateY(-4px);
+    transform: translateY(-4px);
+  }
+}
+
+@-o-keyframes gentle-bounce {
+  0%,
+  100% {
+    -o-transform: translateY(0px);
+    transform: translateY(0px);
+  }
+  25% {
+    -o-transform: translateY(-8px);
+    transform: translateY(-8px);
+  }
+  50% {
+    -o-transform: translateY(-12px);
+    transform: translateY(-12px);
+  }
+  75% {
+    -o-transform: translateY(-4px);
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes gentle-bounce {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  75% {
+    transform: translateY(-4px);
+  }
+}
