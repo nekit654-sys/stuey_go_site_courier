@@ -3,6 +3,7 @@ import CourierTypes from "@/components/CourierTypes";
 import Benefits from "@/components/Benefits";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import FixedCorgiCharacter from "@/components/FixedCorgiCharacter";
 
 const Index = () => {
   return (
@@ -12,6 +13,7 @@ const Index = () => {
       <Benefits />
       <Footer />
       <ScrollToTop />
+      <FixedCorgiCharacter />
     </div>
   );
 };
