@@ -31,14 +31,14 @@ const FixedCorgiCharacter = () => {
     <div className="fixed bottom-4 left-4 z-50">
       {/* Speech Bubble */}
       <div
-        className={`absolute -top-28 left-0 md:left-1/2 md:-translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
+        className={`absolute -top-28 left-1/2 -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
-        <div className="bg-white/95 backdrop-blur-sm text-gray-800 rounded-2xl px-4 py-3 shadow-xl border border-gray-100 w-72 md:w-80 relative">
-          <p className="text-sm font-medium leading-relaxed">
+        <div className="bg-white/95 backdrop-blur-sm text-gray-800 rounded-2xl px-3 py-4 shadow-xl border border-gray-100 w-48 h-20 relative flex items-center justify-center">
+          <p className="text-sm font-medium leading-relaxed text-center">
             {phrases[currentPhrase]}
           </p>
           {/* Speech bubble tail */}
-          <div className="absolute -bottom-2 left-8 md:right-8 md:left-auto w-4 h-4 bg-white/95 rotate-45 border-r border-b border-gray-100"></div>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45 border-r border-b border-gray-100"></div>
         </div>
       </div>
 
