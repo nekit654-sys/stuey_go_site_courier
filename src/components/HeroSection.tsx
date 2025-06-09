@@ -23,7 +23,7 @@ const HeroSection = () => {
       <div className="relative max-w-5xl mx-auto text-center">
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10">
-          <h1 className="md:text-7xl font-bold mb-8 font-rubik text-white text-5xl leading-tight">
+          <h1 className="md:text-7xl font-bold mb-8 font-rubik text-white leading-tight text-6xl">
             Ищете работу со свободой и заработком{" "}
             {loading ? (
               <span className="text-yellow-300 drop-shadow-lg">
