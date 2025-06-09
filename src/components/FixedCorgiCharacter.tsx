@@ -30,12 +30,12 @@ const FixedCorgiCharacter = () => {
       <div
         className={`absolute -top-32 left-1/2 transform -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
-        <div className="bg-white text-gray-800 rounded-xl px-4 py-3 shadow-lg max-w-64 relative">
-          <p className="text-sm font-medium leading-tight">
+        <div className="bg-white text-gray-800 rounded-xl px-6 py-4 shadow-lg w-80 relative">
+          <p className="text-sm font-medium leading-relaxed line-clamp-2">
             {phrases[currentPhrase]}
           </p>
           {/* Speech bubble tail */}
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+          <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white rotate-45"></div>
         </div>
       </div>
 
