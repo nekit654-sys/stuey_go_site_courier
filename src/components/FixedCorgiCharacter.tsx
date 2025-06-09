@@ -28,9 +28,9 @@ const FixedCorgiCharacter = () => {
     <div className="fixed bottom-4 left-4 z-50">
       {/* Speech Bubble */}
       <div
-        className={`absolute -top-24 left-1/2 transform -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
+        className={`absolute -top-32 left-1/2 transform -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
-        <div className="bg-white text-gray-800 rounded-xl px-4 py-3 shadow-lg max-w-48 relative">
+        <div className="bg-white text-gray-800 rounded-xl px-4 py-3 shadow-lg max-w-64 relative">
           <p className="text-sm font-medium leading-tight">
             {phrases[currentPhrase]}
           </p>
@@ -40,11 +40,11 @@ const FixedCorgiCharacter = () => {
       </div>
 
       {/* Corgi Character */}
-      <div className="animate-bounce">
+      <div className="animate-[bounce_3s_ease-in-out_infinite]">
         <img
           src="https://cdn.poehali.dev/files/c6fa10e8-a325-4715-80fa-6d1ea959e58d.png"
           alt="Стю - корги курьер"
-          className="w-24 h-24 md:w-32 md:h-32 object-contain filter drop-shadow-lg"
+          className="w-36 h-36 md:w-48 md:h-48 object-contain filter drop-shadow-lg"
         />
       </div>
     </div>
