@@ -28,7 +28,7 @@ const FixedCorgiCharacter = () => {
   if (!isCharacterVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50">
+    <div className="fixed bottom-4 left-4 md:right-4 md:left-auto z-50">
       {/* Speech Bubble */}
       <div
         className={`absolute -top-28 left-1/2 -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
@@ -53,7 +53,7 @@ const FixedCorgiCharacter = () => {
         {/* Invisible close button */}
         <button
           onClick={() => setIsCharacterVisible(false)}
-          className="absolute -bottom-2 -left-2 w-8 h-8 opacity-0 hover:opacity-20 bg-red-500 rounded-full transition-opacity duration-200"
+          className="absolute -bottom-2 -left-2 w-8 h-8 opacity-15 hover:opacity-30 bg-red-500 rounded-full transition-opacity duration-200"
           title="Скрыть персонажа"
         />
       </div>
