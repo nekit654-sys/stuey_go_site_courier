@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const CorgiCharacter = () => {
+const FixedCorgiCharacter = () => {
   const phrases = [
     "Доставка с хвостиком прибыла!",
     "Ваши посылки — мои приключения!",
@@ -25,7 +25,7 @@ const CorgiCharacter = () => {
   }, [phrases.length]);
 
   return (
-    <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10">
+    <div className="fixed bottom-4 left-4 z-50">
       {/* Speech Bubble */}
       <div
         className={`relative mb-4 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
@@ -51,4 +51,4 @@ const CorgiCharacter = () => {
   );
 };
 
-export default CorgiCharacter;
+export default FixedCorgiCharacter;
