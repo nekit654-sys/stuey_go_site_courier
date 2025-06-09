@@ -50,12 +50,14 @@ const FixedCorgiCharacter = () => {
           className="w-32 h-32 md:w-40 md:h-40 object-contain filter drop-shadow-lg"
         />
 
-        {/* Invisible close button */}
+        {/* Close button - fixed on the left side */}
         <button
           onClick={() => setIsCharacterVisible(false)}
-          className="absolute -bottom-2 -left-2 w-8 h-8 opacity-15 hover:opacity-30 bg-red-500 rounded-full transition-opacity duration-200"
+          className="absolute top-1/2 -translate-y-1/2 -left-12 w-8 h-8 opacity-30 hover:opacity-50 bg-red-500 rounded-full transition-opacity duration-200 flex items-center justify-center"
           title="Скрыть персонажа"
-        />
+        >
+          <span className="text-white text-lg font-bold leading-none">×</span>
+        </button>
       </div>
     </div>
   );
