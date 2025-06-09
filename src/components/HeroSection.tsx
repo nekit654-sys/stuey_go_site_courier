@@ -15,14 +15,15 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/50"></div>
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="md-card p-8 md-elevation-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-2xl">
-          <h1 className="md-headline-2 font-bold mb-6 text-white">
-            Ищете работу со свободой и заработком{" "}
+          <h1 className="md-headline-2 font-bold mb-6">
+            <div className="text-white">Ищете работу</div>
+            <div className="text-black">со свободой и заработком</div>
             {loading ? (
-              <span className="text-yellow-300">в вашем городе?</span>
+              <div className="text-yellow-300">в вашем городе?</div>
             ) : cityInPrepositional ? (
-              <span className="text-yellow-300">в {cityInPrepositional}?</span>
+              <div className="text-yellow-300">в {cityInPrepositional}?</div>
             ) : (
-              <span className="text-yellow-300">в вашем городе?</span>
+              <div className="text-yellow-300">в вашем городе?</div>
             )}
           </h1>
           <p className="md-body-1 mb-8 text-gray-100 max-w-2xl mx-auto leading-relaxed">
