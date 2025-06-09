@@ -17,7 +17,7 @@ const CourierTypes = () => {
         "Работа в любую погоду",
       ],
       bgColor: "md-surface",
-      accentColor: "text-blue-600",
+      accentColor: "text-yellow-500",
     },
     {
       type: "Вело курьер",
@@ -25,7 +25,7 @@ const CourierTypes = () => {
       description: "Доставка на велосипеде",
       benefits: ["До 6000₽ в день", "Экологично", "Отличная физическая форма"],
       bgColor: "md-surface",
-      accentColor: "text-green-600",
+      accentColor: "text-yellow-500",
     },
     {
       type: "Пеший курьер",
@@ -33,7 +33,7 @@ const CourierTypes = () => {
       description: "Доставка пешком",
       benefits: ["До 4000₽ в день", "Не нужен транспорт", "Гибкий график"],
       bgColor: "md-surface",
-      accentColor: "text-purple-600",
+      accentColor: "text-yellow-500",
     },
   ];
 
@@ -47,7 +47,7 @@ const CourierTypes = () => {
         <h2 className="md-headline-3 font-bold text-center mb-4 md-on-background">
           Выбери свой способ доставки
         </h2>
-        <p className="md-body-1 text-center mb-12 text-gray-600 max-w-2xl mx-auto">
+        <p className="md-body-1 text-center mb-12 text-black max-w-2xl mx-auto">
           Каждый тип курьерской работы имеет свои преимущества. Выбери
           подходящий для тебя!
         </p>
@@ -71,7 +71,7 @@ const CourierTypes = () => {
                 <h3 className="md-headline-6 font-bold mb-3 md-on-surface">
                   {courier.type}
                 </h3>
-                <p className="md-body-2 text-gray-600 mb-6">
+                <p className="md-body-2 text-black mb-6">
                   {courier.description}
                 </p>
 
@@ -79,9 +79,13 @@ const CourierTypes = () => {
                   {courier.benefits.map((benefit, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-center gap-2 text-gray-700 md-body-2"
+                      className="flex items-center justify-center gap-2 text-black md-body-2"
                     >
-                      <Icon name="Check" size={16} className="text-green-500" />
+                      <Icon
+                        name="Check"
+                        size={16}
+                        className="text-yellow-500"
+                      />
                       <span>{benefit}</span>
                     </div>
                   ))}

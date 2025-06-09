@@ -1,21 +1,28 @@
-/* Material Design Variables */
+/* Material Design Variables - White/Black/Yellow Theme */
 :root {
-  /* Material Design Colors */
-  --md-primary: #1976d2;
-  --md-primary-dark: #1565c0;
-  --md-primary-light: #42a5f5;
-  --md-secondary: #f57c00;
-  --md-secondary-dark: #ef6c00;
-  --md-secondary-light: #ffb74d;
+  /* Material Design Colors - Updated Theme */
+  --md-primary: #000000;
+  --md-primary-dark: #1a1a1a;
+  --md-primary-light: #333333;
+  --md-secondary: #ffd700;
+  --md-secondary-dark: #ffb000;
+  --md-secondary-light: #ffea4d;
   --md-surface: #ffffff;
-  --md-surface-variant: #f5f5f5;
-  --md-background: #fafafa;
+  --md-surface-variant: #f8f8f8;
+  --md-background: #ffffff;
   --md-on-primary: #ffffff;
-  --md-on-secondary: #ffffff;
-  --md-on-surface: #212121;
-  --md-on-background: #212121;
+  --md-on-secondary: #000000;
+  --md-on-surface: #000000;
+  --md-on-background: #000000;
   --md-outline: #e0e0e0;
-  --md-outline-variant: #eeeeee;
+  --md-outline-variant: #f0f0f0;
+
+  /* Additional theme colors */
+  --md-accent: #ffd700;
+  --md-accent-dark: #ffb000;
+  --md-text-primary: #000000;
+  --md-text-secondary: #333333;
+  --md-text-on-dark: #ffffff;
 
   /* Material Design Elevations */
   --md-elevation-1:
@@ -215,7 +222,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 215, 0, 0.3);
   transform: translate(-50%, -50%);
   transition:
     width 0.6s,

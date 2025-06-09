@@ -18,11 +18,11 @@ const HeroSection = () => {
           <h1 className="md-headline-2 font-bold mb-6 text-white">
             Ищете работу со свободой и заработком{" "}
             {loading ? (
-              <span className="text-blue-300">в вашем городе?</span>
+              <span className="text-yellow-300">в вашем городе?</span>
             ) : cityInPrepositional ? (
-              <span className="text-blue-300">в {cityInPrepositional}?</span>
+              <span className="text-yellow-300">в {cityInPrepositional}?</span>
             ) : (
-              <span className="text-blue-300">в вашем городе?</span>
+              <span className="text-yellow-300">в вашем городе?</span>
             )}
           </h1>
           <p className="md-body-1 mb-8 text-gray-100 max-w-2xl mx-auto leading-relaxed">
@@ -31,15 +31,15 @@ const HeroSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Car" size={20} className="text-blue-300" />
+              <Icon name="Car" size={20} className="text-yellow-300" />
               <span>Авто, вело, пешие</span>
             </div>
             <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Star" size={20} className="text-blue-300" />
+              <Icon name="Star" size={20} className="text-yellow-300" />
               <span>Ведущие сервисы</span>
             </div>
             <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Zap" size={20} className="text-blue-300" />
+              <Icon name="Zap" size={20} className="text-yellow-300" />
               <span>Активный образ жизни</span>
             </div>
           </div>

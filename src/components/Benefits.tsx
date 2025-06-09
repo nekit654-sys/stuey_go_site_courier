@@ -7,42 +7,42 @@ const Benefits = () => {
       title: "Гибкий график работы",
       description:
         "Многие компании предлагают курьерам возможность самостоятельно выбирать смены и планировать своё время. Это особенно удобно для тех, кто хочет совмещать работу с учёбой, хобби или другими занятиями.",
-      color: "text-blue-600",
+      color: "text-yellow-500",
     },
     {
       icon: "DollarSign",
       title: "Возможность заработка",
       description:
         "Работа курьером позволяет зарабатывать деньги, причём в крупных городах спрос на курьерские услуги часто высок, что может обеспечить хороший доход.",
-      color: "text-green-600",
+      color: "text-yellow-500",
     },
     {
       icon: "Activity",
       title: "Физическая активность",
       description:
         "Работа курьером подразумевает постоянное движение, что способствует поддержанию хорошей физической формы и здоровья.",
-      color: "text-red-600",
+      color: "text-yellow-500",
     },
     {
       icon: "MapPin",
       title: "Знакомство с городом",
       description:
         "Курьеры имеют возможность хорошо изучить город, его районы и инфраструктуру. Это может быть полезно не только в работе, но и в личной жизни.",
-      color: "text-purple-600",
+      color: "text-yellow-500",
     },
     {
       icon: "Target",
       title: "Простота входа в профессию",
       description:
         "Для работы курьером обычно не требуется специальное образование или опыт. Это делает профессию доступной для широкого круга людей.",
-      color: "text-orange-600",
+      color: "text-yellow-500",
     },
     {
       icon: "Package",
       title: "Разнообразие задач",
       description:
         "Работа курьером не всегда однообразна. Она может включать доставку различных товаров и взаимодействие с разными людьми, что добавляет элемент разнообразия в рабочий процесс.",
-      color: "text-indigo-600",
+      color: "text-yellow-500",
     },
   ];
 
@@ -52,7 +52,7 @@ const Benefits = () => {
         <h2 className="md-headline-3 font-bold text-center mb-4 md-on-surface">
           Почему стоит выбрать работу курьером?
         </h2>
-        <p className="md-body-1 text-center mb-12 text-gray-600 max-w-2xl mx-auto">
+        <p className="md-body-1 text-center mb-12 text-black max-w-2xl mx-auto">
           Присоединяйтесь к нам и начните свой путь в мире доставки!
         </p>
 
@@ -75,7 +75,7 @@ const Benefits = () => {
                 <h3 className="md-headline-6 font-bold mb-3 md-on-surface">
                   {benefit.title}
                 </h3>
-                <p className="md-body-2 text-gray-600 leading-relaxed">
+                <p className="md-body-2 text-black leading-relaxed">
                   {benefit.description}
                 </p>
               </div>
