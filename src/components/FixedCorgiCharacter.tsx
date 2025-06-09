@@ -28,7 +28,18 @@ const FixedCorgiCharacter = () => {
   if (!isCharacterVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 md:left-8 z-50">
+    <div className="fixed bottom-4 left-4 md:left-8 z-50 relative">
+      {/* Close button - positioned outside bouncing container */}
+      <button
+        onClick={() => setIsCharacterVisible(false)}
+        className="absolute -left-4 top-4 w-6 h-6 bg-white/80 hover:bg-white/90 rounded-full transition-all duration-200 border border-gray-200 shadow-sm flex items-center justify-center group"
+        title="Скрыть персонажа"
+      >
+        <span className="text-gray-600 text-sm font-bold opacity-60 group-hover:opacity-80">
+          ×
+        </span>
+      </button>
+
       {/* Speech Bubble */}
       <div
         className={`absolute -top-28 left-1/2 -translate-x-1/2 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
@@ -48,13 +59,6 @@ const FixedCorgiCharacter = () => {
           src="https://cdn.poehali.dev/files/c6fa10e8-a325-4715-80fa-6d1ea959e58d.png"
           alt="Стю - корги курьер"
           className="w-32 h-32 md:w-40 md:h-40 object-contain filter drop-shadow-lg"
-        />
-
-        {/* Invisible close button */}
-        <button
-          onClick={() => setIsCharacterVisible(false)}
-          className="absolute -bottom-2 -left-2 w-8 h-8 opacity-15 hover:opacity-30 bg-red-500 rounded-full transition-opacity duration-200"
-          title="Скрыть персонажа"
         />
       </div>
     </div>
