@@ -76,7 +76,7 @@ const config: Config = {
             animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
           },
           "50%": {
-            transform: "translateY(-8px)",
+            transform: "translateY(-12px)",
             animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
           },
         },
