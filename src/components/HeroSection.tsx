@@ -6,44 +6,46 @@ const HeroSection = () => {
   const { cityInPrepositional, loading } = useUserLocation();
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4 md-background"
+      className="relative bg-cover bg-center bg-no-repeat text-white py-20 px-4 border-t-4 border-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 shadow-2xl"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
+        borderImage: "linear-gradient(90deg, #fbbf24, #fcd34d, #f59e0b) 1",
       }}
     >
-      <div className="absolute inset-0 bg-black/50"></div>
-      <div className="relative max-w-4xl mx-auto text-center">
-        <div className="md-card p-8 md-elevation-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-2xl">
-          <h1 className="md-headline-2 font-bold mb-6">
-            <div className="text-black">Ищете работу со</div>
-            <div className="text-white">свободой и заработком</div>
-            {loading ? (
-              <div className="text-yellow-300">в вашем городе?</div>
-            ) : cityInPrepositional ? (
-              <div className="text-yellow-300">в {cityInPrepositional}?</div>
-            ) : (
-              <div className="text-yellow-300">в вашем городе?</div>
-            )}
-          </h1>
-          <p className="md-body-1 mb-8 text-gray-100 max-w-2xl mx-auto leading-relaxed">
-            Станьте курьером! Сочетайте активность, гибкий график и возможность
-            хорошо зарабатывать
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Car" size={20} className="text-yellow-300" />
-              <span>Авто, вело, пешие</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Star" size={20} className="text-yellow-300" />
-              <span>Ведущие сервисы</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-100 md-body-2">
-              <Icon name="Zap" size={20} className="text-yellow-300" />
-              <span>Активный образ жизни</span>
-            </div>
+      <div className="absolute inset-0 bg-black/40 border-t border-yellow-300/30"></div>
+      <div className="relative max-w-4xl mx-auto text-center border border-white/10 rounded-2xl backdrop-blur-sm bg-white/5 p-8 shadow-xl">
+        <h1 className="md:text-6xl font-bold mb-6 font-rubik text-white text-4xl">
+          Ищете работу со свободой и заработком{" "}
+          {loading ? (
+            <span className="text-yellow-300">в вашем городе?</span>
+          ) : cityInPrepositional ? (
+            <span className="text-yellow-300">в {cityInPrepositional}?</span>
+          ) : (
+            <span className="text-yellow-300">в вашем городе?</span>
+          )}
+        </h1>
+        <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-2xl mx-auto leading-relaxed">
+          Станьте курьером! Сочетайте активность, гибкий график и возможность
+          хорошо зарабатывать
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <div className="flex items-center gap-2 text-gray-100">
+            <Icon name="Car" size={20} className="text-yellow-300" />
+            <span>Авто, вело, пешие</span>
           </div>
+          <div className="flex items-center gap-2 text-gray-100">
+            <Icon name="Star" size={20} className="text-yellow-300" />
+            <span>Ведущие сервисы</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-100">
+            <Icon name="Zap" size={20} className="text-yellow-300" />
+            <span>Активный образ жизни</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <p className="text-lg text-gray-200 italic"></p>
         </div>
       </div>
     </section>
