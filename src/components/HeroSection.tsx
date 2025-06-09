@@ -17,7 +17,7 @@ const HeroSection = () => {
         <div className="md-card p-8 md-elevation-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-2xl">
           <h1 className="md-headline-2 font-bold mb-6">
             <div className="text-black">Ищете работу со</div>
-            <div className="text-white">со свободой и заработком</div>
+            <div className="text-white">свободой и заработком</div>
             {loading ? (
               <div className="text-yellow-300">в вашем городе?</div>
             ) : cityInPrepositional ? (
