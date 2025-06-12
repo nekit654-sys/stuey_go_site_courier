@@ -15,7 +15,6 @@ const Navigation = () => {
     { path: "/hiring", label: "Процесс найма", icon: "Users" },
     { path: "/culture", label: "Корпоративная культура", icon: "Heart" },
     { path: "/reviews", label: "Отзывы сотрудников", icon: "MessageSquare" },
-    { path: "/contacts", label: "Контакты", icon: "Phone" },
   ];
 
   const handleMenuItemClick = () => {
