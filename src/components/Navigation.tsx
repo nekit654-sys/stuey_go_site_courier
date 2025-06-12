@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
     { path: "/", label: "Главная", icon: "Home" },
@@ -13,6 +17,12 @@ const Navigation = () => {
     { path: "/reviews", label: "Отзывы сотрудников", icon: "MessageSquare" },
     { path: "/contacts", label: "Контакты", icon: "Phone" },
   ];
+
+  const handleMenuItemClick = () => {
+    if (isMobile) {
+      setIsMenuOpen(false);
+    }
+  };
 
   return (
     <nav className="bg-gray-800 border-b-4 border-yellow-400 shadow-2xl sticky top-0 z-50">
@@ -29,6 +39,7 @@ const Navigation = () => {
             </span>
           </Link>
 
+          {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-1">
             {menuItems.map((item) => (
               <Link key={item.path} to={item.path}>
@@ -56,10 +67,48 @@ const Navigation = () => {
           <div className="md:hidden">
             <Button
               variant="ghost"
-              className="text-white hover:bg-yellow-400/20"
+              className="text-white hover:bg-yellow-400/20 transition-all duration-200"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <Icon name="Menu" size={24} />
+              <Icon
+                name={isMenuOpen ? "X" : "Menu"}
+                size={24}
+                className="transition-transform duration-200"
+              />
             </Button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <div
+          className={`
+          md:hidden overflow-hidden transition-all duration-300 ease-in-out
+          ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+        `}
+        >
+          <div className="py-4 space-y-2 border-t border-yellow-400/20">
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleMenuItemClick}
+              >
+                <Button
+                  variant="ghost"
+                  className={`
+                    w-full justify-start transition-all duration-200 hover:scale-105
+                    ${
+                      location.pathname === item.path
+                        ? "bg-yellow-400 text-gray-800 hover:bg-yellow-500 shadow-lg"
+                        : "text-white hover:bg-yellow-400/20 hover:text-yellow-300"
+                    }
+                  `}
+                >
+                  <Icon name={item.icon as any} size={16} />
+                  {item.label}
+                </Button>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
