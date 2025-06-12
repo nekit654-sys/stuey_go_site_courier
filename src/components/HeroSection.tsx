@@ -81,22 +81,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Кнопка призыва к действию */}
-          <div className="mt-8 hidden md:block">
-            <Button
-              onClick={handleBecomeClick}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 text-xl 
-                shadow-xl hover:shadow-2xl active:shadow-lg
-                rounded-xl hover:scale-105 transition-all duration-300 ease-out
-                ring-4 ring-yellow-300/50 hover:ring-yellow-400/70
-                border-0 backdrop-blur-sm
-                relative overflow-hidden
-                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent
-                before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-            >
-              🚀 Стать курьером прямо сейчас!
-            </Button>
-          </div>
+          {/* Удалена кнопка призыва к действию */}
         </div>
       </div>
     </section>

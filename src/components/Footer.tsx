@@ -20,18 +20,6 @@ const Footer = () => {
           <p className="text-gray-300 text-lg">
             Присоединяйся к тысячам курьеров, которые уже работают с Яндекс.Еда
           </p>
-          <div className="mt-6">
-            <Button
-              onClick={handleBecomeClick}
-              className="bg-orange-400 hover:bg-orange-500 text-black font-bold py-3 px-6 text-lg 
-                shadow-lg hover:shadow-xl active:shadow-md
-                rounded-lg hover:scale-105 transition-all duration-200 ease-out
-                ring-2 ring-orange-300/50 hover:ring-orange-400/70
-                border-0"
-            >
-              Стать курьером
-            </Button>
-          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-300 mb-8">
