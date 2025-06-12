@@ -13,18 +13,20 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 text-white py-24 px-6 border-16 border-yellow-600 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl">
-      {/* Современные анимированные элементы */}
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-yellow-600/30"></div>
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-yellow-300/10 via-transparent to-yellow-500/20 animate-pulse"></div>
+    <section
+      className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6 border-16 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl"
+      style={{
+        backgroundImage:
+          "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
+      }}
+    >
+      {/* Градиентный оверлей с анимацией */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent"></div>
 
-      {/* Декоративные геометрические элементы */}
-      <div className="absolute top-12 right-12 w-32 h-32 bg-yellow-200/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-12 left-12 w-48 h-48 bg-yellow-600/15 rounded-full blur-2xl animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-yellow-300/10 rounded-full blur-xl animate-pulse delay-500"></div>
-
-      {/* Градиентный оверлей для лучшего контраста текста */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/30"></div>
+      {/* Декоративные элементы */}
+      <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
+      <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
       <div className="relative max-w-5xl mx-auto text-center">
         {/* Главный контент */}
