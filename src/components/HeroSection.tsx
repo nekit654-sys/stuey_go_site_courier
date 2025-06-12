@@ -14,7 +14,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6 border-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl"
+      className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6 border-16 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
