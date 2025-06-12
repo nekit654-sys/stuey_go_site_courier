@@ -1,14 +1,6 @@
 import Icon from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
 
 const Footer = () => {
-  const referralLink =
-    "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
-
-  const handleBecomeClick = () => {
-    window.open(referralLink, "_blank");
-  };
-
   return (
     <footer className="bg-gray-800 text-white py-12 px-4 border-t-4 border-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 shadow-2xl relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-yellow-900/10 to-amber-900/10"></div>
@@ -20,18 +12,6 @@ const Footer = () => {
           <p className="text-gray-300 text-lg">
             Присоединяйся к тысячам курьеров, которые уже работают с Яндекс.Еда
           </p>
-          <div className="mt-6">
-            <Button
-              onClick={handleBecomeClick}
-              className="bg-orange-400 hover:bg-orange-500 text-black font-bold py-3 px-6 text-lg 
-                shadow-lg hover:shadow-xl active:shadow-md
-                rounded-lg hover:scale-105 transition-all duration-200 ease-out
-                ring-2 ring-orange-300/50 hover:ring-orange-400/70
-                border-0"
-            >
-              Стать курьером
-            </Button>
-          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-300 mb-8">
