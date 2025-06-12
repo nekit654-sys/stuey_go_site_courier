@@ -1,3 +1,4 @@
+import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
 import Benefits from "@/components/Benefits";
@@ -8,6 +9,7 @@ import FixedCorgiCharacter from "@/components/FixedCorgiCharacter";
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <Navigation />
       <HeroSection />
       <CourierTypes />
       <Benefits />
