@@ -42,7 +42,7 @@ const CourierTypes = () => {
   };
 
   return (
-    <section className="py-16 px-4 bg-gray-50">
+    <section className="py-8 px-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 font-rubik">
           Выбери свой способ доставки
