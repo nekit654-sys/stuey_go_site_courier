@@ -6,7 +6,7 @@ const config: Config = {
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}"
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -72,12 +72,12 @@ const config: Config = {
         },
         "gentle-bounce": {
           "0%, 100%": {
-            transform: "translateY(0)",
-            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
+            transform: "translateY(0px)",
+            animationTimingFunction: "ease-in-out",
           },
           "50%": {
-            transform: "translateY(-24px)",
-            animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
+            transform: "translateY(-8px)",
+            animationTimingFunction: "ease-in-out",
           },
         },
       },
