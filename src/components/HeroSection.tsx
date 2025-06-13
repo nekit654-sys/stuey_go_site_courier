@@ -14,7 +14,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white px-6 border-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl py-[49px]"
+      className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6 border-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/ce24f095-6b7b-4e3b-b410-0785d2bfe880.jpg)",
@@ -30,8 +30,8 @@ const HeroSection = () => {
 
       <div className="relative max-w-5xl mx-auto text-center">
         {/* Главный контент */}
-        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
-          <h1 className="md:text-7xl font-bold font-rubik text-white leading-tight text-3xl my-[15px]">
+        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10">
+          <h1 className="md:text-7xl font-bold mb-8 font-rubik text-white leading-tight text-3xl">
             Ищете работу со свободой и заработком{" "}
             {loading ? (
               <span className="text-yellow-300 drop-shadow-lg">
@@ -48,7 +48,7 @@ const HeroSection = () => {
             )}
           </h1>
 
-          <p className="md:text-2xl mb-12 text-gray-100 max-w-3xl mx-auto leading-relaxed font-medium py-[23px] text-xl">
+          <p className="text-xl md:text-2xl mb-12 text-gray-100 max-w-3xl mx-auto leading-relaxed font-medium">
             Присоединяйтесь к команде доставки! Работайте когда удобно,
             оставайтесь в движении и получайте стабильный доход каждый день
           </p>
