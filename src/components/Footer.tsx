@@ -38,7 +38,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700 pt-8 text-gray-400">
-          <p>© 2025 | Начни зарабатывать уже сегодня!</p>
+          <p>© 2025 Начни зарабатывать уже сегодня!</p>
         </div>
       </div>
     </footer>
