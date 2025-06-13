@@ -53,32 +53,9 @@ const HeroSection = () => {
             хорошо зарабатывать
           </p>
 
-          {/* Преимущества с современным дизайном */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="flex flex-col items-center gap-3 p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-yellow-400/20 rounded-full flex items-center justify-center">
-                <Icon name="Car" size={24} className="text-yellow-300" />
-              </div>
-              <span className="text-gray-100 font-medium">
-                Авто, вело, пешие
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center gap-3 p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-yellow-400/20 rounded-full flex items-center justify-center">
-                <Icon name="Star" size={24} className="text-yellow-300" />
-              </div>
-              <span className="text-gray-100 font-medium">Ведущие сервисы</span>
-            </div>
-
-            <div className="flex flex-col items-center gap-3 p-6 backdrop-blur-sm bg-white/5 rounded-xl border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-yellow-400/20 rounded-full flex items-center justify-center">
-                <Icon name="Zap" size={24} className="text-yellow-300" />
-              </div>
-              <span className="text-gray-100 font-medium">
-                Активный образ жизни
-              </span>
-            </div>
+          {/* Убраны блоки преимуществ, добавлены отступы для сохранения размера */}
+          <div className="mb-32">
+            {/* Пустое пространство для сохранения высоты героя */}
           </div>
 
           {/* Удалена кнопка призыва к действию */}
