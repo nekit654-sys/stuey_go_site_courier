@@ -38,7 +38,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop menu */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex flex-1 justify-evenly items-center ml-8">
             {menuItems.map((item) => (
               <Link key={item.path} to={item.path}>
                 <Button
