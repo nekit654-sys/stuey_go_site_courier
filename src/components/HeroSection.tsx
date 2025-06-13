@@ -48,16 +48,69 @@ const HeroSection = () => {
             )}
           </h1>
 
-          <p className="md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed font-medium py-[23px] text-xl text-gray-100">
-            Присоединяйтесь к команде доставки! Работайте когда тебе удобно,
-            оставайтесь в движении и получайте стабильный доход каждый день!
-            Переходи к выбору способа доставки!{" "}
+          <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">
+            Станьте частью команды курьеров и работайте по своему графику!
+            Выбирайте удобный способ доставки и зарабатывайте больше.
           </p>
 
-          {/* Убраны блоки преимуществ, добавлены отступы для сохранения размера */}
-          <div className="mb-32">
-            {/* Пустое пространство для сохранения высоты героя */}
+          {/* Блоки преимуществ разных видов доставки */}
+          <div className="grid md:grid-cols-3 gap-6 mb-10">
+            {/* Пешая доставка */}
+            <div className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4 mx-auto">
+                <Icon name="MapPin" size={28} className="text-yellow-300" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Пешком</h3>
+              <p className="text-sm text-gray-200 leading-relaxed">
+                Доставляйте в своем районе • Никаких затрат на транспорт •
+                Гибкий график
+              </p>
+            </div>
+
+            {/* Велосипед */}
+            <div className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4 mx-auto">
+                <Icon name="Bike" size={28} className="text-yellow-300" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Велосипед</h3>
+              <p className="text-sm text-gray-200 leading-relaxed">
+                Быстрые поездки • Экологично • Отличная физическая форма
+              </p>
+            </div>
+
+            {/* Автомобиль */}
+            <div className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4 mx-auto">
+                <Icon name="Car" size={28} className="text-yellow-300" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Автомобиль</h3>
+              <p className="text-sm text-gray-200 leading-relaxed">
+                Максимальный заработок • Комфорт в любую погоду • Больше заказов
+              </p>
+            </div>
           </div>
+
+          {/* Дополнительные преимущества */}
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-yellow-400/20 rounded-full flex items-center justify-center">
+                <Icon name="Clock" size={16} className="text-yellow-300" />
+              </div>
+              <span className="text-gray-200 font-medium">
+                Работайте когда удобно
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-yellow-400/20 rounded-full flex items-center justify-center">
+                <Icon name="TrendingUp" size={16} className="text-yellow-300" />
+              </div>
+              <span className="text-gray-200 font-medium">
+                Стабильный доход каждый день
+              </span>
+            </div>
+          </div>
+
+          {/* Убраны отступы для сохранения размера */}
 
           {/* Удалена кнопка призыва к действию */}
         </div>
