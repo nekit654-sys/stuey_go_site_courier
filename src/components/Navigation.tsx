@@ -11,7 +11,6 @@ const Navigation = () => {
 
   const menuItems = [
     { path: "/", label: "Главная", icon: "Home" },
-    { path: "/vacancies", label: "Вакансии", icon: "Briefcase" },
     { path: "/hiring", label: "Процесс найма", icon: "Users" },
     { path: "/culture", label: "Корпоративная культура", icon: "Heart" },
     { path: "/reviews", label: "Отзывы сотрудников", icon: "MessageSquare" },
