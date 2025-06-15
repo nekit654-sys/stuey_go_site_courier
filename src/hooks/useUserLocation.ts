@@ -61,28 +61,41 @@ export const useUserLocation = (): LocationData => {
   });
 
   useEffect(() => {
-    const getUserLocation = async () => {
-      try {
-        const response = await fetch("https://ipapi.co/json/");
-        const data = await response.json();
+    const getUserLocation = () => {
+      // Проверяем доступность ymaps
+      if (typeof window !== "undefined" && window.ymaps) {
+        window.ymaps.ready(() => {
+          try {
+            const geolocation = window.ymaps.geolocation;
+            const city = geolocation.city || "";
 
-        if (data.city) {
-          const cityInPrepositional = getCityInPrepositional(data.city);
-          setLocation({
-            city: data.city,
-            cityInPrepositional,
-            loading: false,
-            error: null,
-          });
-        } else {
-          throw new Error("Город не определен");
-        }
-      } catch (error) {
+            if (city) {
+              const cityInPrepositional = getCityInPrepositional(city);
+              setLocation({
+                city,
+                cityInPrepositional,
+                loading: false,
+                error: null,
+              });
+            } else {
+              throw new Error("Город не определен");
+            }
+          } catch (error) {
+            setLocation({
+              city: "",
+              cityInPrepositional: "",
+              loading: false,
+              error: "Не удалось определить город",
+            });
+          }
+        });
+      } else {
+        // Fallback на случай если ymaps не загружен
         setLocation({
           city: "",
           cityInPrepositional: "",
           loading: false,
-          error: "Не удалось определить город",
+          error: "Сервис геолокации недоступен",
         });
       }
     };
@@ -92,3 +105,10 @@ export const useUserLocation = (): LocationData => {
 
   return location;
 };
+
+// Расширяем типы для ymaps
+declare global {
+  interface Window {
+    ymaps: any;
+  }
+}
