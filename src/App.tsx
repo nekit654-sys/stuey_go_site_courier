@@ -18,6 +18,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <div className="dog-courier-background"></div>
       <Toaster />
       <Sonner />
       <BrowserRouter>
