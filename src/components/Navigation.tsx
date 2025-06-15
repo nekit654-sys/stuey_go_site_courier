@@ -33,7 +33,7 @@ const Navigation = () => {
               <Icon name="Zap" size={24} className="text-gray-800" />
             </div>
             <span className="text-xl font-bold text-white font-rubik">
-              Яндекс.Еда | Карьера
+              Стью.GO | Карьера
             </span>
           </Link>
 
