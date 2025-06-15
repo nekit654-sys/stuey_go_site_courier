@@ -52,7 +52,7 @@ const Footer = () => {
               факторов. Все споры решаются в соответствии с законодательством
               РФ.
             </p>
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis text-left">
               Регистрируясь по партнерской ссылке, вы соглашаетесь с условиями
               обработки персональных данных и получения информационных сообщений
               от сервиса.
