@@ -38,60 +38,6 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700 pt-8">
-          {/* Legal Links Section */}
-          <div className="mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Политика конфиденциальности
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Условия использования
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Партнерское соглашение
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Пользовательское соглашение
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Условия партнерской программы
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Обработка персональных данных
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Правила безопасности
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                Техподдержка
-              </a>
-            </div>
-          </div>
-
           {/* Legal Disclaimers */}
           <div className="text-xs text-gray-500 mb-4 max-w-3xl mx-auto leading-relaxed">
             <p className="mb-2">
@@ -106,10 +52,15 @@ const Footer = () => {
               факторов. Все споры решаются в соответствии с законодательством
               РФ.
             </p>
-            <p>
+            <p className="mb-2">
               Регистрируясь по партнерской ссылке, вы соглашаетесь с условиями
               обработки персональных данных и получения информационных сообщений
               от сервиса.
+            </p>
+            <p>
+              Использование сайта означает согласие с политикой
+              конфиденциальности и условиями использования. Информация может
+              быть изменена без предварительного уведомления.
             </p>
           </div>
 
