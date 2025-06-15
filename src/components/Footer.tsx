@@ -37,7 +37,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8">
+        <div className="border-t border-gray-700 px-0 mx-0 py-0">
           {/* Legal Disclaimers */}
           <div className="text-xs text-gray-500 mb-4 max-w-3xl mx-auto leading-relaxed">
             <p className="mb-2">
