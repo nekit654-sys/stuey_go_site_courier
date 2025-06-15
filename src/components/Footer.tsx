@@ -37,11 +37,92 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8 text-gray-400">
-          <p>
-            © 2025 | Яндекс Еда — присоединяйся к команде и зарабатывай каждый
-            день!
-          </p>
+        <div className="border-t border-gray-700 pt-8">
+          {/* Legal Links Section */}
+          <div className="mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Политика конфиденциальности
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Условия использования
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Партнерское соглашение
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Пользовательское соглашение
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Условия партнерской программы
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Обработка персональных данных
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Правила безопасности
+              </a>
+              <a
+                href="#"
+                className="text-gray-400 hover:text-orange-400 transition-colors"
+              >
+                Техподдержка
+              </a>
+            </div>
+          </div>
+
+          {/* Legal Disclaimers */}
+          <div className="text-xs text-gray-500 mb-4 max-w-3xl mx-auto leading-relaxed">
+            <p className="mb-2">
+              <strong>Важные уведомления:</strong> Участие в партнерской
+              программе регулируется действующим законодательством РФ. Доходы от
+              деятельности курьера облагаются налогом согласно Налоговому
+              кодексу РФ.
+            </p>
+            <p className="mb-2">
+              Яндекс.Еда не гарантирует определенный уровень дохода. Заработок
+              зависит от количества выполненных заказов, времени работы и других
+              факторов. Все споры решаются в соответствии с законодательством
+              РФ.
+            </p>
+            <p>
+              Регистрируясь по партнерской ссылке, вы соглашаетесь с условиями
+              обработки персональных данных и получения информационных сообщений
+              от сервиса.
+            </p>
+          </div>
+
+          {/* Copyright */}
+          <div className="text-gray-400 text-sm border-t border-gray-700 pt-4">
+            <p className="mb-2">
+              © 2025 ООО «Яндекс.Еда» | Все права защищены
+            </p>
+            <p className="text-xs text-gray-500">
+              Информация на сайте не является публичной офертой. Актуальные
+              условия уточняйте в приложении Яндекс.Еда
+            </p>
+          </div>
         </div>
       </div>
     </footer>
