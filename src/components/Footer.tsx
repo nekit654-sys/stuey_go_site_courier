@@ -10,18 +10,8 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-800 text-white py-12 px-4 border-t-4 border-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 shadow-2xl relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-yellow-900/10 to-amber-900/10"></div>
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <div className="mb-8 p-6 rounded-xl bg-gray-700/50 backdrop-blur-sm border border-orange-300/30 shadow-lg ring-1 ring-orange-200/20">
-          <h3 className="text-2xl font-bold mb-4 font-rubik">
-            Готов начать зарабатывать?
-          </h3>
-          <p className="text-gray-300 text-lg">
-            Присоединяйся к тысячам курьеров, которые уже работают с Яндекс.Еда
-          </p>
-        </div>
-
+    <footer className="bg-gray-800 text-white py-8 px-4">
+      <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-300 mb-8">
           <div className="flex items-center gap-2">
             <Icon name="Phone" size={18} className="text-orange-400" />
@@ -37,42 +27,55 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 px-0 mx-0 py-0">
-          {/* Legal Disclaimers */}
-          <div className="text-xs text-gray-500 mb-4 max-w-none mx-auto leading-tight space-y-1">
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-              <strong>Важные уведомления:</strong> Участие в партнерской
-              программе регулируется действующим законодательством РФ. Доходы от
-              деятельности курьера облагаются налогом согласно Налоговому
-              кодексу РФ.
-            </p>
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-              Яндекс.Еда не гарантирует определенный уровень дохода. Заработок
-              зависит от количества выполненных заказов, времени работы и других
-              факторов. Все споры решаются в соответствии с законодательством
-              РФ.
-            </p>
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis text-left">
-              Регистрируясь по партнерской ссылке, вы соглашаетесь с условиями
-              обработки персональных данных и получения информационных сообщений
-              от сервиса.
-            </p>
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-              Использование сайта означает согласие с политикой
-              конфиденциальности и условиями использования. Информация может
-              быть изменена без предварительного уведомления.
-            </p>
-          </div>
+        {/* Карта сайта */}
+        <div className="border-t border-gray-700 pt-6">
+          <nav className="flex flex-wrap justify-center gap-6 mb-6">
+            <a
+              href="/"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Главная
+            </a>
+            <a
+              href="/vacancies"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Вакансии
+            </a>
+            <a
+              href="/hiring"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Трудоустройство
+            </a>
+            <a
+              href="/culture"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Корпоративная культура
+            </a>
+            <a
+              href="/reviews"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Отзывы
+            </a>
+            <a
+              href="/contacts"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              Контакты
+            </a>
+            <a
+              href="/advertising"
+              className="text-gray-300 hover:text-orange-400 transition-colors"
+            >
+              О рекламе
+            </a>
+          </nav>
 
-          {/* Copyright */}
-          <div className="text-gray-400 text-sm border-t border-gray-700 pt-4">
-            <p className="mb-2">
-              © 2025 ООО «Яндекс.Еда» | Все права защищены
-            </p>
-            <p className="text-xs text-gray-500">
-              Информация на сайте не является публичной офертой. Актуальные
-              условия уточняйте в приложении Яндекс.Еда
-            </p>
+          <div className="text-center text-gray-400 text-sm">
+            <p>© 2025 Яндекс.Еда | Все права защищены</p>
           </div>
         </div>
       </div>
