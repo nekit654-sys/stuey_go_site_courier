@@ -39,25 +39,25 @@ const Footer = () => {
 
         <div className="border-t border-gray-700 px-0 mx-0 py-0">
           {/* Legal Disclaimers */}
-          <div className="text-xs text-gray-500 mb-4 max-w-3xl mx-auto leading-relaxed">
-            <p className="mb-2">
+          <div className="text-xs text-gray-500 mb-4 max-w-none mx-auto leading-tight space-y-1">
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               <strong>Важные уведомления:</strong> Участие в партнерской
               программе регулируется действующим законодательством РФ. Доходы от
               деятельности курьера облагаются налогом согласно Налоговому
               кодексу РФ.
             </p>
-            <p className="mb-2">
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               Яндекс.Еда не гарантирует определенный уровень дохода. Заработок
               зависит от количества выполненных заказов, времени работы и других
               факторов. Все споры решаются в соответствии с законодательством
               РФ.
             </p>
-            <p className="mb-2">
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               Регистрируясь по партнерской ссылке, вы соглашаетесь с условиями
               обработки персональных данных и получения информационных сообщений
               от сервиса.
             </p>
-            <p>
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               Использование сайта означает согласие с политикой
               конфиденциальности и условиями использования. Информация может
               быть изменена без предварительного уведомления.
