@@ -12,6 +12,7 @@ import Culture from "./pages/Culture";
 import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
+import ChatWidgetStyles from "@/components/ChatWidgetStyles";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
         </Routes>
         <FixedCorgiCharacter />
         <ScrollToTop />
+        <ChatWidgetStyles />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
