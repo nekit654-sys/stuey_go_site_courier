@@ -69,12 +69,14 @@ const CourierTypes = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-100/20 via-yellow-100/20 to-amber-100/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <CardContent className="p-8 text-center flex flex-col h-full">
-                <div className="mb-6 flex justify-center">
-                  <Icon
-                    name={courier.icon}
-                    size={48}
-                    className="text-yellow-300 hover:text-yellow-400 transition-colors duration-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] filter contrast-125"
-                  />
+                <div className="mb-6 flex justify-center relative z-20">
+                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <Icon
+                      name={courier.icon}
+                      size={48}
+                      className="text-white hover:text-yellow-100 transition-colors duration-300 relative z-30"
+                    />
+                  </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
                   {courier.type}
@@ -92,7 +94,7 @@ const CourierTypes = () => {
                       <Icon
                         name="Check"
                         size={16}
-                        className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] filter contrast-125"
+                        className="text-yellow-500 relative z-20"
                       />
                       <span>{benefit}</span>
                     </div>

@@ -59,12 +59,14 @@ const Benefits = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-yellow-50/30 to-amber-50/30 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative z-10">
-                <div className="mb-6 flex justify-center">
-                  <Icon
-                    name={benefit.icon}
-                    size={40}
-                    className="text-yellow-300 hover:text-yellow-400 transition-all duration-300 hover:scale-110 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] filter contrast-125"
-                  />
+                <div className="mb-6 flex justify-center relative z-20">
+                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <Icon
+                      name={benefit.icon}
+                      size={40}
+                      className="text-white hover:text-yellow-100 transition-all duration-300 hover:scale-110 relative z-30"
+                    />
+                  </div>
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-gray-800 font-rubik">
                   {benefit.title}
