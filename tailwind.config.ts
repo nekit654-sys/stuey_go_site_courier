@@ -6,7 +6,7 @@ const config: Config = {
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}"
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -61,7 +61,31 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        "gradient-radial":
+          "radial-gradient(circle at center, var(--tw-gradient-stops))",
+      },
+      animation: {
+        "magic-glow": "magicGlow 3s ease forwards",
+      },
       keyframes: {
+        magicGlow: {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.8)",
+            filter: "drop-shadow(0 0 10px #ffec3d)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.2)",
+            filter: "drop-shadow(0 0 40px #ffec3d)",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "scale(1.5)",
+            filter: "drop-shadow(0 0 0 #ffec3d)",
+          },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },

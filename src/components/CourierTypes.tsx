@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Icon from "@/components/ui/icon";
+import { useMagicEffect } from "@/hooks/useMagicEffect";
 
 const CourierTypes = () => {
   const referralLink =
@@ -39,6 +40,14 @@ const CourierTypes = () => {
 
   const handleCourierTypeClick = (type: string) => {
     window.open(referralLink, "_blank");
+  };
+
+  const { triggerMagicEffect } = useMagicEffect();
+
+  const handleMagicClick = (event: React.MouseEvent, type: string) => {
+    triggerMagicEffect(event, () => {
+      window.open(referralLink, "_blank");
+    });
   };
 
   return (
@@ -91,7 +100,7 @@ const CourierTypes = () => {
                 </div>
 
                 <Button
-                  onClick={() => handleCourierTypeClick(courier.type)}
+                  onClick={(e) => handleMagicClick(e, courier.type)}
                   className={`w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4 px-6 text-lg 
                     shadow-lg hover:shadow-xl active:shadow-md
                     rounded-lg hover:scale-105 transition-all duration-200 ease-out
