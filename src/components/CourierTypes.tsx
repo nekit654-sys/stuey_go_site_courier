@@ -73,7 +73,7 @@ const CourierTypes = () => {
                   <Icon
                     name={courier.icon}
                     size={48}
-                    className="text-yellow-300 hover:text-yellow-400 transition-colors duration-300"
+                    className="text-yellow-300 hover:text-yellow-400 transition-colors duration-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] filter contrast-125"
                   />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
@@ -92,7 +92,7 @@ const CourierTypes = () => {
                       <Icon
                         name="Check"
                         size={16}
-                        className="text-yellow-300"
+                        className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] filter contrast-125"
                       />
                       <span>{benefit}</span>
                     </div>

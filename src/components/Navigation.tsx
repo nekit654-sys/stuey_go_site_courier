@@ -57,7 +57,11 @@ const Navigation = () => {
                   <Icon
                     name={item.icon as any}
                     size={16}
-                    className="text-yellow-300"
+                    className={
+                      location.pathname === item.path
+                        ? "text-gray-800"
+                        : "text-yellow-300"
+                    }
                   />
                   {item.label}
                 </Button>
@@ -109,7 +113,11 @@ const Navigation = () => {
                   <Icon
                     name={item.icon as any}
                     size={16}
-                    className="text-yellow-300"
+                    className={
+                      location.pathname === item.path
+                        ? "text-gray-800"
+                        : "text-yellow-300"
+                    }
                   />
                   {item.label}
                 </Button>
