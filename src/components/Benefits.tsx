@@ -63,7 +63,7 @@ const Benefits = () => {
                   <Icon
                     name={benefit.icon}
                     size={40}
-                    className="text-orange-600 hover:text-orange-700 transition-all duration-300 hover:scale-110"
+                    className="text-yellow-300 hover:text-yellow-400 transition-all duration-300 hover:scale-110"
                   />
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-gray-800 font-rubik">

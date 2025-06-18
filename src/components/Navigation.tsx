@@ -54,7 +54,11 @@ const Navigation = () => {
                     }
                   `}
                 >
-                  <Icon name={item.icon as any} size={16} />
+                  <Icon
+                    name={item.icon as any}
+                    size={16}
+                    className="text-yellow-300"
+                  />
                   {item.label}
                 </Button>
               </Link>
@@ -71,7 +75,7 @@ const Navigation = () => {
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
                 size={24}
-                className="transition-transform duration-200"
+                className="text-yellow-300 transition-transform duration-200"
               />
             </Button>
           </div>
@@ -102,7 +106,11 @@ const Navigation = () => {
                     }
                   `}
                 >
-                  <Icon name={item.icon as any} size={16} />
+                  <Icon
+                    name={item.icon as any}
+                    size={16}
+                    className="text-yellow-300"
+                  />
                   {item.label}
                 </Button>
               </Link>
