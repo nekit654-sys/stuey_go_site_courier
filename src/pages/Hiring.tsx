@@ -6,7 +6,6 @@ import Icon from "@/components/ui/icon";
 const Hiring = () => {
   const steps = [
     {
-      number: "01",
       title: "Подача заявки",
       description:
         "Заполните анкету на сайте или в приложении. Это займет всего 5 минут.",
@@ -14,7 +13,6 @@ const Hiring = () => {
       time: "5 минут",
     },
     {
-      number: "02",
       title: "Проверка документов",
       description:
         "Наши специалисты проверят ваши документы и свяжутся с вами.",
@@ -22,14 +20,12 @@ const Hiring = () => {
       time: "10 минут",
     },
     {
-      number: "03",
       title: "Обучение",
       description: "Пройдите короткое онлайн-обучение правилам работы курьера.",
       icon: "BookOpen",
       time: "30 минут",
     },
     {
-      number: "04",
       title: "Первый заказ",
       description: "Получите первый заказ и начните зарабатывать уже сегодня!",
       icon: "Truck",
@@ -73,11 +69,6 @@ const Hiring = () => {
                         size={20}
                         className="text-gray-800 md:w-6 md:h-6"
                       />
-                    </div>
-                    <div className="text-center mt-1 md:mt-2">
-                      <span className="text-lg md:text-2xl font-bold text-yellow-600">
-                        {step.number}
-                      </span>
                     </div>
                   </div>
 

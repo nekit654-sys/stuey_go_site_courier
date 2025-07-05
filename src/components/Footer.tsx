@@ -125,14 +125,6 @@ const Footer = () => {
                       Налогообложение
                     </a>
                   </li>
-                  <li>
-                    <a
-                      href="/advertising"
-                      className="hover:text-gray-400 transition-colors"
-                    >
-                      Партнерская программа
-                    </a>
-                  </li>
                 </ul>
               </div>
             </div>
