@@ -64,7 +64,7 @@ const Benefits = () => {
                     <Icon
                       name={benefit.icon}
                       size={40}
-                      className="text-white hover:text-yellow-100 transition-all duration-300 hover:scale-110 relative z-30"
+                      className="text-black hover:text-gray-800 transition-all duration-300 hover:scale-110 relative z-30"
                     />
                   </div>
                 </div>

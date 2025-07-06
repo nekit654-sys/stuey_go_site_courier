@@ -74,7 +74,7 @@ const CourierTypes = () => {
                     <Icon
                       name={courier.icon}
                       size={48}
-                      className="text-white hover:text-yellow-100 transition-colors duration-300 relative z-30"
+                      className="text-black hover:text-gray-800 transition-colors duration-300 relative z-30"
                     />
                   </div>
                 </div>
