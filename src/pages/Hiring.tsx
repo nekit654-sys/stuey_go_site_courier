@@ -67,7 +67,7 @@ const Hiring = () => {
                       <Icon
                         name={step.icon as any}
                         size={20}
-                        className="text-gray-800 md:w-6 md:h-6"
+                        className="text-black md:w-6 md:h-6"
                       />
                     </div>
                   </div>
