@@ -22,7 +22,7 @@ const ChatWidgetStyles = () => {
         /* Адаптация для мобильных */
         @media (max-width: 768px) {
           #jaicp-container {
-            right: 16px !important;
+            right: 8px !important;
             bottom: 16px !important;
           }
         }
