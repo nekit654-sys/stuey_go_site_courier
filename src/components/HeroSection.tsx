@@ -32,9 +32,10 @@ const HeroSection = () => {
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
           <h1 className="md:text-7xl font-bold font-rubik text-white leading-tight text-3xl my-[15px]">
-            Ищете работу{" "}
+            Ищете работу <br />
+            <span className="text-white">со свободой и</span> <br />
             <span className="text-yellow-300 drop-shadow-lg">
-              со свободой и заработком?
+              заработком в вашем городе?
             </span>
           </h1>
 
