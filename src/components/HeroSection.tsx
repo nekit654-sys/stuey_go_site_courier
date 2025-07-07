@@ -32,20 +32,10 @@ const HeroSection = () => {
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
           <h1 className="md:text-7xl font-bold font-rubik text-white leading-tight text-3xl my-[15px]">
-            Ищете работу со свободой и заработком{" "}
-            {loading ? (
-              <span className="text-yellow-300 drop-shadow-lg">
-                в вашем городе?
-              </span>
-            ) : cityInPrepositional ? (
-              <span className="text-yellow-300 drop-shadow-lg">
-                в {cityInPrepositional}?
-              </span>
-            ) : (
-              <span className="text-yellow-300 drop-shadow-lg">
-                в вашем городе?
-              </span>
-            )}
+            Ищете работу{" "}
+            <span className="text-yellow-300 drop-shadow-lg">
+              со свободой и заработком?
+            </span>
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">
