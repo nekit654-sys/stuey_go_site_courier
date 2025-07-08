@@ -651,6 +651,7 @@
   </div>
   <button id="playBtn" role="menuitem">Играть</button>
   <button id="rulesBtn" role="menuitem">Правила</button>
+  <button id="becomeBtn" role="menuitem">Стать курьером</button>
   <button id="exitBtn" role="menuitem">Выход из игры</button>
 
 </div>
@@ -769,6 +770,7 @@
   const closeRulesBtn = document.getElementById('closeRulesBtn');
   const restartBtn = document.getElementById('restartBtn');
   const toMenuBtn = document.getElementById('toMenuBtn');
+  const becomeBtn = document.getElementById('becomeBtn');
   const game = document.getElementById('game');
   const speechBubble = document.getElementById('speechBubble');
   const lanes = document.querySelectorAll('.lane');
@@ -1468,7 +1470,14 @@
 
     setTimeout(() => {
       if (!window.closed) {
-        window.location.href = 'about:blank';
+        // Проверяем, если мы в iframe или родительском окне
+        if (window.parent !== window.self) {
+          // Мы в iframe, закрываем модальное окно
+          window.parent.postMessage('closeGame', '*');
+        } else {
+          // Мы в отдельной вкладке, возвращаемся на главную страницу
+          window.location.href = window.location.origin;
+        }
       }
     }, 500);
   });
@@ -1483,6 +1492,10 @@
   toMenuBtn.addEventListener('click', () => {
     gameOverMenu.style.display = 'none';
     mainMenu.style.display = 'block';
+  });
+  becomeBtn.addEventListener('click', () => {
+    const referralLink = 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank';
+    window.open(referralLink, '_blank');
   });
 
   // Сенсорное управление
