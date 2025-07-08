@@ -40,8 +40,8 @@ const HeroSection = () => {
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">
-            Станьте частью команды курьеров и работайте по своему графику!
-            Выбирайте удобный способ доставки и зарабатывайте больше.
+            Присоединяйтесь к Stuey.Go – крупнейшей курьерской службе!
+            Зарабатывайте до 10000₽ в день с каждодневными выплатами.
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mb-10">
@@ -56,7 +56,7 @@ const HeroSection = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Автомобиль</h3>
               <p className="text-sm text-gray-200 leading-relaxed">
-                Максимальный заработок • Комфорт в любую погоду • Больше заказов
+                До 10000₽/день • Каждодневные выплаты • Работа у дома
               </p>
             </div>
 
@@ -71,7 +71,7 @@ const HeroSection = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Велосипед</h3>
               <p className="text-sm text-gray-200 leading-relaxed">
-                Быстрые поездки • Экологично • Отличная физическая форма
+                До 10000₽/день • Каждодневные выплаты • Работа у дома
               </p>
             </div>
 
@@ -86,8 +86,7 @@ const HeroSection = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Пешком</h3>
               <p className="text-sm text-gray-200 leading-relaxed">
-                Доставляйте в своем районе • Никаких затрат на транспорт •
-                Гибкий график
+                До 10000₽/день • Каждодневные выплаты • Работа у дома
               </p>
             </div>
           </div>
