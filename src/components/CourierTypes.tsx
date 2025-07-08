@@ -113,7 +113,7 @@ const CourierTypes = () => {
                     before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
                     before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700`}
                 >
-                  Стать курьером со Stuey.Go
+                  Заполнить заявку
                 </Button>
               </CardContent>
             </Card>
