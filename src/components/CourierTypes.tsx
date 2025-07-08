@@ -12,7 +12,11 @@ const CourierTypes = () => {
       type: "Авто курьер",
       icon: "Car",
       description: "Доставка на автомобиле",
-      benefits: ["До 10000₽ в день", "Каждодневные выплаты", "Работа у дома"],
+      benefits: [
+        "До 8000₽ в день",
+        "Большой радиус доставки",
+        "Работа в любую погоду",
+      ],
       bgColor: "bg-blue-50 hover:bg-blue-100",
       buttonColor: "bg-blue-600 hover:bg-blue-700",
     },
@@ -20,7 +24,7 @@ const CourierTypes = () => {
       type: "Вело курьер",
       icon: "Bike",
       description: "Доставка на велосипеде",
-      benefits: ["До 10000₽ в день", "Каждодневные выплаты", "Работа у дома"],
+      benefits: ["До 6000₽ в день", "Экологично", "Отличная физическая форма"],
       bgColor: "bg-green-50 hover:bg-green-100",
       buttonColor: "bg-green-600 hover:bg-green-700",
     },
@@ -28,7 +32,7 @@ const CourierTypes = () => {
       type: "Пеший курьер",
       icon: "User",
       description: "Доставка пешком",
-      benefits: ["До 10000₽ в день", "Каждодневные выплаты", "Работа у дома"],
+      benefits: ["До 4000₽ в день", "Не нужен транспорт", "Гибкий график"],
       bgColor: "bg-purple-50 hover:bg-purple-100",
       buttonColor: "bg-purple-600 hover:bg-purple-700",
     },
@@ -109,7 +113,7 @@ const CourierTypes = () => {
                     before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
                     before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700`}
                 >
-                  ⭢ Стать курьером со Stuey.Go ⭠
+                  ⭢ Стать курьером ⭠
                 </Button>
               </CardContent>
             </Card>
