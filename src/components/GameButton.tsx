@@ -8,8 +8,13 @@ interface GameButtonProps {
 const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth <= 767);
+    };
+
     const handleScroll = () => {
       // Показываем кнопку когда прокрутили на 80% от высоты страницы
       const scrollTop =
@@ -21,13 +26,23 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       setIsVisible(scrollPercentage > 0.8);
     };
 
+    checkDevice();
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", checkDevice);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", checkDevice);
+    };
   }, []);
 
   const toggleGame = () => {
-    setIsGameOpen(!isGameOpen);
-    onToggle(!isGameOpen);
+    if (isMobile) {
+      // На мобильных открываем в новой вкладке
+      window.open("/game.html", "_blank");
+    } else {
+      setIsGameOpen(!isGameOpen);
+      onToggle(!isGameOpen);
+    }
   };
 
   const closeGame = () => {
@@ -96,13 +111,13 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
         </button>
       </div>
 
-      {/* Модальное окно с игрой */}
-      {isGameOpen && (
+      {/* Модальное окно с игрой (только для десктопа) */}
+      {isGameOpen && !isMobile && (
         <div className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-6xl h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden">
             {/* Кнопка закрытия */}
             <button
-              onClick={toggleGame}
+              onClick={closeGame}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
                          text-white rounded-full flex items-center justify-center 
                          transition-all duration-200 hover:scale-110"

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Приключения курьера <strong>Stuey.Go</strong> - версия 1.9</title>
+<title>Приключения курьера <strong>Stuey.Go</strong></title>
 <style>
   /* --- Сброс и базовые стили --- */
   *, *::before, *::after {
@@ -652,7 +652,7 @@
   <button id="playBtn" role="menuitem">Играть</button>
   <button id="rulesBtn" role="menuitem">Правила</button>
   <button id="exitBtn" role="menuitem">Выход из игры</button>
-  <div id="versionMenu" aria-label="Версия игры">ver. 1.9</div>
+
 </div>
 
 <!-- Правила -->
@@ -711,8 +711,7 @@
     </div>
   </div>
 
-  <!-- ВЕРСИЯ ИГРЫ В ЛЕВОМ НИЖНЕМ УГЛУ -->
-  <div id="gameVersion" aria-label="Версия игры" style="display:none; position: fixed; bottom: 0.5rem; left: 0.5rem; color: #FFD700; font-weight: 700; font-size: clamp(0.8rem, 2vw, 1rem); text-shadow: 0 0 0.3rem #000; user-select: none; z-index: 50; pointer-events: none;">ver. 1.9</div>
+
 
 </div>
 
@@ -748,8 +747,6 @@
 
 <script>
 (() => {
-  const GAME_VERSION = '1.9';
-
   // Элементы
   const welcomeScreen = document.getElementById('welcomeScreen');
   const mainMenu = document.getElementById('mainMenu');
@@ -774,13 +771,7 @@
   const toMenuBtn = document.getElementById('toMenuBtn');
   const game = document.getElementById('game');
   const speechBubble = document.getElementById('speechBubble');
-  const gameVersion = document.getElementById('gameVersion');
-  const versionMenu = document.getElementById('versionMenu');
   const lanes = document.querySelectorAll('.lane');
-
-  // Устанавливаем версию в оба места
-  versionMenu.textContent = `ver. ${GAME_VERSION}`;
-  gameVersion.textContent = `ver. ${GAME_VERSION}`;
 
   // Определяем мобильное устройство (по ширине экрана)
   const isMobile = window.innerWidth <= 767;
@@ -1391,8 +1382,6 @@
     courierCurrentY = lanePositions[courierLane] - courier.offsetHeight / 2;
     courier.style.top = courierCurrentY + 'px';
 
-    gameVersion.style.display = 'block';
-
     updateDashSpeed();
 
     startSpawning();
@@ -1425,7 +1414,7 @@
     movingDown = false;
     moveCooldown = 0;
 
-    gameVersion.style.display = 'none';
+
   }
 
   function showGameOverAnimation() {
@@ -1450,7 +1439,7 @@
     if (gameOverFlag) return;
     gameOverFlag = true;
     stopGame();
-    gameVersion.style.display = 'none';
+
     showGameOverAnimation();
   }
 
