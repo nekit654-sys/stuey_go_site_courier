@@ -1474,7 +1474,8 @@
     touchControls.style.display = 'none';
     stopGame();
 
-    window.close();
+    // Отправляем сообщение родительскому окну для закрытия модального окна
+    window.parent.postMessage('closeGame', '*');
 
     setTimeout(() => {
       if (!window.closed) {
