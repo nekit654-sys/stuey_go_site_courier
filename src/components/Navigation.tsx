@@ -67,6 +67,20 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
+
+            {/* Заполнить заявку кнопка */}
+            <Button
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ring-2 ring-red-500/50 hover:ring-red-400/70"
+              onClick={() =>
+                window.open(
+                  "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank",
+                  "_blank",
+                )
+              }
+            >
+              <Icon name="FileText" size={16} className="text-white" />
+              Заполнить заявку
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -123,6 +137,21 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
+
+            {/* Мобильная кнопка заполнить заявку */}
+            <Button
+              className="w-full justify-start bg-red-600 hover:bg-red-700 text-white font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+              onClick={() => {
+                window.open(
+                  "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank",
+                  "_blank",
+                );
+                setIsMenuOpen(false);
+              }}
+            >
+              <Icon name="FileText" size={16} className="text-white" />
+              Заполнить заявку
+            </Button>
           </div>
         </div>
       </div>
