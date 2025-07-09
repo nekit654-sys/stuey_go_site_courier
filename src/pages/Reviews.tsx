@@ -626,7 +626,7 @@ const Reviews = () => {
                 <div className="text-gray-700">Рекомендуют работу</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-800">52K ₽</div>
+                <div className="text-3xl font-bold text-gray-800">67K ₽</div>
                 <div className="text-gray-700">Средний доход</div>
               </div>
             </div>
