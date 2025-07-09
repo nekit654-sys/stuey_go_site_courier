@@ -1,15 +1,23 @@
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useMagicEffect } from "@/hooks/useMagicEffect";
 
 const HeroSection = () => {
   const { cityInPrepositional, loading } = useUserLocation();
+  const { triggerMagicEffect } = useMagicEffect();
 
   const referralLink =
     "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
 
   const handleBecomeClick = () => {
     window.open(referralLink, "_blank");
+  };
+
+  const handleMagicClick = (event: React.MouseEvent) => {
+    triggerMagicEffect(event, () => {
+      window.open(referralLink, "_blank");
+    });
   };
 
   return (
@@ -48,7 +56,7 @@ const HeroSection = () => {
             {/* Пешая доставка */}
             <div
               className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleBecomeClick}
+              onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
                 <Icon name="User" size={28} className="text-black" />
@@ -63,7 +71,7 @@ const HeroSection = () => {
             {/* Велосипед */}
             <div
               className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-2 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleBecomeClick}
+              onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
                 <Icon name="Bike" size={28} className="text-black" />
@@ -77,7 +85,7 @@ const HeroSection = () => {
             {/* Автомобиль */}
             <div
               className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-3 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleBecomeClick}
+              onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
                 <Icon name="Car" size={28} className="text-black" />
