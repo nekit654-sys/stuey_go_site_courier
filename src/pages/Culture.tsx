@@ -8,35 +8,35 @@ const Culture = () => {
       title: 'Программа лояльности "Прогресс"',
       subtitle: "Бонусы за качественные доставки",
       image:
-        "https://cdn.poehali.dev/files/94e55626-c01d-4000-b009-a365581039c4.png",
+        "https://cdn.poehali.dev/files/a332b583-8ee3-4686-846e-cacf8e661bbe.png",
       bgColor: "bg-yellow-400",
     },
     {
       title: "Заходите отдохнуть",
       subtitle: "Бесплатный чай в перерывах между доставками",
       image:
-        "https://cdn.poehali.dev/files/ef07f6a1-11d6-4c7a-b85b-119e6d48bf2c.png",
+        "https://cdn.poehali.dev/files/4780d84e-8c95-4633-a95a-57dcd58c664a.png",
       bgColor: "bg-yellow-400",
     },
     {
       title: "Скидки на еду",
       subtitle: "Специальные предложения для курьеров",
       image:
-        "https://cdn.poehali.dev/files/7a328e65-304b-4089-9d75-b2109b2b60f0.png",
+        "https://cdn.poehali.dev/files/0259e292-26c4-4e05-bc59-a016548e8ce9.png",
       bgColor: "bg-yellow-400",
     },
     {
       title: "Бонусы от Яндекса",
       subtitle: "Выгода с Про, самокаты с Яндекс Go и такси на поздних слотах",
       image:
-        "https://cdn.poehali.dev/files/3e180814-9755-4188-93a7-7ab83fa85c95.png",
+        "https://cdn.poehali.dev/files/c5e01294-a5e2-450a-8a3d-7a7d46936a98.png",
       bgColor: "bg-yellow-400",
     },
     {
       title: "Всё для телефона",
       subtitle: "Выгодные тарифы от наших партнёров",
       image:
-        "https://cdn.poehali.dev/files/985fbe39-bb38-4bb3-9f2a-d20f8c893e49.png",
+        "https://cdn.poehali.dev/files/74f15575-fb8c-4020-ae34-92abbe98bae5.png",
       bgColor: "bg-yellow-400",
     },
     {
