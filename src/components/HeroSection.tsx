@@ -79,7 +79,7 @@ const HeroSection = () => {
               <h3 className="text-xl font-bold mb-3 text-yellow-400">
                 Велосипед
               </h3>
-              <p className="text-sm text-gray-200 leading-relaxed">
+              <p className="text-sm leading-relaxed text-[#ffffff]">
                 Быстрые поездки • Экологично • Отличная физическая форма
               </p>
             </div>
