@@ -42,7 +42,7 @@ const HeroSection = () => {
           <h1 className="md:text-7xl font-bold font-rubik text-white leading-tight text-3xl my-[15px]">
             Ищете работу <br />
             <span className="text-white">со свободой и</span> <br />
-            <span className="text-yellow-300 drop-shadow-lg">
+            <span className="drop-shadow-lg text-yellow-400">
               заработком в вашем городе?
             </span>
           </h1>
