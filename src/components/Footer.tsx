@@ -117,14 +117,6 @@ const Footer = () => {
                       Правовая информация
                     </a>
                   </li>
-                  <li>
-                    <a
-                      href="/advertising"
-                      className="hover:text-gray-400 transition-colors"
-                    >
-                      Налогообложение
-                    </a>
-                  </li>
                 </ul>
               </div>
             </div>
