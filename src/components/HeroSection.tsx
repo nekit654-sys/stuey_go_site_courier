@@ -92,7 +92,9 @@ const HeroSection = () => {
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
                 <Icon name="Car" size={28} className="text-black" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Автомобиль</h3>
+              <h3 className="text-xl font-bold mb-3 text-yellow-400">
+                Автомобиль
+              </h3>
               <p className="text-sm text-gray-200 leading-relaxed">
                 Максимальный заработок • Комфорт в любую погоду • Больше заказов
               </p>
