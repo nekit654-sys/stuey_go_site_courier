@@ -43,7 +43,7 @@ const Culture = () => {
       title: "Вело с выгодой",
       subtitle: "Скидки на аренду и покупку велосипедов и электротранспорта",
       image:
-        "https://cdn.poehali.dev/files/7a328e65-304b-4089-9d75-b2109b2b60f0.png",
+        "https://cdn.poehali.dev/files/a35ec048-6a4b-4d01-8c1d-56c773f20f87.png",
       bgColor: "bg-yellow-400",
     },
   ];
