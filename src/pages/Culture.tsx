@@ -3,42 +3,49 @@ import Footer from "@/components/Footer";
 import Icon from "@/components/ui/icon";
 
 const Culture = () => {
-  const values = [
+  const benefitCards = [
     {
-      title: "Свобода выбора",
-      description:
-        "Работайте когда хотите и сколько хотите. Ваш график — ваши правила.",
-      icon: "Calendar",
-      color: "bg-blue-500",
+      title: 'Программа лояльности "Прогресс"',
+      subtitle: "Бонусы за качественные доставки",
+      image:
+        "https://cdn.poehali.dev/files/f271f7b2-64e3-42a8-b868-f98bab04042b.png",
+      bgColor: "bg-yellow-400",
     },
     {
-      title: "Справедливость",
-      description: "Прозрачная система оплаты. Каждый рубль честно заработан.",
-      icon: "Scale",
-      color: "bg-green-500",
+      title: "Заходите отдохнуть",
+      subtitle: "Бесплатный чай в перерывах между доставками",
+      image:
+        "https://cdn.poehali.dev/files/ef07f6a1-11d6-4c7a-b85b-119e6d48bf2c.png",
+      bgColor: "bg-yellow-400",
     },
     {
-      title: "Поддержка",
-      description:
-        "Круглосуточная техподдержка готова помочь в любой ситуации.",
-      icon: "HeadphonesIcon",
-      color: "bg-purple-500",
+      title: "Скидки на еду",
+      subtitle: "Специальные предложения для курьеров",
+      image:
+        "https://cdn.poehali.dev/files/7a328e65-304b-4089-9d75-b2109b2b60f0.png",
+      bgColor: "bg-yellow-400",
     },
     {
-      title: "Развитие",
-      description: "Растите вместе с нами. От курьера до партнера-франчайзи.",
-      icon: "TrendingUp",
-      color: "bg-orange-500",
+      title: "Бонусы от Яндекса",
+      subtitle: "Выгода с Про, самокаты с Яндекс Go и такси на поздних слотах",
+      image:
+        "https://cdn.poehali.dev/files/3e180814-9755-4188-93a7-7ab83fa85c95.png",
+      bgColor: "bg-yellow-400",
     },
-  ];
-
-  const benefits = [
-    "Гибкий график работы",
-    "Еженедельные выплаты",
-    "Бонусная система",
-    "Страхование курьеров",
-    "Обучение и развитие",
-    "Корпоративные мероприятия",
+    {
+      title: "Всё для телефона",
+      subtitle: "Выгодные тарифы от наших партнёров",
+      image:
+        "https://cdn.poehali.dev/files/985fbe39-bb38-4bb3-9f2a-d20f8c893e49.png",
+      bgColor: "bg-yellow-400",
+    },
+    {
+      title: "Вело с выгодой",
+      subtitle: "Скидки на аренду и покупку велосипедов и электротранспорта",
+      image:
+        "https://cdn.poehali.dev/files/7a328e65-304b-4089-9d75-b2109b2b60f0.png",
+      bgColor: "bg-yellow-400",
+    },
   ];
 
   return (
@@ -49,61 +56,26 @@ const Culture = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Корпоративная <span className="text-yellow-500">культура</span>
+              Мотивация и <span className="text-yellow-500">доход</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Наши ценности и принципы работы, которые делают нас командой
+              Дополнительные возможности для заработка и мотивации курьеров
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            {values.map((value, index) => (
+          <div className="grid grid-cols-1 gap-6 mb-16">
+            {benefitCards.map((card, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-yellow-200 hover:border-yellow-400"
+                className="relative overflow-hidden rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
               >
-                <div className="flex items-start space-x-4">
-                  <div
-                    className={`w-12 h-12 ${value.color} rounded-full flex items-center justify-center shadow-lg`}
-                  >
-                    <Icon
-                      name={value.icon as any}
-                      size={24}
-                      className="text-white"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800 mb-3">
-                      {value.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {value.description}
-                    </p>
-                  </div>
-                </div>
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-32 object-cover"
+                />
               </div>
             ))}
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-200 mb-16">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-              Что мы предлагаем нашей команде
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3 p-4 rounded-lg hover:bg-yellow-50 transition-colors"
-                >
-                  <Icon
-                    name="CheckCircle"
-                    size={20}
-                    className="text-green-500 flex-shrink-0"
-                  />
-                  <span className="text-gray-700 font-medium">{benefit}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white shadow-2xl">
