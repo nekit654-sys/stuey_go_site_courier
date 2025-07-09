@@ -8,7 +8,7 @@ const Culture = () => {
       title: 'Программа лояльности "Прогресс"',
       subtitle: "Бонусы за качественные доставки",
       image:
-        "https://cdn.poehali.dev/files/f271f7b2-64e3-42a8-b868-f98bab04042b.png",
+        "https://cdn.poehali.dev/files/94e55626-c01d-4000-b009-a365581039c4.png",
       bgColor: "bg-yellow-400",
     },
     {
@@ -72,7 +72,7 @@ const Culture = () => {
                 <img
                   src={card.image}
                   alt={card.title}
-                  className="w-full h-32 object-cover"
+                  className="w-full h-auto object-contain"
                 />
               </div>
             ))}
