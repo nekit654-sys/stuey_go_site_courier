@@ -45,18 +45,19 @@ const HeroSection = () => {
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mb-10">
-            {/* Автомобиль */}
+            {/* Пешая доставка */}
             <div className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4 mx-auto">
                 <Icon
-                  name="Car"
+                  name="MapPin"
                   size={28}
                   className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]"
                 />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Автомобиль</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Пешком</h3>
               <p className="text-sm text-gray-200 leading-relaxed">
-                Максимальный заработок • Комфорт в любую погоду • Больше заказов
+                Доставляйте в своем районе • Никаких затрат на транспорт •
+                Гибкий график
               </p>
             </div>
 
@@ -75,19 +76,18 @@ const HeroSection = () => {
               </p>
             </div>
 
-            {/* Пешая доставка */}
+            {/* Автомобиль */}
             <div className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4 mx-auto">
                 <Icon
-                  name="MapPin"
+                  name="Car"
                   size={28}
                   className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]"
                 />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Пешком</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Автомобиль</h3>
               <p className="text-sm text-gray-200 leading-relaxed">
-                Доставляйте в своем районе • Никаких затрат на транспорт •
-                Гибкий график
+                Максимальный заработок • Комфорт в любую погоду • Больше заказов
               </p>
             </div>
           </div>
