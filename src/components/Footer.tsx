@@ -42,10 +42,10 @@ const Footer = () => {
         {/* Sitemap */}
         <div className="border-t border-gray-700/50 pt-6 mb-6">
           <div className="text-xs text-gray-600 space-y-2">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left max-w-2xl mx-auto">
               <div>
-                <h4 className="text-gray-500 font-medium mb-1">Основное</h4>
-                <ul className="space-y-1">
+                <h4 className="text-gray-500 font-medium mb-3">Основное</h4>
+                <ul className="space-y-2">
                   <li>
                     <a
                       href="/"
@@ -65,8 +65,8 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h4 className="text-gray-500 font-medium mb-1">Информация</h4>
-                <ul className="space-y-1">
+                <h4 className="text-gray-500 font-medium mb-3">Информация</h4>
+                <ul className="space-y-2">
                   <li>
                     <a
                       href="/contacts"
@@ -86,8 +86,8 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h4 className="text-gray-500 font-medium mb-1">Документы</h4>
-                <ul className="space-y-1">
+                <h4 className="text-gray-500 font-medium mb-3">Документы</h4>
+                <ul className="space-y-2">
                   <li>
                     <a
                       href="/privacy"
@@ -102,19 +102,6 @@ const Footer = () => {
                       className="hover:text-gray-400 transition-colors"
                     >
                       Условия
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="text-gray-500 font-medium mb-1">Реклама</h4>
-                <ul className="space-y-1">
-                  <li>
-                    <a
-                      href="/advertising"
-                      className="hover:text-gray-400 transition-colors"
-                    >
-                      Правовая информация
                     </a>
                   </li>
                 </ul>
