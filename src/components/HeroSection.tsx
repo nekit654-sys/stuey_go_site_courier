@@ -62,7 +62,7 @@ const HeroSection = () => {
                 <Icon name="User" size={28} className="text-black" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-yellow-400">Пешком</h3>
-              <p className="text-sm text-gray-200 leading-relaxed">
+              <p className="text-sm leading-relaxed text-[#ffffff]">
                 Доставляйте в своем районе • Никаких затрат на транспорт •
                 Гибкий график
               </p>
