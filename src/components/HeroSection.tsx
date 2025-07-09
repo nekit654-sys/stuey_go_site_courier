@@ -95,7 +95,7 @@ const HeroSection = () => {
               <h3 className="text-xl font-bold mb-3 text-yellow-400">
                 Автомобиль
               </h3>
-              <p className="text-sm text-gray-200 leading-relaxed">
+              <p className="text-sm leading-relaxed text-[#ffffff]">
                 Максимальный заработок • Комфорт в любую погоду • Больше заказов
               </p>
             </div>
