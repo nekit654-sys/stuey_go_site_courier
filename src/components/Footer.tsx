@@ -42,7 +42,7 @@ const Footer = () => {
         {/* Sitemap */}
         <div className="border-t border-gray-700/50 pt-6 mb-6">
           <div className="text-xs text-gray-600 space-y-2">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-8 text-left w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-8 text-left w-full mx-0 px-[125px]">
               <div>
                 <h4 className="text-gray-500 font-medium mb-3">Основное</h4>
                 <ul className="space-y-2">
