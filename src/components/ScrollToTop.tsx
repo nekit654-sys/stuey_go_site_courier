@@ -6,15 +6,22 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      const scrollTop = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Показываем кнопку только когда пользователь близко к низу страницы (в пределах 200px от низа)
+      const isNearBottom = scrollTop + windowHeight >= documentHeight - 200;
+
+      setIsVisible(isNearBottom);
     };
 
     window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    window.addEventListener("resize", toggleVisibility);
+    return () => {
+      window.removeEventListener("scroll", toggleVisibility);
+      window.removeEventListener("resize", toggleVisibility);
+    };
   }, []);
 
   const scrollToTop = () => {
