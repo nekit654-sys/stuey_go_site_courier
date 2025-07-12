@@ -39,12 +39,10 @@ const HeroSection = () => {
       <div className="relative max-w-5xl mx-auto text-center">
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
-          <h1 className="md:text-7xl font-bold font-rubik leading-tight my-[15px] text-6xl">
-            <span className="text-white text-4xl">Ищете работу</span> <br />
-            <span className="text-white text-4xl">со свободой и</span> <br />
-            <span className="text-yellow-400 text-4xl">
-              заработком в вашем городе?
-            </span>
+          <h1 className="font-bold font-rubik leading-tight my-[15px] text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl">
+            <span className="text-white">Ищете работу</span> <br />
+            <span className="text-white">со свободой и</span> <br />
+            <span className="text-yellow-400">заработком в вашем городе?</span>
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">
