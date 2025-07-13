@@ -38,7 +38,7 @@ const HeroSection = () => {
 
       <div className="relative max-w-5xl mx-auto text-center">
         {/* Главный контент */}
-        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
+        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 p-10 shadow-xl ring-1 ring-white/10 my-0 mx-0 py-[30px] px-[110px] rounded-2xl">
           <h1 className="font-bold font-rubik leading-tight my-[15px] text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl">
             <span className="text-white">Ищете работу</span> <br />
             <span className="text-white">со свободой и</span> <br />
