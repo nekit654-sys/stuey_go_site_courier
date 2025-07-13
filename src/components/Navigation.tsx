@@ -24,7 +24,7 @@ const Navigation = () => {
 
   return (
     <nav className="bg-gray-800 border-b-4 border-yellow-400 shadow-2xl sticky top-0 z-50">
-      <div className="absolute inset-0 from-orange-900/10 via-yellow-900/10 to-amber-900/10 bg-zinc-900"></div>
+      <div className="absolute inset-0 from-orange-900/10 via-yellow-900/10 to-amber-900/10 bg-[#000000]"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between py-4">
