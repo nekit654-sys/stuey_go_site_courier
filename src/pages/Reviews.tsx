@@ -575,6 +575,10 @@ const Reviews = () => {
                     src={review.avatar}
                     alt={review.name}
                     className="w-12 h-12 rounded-full object-cover shadow-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}&background=fbbf24&color=1f2937&size=100`;
+                    }}
                   />
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-800">{review.name}</h3>
