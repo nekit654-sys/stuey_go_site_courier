@@ -87,7 +87,7 @@ const Contacts = () => {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      <div className="py-16 px-4">
+      <div className="pt-24 pb-16 md:pt-32 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
