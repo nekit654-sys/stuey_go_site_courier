@@ -22,7 +22,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white px-6 border-t-4 border-b-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl py-[49px]"
+      className="relative bg-cover bg-center bg-no-repeat text-white px-6 border-4 border-yellow-400 rounded-3xl mx-4 my-8 overflow-hidden shadow-2xl py-[49px]"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/7cac183a-71f5-4b31-b8af-49ec249a6874.png)",
@@ -30,7 +30,7 @@ const HeroSection = () => {
     >
       {/* Градиентный оверлей с анимацией */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/30 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent"></div>
 
       {/* Декоративные элементы */}
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
