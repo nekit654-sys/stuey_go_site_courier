@@ -30,7 +30,7 @@ const HeroSection = () => {
     >
       {/* Градиентный оверлей с анимацией */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/30 via-transparent to-transparent"></div>
 
       {/* Декоративные элементы */}
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
