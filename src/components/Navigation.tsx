@@ -23,7 +23,7 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-gray-800 border-b-4 border-yellow-400 shadow-2xl absolute top-0 left-0 right-0 z-50">
+    <nav className="bg-gray-800 border-b-4 border-yellow-400 shadow-2xl fixed top-0 left-0 right-0 z-50">
       <div className="absolute inset-0 from-orange-900/10 via-yellow-900/10 to-amber-900/10 bg-neutral-900"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
