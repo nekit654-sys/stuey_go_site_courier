@@ -74,7 +74,7 @@ const Navigation = () => {
           {/* Game Button */}
           <div className="hidden md:block ml-4">
             <Button
-              onClick={() => window.open('/game.html', '_blank')}
+              onClick={() => setIsGameOpen(!isGameOpen)}
               className="
                 bg-gradient-to-r from-orange-500 to-yellow-500 
                 text-white font-bold px-4 py-2 rounded-full
@@ -147,7 +147,7 @@ const Navigation = () => {
             {/* Mobile Game Button */}
             <Button
               onClick={() => {
-                window.open('/game.html', '_blank');
+                setIsGameOpen(!isGameOpen);
                 handleMenuItemClick();
               }}
               className="
@@ -162,6 +162,31 @@ const Navigation = () => {
           </div>
         </div>
       </div>
+      
+      {/* Модальное окно с игрой */}
+      {isGameOpen && (
+        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-6xl h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden">
+            {/* Кнопка закрытия */}
+            <button
+              onClick={() => setIsGameOpen(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
+                         text-white rounded-full flex items-center justify-center 
+                         transition-all duration-200 hover:scale-110"
+            >
+              <Icon name="X" size={16} />
+            </button>
+
+            {/* Iframe с игрой */}
+            <iframe
+              src="/game.html"
+              className="w-full h-full border-0"
+              title="Игра Приключения курьера Stuey.Go"
+              allow="fullscreen"
+            />
+          </div>
+        </div>
+      )}
       
       {/* Game Component - только для плавающей кнопки */}
       <GameButton onToggle={() => {}} />
