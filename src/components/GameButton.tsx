@@ -16,19 +16,28 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     const handleScroll = () => {
-      // Показываем кнопку когда прокрутили на 80% от высоты страницы
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      const windowHeight = window.innerHeight;
+      // Показываем кнопку только на мобильных и планшетах когда прокрутили до середины страницы
+      if (window.innerWidth > 1024) {
+        setIsVisible(false);
+        return;
+      }
+      
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const documentHeight = document.documentElement.scrollHeight;
-      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
-
-      setIsVisible(scrollPercentage > 0.8);
+      const windowHeight = window.innerHeight;
+      const scrollPercentage = scrollTop / (documentHeight - windowHeight);
+      
+      // Показываем кнопку когда прокрутили до середины страницы (50%)
+      setIsVisible(scrollPercentage >= 0.5);
     };
 
     checkDevice();
+    handleScroll(); // Вызываем сразу для проверки начального состояния
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", checkDevice);
+    window.addEventListener("resize", () => {
+      checkDevice();
+      handleScroll();
+    });
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", checkDevice);
@@ -63,9 +72,9 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   return (
     <>
-      {/* Плавающая кнопка игры */}
+      {/* Плавающая кнопка игры - только для мобильных и планшетов */}
       <div
-        className={`fixed bottom-6 left-6 transition-all duration-300 z-50 ${
+        className={`fixed bottom-6 left-6 transition-all duration-300 z-50 lg:hidden ${
           isVisible
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
