@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
+import FallingCoins from "@/components/FallingCoins";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -38,6 +39,7 @@ const App = () => (
         <GameButton
           onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
         />
+        <FallingCoins />
         <ChatWidgetStyles />
 
         {/* Магический эффект */}
