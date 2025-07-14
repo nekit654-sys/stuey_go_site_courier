@@ -79,8 +79,9 @@ const Navigation = () => {
                 bg-gradient-to-r from-orange-500 to-yellow-500 
                 text-white font-bold px-4 py-2 rounded-full
                 shadow-lg hover:shadow-xl transform hover:scale-105
-                transition-all duration-200 animate-pulse
+                transition-all duration-200
                 ring-2 ring-orange-300/50 hover:ring-orange-400/70
+                hover:from-orange-400 hover:to-yellow-400
               "
             >
               <Icon name="Gamepad2" size={16} className="mr-2" />
