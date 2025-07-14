@@ -45,13 +45,9 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   }, []);
 
   const toggleGame = () => {
-    if (isMobile) {
-      // На мобильных открываем в новой вкладке
-      window.open("/game.html", "_blank");
-    } else {
-      setIsGameOpen(!isGameOpen);
-      onToggle(!isGameOpen);
-    }
+    // Всегда открываем в модальном окне
+    setIsGameOpen(!isGameOpen);
+    onToggle(!isGameOpen);
   };
 
   const closeGame = () => {
@@ -120,8 +116,8 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
         </button>
       </div>
 
-      {/* Модальное окно с игрой (только для десктопа) */}
-      {isGameOpen && !isMobile && (
+      {/* Модальное окно с игрой */}
+      {isGameOpen && (
         <div className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-6xl h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden">
             {/* Кнопка закрытия */}
