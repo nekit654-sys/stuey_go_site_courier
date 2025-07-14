@@ -140,7 +140,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
 
           {/* Фон баннера */}
           <div
-            className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96 bg-cover bg-center"
+            className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] bg-cover bg-center"
             style={{
               backgroundImage: `url('https://cdn.poehali.dev/files/28a9effa-e6f7-4f93-a6c7-1b9484f076be.jpg')`,
             }}
@@ -180,13 +180,13 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                 <img
                   src="https://cdn.poehali.dev/files/01665182-15dc-4b4f-a2bd-8b021378fdea.png"
                   alt="Корги курьер"
-                  className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain"
+                  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
                 />
               </div>
             </div>
 
             {/* Диалоговое окно */}
-            <div className="absolute bottom-20 left-4 sm:bottom-28 sm:left-8 md:bottom-36 md:left-12 lg:bottom-44 lg:left-16">
+            <div className="absolute bottom-24 left-6 sm:bottom-32 sm:left-10 md:bottom-40 md:left-14 lg:bottom-48 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
                 {/* Хвостик диалогового окна */}
                 <div className="absolute top-full left-4 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[15px] border-l-transparent border-r-transparent border-b-white" />
@@ -204,7 +204,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                   </p>
                   <div className="mt-2 flex items-center gap-1">
                     <Icon name="Gift" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Начни экономить уже сейчас</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Начни зарабатывать уже сейчас</span>
                   </div>
                 </div>
               </div>
