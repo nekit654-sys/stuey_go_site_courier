@@ -50,7 +50,7 @@ const HeroSection = () => {
           <div className="grid md:grid-cols-3 gap-6 mb-10">
             {/* Пешая доставка */}
             <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
+              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
               onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
@@ -65,7 +65,7 @@ const HeroSection = () => {
 
             {/* Велосипед */}
             <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-2 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
+              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-2 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
               onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
@@ -81,7 +81,7 @@ const HeroSection = () => {
 
             {/* Автомобиль */}
             <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-bounce-sequence-3 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
+              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-3 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
               onClick={handleMagicClick}
             >
               <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
