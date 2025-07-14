@@ -16,20 +16,14 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     const handleScroll = () => {
-      // Показываем кнопку когда прокрутили за героя и до конца страницы
-      const heroSection = document.querySelector('.min-h-screen');
-      
-      if (heroSection) {
-        const heroHeight = heroSection.getBoundingClientRect().bottom + window.pageYOffset;
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Показываем кнопку когда прокрутили ниже героя
-        setIsVisible(scrollTop > heroHeight - window.innerHeight);
-      } else {
-        // Fallback: показываем после 100vh скролла
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        setIsVisible(scrollTop > window.innerHeight);
-      }
+      // Показываем кнопку когда прокрутили на 80% от высоты страницы
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
+
+      setIsVisible(scrollPercentage > 0.8);
     };
 
     checkDevice();
