@@ -65,7 +65,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     <>
       {/* Плавающая кнопка игры */}
       <div
-        className={`fixed bottom-6 left-6 transition-all duration-300 z-[100] ${
+        className={`fixed bottom-6 left-6 transition-all duration-300 z-50 ${
           isVisible
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
