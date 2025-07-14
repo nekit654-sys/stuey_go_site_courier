@@ -16,21 +16,19 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     const handleScroll = () => {
-      // Показываем кнопку когда 3 кнопки доставки находятся по середине экрана
-      const deliveryButtons = document.querySelector('.grid.md\\:grid-cols-3.gap-6.mb-10');
+      // Показываем кнопку когда прокрутили за героя и до конца страницы
+      const heroSection = document.querySelector('.min-h-screen');
       
-      if (deliveryButtons) {
-        const rect = deliveryButtons.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        const buttonsCenterY = rect.top + rect.height / 2;
-        const screenCenterY = windowHeight / 2;
-        
-        // Показываем кнопку когда центр 3 кнопок находится в центральной части экрана
-        setIsVisible(Math.abs(buttonsCenterY - screenCenterY) < windowHeight * 0.3);
-      } else {
-        // Fallback: если не нашли элемент, показываем после 300px скролла
+      if (heroSection) {
+        const heroHeight = heroSection.getBoundingClientRect().bottom + window.pageYOffset;
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        setIsVisible(scrollTop > 300);
+        
+        // Показываем кнопку когда прокрутили ниже героя
+        setIsVisible(scrollTop > heroHeight - window.innerHeight);
+      } else {
+        // Fallback: показываем после 100vh скролла
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        setIsVisible(scrollTop > window.innerHeight);
       }
     };
 
