@@ -3,8 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
+import FallingCoins from "@/components/FallingCoins";
+import WelcomeBanner from "@/components/WelcomeBanner";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -17,41 +20,61 @@ import ChatWidgetStyles from "@/components/ChatWidgetStyles";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/vacancies" element={<Vacancies />} />
-          <Route path="/hiring" element={<Hiring />} />
-          <Route path="/culture" element={<Culture />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route path="/contacts" element={<Contacts />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+const App = () => {
+  const [showBanner, setShowBanner] = useState(false);
 
-        <ScrollToTop />
-        <GameButton
-          onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
-        />
-        <ChatWidgetStyles />
+  useEffect(() => {
+    const hasSeenBanner = localStorage.getItem('hasSeenWelcomeBanner');
+    if (!hasSeenBanner) {
+      setShowBanner(true);
+    }
+  }, []);
 
-        {/* Магический эффект */}
-        <div
-          id="magic-overlay"
-          className="fixed inset-0 pointer-events-none z-[9998] bg-gradient-radial from-yellow-300/80 via-yellow-300/20 to-transparent opacity-0 animate-magic-glow"
-        />
-        <div
-          id="particles-container"
-          className="fixed inset-0 pointer-events-none overflow-visible z-[9999]"
-        />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  const handleCloseBanner = () => {
+    setShowBanner(false);
+    localStorage.setItem('hasSeenWelcomeBanner', 'true');
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/vacancies" element={<Vacancies />} />
+            <Route path="/hiring" element={<Hiring />} />
+            <Route path="/culture" element={<Culture />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/contacts" element={<Contacts />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+
+          <ScrollToTop />
+          <GameButton
+            onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
+          />
+          <FallingCoins />
+          <ChatWidgetStyles />
+
+          {/* Приветственный баннер */}
+          {showBanner && <WelcomeBanner onClose={handleCloseBanner} />}
+
+          {/* Магический эффект */}
+          <div
+            id="magic-overlay"
+            className="fixed inset-0 pointer-events-none z-[9998] bg-gradient-radial from-yellow-300/80 via-yellow-300/20 to-transparent opacity-0 animate-magic-glow"
+          />
+          <div
+            id="particles-container"
+            className="fixed inset-0 pointer-events-none overflow-visible z-[9999]"
+          />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
