@@ -16,14 +16,11 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     const handleScroll = () => {
-      // Показываем кнопку когда прокрутили на 80% от высоты страницы
+      // Показываем кнопку когда прокрутили немного страницы (300px)
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
 
-      setIsVisible(scrollPercentage > 0.8);
+      setIsVisible(scrollTop > 300);
     };
 
     checkDevice();
