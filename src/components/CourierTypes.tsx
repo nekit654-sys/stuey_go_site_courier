@@ -108,7 +108,7 @@ const CourierTypes = () => {
                     rounded-lg hover:scale-105 transition-all duration-200 ease-out
                     ring-2 ring-amber-300/50 hover:ring-amber-400/70
                     border-0 backdrop-blur-sm
-                    animate-shimmer-sequence-${index + 1}
+                    animate-bounce-sequence-${index + 1}
                     relative overflow-hidden
                     before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
                     before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700`}
