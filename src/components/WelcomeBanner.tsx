@@ -7,6 +7,7 @@ interface WelcomeBannerProps {
 
 const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(10);
   const [coins, setCoins] = useState<Array<{ id: number; left: number; delay: number; size: number }>>([]);
 
   useEffect(() => {
@@ -24,15 +25,22 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
     };
 
     generateCoins();
-    const interval = setInterval(generateCoins, 3000);
+    const coinsInterval = setInterval(generateCoins, 3000);
 
-    const timer = setTimeout(() => {
-      handleClose();
-    }, 10000);
+    // Таймер обратного отсчета
+    const countdownInterval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          handleClose();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
+      clearInterval(coinsInterval);
+      clearInterval(countdownInterval);
     };
   }, []);
 
@@ -99,6 +107,15 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               transform: scale(1.05);
             }
           }
+          
+          @keyframes timerPulse {
+            0%, 100% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.1);
+            }
+          }
         `}
       </style>
       
@@ -108,6 +125,11 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             isVisible ? 'animate-[bannerFadeIn_0.5s_ease-out]' : 'animate-[bannerFadeOut_0.5s_ease-in]'
           }`}
         >
+          {/* Таймер обратного отсчета */}
+          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm animate-[timerPulse_1s_infinite_ease-in-out]">
+            {timeLeft} сек
+          </div>
+
           {/* Кнопка закрытия */}
           <button
             onClick={handleClose}

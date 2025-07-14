@@ -21,18 +21,12 @@ import ChatWidgetStyles from "@/components/ChatWidgetStyles";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    const hasSeenBanner = localStorage.getItem('hasSeenWelcomeBanner');
-    if (!hasSeenBanner) {
-      setShowBanner(true);
-    }
-  }, []);
+  const [showBanner, setShowBanner] = useState(true);
+  const [showFallingCoins, setShowFallingCoins] = useState(false);
 
   const handleCloseBanner = () => {
     setShowBanner(false);
-    localStorage.setItem('hasSeenWelcomeBanner', 'true');
+    setShowFallingCoins(true);
   };
 
   return (
@@ -56,7 +50,7 @@ const App = () => {
           <GameButton
             onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
           />
-          <FallingCoins />
+          {showFallingCoins && <FallingCoins />}
           <ChatWidgetStyles />
 
           {/* Приветственный баннер */}
