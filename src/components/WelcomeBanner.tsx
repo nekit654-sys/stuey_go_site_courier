@@ -186,11 +186,8 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             </div>
 
             {/* Диалоговое окно */}
-            <div className="absolute bottom-24 left-6 sm:bottom-32 sm:left-10 md:bottom-40 md:left-14 lg:bottom-48 lg:left-18">
+            <div className="absolute bottom-28 left-6 sm:bottom-36 sm:left-10 md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
-                {/* Хвостик диалогового окна */}
-                <div className="absolute top-full left-4 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[15px] border-l-transparent border-r-transparent border-b-white" />
-                
                 {/* Само диалоговое окно */}
                 <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md">
                   <div className="flex items-center gap-2 mb-2">
