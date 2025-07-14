@@ -16,11 +16,22 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     const handleScroll = () => {
-      // Показываем кнопку когда прокрутили немного страницы (300px)
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-
-      setIsVisible(scrollTop > 300);
+      // Показываем кнопку когда 3 кнопки доставки находятся по середине экрана
+      const deliveryButtons = document.querySelector('.grid.md\\:grid-cols-3.gap-6.mb-10');
+      
+      if (deliveryButtons) {
+        const rect = deliveryButtons.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const buttonsCenterY = rect.top + rect.height / 2;
+        const screenCenterY = windowHeight / 2;
+        
+        // Показываем кнопку когда центр 3 кнопок находится в центральной части экрана
+        setIsVisible(Math.abs(buttonsCenterY - screenCenterY) < windowHeight * 0.3);
+      } else {
+        // Fallback: если не нашли элемент, показываем после 300px скролла
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        setIsVisible(scrollTop > 300);
+      }
     };
 
     checkDevice();
