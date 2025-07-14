@@ -3,11 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import GameButton from "@/components/GameButton";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isGameOpen, setIsGameOpen] = useState(false);
 
   const menuItems = [
     { path: "/", label: "Главная", icon: "Home" },
@@ -69,6 +71,23 @@ const Navigation = () => {
             ))}
           </div>
 
+          {/* Game Button */}
+          <div className="hidden md:block ml-4">
+            <Button
+              onClick={() => setIsGameOpen(!isGameOpen)}
+              className="
+                bg-gradient-to-r from-orange-500 to-yellow-500 
+                text-white font-bold px-4 py-2 rounded-full
+                shadow-lg hover:shadow-xl transform hover:scale-105
+                transition-all duration-200 animate-pulse
+                ring-2 ring-orange-300/50 hover:ring-orange-400/70
+              "
+            >
+              <Icon name="Gamepad2" size={16} className="mr-2" />
+              Игра
+            </Button>
+          </div>
+
           {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
@@ -123,9 +142,30 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
+            
+            {/* Mobile Game Button */}
+            <Button
+              onClick={() => {
+                setIsGameOpen(!isGameOpen);
+                handleMenuItemClick();
+              }}
+              className="
+                w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
+                text-white font-bold transition-all duration-200 hover:scale-105
+                shadow-lg ring-2 ring-orange-300/50
+              "
+            >
+              <Icon name="Gamepad2" size={16} className="mr-2" />
+              Игра
+            </Button>
           </div>
         </div>
       </div>
+      
+      {/* Game Component */}
+      {isGameOpen && (
+        <GameButton onToggle={setIsGameOpen} />
+      )}
     </nav>
   );
 };
