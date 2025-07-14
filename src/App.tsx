@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
-import FallingCoins from "@/components/FallingCoins";
+
 import WelcomeBanner from "@/components/WelcomeBanner";
 
 import Index from "./pages/Index";
@@ -22,11 +22,9 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showBanner, setShowBanner] = useState(true);
-  const [showFallingCoins, setShowFallingCoins] = useState(false);
 
   const handleCloseBanner = () => {
     setShowBanner(false);
-    setShowFallingCoins(true);
   };
 
   return (
@@ -50,7 +48,7 @@ const App = () => {
           <GameButton
             onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
           />
-          {showFallingCoins && <FallingCoins />}
+
           <ChatWidgetStyles />
 
           {/* Приветственный баннер */}
