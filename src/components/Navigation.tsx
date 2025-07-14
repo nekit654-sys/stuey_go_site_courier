@@ -74,7 +74,7 @@ const Navigation = () => {
           {/* Game Button */}
           <div className="hidden md:block ml-4">
             <Button
-              onClick={() => setIsGameOpen(!isGameOpen)}
+              onClick={() => window.open('/game.html', '_blank')}
               className="
                 bg-gradient-to-r from-orange-500 to-yellow-500 
                 text-white font-bold px-4 py-2 rounded-full
@@ -147,7 +147,7 @@ const Navigation = () => {
             {/* Mobile Game Button */}
             <Button
               onClick={() => {
-                setIsGameOpen(!isGameOpen);
+                window.open('/game.html', '_blank');
                 handleMenuItemClick();
               }}
               className="
@@ -163,10 +163,8 @@ const Navigation = () => {
         </div>
       </div>
       
-      {/* Game Component */}
-      {isGameOpen && (
-        <GameButton onToggle={setIsGameOpen} />
-      )}
+      {/* Game Component - только для плавающей кнопки */}
+      <GameButton onToggle={() => {}} />
     </nav>
   );
 };
