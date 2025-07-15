@@ -23,8 +23,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-attachment: fixed;
   }
 
   /* --- Контейнер игры --- */
@@ -35,22 +33,20 @@
     max-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
+    background: transparent;
   }
 
   /* --- Верхняя и нижняя полосы с лесом --- */
   .city-strip {
     flex-shrink: 0;
     height: clamp(3rem, 8vw, 5rem);
-    background: linear-gradient(to bottom, #38a169, #2f855a, #276749);
+    background: linear-gradient(to bottom, #2e7d32, #145214);
     overflow: hidden;
     position: relative;
     font-size: clamp(2rem, 6vw, 3rem);
     line-height: clamp(3rem, 8vw, 5rem);
     white-space: nowrap;
-    color: #9ae6b4;
-    box-shadow: inset 0 -5px 15px rgba(0,0,0,0.3);
+    color: #a5d6a7;
   }
   .scrolling-objects {
     position: absolute;
@@ -74,7 +70,7 @@
     max-width: 100vw;
     height: 100%;
     max-height: calc(100vh - 2 * clamp(3rem, 8vw, 5rem));
-    box-shadow: inset 0 0 3vw rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 2vw #222;
     overflow: hidden;
 
     display: flex;
@@ -82,9 +78,7 @@
     justify-content: space-around;
     padding: 0 1vw;
 
-    background: linear-gradient(90deg, #4a5568 0%, #2d3748 50%, #4a5568 100%);
-    background-size: 200px 100%;
-    animation: roadMove 2s linear infinite;
+    background: none;
   }
   .lane {
     flex: 1;
@@ -103,18 +97,17 @@
     background:
       repeating-linear-gradient(
         to right,
-        #ffd700 0,
-        #ffd700 20px,
+        white 0,
+        white 20px,
         transparent 20px,
         transparent 40px
       );
-    opacity: 0.8;
+    opacity: 0.6;
     transform: translateY(-50%);
     animation: dashMove linear infinite;
     pointer-events: none;
     z-index: 2;
     animation-duration: 1s;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   }
   @keyframes dashMove {
     0% {
@@ -122,14 +115,6 @@
     }
     100% {
       background-position: -40px 0;
-    }
-  }
-  @keyframes roadMove {
-    0% {
-      background-position: 0 0;
-    }
-    100% {
-      background-position: -200px 0;
     }
   }
 
@@ -141,7 +126,7 @@
     user-select: none;
     pointer-events: none;
     z-index: 10;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    text-shadow: 1px 1px 0.2vw #2e1b0c;
     transform-origin: center bottom;
     animation: sway 2s ease-in-out infinite;
     width: 1em;
@@ -151,7 +136,6 @@
     transform-box: fill-box;
     transform: scaleX(-1);
     transition: top 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 5px 15px rgba(255, 215, 0, 0.3));
   }
   @keyframes sway {
     0%, 100% { transform: scaleX(-1) translateX(0) rotate(0deg); }
@@ -242,37 +226,30 @@
     pointer-events: none;
     z-index: 5;
     transition: transform 0.2s ease;
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
+    text-shadow: 1px 1px 0.1vw #422d1f;
   }
   .pedestrian {
-    filter: drop-shadow(0 0 0.15rem #8b0000) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    animation: pedestrianFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 0.15rem #8b0000);
   }
   .food {
-    filter: drop-shadow(0 0 0.2rem #ffd54f) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
-    animation: foodGlow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 0.2rem #ffd54f);
+    text-shadow: 1px 1px 0.1vw #7a4a19;
   }
   .medkit {
-    filter: drop-shadow(0 0 0.25rem #e57373) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    text-shadow: 0 0 8px rgba(229, 115, 115, 0.8);
-    animation: medkitPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 0.25rem #e57373);
+    text-shadow: 1px 1px 0.1vw #c62828;
   }
   .bonus {
-    filter: drop-shadow(0 0 0.25rem #64b5f6) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    text-shadow: 0 0 8px rgba(100, 181, 246, 0.8);
-    animation: bonusSpark 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 0.25rem #64b5f6);
+    text-shadow: 1px 1px 0.1vw #1565c0;
   }
   .policeCar {
-    filter: drop-shadow(0 0 0.3rem #2196f3) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    text-shadow: 0 0 10px rgba(33, 150, 243, 0.8);
-    animation: policeFlash 0.8s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 0.3rem #2196f3);
+    text-shadow: 1px 1px 0.15vw #0d47a1;
   }
   .policeStanding {
-    filter: drop-shadow(0 0 0.25rem #1565c0) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    text-shadow: 0 0 8px rgba(21, 101, 192, 0.8);
-    animation: policeStandingTwitch 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 0.25rem #1565c0);
+    text-shadow: 1px 1px 0.1vw #0d47a1;
   }
 
   /* --- Главное меню --- */
@@ -281,10 +258,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(26,32,44,0.9) 100%);
-    border-radius: 1.5rem;
+    background: #000a;
+    border-radius: 1rem;
     padding: clamp(1rem, 4vw, 2rem) clamp(2rem, 8vw, 4rem);
-    box-shadow: 0 0 2rem #FFD700, 0 0 4rem rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 1rem #FFD700;
     text-align: center;
     z-index: 1000;
     font-weight: 700;
@@ -292,8 +269,6 @@
     color: #FFD700;
     max-width: 90vw;
     width: 400px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 215, 0, 0.3);
   }
   #versionMenu {
     position: absolute;
@@ -362,22 +337,17 @@
     padding: 0.75rem 2rem;
     border: 2px solid #FFD700;
     border-radius: 0.75rem;
-    background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1));
+    background-color: transparent;
     color: #FFD700;
     cursor: pointer;
     width: 100%;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-    position: relative;
-    overflow: hidden;
+    transition: background-color 0.3s, color 0.3s;
   }
   #mainMenu button:hover,
   #mainMenu button:focus {
-    background: linear-gradient(45deg, #FFD700, #FFA500);
+    background-color: #FFD700;
     color: #000;
     outline: none;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-    transform: translateY(-2px);
   }
   
   /* Красная кнопка "Подать заявку" */
@@ -515,7 +485,7 @@
   #welcomeScreen {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
+    background: black;
     color: #FFD700;
     display: flex;
     flex-direction: column;
@@ -530,7 +500,6 @@
     box-sizing: border-box;
     border: 0.5vw solid #FFD700;
     border-radius: 2vw;
-    box-shadow: inset 0 0 50px rgba(255, 215, 0, 0.2);
   }
   #welcomeScreen h1 {
     font-size: clamp(3rem, 15vw, 6rem);
@@ -592,33 +561,6 @@
   @keyframes blinkYellow {
     0% { opacity: 1; }
     100% { opacity: 0.3; }
-  }
-  
-  /* --- Новые анимации для объектов --- */
-  @keyframes pedestrianFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
-  }
-  @keyframes foodGlow {
-    0% { filter: drop-shadow(0 0 0.2rem #ffd54f) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5)); }
-    100% { filter: drop-shadow(0 0 0.8rem #ffd54f) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5)); }
-  }
-  @keyframes medkitPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-  @keyframes bonusSpark {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.2); }
-  }
-  @keyframes policeFlash {
-    0% { filter: drop-shadow(0 0 0.3rem #2196f3) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5)); }
-    100% { filter: drop-shadow(0 0 1rem #ff1744) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5)); }
-  }
-  @keyframes policeStandingTwitch {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    75% { transform: translateX(2px); }
   }
 
   /* --- Экран ПОТРАЧЕНО --- */
@@ -712,7 +654,7 @@
     <div class="text">
       "<strong>Stuey.Go</strong>"
       <div id="menuCharacter" aria-label="Персонаж курьера корги" role="img" style="display:inline-block; margin-left:0.3rem;">
-        <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:80px; height:80px; object-fit:contain; animation: bounce 2s infinite ease-in-out; filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));" />
+        <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:80px; height:80px; object-fit:contain; animation: bounce 2s infinite ease-in-out;" />
       </div>
     </div>
   </div>
@@ -765,7 +707,7 @@
     <div class="lane lane4"></div>
 
     <div id="courier" aria-label="Курьер корги на велосипеде" role="img" aria-live="polite">
-      <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:100px; height:100px; object-fit:contain; animation: bounce 1s infinite ease-in-out; transform: scaleX(-1); filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));" />
+      <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:100px; height:100px; object-fit:contain; animation: bounce 1s infinite ease-in-out; transform: scaleX(-1);" />
     </div>
     <div id="speechBubble" aria-live="polite" role="alert"></div>
   </div>
