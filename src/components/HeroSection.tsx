@@ -42,7 +42,7 @@ const HeroSection = () => {
           <h1 className="font-bold font-rubik leading-tight my-[15px] text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl">
             <span className="text-white">Начни карьеру с</span> <br />
             <span className="text-white">Stuey.Go!</span> <br />
-            <span className="text-yellow-400">заработком в вашем городе?</span>
+            <span className="text-yellow-400">Бесплатное обучение + бонусы за выполнение заказов!</span>
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">Станьте частью команды курьеров и работайте по своему графику! Выбирайте удобный способ доставки и зарабатывайте больше!</p>
