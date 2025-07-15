@@ -41,7 +41,7 @@ const HeroSection = () => {
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
           <h1 className="font-bold font-rubik leading-tight my-[15px] text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl">
             <span className="text-white">Начни карьеру </span> <br />
-            <span className="text-white">Stuey.Go!</span> <br />
+            <span className="text-white"> Stuey.Go!</span> <br />
             <span className="text-yellow-400">Бесплатное обучение + бонусы за выполнение заказов!</span>
           </h1>
 
