@@ -727,17 +727,17 @@
 <div id="rulesDialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" style="display:none; color:#fff; background:#000; padding:1rem; border-radius:1rem; max-width:600px; margin: 4vh auto; overflow-y:auto; max-height: 80vh; position: fixed; inset: 0; z-index: 2000;">
   <h2 id="rulesTitle" style="color:#FFD700; text-align:center; margin-bottom: 0.5rem;">Правила игры</h2>
   <ul style="line-height:1.5; font-size: 1.1rem; padding-left: 1.2rem;">
-    <li>Управляйте курьером (корги на скутере) стрелками ↑ и ↓ или касаниями на экране.</li>
+    <li>Управляйте курьером (🛵) стрелками ↑ и ↓ или касаниями на экране.</li>
     <li>Курьер может перемещаться по пяти полосам движения, меняя позицию вверх/вниз.</li>
-    <li>Собирайте еду (пицца, бургер, картошка фри, хот-дог, куриная ножка, тако) для очков.</li>
+    <li>Собирайте еду (🍕, 🍔, 🍟, 🌭, 🍗, 🌮) для очков.</li>
     <li>Разные виды фаст-фуда дают разное количество очков.</li>
     <li>Появляются аптечки (🩹), которые восстанавливают жизнь.</li>
     <li>Избегайте пешеходов и полицейских — столкновения отнимают жизни:</li>
     <ul style="font-size: 1rem; padding-left: 1rem;">
-      <li>Стоячий пешеход (обычный человек) отнимает 0.5 ❤️.</li>
-      <li>Идущие пешеходы (люди в движении) отнимают 1 ❤️.</li>
-      <li>Стоячий полицейский (офицер в синей форме) отнимает 1.5 ❤️.</li>
-      <li>Полицейская машина (сине-белый автомобиль с мигалками) отнимает 2 ❤️.</li>
+      <li>Стоячий пешеход (🧍) отнимает 0.5 ❤️.</li>
+      <li>Идущие пешеходы (🚶‍♂️, 🚶‍♀️) отнимают 1 ❤️.</li>
+      <li>Стоячий полицейский (👮‍♂️) отнимает 1.5 ❤️.</li>
+      <li>Полицейская машина с полицейским (🚓👮‍♂️) отнимает 2 ❤️.</li>
     </ul>
     <li>Появляются бонусы: ускорение (⚡️) и неуязвимость (🛡️).</li>
     <li>Удерживайте стрелки или сенсорные кнопки для плавного движения по полосам.</li>
@@ -972,13 +972,8 @@
     ped.dataset.lane = lane;
     ped.style.top = (lanePositions[lane] - 24) + 'px';
     ped.style.left = window.innerWidth + 'px';
-    const img = document.createElement('img');
-    img.src = 'img/d14bd31c-aa1d-4c5f-b681-b194f31152c3.jpg';
-    img.alt = 'Пешеход';
-    img.style.width = '48px';
-    img.style.height = '48px';
-    img.style.objectFit = 'contain';
-    ped.appendChild(img);
+    const pedestrianEmojis = ['🚶‍♂️', '🚶‍♀️'];
+    ped.textContent = pedestrianEmojis[Math.floor(Math.random() * pedestrianEmojis.length)];
     game.appendChild(ped);
     const speedFactor = 0.8 + Math.random() * 0.4;
     pedestrians.push({ elem: ped, x: window.innerWidth, lane, speed: speedX * speedFactor });
@@ -991,13 +986,7 @@
     ped.dataset.lane = lane;
     ped.style.top = (lanePositions[lane] - 24) + 'px';
     ped.style.left = window.innerWidth + 'px';
-    const img = document.createElement('img');
-    img.src = 'img/d8bee195-9c67-4cfd-9b7e-65b1af118391.jpg';
-    img.alt = 'Стоящий пешеход';
-    img.style.width = '48px';
-    img.style.height = '48px';
-    img.style.objectFit = 'contain';
-    ped.appendChild(img);
+    ped.textContent = '🧍';
     game.appendChild(ped);
     standingPeds.push({ elem: ped, x: window.innerWidth, lane, speed: speedX * 0.5 });
   }
@@ -1009,13 +998,7 @@
     cop.dataset.lane = lane;
     cop.style.top = (lanePositions[lane] - 24) + 'px';
     cop.style.left = window.innerWidth + 'px';
-    const img = document.createElement('img');
-    img.src = 'img/019c1f56-bd99-4b80-bc02-349de48cad6b.jpg';
-    img.alt = 'Полицейский';
-    img.style.width = '48px';
-    img.style.height = '48px';
-    img.style.objectFit = 'contain';
-    cop.appendChild(img);
+    cop.textContent = '👮‍♂️';
     game.appendChild(cop);
     policeStandings.push({ elem: cop, x: window.innerWidth, lane, speed: speedX * 0.5 });
   }
@@ -1028,21 +1011,15 @@
     food.style.top = (lanePositions[lane] - 24) + 'px';
     food.style.left = window.innerWidth + 'px';
     const foodItems = [
-      { img: 'img/6575fd98-392b-46ed-8969-638c7cc5964a.jpg', alt: 'Пицца', points: 10 },
-      { img: 'img/cb3d3a23-457c-4ae5-9d0c-58a2880e4a6b.jpg', alt: 'Бургер', points: 8 },
-      { img: 'img/9607fd7d-5314-41d5-b177-0dee4dec3de2.jpg', alt: 'Картошка фри', points: 7 },
-      { img: 'img/6dbb5d14-68bd-4c09-95ec-e78e8b66454e.jpg', alt: 'Хот-дог', points: 6 },
-      { img: 'img/3d408b5c-3912-4be1-b2f8-0da2b00bbee3.jpg', alt: 'Куриная ножка', points: 9 },
-      { img: 'img/a48b0ab8-f123-40ab-9ffe-8dd4dd948914.jpg', alt: 'Тако', points: 11 }
+      { emoji: '🍕', points: 10 },
+      { emoji: '🍔', points: 8 },
+      { emoji: '🍟', points: 7 },
+      { emoji: '🌭', points: 6 },
+      { emoji: '🍗', points: 9 },
+      { emoji: '🌮', points: 11 }
     ];
     const item = foodItems[Math.floor(Math.random() * foodItems.length)];
-    const img = document.createElement('img');
-    img.src = item.img;
-    img.alt = item.alt;
-    img.style.width = '48px';
-    img.style.height = '48px';
-    img.style.objectFit = 'contain';
-    food.appendChild(img);
+    food.textContent = item.emoji;
     game.appendChild(food);
     foods.push({ elem: food, x: window.innerWidth, lane, points: item.points, speed: speedX });
   }
@@ -1079,13 +1056,7 @@
     car.dataset.lane = lane;
     car.style.top = (lanePositions[lane] - 24) + 'px';
     car.style.left = window.innerWidth + 'px';
-    const img = document.createElement('img');
-    img.src = 'img/bbc25d1b-1961-49e3-ae13-c3c5ecd64f2a.jpg';
-    img.alt = 'Полицейская машина';
-    img.style.width = '64px';
-    img.style.height = '48px';
-    img.style.objectFit = 'contain';
-    car.appendChild(img);
+    car.textContent = '🚓👮‍♂️';
     game.appendChild(car);
     policeCars.push({ elem: car, x: window.innerWidth, lane, speed: speedX * 1.5 });
   }
