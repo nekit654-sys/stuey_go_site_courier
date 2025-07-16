@@ -10,7 +10,7 @@ const SalaryBanner = ({ onClose }: SalaryBannerProps) => {
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="text-black font-semibold text-sm">💰 Минимальная гарантированная ставка от 220 рублей/час! Выплаты самозанятым — ежедневно!</div>
+            <div className="text-black font-semibold text-sm">💰 Минимальная гарантированная ставка от 320 рублей/час! Выплаты самозанятым — ежедневно!</div>
           </div>
           <button
             onClick={onClose}
