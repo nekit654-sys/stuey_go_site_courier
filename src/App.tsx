@@ -8,6 +8,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
 
 import WelcomeBanner from "@/components/WelcomeBanner";
+import SalaryBanner from "@/components/SalaryBanner";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -22,9 +23,14 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showBanner, setShowBanner] = useState(true);
+  const [showSalaryBanner, setShowSalaryBanner] = useState(true);
 
   const handleCloseBanner = () => {
     setShowBanner(false);
+  };
+
+  const handleCloseSalaryBanner = () => {
+    setShowSalaryBanner(false);
   };
 
   return (
@@ -51,6 +57,9 @@ const App = () => {
 
           <ChatWidgetStyles />
 
+          {/* Баннер зарплаты */}
+          {showSalaryBanner && <SalaryBanner onClose={handleCloseSalaryBanner} />}
+          
           {/* Приветственный баннер */}
           {showBanner && <WelcomeBanner onClose={handleCloseBanner} />}
 
