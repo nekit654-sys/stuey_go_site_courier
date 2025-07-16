@@ -210,9 +210,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           
           {/* Мини-баннер регистрации */}
           <div className="bg-blue-500 text-white px-4 py-3 text-center border-t border-blue-600">
-            <div className="font-semibold text-sm">
-              📝 Регистрируйся до конца, заполняй ФИО, город, номер телефона!
-            </div>
+            <div className="font-semibold text-sm">📝 Регистрируйся до конца! Заполняй ФИО, город и номер телефона!</div>
           </div>
         </div>
       </div>
