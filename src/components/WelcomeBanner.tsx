@@ -201,7 +201,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                   </p>
                   <div className="mt-2 flex items-center gap-1">
                     <Icon name="Gift" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Начни зарабатывать уже сейчас</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Начни зарабатывать уже сейчас!</span>
                   </div>
                 </div>
               </div>
