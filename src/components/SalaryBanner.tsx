@@ -6,7 +6,7 @@ interface SalaryBannerProps {
 
 const SalaryBanner = ({ onClose }: SalaryBannerProps) => {
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-yellow-400 border-b border-yellow-500 shadow-sm">
+    <div className="fixed bottom-0 left-0 right-0 z-[60] bg-yellow-400 border-t border-yellow-500 shadow-lg">
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
