@@ -175,12 +175,12 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             </div>
 
             {/* Корги курьер */}
-            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 md:bottom-12 md:left-12">
+            <div className="absolute bottom-2 left-4 sm:bottom-4 sm:left-8 md:bottom-6 md:left-12">
               <div className="animate-[corgiJump_2s_infinite_ease-in-out]">
                 <img
                   src="https://cdn.poehali.dev/files/01665182-15dc-4b4f-a2bd-8b021378fdea.png"
                   alt="Корги курьер"
-                  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
+                  className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain"
                 />
               </div>
             </div>
