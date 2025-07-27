@@ -99,17 +99,26 @@ const HeroIncomeCalculator = () => {
 
       {/* Информационные блоки */}
       <div className="grid md:grid-cols-3 gap-4 mt-8 mb-6">
-        <div className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center">
+        <div 
+          className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
+          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+        >
           <Icon name="User" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Пешком</div>
           <div className="text-xs text-gray-300">Свой район</div>
         </div>
-        <div className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center">
+        <div 
+          className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
+          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+        >
           <Icon name="Bike" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Велосипед</div>
           <div className="text-xs text-gray-300">Быстро и экологично</div>
         </div>
-        <div className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center">
+        <div 
+          className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
+          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+        >
           <Icon name="Car" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Автомобиль</div>
           <div className="text-xs text-gray-300">Максимальный доход</div>
