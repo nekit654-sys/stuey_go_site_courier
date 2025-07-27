@@ -73,8 +73,24 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Game Button */}
+          {/* Calculator Button */}
           <div className="hidden md:block ml-4">
+            <Button
+              onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
+              variant="outline"
+              className="
+                border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-800
+                font-medium px-4 py-2 rounded-full
+                transition-all duration-200 hover:scale-105
+              "
+            >
+              <Icon name="Calculator" size={16} className="mr-2" />
+              Калькулятор доходности
+            </Button>
+          </div>
+          
+          {/* Game Button */}
+          <div className="hidden md:block ml-2">
             <Button
               onClick={() => setIsGameOpen(!isGameOpen)}
               className="
@@ -88,22 +104,6 @@ const Navigation = () => {
             >
               <Icon name="Gamepad2" size={16} className="mr-2" />
               Игра
-            </Button>
-          </div>
-          
-          {/* Calculator Button */}
-          <div className="hidden md:block ml-2">
-            <Button
-              onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
-              variant="outline"
-              className="
-                border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-800
-                font-medium px-4 py-2 rounded-full
-                transition-all duration-200 hover:scale-105
-              "
-            >
-              <Icon name="Calculator" size={16} className="mr-2" />
-              Калькулятор доходности
             </Button>
           </div>
 
@@ -162,22 +162,6 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Game Button */}
-            <Button
-              onClick={() => {
-                setIsGameOpen(!isGameOpen);
-                handleMenuItemClick();
-              }}
-              className="
-                w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
-                text-white font-bold transition-all duration-200 hover:scale-105
-                shadow-lg ring-2 ring-orange-300/50
-              "
-            >
-              <Icon name="Gamepad2" size={16} className="mr-2" />
-              Игра
-            </Button>
-            
             {/* Mobile Calculator Button */}
             <Button
               onClick={() => {
@@ -192,6 +176,22 @@ const Navigation = () => {
             >
               <Icon name="Calculator" size={16} className="mr-2" />
               Калькулятор доходности
+            </Button>
+            
+            {/* Mobile Game Button */}
+            <Button
+              onClick={() => {
+                setIsGameOpen(!isGameOpen);
+                handleMenuItemClick();
+              }}
+              className="
+                w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
+                text-white font-bold transition-all duration-200 hover:scale-105
+                shadow-lg ring-2 ring-orange-300/50
+              "
+            >
+              <Icon name="Gamepad2" size={16} className="mr-2" />
+              Игра
             </Button>
           </div>
         </div>
