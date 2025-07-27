@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMagicEffect } from "@/hooks/useMagicEffect";
+import HeroIncomeCalculator from "@/components/HeroIncomeCalculator";
 
 const HeroSection = () => {
   const { cityInPrepositional, loading } = useUserLocation();
@@ -47,53 +48,8 @@ const HeroSection = () => {
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">Станьте частью команды курьеров и работайте по своему графику! Выбирайте удобный способ доставки и зарабатывайте больше!</p>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-10">
-            {/* Пешая доставка */}
-            <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleMagicClick}
-            >
-              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
-                <Icon name="User" size={28} className="text-black" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-yellow-400">Пешком</h3>
-              <p className="text-sm leading-relaxed text-[#ffffff]">
-                Доставляйте в своем районе • Никаких затрат на транспорт •
-                Гибкий график
-              </p>
-            </div>
-
-            {/* Велосипед */}
-            <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-2 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleMagicClick}
-            >
-              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
-                <Icon name="Bike" size={28} className="text-black" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-yellow-400">
-                Велосипед
-              </h3>
-              <p className="text-sm leading-relaxed text-[#ffffff]">
-                Быстрые поездки • Экологично • Отличная физическая форма
-              </p>
-            </div>
-
-            {/* Автомобиль */}
-            <div
-              className="backdrop-blur-sm bg-white/10 border border-yellow-400/40 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer animate-shimmer-sequence-3 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-              onClick={handleMagicClick}
-            >
-              <div className="flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-full mb-4 mx-auto">
-                <Icon name="Car" size={28} className="text-black" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-yellow-400">
-                Автомобиль
-              </h3>
-              <p className="text-sm leading-relaxed text-[#ffffff]">
-                Максимальный заработок • Комфорт в любую погоду • Больше заказов
-              </p>
-            </div>
+          <div className="mb-10">
+            <HeroIncomeCalculator />
           </div>
 
           {/* Убраны отступы для сохранения размера */}
