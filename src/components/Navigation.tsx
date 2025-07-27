@@ -4,12 +4,14 @@ import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameButton from "@/components/GameButton";
+import IncomeCalculator from "@/components/IncomeCalculator";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
 
   const menuItems = [
     { path: "/", label: "Главная", icon: "Home" },
@@ -71,21 +73,21 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Game Button */}
+          {/* Calculator Button */}
           <div className="hidden md:block ml-4">
             <Button
-              onClick={() => setIsGameOpen(!isGameOpen)}
+              onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
               className="
-                bg-gradient-to-r from-orange-500 to-yellow-500 
+                bg-gradient-to-r from-yellow-500 to-yellow-600
                 text-white font-bold px-4 py-2 rounded-full
                 shadow-lg hover:shadow-xl transform hover:scale-105
                 transition-all duration-200
-                ring-2 ring-orange-300/50 hover:ring-orange-400/70
-                hover:from-orange-400 hover:to-yellow-400
+                ring-2 ring-yellow-300/50 hover:ring-yellow-400/70
+                hover:from-yellow-400 hover:to-yellow-500
               "
             >
-              <Icon name="Gamepad2" size={16} className="mr-2" />
-              Игра
+              <Icon name="Calculator" size={16} className="mr-2" />
+              Калькулятор
             </Button>
           </div>
 
@@ -144,20 +146,20 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Game Button */}
+            {/* Mobile Calculator Button */}
             <Button
               onClick={() => {
-                setIsGameOpen(!isGameOpen);
+                setIsCalculatorOpen(!isCalculatorOpen);
                 handleMenuItemClick();
               }}
               className="
-                w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
+                w-full justify-start bg-gradient-to-r from-yellow-500 to-yellow-600
                 text-white font-bold transition-all duration-200 hover:scale-105
-                shadow-lg ring-2 ring-orange-300/50
+                shadow-lg ring-2 ring-yellow-300/50
               "
             >
-              <Icon name="Gamepad2" size={16} className="mr-2" />
-              Игра
+              <Icon name="Calculator" size={16} className="mr-2" />
+              Калькулятор
             </Button>
           </div>
         </div>
@@ -184,6 +186,28 @@ const Navigation = () => {
               title="Игра Приключения курьера Stuey.Go"
               allow="fullscreen"
             />
+          </div>
+        </div>
+      )}
+      
+      {/* Модальное окно с калькулятором */}
+      {isCalculatorOpen && (
+        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="relative bg-white rounded-lg shadow-2xl overflow-hidden">
+            {/* Кнопка закрытия */}
+            <button
+              onClick={() => setIsCalculatorOpen(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
+                         text-white rounded-full flex items-center justify-center 
+                         transition-all duration-200 hover:scale-110"
+            >
+              <Icon name="X" size={16} />
+            </button>
+
+            {/* Калькулятор */}
+            <div className="p-4">
+              <IncomeCalculator />
+            </div>
           </div>
         </div>
       )}
