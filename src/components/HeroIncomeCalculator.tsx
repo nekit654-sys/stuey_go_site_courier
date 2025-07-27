@@ -101,7 +101,7 @@ const HeroIncomeCalculator = () => {
       <div className="grid md:grid-cols-3 gap-4 mt-8 mb-6">
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
-          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+          onClick={() => window.open('https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank', '_blank')}
         >
           <Icon name="User" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Пешком</div>
@@ -109,7 +109,7 @@ const HeroIncomeCalculator = () => {
         </div>
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
-          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+          onClick={() => window.open('https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank', '_blank')}
         >
           <Icon name="Bike" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Велосипед</div>
@@ -117,7 +117,7 @@ const HeroIncomeCalculator = () => {
         </div>
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-300 hover:scale-105"
-          onClick={() => window.open('https://delivery-club.ru/courier/invite/0G31H1FK', '_blank')}
+          onClick={() => window.open('https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank', '_blank')}
         >
           <Icon name="Car" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Автомобиль</div>
