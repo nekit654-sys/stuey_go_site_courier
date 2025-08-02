@@ -46,7 +46,7 @@ const HeroSection = () => {
             <span className="text-yellow-400">заработком в вашем городе?</span>
           </h1>
 
-          <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-lg text-gray-100">Станьте частью команды курьеров и работайте по своему графику! Выбирайте удобный способ доставки и зарабатывайте больше!</p>
+          <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">Станьте частью команды курьеров и работайте по своему графику! Выбирайте удобный способ доставки и зарабатывайте больше!</p>
 
           <div className="mb-10">
             <HeroIncomeCalculator />
