@@ -6,7 +6,7 @@ const HeroIncomeCalculator = () => {
   const [hours, setHours] = useState(8);
 
   const calculateIncome = useCallback((daysValue: number, hoursValue: number) => {
-    const maxIncome = 210000;
+    const maxIncome = 230000;
     const maxDays = 31;
     const maxHours = 12;
     
