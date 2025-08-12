@@ -6,8 +6,8 @@ const IncomeCalculator = () => {
   const [hours, setHours] = useState(8);
 
   const calculateIncome = useCallback((daysValue: number, hoursValue: number) => {
-    // Максимальная сумма 230000 при 31 дне и 12 часах
-    const maxIncome = 230000;
+    // Максимальная сумма 210000 при 31 дне и 12 часах
+    const maxIncome = 210000;
     const maxDays = 31;
     const maxHours = 12;
     
