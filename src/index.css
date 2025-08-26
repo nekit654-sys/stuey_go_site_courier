@@ -481,3 +481,27 @@ div[class*="jcb"] {
 #jcb_button {
   bottom: 100px !important; /* Поднимаем кнопку чата еще выше */
 }
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 768px) {
+  /* На мобильных баннер сверху, возвращаем стандартные отступы для чата */
+  #jivo-iframe-container,
+  #jcb-container,
+  .jivo_chat_widget,
+  .jcb_widget {
+    bottom: 20px !important; /* Стандартный отступ снизу */
+  }
+
+  div[id*="jivo"],
+  div[class*="jivo"],
+  div[id*="jcb"],
+  div[class*="jcb"] {
+    bottom: 20px !important;
+  }
+
+  .jivo-button,
+  .jcb-button,
+  #jcb_button {
+    bottom: 20px !important; /* Стандартная позиция */
+  }
+}
