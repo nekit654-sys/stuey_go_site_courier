@@ -9,7 +9,6 @@ import GameButton from "@/components/GameButton";
 
 import WelcomeBanner from "@/components/WelcomeBanner";
 import SalaryBanner from "@/components/SalaryBanner";
-import CustomCursor from "@/components/CustomCursor";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -63,9 +62,6 @@ const App = () => {
           
           {/* Приветственный баннер */}
           {showBanner && <WelcomeBanner onClose={handleCloseBanner} />}
-
-          {/* Кастомный курсор с пылью */}
-          <CustomCursor />
 
           {/* Магический эффект */}
           <div
