@@ -484,24 +484,24 @@ div[class*="jcb"] {
 
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
-  /* На мобильных поднимаем чат еще выше из-за полноширинного баннера */
+  /* На мобильных баннер теперь сверху, возвращаем стандартные отступы для чата */
   #jivo-iframe-container,
   #jcb-container,
   .jivo_chat_widget,
   .jcb_widget {
-    bottom: 80px !important; /* Больше отступ на мобильных */
+    bottom: 20px !important; /* Стандартный отступ снизу */
   }
 
   div[id*="jivo"],
   div[class*="jivo"],
   div[id*="jcb"],
   div[class*="jcb"] {
-    bottom: 80px !important;
+    bottom: 20px !important;
   }
 
   .jivo-button,
   .jcb-button,
   #jcb_button {
-    bottom: 100px !important; /* Еще выше на мобильных */
+    bottom: 20px !important; /* Стандартная позиция */
   }
 }
