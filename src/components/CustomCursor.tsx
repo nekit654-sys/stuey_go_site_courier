@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Particle {
   id: number;
@@ -6,62 +6,32 @@ interface Particle {
   y: number;
   opacity: number;
   size: number;
-  vx: number;
-  vy: number;
 }
 
 const CustomCursor = () => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const particleIdRef = useRef(0);
-  const lastParticleTime = useRef(0);
-  const animationRef = useRef<number>();
 
   useEffect(() => {
-    // Оптимизированная функция создания частиц
-    const createParticles = useCallback((x: number, y: number, count: number = 5) => {
-      const now = Date.now();
-      // Ограничиваем частоту создания частиц до ~100 FPS
-      if (now - lastParticleTime.current < 10) return;
-      
-      lastParticleTime.current = now;
-      
-      const newParticles: Particle[] = [];
-      for (let i = 0; i < count; i++) {
-        newParticles.push({
-          id: particleIdRef.current++,
-          x: x + (Math.random() - 0.5) * 8,
-          y: y + (Math.random() - 0.5) * 8,
-          opacity: 0.9,
-          size: Math.random() * 2.5 + 1.5,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
-        });
-      }
-      
-      setParticles(prev => {
-        const combined = [...prev, ...newParticles];
-        // Ограничиваем до 100 частиц
-        return combined.length > 100 ? combined.slice(-80) : combined;
-      });
-    }, []);
-
-    let rafId: number;
+    let particleId = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       const x = e.clientX;
       const y = e.clientY;
-      
-      // Используем requestAnimationFrame для плавности курсора
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        setCursorPosition({ x, y });
-        setIsVisible(true);
-      });
+      setCursorPosition({ x, y });
+      setIsVisible(true);
 
-      // Создаем больше частиц (5-8 за раз)
-      createParticles(x, y, Math.floor(Math.random() * 4) + 5);
+      // Создаем новую частицу
+      const newParticle: Particle = {
+        id: particleId++,
+        x,
+        y,
+        opacity: 1,
+        size: Math.random() * 4 + 2,
+      };
+
+      setParticles(prev => [...prev, newParticle]);
     };
 
     const handleMouseLeave = () => {
@@ -72,15 +42,24 @@ const CustomCursor = () => {
       setIsVisible(true);
     };
 
-    // Мобильные события с большим количеством частиц
+    // Мобильные события
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       if (touch) {
         const x = touch.clientX;
         const y = touch.clientY;
         
-        // Создаем взрыв частиц при касании
-        createParticles(x, y, 12);
+        // Создаем частицы при касании
+        for (let i = 0; i < 3; i++) {
+          const newParticle: Particle = {
+            id: particleId++,
+            x: x + (Math.random() - 0.5) * 20,
+            y: y + (Math.random() - 0.5) * 20,
+            opacity: 1,
+            size: Math.random() * 6 + 3,
+          };
+          setParticles(prev => [...prev, newParticle]);
+        }
       }
     };
 
@@ -90,8 +69,15 @@ const CustomCursor = () => {
         const x = touch.clientX;
         const y = touch.clientY;
         
-        // Создаем шлейф частиц при движении
-        createParticles(x, y, 8);
+        // Создаем частицы при движении пальца
+        const newParticle: Particle = {
+          id: particleId++,
+          x: x + (Math.random() - 0.5) * 15,
+          y: y + (Math.random() - 0.5) * 15,
+          opacity: 1,
+          size: Math.random() * 5 + 2,
+        };
+        setParticles(prev => [...prev, newParticle]);
       }
     };
 
@@ -107,48 +93,41 @@ const CustomCursor = () => {
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
-      cancelAnimationFrame(rafId);
     };
   }, []);
 
-  // Оптимизированная анимация частиц через RAF
+  // Анимация частиц
   useEffect(() => {
-    const animateParticles = () => {
+    const interval = setInterval(() => {
       setParticles(prev => prev
         .map(particle => ({
           ...particle,
-          x: particle.x + particle.vx,
-          y: particle.y + particle.vy,
-          opacity: particle.opacity - 0.015,
-          size: particle.size * 0.99,
-          vx: particle.vx * 0.99,
-          vy: particle.vy * 0.99,
+          opacity: particle.opacity - 0.02,
+          size: particle.size * 0.98,
         }))
-        .filter(particle => particle.opacity > 0.05)
+        .filter(particle => particle.opacity > 0)
       );
-      
-      animationRef.current = requestAnimationFrame(animateParticles);
-    };
+    }, 16);
 
-    animationRef.current = requestAnimationFrame(animateParticles);
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
+    return () => clearInterval(interval);
   }, []);
+
+  // Ограничиваем количество частиц
+  useEffect(() => {
+    if (particles.length > 50) {
+      setParticles(prev => prev.slice(-30));
+    }
+  }, [particles.length]);
 
   return (
     <>
       {/* Кастомный курсор для ПК */}
       <div 
-        className={`fixed top-0 left-0 pointer-events-none z-[9999] transition-opacity duration-200 hidden md:block ${
+        className={`fixed top-0 left-0 pointer-events-none z-[9999] transition-opacity duration-300 hidden md:block ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
-          transform: `translate3d(${cursorPosition.x - 10}px, ${cursorPosition.y - 10}px, 0)`,
-          willChange: 'transform',
+          transform: `translate(${cursorPosition.x - 10}px, ${cursorPosition.y - 10}px)`,
         }}
       >
         <div className="w-5 h-5 bg-yellow-400 rounded-full border-2 border-yellow-300 shadow-lg">
@@ -156,32 +135,29 @@ const CustomCursor = () => {
         </div>
       </div>
 
-      {/* Частицы пыли - оптимизированный рендер */}
-      <div className="fixed top-0 left-0 pointer-events-none z-[9998] w-full h-full overflow-hidden">
-        {particles.map(particle => (
-          <div
-            key={particle.id}
-            className="absolute bg-yellow-400 rounded-full"
-            style={{
-              transform: `translate3d(${particle.x}px, ${particle.y}px, 0)`,
-              opacity: particle.opacity,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              boxShadow: '0 0 4px rgba(251, 191, 36, 0.5)',
-              willChange: 'transform, opacity',
-            }}
-          />
-        ))}
-      </div>
+      {/* Частицы пыли */}
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className="fixed top-0 left-0 pointer-events-none z-[9998] bg-yellow-400 rounded-full"
+          style={{
+            transform: `translate(${particle.x}px, ${particle.y}px)`,
+            opacity: particle.opacity,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            boxShadow: '0 0 6px rgba(251, 191, 36, 0.6)',
+          }}
+        />
+      ))}
 
-      {/* Оптимизированные стили для скрытия курсора */}
+      {/* Глобальные стили для скрытия стандартного курсора */}
       <style>{`
         @media (min-width: 768px) {
           * {
             cursor: none !important;
           }
           
-          a, button, input, textarea, select, [role="button"] {
+          a, button, input, textarea, select {
             cursor: none !important;
           }
         }
