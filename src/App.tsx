@@ -18,6 +18,7 @@ import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
 import ChatWidgetStyles from "@/components/ChatWidgetStyles";
+import MobileChatController from "@/components/MobileChatController";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => {
           />
 
           <ChatWidgetStyles />
+          <MobileChatController />
 
           {/* Баннер зарплаты */}
           {showSalaryBanner && <SalaryBanner onClose={handleCloseSalaryBanner} />}
