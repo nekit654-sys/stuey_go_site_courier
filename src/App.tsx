@@ -19,7 +19,6 @@ import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
 import ChatWidgetStyles from "@/components/ChatWidgetStyles";
 import MobileChatController from "@/components/MobileChatController";
-import { MenuProvider } from "@/contexts/MenuContext";
 
 const queryClient = new QueryClient();
 
@@ -37,8 +36,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MenuProvider>
-        <TooltipProvider>
+      <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -78,7 +76,6 @@ const App = () => {
           />
         </BrowserRouter>
       </TooltipProvider>
-      </MenuProvider>
     </QueryClientProvider>
   );
 };

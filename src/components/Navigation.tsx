@@ -5,12 +5,11 @@ import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameButton from "@/components/GameButton";
 import IncomeCalculator from "@/components/IncomeCalculator";
-import { useMenu } from "@/contexts/MenuContext";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { isMenuOpen, setIsMenuOpen } = useMenu();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
 
