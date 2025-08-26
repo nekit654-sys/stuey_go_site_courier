@@ -8,6 +8,7 @@ interface Particle {
   vx: number;
   vy: number;
   life: number;
+  poolIndex?: number;
 }
 
 const CustomCursor = () => {
@@ -48,16 +49,24 @@ const CustomCursor = () => {
     };
   }, [createParticlePool]);
 
-  // Оптимизированная функция создания частиц
+  // Упрощенная функция создания частиц с индексацией
   const addParticles = useCallback((x: number, y: number, count: number = 8) => {
     const particles = particlesRef.current;
     const pool = particlePool.current;
     
     for (let i = 0; i < count && particles.length < 120; i++) {
-      const availableParticle = pool.find(p => p.style.display === 'none');
-      if (!availableParticle) continue;
+      // Находим свободный элемент в пуле
+      let poolIndex = -1;
+      for (let j = 0; j < pool.length; j++) {
+        if (pool[j].style.display === 'none') {
+          poolIndex = j;
+          break;
+        }
+      }
+      
+      if (poolIndex === -1) continue;
 
-      const particle: Particle = {
+      const particle: Particle & { poolIndex: number } = {
         x: x + (Math.random() - 0.5) * 12,
         y: y + (Math.random() - 0.5) * 12,
         opacity: 0.9,
@@ -65,15 +74,19 @@ const CustomCursor = () => {
         vx: (Math.random() - 0.5) * 0.8,
         vy: (Math.random() - 0.5) * 0.8,
         life: 1.0,
+        poolIndex,
       };
 
-      particles.push(particle);
+      particles.push(particle as Particle);
       
       // Настройка DOM элемента
-      availableParticle.style.display = 'block';
-      availableParticle.style.width = `${particle.size}px`;
-      availableParticle.style.height = `${particle.size}px`;
-      availableParticle.style.boxShadow = '0 0 3px rgba(251, 191, 36, 0.4)';
+      const domEl = pool[poolIndex];
+      domEl.style.display = 'block';
+      domEl.style.width = `${particle.size}px`;
+      domEl.style.height = `${particle.size}px`;
+      domEl.style.boxShadow = '0 0 3px rgba(251, 191, 36, 0.4)';
+      domEl.style.transform = `translate3d(${particle.x}px, ${particle.y}px, 0)`;
+      domEl.style.opacity = particle.opacity.toString();
     }
   }, []);
 
@@ -100,7 +113,7 @@ const CustomCursor = () => {
     
     // Обновляем частицы
     for (let i = particles.length - 1; i >= 0; i--) {
-      const particle = particles[i];
+      const particle = particles[i] as Particle & { poolIndex: number };
       
       // Обновляем позицию и свойства
       particle.x += particle.vx;
@@ -111,11 +124,8 @@ const CustomCursor = () => {
       particle.vx *= 0.995;
       particle.vy *= 0.995;
       
-      // Находим соответствующий DOM элемент
-      const domElement = pool.find((el, index) => 
-        el.style.display === 'block' && 
-        Math.abs(parseFloat(el.style.transform.split('(')[1]) - particle.x) < 1
-      );
+      // Получаем DOM элемент по индексу
+      const domElement = pool[particle.poolIndex];
       
       if (domElement) {
         if (particle.life <= 0) {
