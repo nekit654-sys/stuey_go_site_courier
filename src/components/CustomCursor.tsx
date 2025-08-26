@@ -6,6 +6,8 @@ interface Particle {
   y: number;
   opacity: number;
   size: number;
+  vx: number;
+  vy: number;
 }
 
 const CustomCursor = () => {
@@ -21,14 +23,16 @@ const CustomCursor = () => {
       setCursorPosition({ x, y });
       setIsVisible(true);
 
-      // Создаем новые частицы
-      for (let i = 0; i < 3; i++) {
+      // Создаем больше частиц с анимацией
+      for (let i = 0; i < 8; i++) {
         const newParticle: Particle = {
           id: particleId.current++,
-          x: x + (Math.random() - 0.5) * 10,
-          y: y + (Math.random() - 0.5) * 10,
-          opacity: 0.8,
-          size: Math.random() * 3 + 2,
+          x: x + (Math.random() - 0.5) * 15,
+          y: y + (Math.random() - 0.5) * 15,
+          opacity: 0.9,
+          size: Math.random() * 6 + 4,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
         };
 
         setParticles(prev => [...prev, newParticle]);
@@ -45,14 +49,16 @@ const CustomCursor = () => {
         const x = touch.clientX;
         const y = touch.clientY;
         
-        // Создаем частицы на мобильном
-        for (let i = 0; i < 5; i++) {
+        // Создаем больше частиц на мобильном
+        for (let i = 0; i < 12; i++) {
           const newParticle: Particle = {
             id: particleId.current++,
-            x: x + (Math.random() - 0.5) * 15,
-            y: y + (Math.random() - 0.5) * 15,
-            opacity: 0.8,
-            size: Math.random() * 4 + 2,
+            x: x + (Math.random() - 0.5) * 20,
+            y: y + (Math.random() - 0.5) * 20,
+            opacity: 0.9,
+            size: Math.random() * 8 + 5,
+            vx: (Math.random() - 0.5) * 3,
+            vy: (Math.random() - 0.5) * 3,
           };
 
           setParticles(prev => [...prev, newParticle]);
@@ -66,14 +72,16 @@ const CustomCursor = () => {
         const x = touch.clientX;
         const y = touch.clientY;
         
-        // Взрыв частиц при касании
-        for (let i = 0; i < 8; i++) {
+        // Большой взрыв частиц при касании
+        for (let i = 0; i < 20; i++) {
           const newParticle: Particle = {
             id: particleId.current++,
-            x: x + (Math.random() - 0.5) * 20,
-            y: y + (Math.random() - 0.5) * 20,
-            opacity: 0.9,
-            size: Math.random() * 5 + 3,
+            x: x + (Math.random() - 0.5) * 30,
+            y: y + (Math.random() - 0.5) * 30,
+            opacity: 1.0,
+            size: Math.random() * 10 + 6,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
           };
 
           setParticles(prev => [...prev, newParticle]);
@@ -96,26 +104,30 @@ const CustomCursor = () => {
     };
   }, []);
 
-  // Анимация исчезновения частиц
+  // Анимация движения и исчезновения частиц
   useEffect(() => {
     const interval = setInterval(() => {
       setParticles(prev => prev
         .map(particle => ({
           ...particle,
-          opacity: particle.opacity - 0.02,
-          size: particle.size * 0.99,
+          x: particle.x + particle.vx,
+          y: particle.y + particle.vy,
+          opacity: particle.opacity - 0.015,
+          size: particle.size * 0.995,
+          vx: particle.vx * 0.98,
+          vy: particle.vy * 0.98,
         }))
-        .filter(particle => particle.opacity > 0)
+        .filter(particle => particle.opacity > 0.1)
       );
-    }, 50);
+    }, 30);
 
     return () => clearInterval(interval);
   }, []);
 
   // Ограничиваем количество частиц
   useEffect(() => {
-    if (particles.length > 80) {
-      setParticles(prev => prev.slice(-50));
+    if (particles.length > 150) {
+      setParticles(prev => prev.slice(-100));
     }
   }, [particles.length]);
 
