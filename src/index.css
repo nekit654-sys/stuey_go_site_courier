@@ -457,13 +457,13 @@
   }
 }
 
-/* Стили для чата Jivo - устанавливаем z-index ниже баннера и поднимаем выше */
+/* Стили для чата Jivo - устанавливаем z-index ниже баннера */
 #jivo-iframe-container,
 #jcb-container,
 .jivo_chat_widget,
 .jcb_widget {
   z-index: 50 !important; /* Ниже чем у SalaryBanner (z-[60]) */
-  bottom: 60px !important; /* Поднимаем на высоту баннера + отступ */
+  bottom: 20px !important; /* Стандартная позиция на десктопе */
 }
 
 /* Дополнительная защита для всех элементов Jivo */
@@ -472,14 +472,14 @@ div[class*="jivo"],
 div[id*="jcb"],
 div[class*="jcb"] {
   z-index: 50 !important;
-  bottom: 60px !important;
+  bottom: 20px !important;
 }
 
 /* Специальные селекторы для кнопки чата */
 .jivo-button,
 .jcb-button,
 #jcb_button {
-  bottom: 80px !important; /* Поднимаем кнопку чата еще выше */
+  bottom: 20px !important; /* Стандартная позиция */
 }
 
 /* Адаптивные стили для мобильных устройств */
