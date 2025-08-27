@@ -18,6 +18,11 @@ const ChatWidgetStyles = () => {
           right: 20px !important;
           z-index: 40 !important;
         }
+        
+        /* При открытой игре понижаем z-index чата */
+        body.game-modal-open #jaicp-container {
+          z-index: 30 !important;
+        }
 
         /* Адаптация для мобильных */
         @media (max-width: 768px) {

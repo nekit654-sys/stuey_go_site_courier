@@ -46,13 +46,22 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   const toggleGame = () => {
     // Всегда открываем в модальном окне
-    setIsGameOpen(!isGameOpen);
-    onToggle(!isGameOpen);
+    const newGameState = !isGameOpen;
+    setIsGameOpen(newGameState);
+    onToggle(newGameState);
+    
+    // Добавляем/убираем класс для управления z-index чата
+    if (newGameState) {
+      document.body.classList.add('game-modal-open');
+    } else {
+      document.body.classList.remove('game-modal-open');
+    }
   };
 
   const closeGame = () => {
     setIsGameOpen(false);
     onToggle(false);
+    document.body.classList.remove('game-modal-open');
   };
 
   useEffect(() => {
@@ -63,7 +72,10 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      document.body.classList.remove('game-modal-open');
+    };
   }, []);
 
   return (

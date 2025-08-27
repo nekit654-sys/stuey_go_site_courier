@@ -1,28 +1,12 @@
 import { useEffect, useState } from "react";
 
 const MobileChatController = () => {
-  const [showChat, setShowChat] = useState(false);
+  const [showChat, setShowChat] = useState(true); // Показываем сразу
 
   useEffect(() => {
     const handleScroll = () => {
-      // Проверяем, что мы на мобильном устройстве
-      if (window.innerWidth > 768) {
-        setShowChat(true);
-        return;
-      }
-
-      // Находим героя секцию
-      const heroSection = document.querySelector('section[style*="background-image"]');
-      if (!heroSection) {
-        setShowChat(true);
-        return;
-      }
-
-      // Получаем нижнюю границу героя секции
-      const heroBottom = heroSection.getBoundingClientRect().bottom;
-      
-      // Показываем чат когда пользователь проскролил ниже героя
-      setShowChat(heroBottom < 0);
+      // На всех устройствах показываем чат
+      setShowChat(true);
     };
 
     // Проверяем при загрузке
