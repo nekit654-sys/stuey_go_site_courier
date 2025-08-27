@@ -17,11 +17,19 @@ const ChatWidgetStyles = () => {
           bottom: 20px !important;
           right: 20px !important;
           z-index: 40 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          transform: scale(1) !important;
+          transition: all 0.3s ease !important;
         }
         
-        /* При открытой игре понижаем z-index чата */
+        /* При открытой игре скрываем чат полностью */
         body.game-modal-open #jaicp-container {
-          z-index: 30 !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: scale(0.8) !important;
+          transition: all 0.3s ease !important;
         }
 
         /* Адаптация для мобильных */

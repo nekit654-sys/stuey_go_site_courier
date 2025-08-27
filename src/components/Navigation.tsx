@@ -181,8 +181,16 @@ const Navigation = () => {
             {/* Mobile Game Button */}
             <Button
               onClick={() => {
-                setIsGameOpen(!isGameOpen);
+                const newGameState = !isGameOpen;
+                setIsGameOpen(newGameState);
                 handleMenuItemClick();
+                
+                // Управляем классом body для скрытия чата
+                if (newGameState) {
+                  document.body.classList.add('game-modal-open');
+                } else {
+                  document.body.classList.remove('game-modal-open');
+                }
               }}
               className="
                 w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
@@ -203,7 +211,10 @@ const Navigation = () => {
           <div className="relative w-full max-w-6xl h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden">
             {/* Кнопка закрытия */}
             <button
-              onClick={() => setIsGameOpen(false)}
+              onClick={() => {
+                setIsGameOpen(false);
+                document.body.classList.remove('game-modal-open');
+              }}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
                          text-white rounded-full flex items-center justify-center 
                          transition-all duration-200 hover:scale-110"
