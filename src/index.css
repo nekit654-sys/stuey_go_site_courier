@@ -457,57 +457,16 @@
   }
 }
 
-/* Стили для чата Jivo - устанавливаем z-index ниже баннера и поднимаем выше */
-#jivo-iframe-container,
-#jcb-container,
-.jivo_chat_widget,
-.jcb_widget {
-  z-index: 50 !important; /* Ниже чем у SalaryBanner (z-[60]) */
-  bottom: 80px !important; /* Поднимаем выше баннера */
-  right: 20px !important; /* Фиксируем справа */
+/* Анимация задержки для WhatsApp кнопки */
+@keyframes animation-delay-150 {
+  0% {
+    animation-delay: 150ms;
+  }
+  100% {
+    animation-delay: 150ms;
+  }
 }
 
-/* Дополнительная защита для всех элементов Jivo */
-div[id*="jivo"],
-div[class*="jivo"],
-div[id*="jcb"],
-div[class*="jcb"] {
-  z-index: 50 !important;
-  bottom: 80px !important;
-  right: 20px !important;
-}
-
-/* Специальные селекторы для кнопки чата */
-.jivo-button,
-.jcb-button,
-#jcb_button {
-  bottom: 100px !important; /* Поднимаем кнопку чата еще выше */
-  right: 20px !important; /* Фиксируем справа */
-}
-
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 768px) {
-  /* На мобильных баннер сверху, возвращаем стандартные отступы для чата */
-  #jivo-iframe-container,
-  #jcb-container,
-  .jivo_chat_widget,
-  .jcb_widget {
-    bottom: 20px !important; /* Стандартный отступ снизу */
-    right: 20px !important; /* Фиксируем справа */
-  }
-
-  div[id*="jivo"],
-  div[class*="jivo"],
-  div[id*="jcb"],
-  div[class*="jcb"] {
-    bottom: 20px !important;
-    right: 20px !important;
-  }
-
-  .jivo-button,
-  .jcb-button,
-  #jcb_button {
-    bottom: 20px !important; /* Стандартная позиция */
-    right: 20px !important; /* Фиксируем справа */
-  }
+.animation-delay-150 {
+  animation-delay: 150ms;
 }

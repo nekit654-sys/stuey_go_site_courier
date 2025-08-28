@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 import WelcomeBanner from "@/components/WelcomeBanner";
 import SalaryBanner from "@/components/SalaryBanner";
@@ -17,7 +18,6 @@ import Culture from "./pages/Culture";
 import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
 import NotFound from "./pages/NotFound";
-import ChatWidgetStyles from "@/components/ChatWidgetStyles";
 
 const queryClient = new QueryClient();
 
@@ -54,8 +54,7 @@ const App = () => {
           <GameButton
             onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
           />
-
-          <ChatWidgetStyles />
+          <WhatsAppButton />
 
           {/* Баннер зарплаты */}
           {showSalaryBanner && <SalaryBanner onClose={handleCloseSalaryBanner} />}

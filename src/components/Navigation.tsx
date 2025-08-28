@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import GameButton from "@/components/GameButton";
 import IncomeCalculator from "@/components/IncomeCalculator";
 
 const Navigation = () => {
@@ -255,8 +254,7 @@ const Navigation = () => {
         </div>
       )}
       
-      {/* Game Component - только для плавающей кнопки */}
-      <GameButton onToggle={() => {}} />
+
     </nav>
   );
 };
