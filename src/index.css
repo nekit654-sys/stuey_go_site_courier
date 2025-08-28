@@ -470,3 +470,11 @@
 .animation-delay-150 {
   animation-delay: 150ms;
 }
+
+/* Скрытие WhatsApp кнопки при открытой игре */
+body.game-modal-open .whatsapp-button {
+  z-index: 40 !important;
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+  transition: all 0.3s ease !important;
+}

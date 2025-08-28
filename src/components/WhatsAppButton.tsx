@@ -25,6 +25,7 @@ const WhatsAppButton: React.FC = () => {
     <button
       onClick={handleWhatsAppClick}
       className={`
+        whatsapp-button
         fixed bottom-6 right-6 z-50
         w-16 h-16 bg-green-500 hover:bg-green-600
         rounded-full shadow-lg hover:shadow-xl
