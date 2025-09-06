@@ -78,7 +78,7 @@ const Navigation = () => {
               onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
               variant="outline"
               className="
-                border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-800
+                bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500 hover:text-black
                 font-medium px-4 py-2 rounded-full
                 transition-all duration-200 hover:scale-105
               "
