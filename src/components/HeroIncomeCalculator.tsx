@@ -5,6 +5,7 @@ import { useMagicEffect } from '@/hooks/useMagicEffect';
 const HeroIncomeCalculator = () => {
   const [days, setDays] = useState(15);
   const [hours, setHours] = useState(8);
+  const [referralBonus, setReferralBonus] = useState(false);
   const { triggerMagicEffect } = useMagicEffect();
 
   const referralLink = "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
@@ -15,16 +16,16 @@ const HeroIncomeCalculator = () => {
     });
   };
 
-  const calculateIncome = useCallback((daysValue: number, hoursValue: number) => {
+  const calculateIncome = useCallback((daysValue: number, hoursValue: number, withBonus: boolean) => {
     const maxIncome = 230000;
     const maxDays = 31;
     const maxHours = 12;
     
     const income = (daysValue / maxDays) * (hoursValue / maxHours) * maxIncome;
-    return Math.round(income);
+    return Math.round(income) + (withBonus ? 18000 : 0);
   }, []);
 
-  const income = calculateIncome(days, hours);
+  const income = calculateIncome(days, hours, referralBonus);
 
   return (
     <div className="backdrop-blur-md bg-white/10 border border-yellow-400/30 rounded-2xl p-8 shadow-xl ring-1 ring-white/10">
@@ -43,6 +44,23 @@ const HeroIncomeCalculator = () => {
           {income.toLocaleString('ru-RU')} ₽
         </div>
         <div className="text-gray-200">за выбранный период</div>
+      </div>
+
+      {/* Чекбокс бонуса за друга */}
+      <div className="mb-8">
+        <label className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200">
+          <input
+            type="checkbox"
+            checked={referralBonus}
+            onChange={(e) => setReferralBonus(e.target.checked)}
+            className="w-5 h-5 text-yellow-400 bg-white/10 border-yellow-400/50 rounded focus:ring-yellow-400 focus:ring-2"
+          />
+          <div className="flex items-center gap-2">
+            <Icon name="UserPlus" size={20} className="text-yellow-400" />
+            <span className="text-white font-medium">Привел друга</span>
+            <span className="text-yellow-400 font-bold">+18 000 ₽</span>
+          </div>
+        </label>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">

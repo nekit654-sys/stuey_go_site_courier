@@ -4,8 +4,9 @@ import Icon from '@/components/ui/icon';
 const IncomeCalculator = () => {
   const [days, setDays] = useState(15);
   const [hours, setHours] = useState(8);
+  const [referralBonus, setReferralBonus] = useState(false);
 
-  const calculateIncome = useCallback((daysValue: number, hoursValue: number) => {
+  const calculateIncome = useCallback((daysValue: number, hoursValue: number, withBonus: boolean) => {
     // Максимальная сумма 230000 при 31 дне и 12 часах
     const maxIncome = 230000;
     const maxDays = 31;
@@ -13,10 +14,10 @@ const IncomeCalculator = () => {
     
     // Вычисляем пропорциональный доход
     const income = (daysValue / maxDays) * (hoursValue / maxHours) * maxIncome;
-    return Math.round(income);
+    return Math.round(income) + (withBonus ? 18000 : 0);
   }, []);
 
-  const income = calculateIncome(days, hours);
+  const income = calculateIncome(days, hours, referralBonus);
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
@@ -35,6 +36,23 @@ const IncomeCalculator = () => {
           {income.toLocaleString('ru-RU')} ₽
         </div>
         <div className="text-sm text-gray-600">за выбранный период</div>
+      </div>
+
+      {/* Чекбокс бонуса за друга */}
+      <div className="mb-6">
+        <label className="flex items-center gap-3 cursor-pointer bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-all duration-200">
+          <input
+            type="checkbox"
+            checked={referralBonus}
+            onChange={(e) => setReferralBonus(e.target.checked)}
+            className="w-4 h-4 text-yellow-500 bg-white border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+          />
+          <div className="flex items-center gap-2">
+            <Icon name="UserPlus" size={16} className="text-yellow-500" />
+            <span className="text-gray-700 font-medium">Привел друга</span>
+            <span className="text-yellow-600 font-bold">+18 000 ₽</span>
+          </div>
+        </label>
       </div>
 
       {/* Ползунок дней */}
