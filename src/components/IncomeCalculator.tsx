@@ -49,7 +49,7 @@ const IncomeCalculator = () => {
           />
           <div className="flex items-center gap-2">
             <Icon name="UserPlus" size={16} className="text-yellow-500" />
-            <span className="text-gray-700 font-medium">Привел друга</span>
+            <span className="text-gray-700 font-medium">Приведи друга</span>
             <span className="text-yellow-600 font-bold">+18 000 ₽</span>
           </div>
         </label>
