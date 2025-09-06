@@ -57,7 +57,7 @@ const HeroIncomeCalculator = () => {
           />
           <div className="flex items-center gap-2">
             <Icon name="UserPlus" size={20} className="text-yellow-400" />
-            <span className="text-white font-medium">Привел друга</span>
+            <span className="text-white font-medium">Приведи друга</span>
             <span className="text-yellow-400 font-bold">+18 000 ₽</span>
           </div>
         </label>
