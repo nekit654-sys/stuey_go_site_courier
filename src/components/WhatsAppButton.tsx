@@ -3,6 +3,7 @@ import Icon from '@/components/ui/icon';
 
 const WhatsAppButton: React.FC = () => {
   const [isPulsing, setIsPulsing] = useState(false);
+  const [showBubble, setShowBubble] = useState(true);
 
   useEffect(() => {
     // Пульсация каждые 8 секунд
@@ -21,12 +22,32 @@ const WhatsAppButton: React.FC = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleBubbleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowBubble(false);
+  };
+
   return (
-    <button
+    <div className="fixed bottom-6 right-6 z-50">
+      {/* Текстовое облако */}
+      {showBubble && (
+        <div className="absolute -top-16 -left-24 animate-bounce">
+          <div 
+            className="relative bg-white text-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors whitespace-nowrap"
+            onClick={handleBubbleClick}
+          >
+            <span className="text-sm font-medium">Есть вопросы? Задавай!</span>
+            {/* Хвостик облака */}
+            <div className="absolute bottom-[-8px] right-6 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white"></div>
+            <div className="absolute bottom-[-7px] right-6 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-gray-200"></div>
+          </div>
+        </div>
+      )}
+
+      <button
       onClick={handleWhatsAppClick}
       className={`
         whatsapp-button
-        fixed bottom-6 right-6 z-50
         w-16 h-16 bg-green-500 hover:bg-green-600
         rounded-full shadow-lg hover:shadow-xl
         flex items-center justify-center
@@ -69,6 +90,7 @@ const WhatsAppButton: React.FC = () => {
         <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
       </div>
     </button>
+    </div>
   );
 };
 
