@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { useSound } from '@/hooks/useSound';
 
 const WhatsAppButton: React.FC = () => {
   const [isPulsing, setIsPulsing] = useState(false);
   const [showBubble, setShowBubble] = useState(true);
+  const { playSound } = useSound();
 
   useEffect(() => {
     // Пульсация каждые 8 секунд
@@ -16,6 +18,7 @@ const WhatsAppButton: React.FC = () => {
   }, []);
 
   const handleWhatsAppClick = () => {
+    playSound('notification');
     const phoneNumber = '79096597088';
     const message = encodeURIComponent('Привет! Хочу работать с вами!🚀');
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
@@ -24,6 +27,7 @@ const WhatsAppButton: React.FC = () => {
 
   const handleBubbleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    playSound('pop');
     setShowBubble(false);
   };
 
@@ -35,6 +39,7 @@ const WhatsAppButton: React.FC = () => {
           <div 
             className="relative bg-white text-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors whitespace-nowrap"
             onClick={handleBubbleClick}
+            onMouseEnter={() => playSound('hover')}
           >
             <span className="text-sm font-medium">Есть вопросы? Задавай!</span>
             {/* Хвостик облака */}
@@ -46,6 +51,7 @@ const WhatsAppButton: React.FC = () => {
 
       <button
       onClick={handleWhatsAppClick}
+      onMouseEnter={() => playSound('hover')}
       className={`
         whatsapp-button
         w-16 h-16 bg-green-500 hover:bg-green-600

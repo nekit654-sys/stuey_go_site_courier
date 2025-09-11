@@ -1,16 +1,19 @@
 import { useState, useCallback } from 'react';
 import Icon from '@/components/ui/icon';
 import { useMagicEffect } from '@/hooks/useMagicEffect';
+import { useSound } from '@/hooks/useSound';
 
 const HeroIncomeCalculator = () => {
   const [days, setDays] = useState(15);
   const [hours, setHours] = useState(8);
   const [referralBonus, setReferralBonus] = useState(false);
   const { triggerMagicEffect } = useMagicEffect();
+  const { playSound } = useSound();
 
   const referralLink = "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
 
   const handleMagicClick = (event: React.MouseEvent, type: string) => {
+    playSound('success');
     triggerMagicEffect(event, () => {
       window.open(referralLink, "_blank");
     });
@@ -48,11 +51,17 @@ const HeroIncomeCalculator = () => {
 
       {/* Чекбокс бонуса за друга */}
       <div className="mb-8">
-        <label className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200">
+        <label 
+          className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200"
+          onMouseEnter={() => playSound('hover')}
+        >
           <input
             type="checkbox"
             checked={referralBonus}
-            onChange={(e) => setReferralBonus(e.target.checked)}
+            onChange={(e) => {
+              playSound('click');
+              setReferralBonus(e.target.checked);
+            }}
             className="w-5 h-5 text-yellow-400 bg-white/10 border-yellow-400/50 rounded focus:ring-yellow-400 focus:ring-2"
           />
           <div className="flex items-center gap-2">
@@ -81,7 +90,10 @@ const HeroIncomeCalculator = () => {
               min="5"
               max="31"
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              onChange={(e) => {
+                playSound('beep');
+                setDays(Number(e.target.value));
+              }}
               className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
               style={{
                 background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${((days - 5) / (31 - 5)) * 100}%, rgba(255,255,255,0.2) ${((days - 5) / (31 - 5)) * 100}%, rgba(255,255,255,0.2) 100%)`
@@ -111,7 +123,10 @@ const HeroIncomeCalculator = () => {
               min="2"
               max="12"
               value={hours}
-              onChange={(e) => setHours(Number(e.target.value))}
+              onChange={(e) => {
+                playSound('beep');
+                setHours(Number(e.target.value));
+              }}
               className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
               style={{
                 background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${((hours - 2) / (12 - 2)) * 100}%, rgba(255,255,255,0.2) ${((hours - 2) / (12 - 2)) * 100}%, rgba(255,255,255,0.2) 100%)`
@@ -130,6 +145,7 @@ const HeroIncomeCalculator = () => {
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200 ease-out hover:scale-105 animate-bounce-sequence-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 shadow-lg hover:shadow-xl ring-1 ring-yellow-400/30 hover:ring-yellow-400/50"
           onClick={(e) => handleMagicClick(e, 'walking')}
+          onMouseEnter={() => playSound('hover')}
         >
           <Icon name="User" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Пешком</div>
@@ -138,6 +154,7 @@ const HeroIncomeCalculator = () => {
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200 ease-out hover:scale-105 animate-bounce-sequence-2 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 shadow-lg hover:shadow-xl ring-1 ring-yellow-400/30 hover:ring-yellow-400/50"
           onClick={(e) => handleMagicClick(e, 'bicycle')}
+          onMouseEnter={() => playSound('hover')}
         >
           <Icon name="Bike" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Велосипед</div>
@@ -146,6 +163,7 @@ const HeroIncomeCalculator = () => {
         <div 
           className="backdrop-blur-sm bg-white/5 border border-yellow-400/20 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200 ease-out hover:scale-105 animate-bounce-sequence-3 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-yellow-300/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 shadow-lg hover:shadow-xl ring-1 ring-yellow-400/30 hover:ring-yellow-400/50"
           onClick={(e) => handleMagicClick(e, 'car')}
+          onMouseEnter={() => playSound('hover')}
         >
           <Icon name="Car" size={24} className="text-yellow-400 mx-auto mb-2" />
           <div className="text-sm text-white font-medium">Автомобиль</div>
