@@ -38,8 +38,8 @@ const WhatsAppButton: React.FC = () => {
           >
             <span className="text-sm font-medium">Есть вопросы? Задавай!</span>
             {/* Хвостик облака */}
-            <div className="absolute bottom-[-8px] right-[7rem] w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white"></div>
-            <div className="absolute bottom-[-7px] right-[7rem] w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-gray-200"></div>
+            <div className="absolute bottom-[-8px] right-[5rem] w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white"></div>
+            <div className="absolute bottom-[-7px] right-[5rem] w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-gray-200"></div>
           </div>
         </div>
       )}
