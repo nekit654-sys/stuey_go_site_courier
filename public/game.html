@@ -1046,6 +1046,7 @@
           if (!shieldActive) {
             loseLife(1);
             showSpeechRandom(pedestrianPhrases);
+            playSound('hit');
           }
           p.elem.remove();
           pedestrians.splice(i, 1);
@@ -1061,6 +1062,7 @@
           if (!shieldActive) {
             loseLife(0.5);
             showSpeechRandom(pedestrianPhrases);
+            playSound('hit');
           }
           p.elem.remove();
           standingPeds.splice(i, 1);
@@ -1076,6 +1078,7 @@
           if (!shieldActive) {
             loseLife(1.5);
             showSpeechRandom(policePhrases);
+            playSound('hit');
           }
           p.elem.remove();
           policeStandings.splice(i, 1);
@@ -1091,6 +1094,7 @@
           if (!shieldActive) {
             loseLife(2);
             showSpeechRandom(policePhrases);
+            playSound('hit');
           }
           p.elem.remove();
           policeCars.splice(i, 1);
@@ -1143,8 +1147,10 @@
         if (isCollide(courierRect, r)) {
           if (b.type === '⚡️') {
             activateSpeedBoost();
+            playSound('bonus');
           } else if (b.type === '🛡️') {
             activateShield();
+            playSound('bonus');
           }
           b.elem.remove();
           bonuses.splice(i, 1);
@@ -1225,8 +1231,140 @@
     }, 7000);
   }
 
+  // Система звуков
+  let audioContext;
+  let backgroundMusicGain;
+  let backgroundMusicOscillator;
+  let isBackgroundMusicPlaying = false;
+  
+  const melody = [
+    523.25, // C5
+    659.25, // E5
+    783.99, // G5
+    659.25, // E5
+    698.46, // F5
+    659.25, // E5
+    587.33, // D5
+    523.25, // C5
+  ];
+  let currentNoteIndex = 0;
+  let nextNoteTime = 0;
+  let musicScheduler;
+  
+  function initAudioContext() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      backgroundMusicGain = audioContext.createGain();
+      backgroundMusicGain.connect(audioContext.destination);
+      backgroundMusicGain.gain.value = 0.1; // Тихая фоновая музыка
+    }
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }
+  
+  function createSound(frequency, duration, type = 'sine', volume = 0.3) {
+    if (!audioContext) initAudioContext();
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  }
+  
+  function playBackgroundMusic() {
+    if (!audioContext || isBackgroundMusicPlaying) return;
+    initAudioContext();
+    
+    isBackgroundMusicPlaying = true;
+    nextNoteTime = audioContext.currentTime;
+    currentNoteIndex = 0;
+    
+    function scheduleNote() {
+      if (!isBackgroundMusicPlaying) return;
+      
+      while (nextNoteTime < audioContext.currentTime + 0.1) {
+        const oscillator = audioContext.createOscillator();
+        const noteGain = audioContext.createGain();
+        
+        oscillator.connect(noteGain);
+        noteGain.connect(backgroundMusicGain);
+        
+        const frequency = melody[currentNoteIndex % melody.length];
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        noteGain.gain.setValueAtTime(0, nextNoteTime);
+        noteGain.gain.linearRampToValueAtTime(0.15, nextNoteTime + 0.05);
+        noteGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.4);
+        
+        oscillator.start(nextNoteTime);
+        oscillator.stop(nextNoteTime + 0.5);
+        
+        const secondsPerBeat = 60.0 / 120; // 120 BPM
+        nextNoteTime += secondsPerBeat;
+        currentNoteIndex++;
+      }
+      
+      if (isBackgroundMusicPlaying) {
+        musicScheduler = setTimeout(scheduleNote, 25);
+      }
+    }
+    
+    scheduleNote();
+  }
+  
+  function stopBackgroundMusic() {
+    isBackgroundMusicPlaying = false;
+    if (musicScheduler) {
+      clearTimeout(musicScheduler);
+      musicScheduler = null;
+    }
+  }
+  
   function playSound(name) {
-    // Можно добавить звуки
+    if (!audioContext) initAudioContext();
+    
+    try {
+      switch (name) {
+        case 'eat':
+          createSound(800, 0.15, 'square', 0.4);
+          setTimeout(() => createSound(1200, 0.1, 'sine', 0.3), 50);
+          break;
+        case 'medkit':
+          createSound(523, 0.2, 'sine', 0.4);
+          setTimeout(() => createSound(659, 0.2, 'sine', 0.4), 100);
+          setTimeout(() => createSound(784, 0.3, 'sine', 0.4), 200);
+          break;
+        case 'hit':
+          createSound(200, 0.3, 'sawtooth', 0.5);
+          break;
+        case 'gameOver':
+          createSound(440, 0.3, 'sawtooth', 0.6);
+          setTimeout(() => createSound(330, 0.3, 'sawtooth', 0.6), 300);
+          setTimeout(() => createSound(262, 0.5, 'sawtooth', 0.6), 600);
+          break;
+        case 'bonus':
+          createSound(1200, 0.1, 'sine', 0.4);
+          setTimeout(() => createSound(1600, 0.15, 'triangle', 0.3), 50);
+          break;
+        default:
+          createSound(440, 0.1, 'sine', 0.3);
+      }
+    } catch (error) {
+      console.warn('Sound playback failed:', error);
+    }
   }
 
   function startSpawning() {
@@ -1366,6 +1504,10 @@
     medkits = [];
     bonuses = [];
     policeCars = [];
+    
+    // Запускаем фоновую музыку
+    initAudioContext();
+    setTimeout(() => playBackgroundMusic(), 500);
 
     score = 0;
     lives = 3;
@@ -1404,6 +1546,7 @@
     cancelAnimationFrame(gameLoopId);
     stopSpawning();
     stopTimer();
+    stopBackgroundMusic();
     pedestrians.forEach(p => p.elem.remove());
     standingPeds.forEach(p => p.elem.remove());
     policeStandings.forEach(p => p.elem.remove());
@@ -1422,8 +1565,6 @@
     movingUp = false;
     movingDown = false;
     moveCooldown = 0;
-
-
   }
 
   function showGameOverAnimation() {
@@ -1448,6 +1589,8 @@
     if (gameOverFlag) return;
     gameOverFlag = true;
     stopGame();
+    stopBackgroundMusic();
+    playSound('gameOver');
 
     showGameOverAnimation();
   }

@@ -8,7 +8,10 @@ export type SoundType =
   | 'notification' 
   | 'whoosh'
   | 'pop'
-  | 'beep';
+  | 'beep'
+  | 'hit'
+  | 'gameOver'
+  | 'backgroundMusic';
 
 interface SoundMap {
   [key: string]: string;
@@ -79,6 +82,21 @@ const playComplexSound = async (type: SoundType): Promise<void> => {
       break;
     case 'beep':
       await createSound(1000, 0.1, 'square');
+      break;
+    case 'hit':
+      await createSound(1500, 0.1, 'triangle');
+      await new Promise(resolve => setTimeout(resolve, 20));
+      await createSound(2000, 0.05, 'square');
+      break;
+    case 'gameOver':
+      await createSound(440, 0.3, 'sawtooth');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await createSound(330, 0.3, 'sawtooth');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await createSound(262, 0.5, 'sawtooth');
+      break;
+    case 'backgroundMusic':
+      // Фоновая музыка будет воспроизводиться отдельно
       break;
     default:
       await createSound(440, 0.1);
