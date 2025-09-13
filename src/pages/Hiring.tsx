@@ -2,8 +2,10 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { useSound } from "@/hooks/useSound";
 
 const Hiring = () => {
+  const { playSound } = useSound();
   const steps = [
     {
       title: "Подача заявки",
@@ -34,6 +36,7 @@ const Hiring = () => {
   ];
 
   const handleStart = () => {
+    playSound('success');
     window.open(
       "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank",
       "_blank",
@@ -99,6 +102,7 @@ const Hiring = () => {
             </p>
             <Button
               onClick={handleStart}
+              onMouseEnter={() => playSound('hover')}
               className="bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full md:w-auto"
             >
               <Icon name="Rocket" size={18} className="mr-2 md:w-5 md:h-5" />
