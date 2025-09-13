@@ -172,9 +172,7 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Сноска */}
-      <div className="text-xs text-gray-400 text-center leading-relaxed border-t border-white/10 pt-4">
-        * Доход рассчитан при максимальных коэффициентах и может отличаться в зависимости от региона и условий работы
-      </div>
+      <div className="text-xs text-gray-400 text-center leading-relaxed border-t border-white/10 pt-4"></div>
 
       <style jsx>{`
         .slider::-webkit-slider-thumb {
