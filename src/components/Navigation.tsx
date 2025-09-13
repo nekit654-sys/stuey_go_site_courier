@@ -4,12 +4,10 @@ import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import IncomeCalculator from "@/components/IncomeCalculator";
-import { useSound } from "@/hooks/useSound";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { playSound } = useSound();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -22,7 +20,6 @@ const Navigation = () => {
   ];
 
   const handleMenuItemClick = () => {
-    playSound('click');
     if (isMobile) {
       setIsMenuOpen(false);
     }
@@ -49,7 +46,6 @@ const Navigation = () => {
                   variant={
                     location.pathname === item.path ? "default" : "ghost"
                   }
-                  onMouseEnter={() => playSound('hover')}
                   className={`
                     transition-all duration-200 hover:scale-105
                     ${
@@ -77,11 +73,7 @@ const Navigation = () => {
           {/* Calculator Button */}
           <div className="hidden md:block ml-4">
             <Button
-              onClick={() => {
-                playSound('pop');
-                setIsCalculatorOpen(!isCalculatorOpen);
-              }}
-              onMouseEnter={() => playSound('hover')}
+              onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
               variant="outline"
               className="
                 bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500 hover:text-black
@@ -97,11 +89,7 @@ const Navigation = () => {
           {/* Game Button */}
           <div className="hidden md:block ml-2">
             <Button
-              onClick={() => {
-                playSound('whoosh');
-                setIsGameOpen(!isGameOpen);
-              }}
-              onMouseEnter={() => playSound('hover')}
+              onClick={() => setIsGameOpen(!isGameOpen)}
               className="
                 bg-gradient-to-r from-orange-500 to-yellow-500 
                 text-white font-bold px-4 py-2 rounded-full
@@ -121,11 +109,7 @@ const Navigation = () => {
             <Button
               variant="ghost"
               className="text-white hover:bg-yellow-400/20 transition-all duration-200"
-              onClick={() => {
-                playSound('click');
-                setIsMenuOpen(!isMenuOpen);
-              }}
-              onMouseEnter={() => playSound('hover')}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
@@ -178,11 +162,9 @@ const Navigation = () => {
             {/* Mobile Calculator Button */}
             <Button
               onClick={() => {
-                playSound('pop');
                 setIsCalculatorOpen(!isCalculatorOpen);
                 handleMenuItemClick();
               }}
-              onMouseEnter={() => playSound('hover')}
               variant="outline"
               className="
                 w-full justify-start border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-800
@@ -196,7 +178,6 @@ const Navigation = () => {
             {/* Mobile Game Button */}
             <Button
               onClick={() => {
-                playSound('whoosh');
                 const newGameState = !isGameOpen;
                 setIsGameOpen(newGameState);
                 handleMenuItemClick();
@@ -208,7 +189,6 @@ const Navigation = () => {
                   document.body.classList.remove('game-modal-open');
                 }
               }}
-              onMouseEnter={() => playSound('hover')}
               className="
                 w-full justify-start bg-gradient-to-r from-orange-500 to-yellow-500 
                 text-white font-bold transition-all duration-200 hover:scale-105
@@ -229,11 +209,9 @@ const Navigation = () => {
             {/* Кнопка закрытия */}
             <button
               onClick={() => {
-                playSound('click');
                 setIsGameOpen(false);
                 document.body.classList.remove('game-modal-open');
               }}
-              onMouseEnter={() => playSound('hover')}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
                          text-white rounded-full flex items-center justify-center 
                          transition-all duration-200 hover:scale-110"
@@ -258,11 +236,7 @@ const Navigation = () => {
           <div className="relative bg-white rounded-lg shadow-2xl overflow-hidden">
             {/* Кнопка закрытия */}
             <button
-              onClick={() => {
-                playSound('click');
-                setIsCalculatorOpen(false);
-              }}
-              onMouseEnter={() => playSound('hover')}
+              onClick={() => setIsCalculatorOpen(false)}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
                          text-white rounded-full flex items-center justify-center 
                          transition-all duration-200 hover:scale-110"
