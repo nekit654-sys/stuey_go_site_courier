@@ -51,7 +51,7 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Кнопки типов курьеров */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
         {(Object.keys(courierTypeSettings) as CourierType[]).map((type) => {
           const config = courierTypeSettings[type];
           const isActive = courierType === type;
@@ -64,7 +64,7 @@ const HeroIncomeCalculator = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className={`
-                backdrop-blur-sm border rounded-xl p-4 text-center transition-all duration-200 ease-out hover:scale-105
+                backdrop-blur-sm border rounded-lg sm:rounded-xl p-2 sm:p-4 text-center transition-all duration-200 ease-out hover:scale-105
                 ${isActive 
                   ? 'bg-yellow-400/30 border-yellow-400 ring-2 ring-yellow-400/50' 
                   : 'bg-white/5 border-yellow-400/20 hover:bg-white/10 hover:border-yellow-400/40'
@@ -73,14 +73,14 @@ const HeroIncomeCalculator = () => {
             >
               <Icon 
                 name={config.icon as any} 
-                size={28} 
-                className={isActive ? 'text-yellow-400 mx-auto mb-2' : 'text-gray-300 mx-auto mb-2'} 
+                size={20} 
+                className={`${isActive ? 'text-yellow-400' : 'text-gray-300'} mx-auto mb-1 sm:mb-2 sm:w-7 sm:h-7`} 
               />
-              <div className={`text-sm font-medium ${isActive ? 'text-white' : 'text-gray-300'}`}>
+              <div className={`text-xs sm:text-sm font-medium ${isActive ? 'text-white' : 'text-gray-300'} leading-tight`}>
                 {config.label}
               </div>
-              <div className="text-xs text-yellow-400 font-semibold mt-1">
-                до {config.maxIncome.toLocaleString('ru-RU')} ₽
+              <div className="text-[10px] sm:text-xs text-yellow-400 font-semibold mt-0.5 sm:mt-1 leading-tight">
+                до {(config.maxIncome / 1000).toFixed(0)}к ₽
               </div>
             </button>
           );
