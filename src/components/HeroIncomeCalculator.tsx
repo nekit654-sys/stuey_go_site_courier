@@ -23,9 +23,9 @@ const HeroIncomeCalculator = () => {
   };
 
   const courierTypeSettings = {
-    walking: { maxIncome: 140000, label: 'Пеший курьер', icon: 'User' },
-    bicycle: { maxIncome: 170000, label: 'Велокурьер', icon: 'Bike' },
-    car: { maxIncome: 230000, label: 'Авто курьер', icon: 'Car' }
+    walking: { maxIncome: 140000, label: 'Пеший', icon: 'User' },
+    bicycle: { maxIncome: 170000, label: 'Вело', icon: 'Bike' },
+    car: { maxIncome: 230000, label: 'Авто', icon: 'Car' }
   };
 
   const calculateIncome = useCallback((daysValue: number, hoursValue: number, withBonus: boolean, type: CourierType) => {
