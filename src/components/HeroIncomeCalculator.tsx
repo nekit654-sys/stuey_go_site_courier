@@ -76,7 +76,7 @@ const HeroIncomeCalculator = () => {
                 size={20} 
                 className={`${isActive ? 'text-yellow-400' : 'text-gray-300'} mx-auto mb-1 sm:mb-2 sm:w-7 sm:h-7`} 
               />
-              <div className={`text-xs sm:text-sm font-medium ${isActive ? 'text-white' : 'text-gray-300'} leading-tight`}>
+              <div className={`text-xs sm:text-sm font-medium ${isActive ? 'text-white' : 'text-gray-300'} leading-tight px-1 break-words text-center`}>
                 {config.label}
               </div>
               <div className="text-[10px] sm:text-xs text-yellow-400 font-semibold mt-0.5 sm:mt-1 leading-tight">
