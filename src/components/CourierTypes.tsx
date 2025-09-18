@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Icon from "@/components/ui/icon";
 import { useMagicEffect } from "@/hooks/useMagicEffect";
+import { useSound } from "@/hooks/useSound";
 
 const CourierTypes = () => {
   const referralLink =
     "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
+  const { playSound } = useSound();
 
   const courierTypes = [
     {
@@ -45,6 +47,7 @@ const CourierTypes = () => {
   const { triggerMagicEffect } = useMagicEffect();
 
   const handleMagicClick = (event: React.MouseEvent, type: string) => {
+    playSound('magic');
     triggerMagicEffect(event, () => {
       window.open(referralLink, "_blank");
     });
@@ -103,6 +106,7 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={(e) => handleMagicClick(e, courier.type)}
+                  onMouseEnter={() => playSound('hover')}
                   className={`w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4 px-6 text-lg 
                     shadow-lg hover:shadow-xl active:shadow-md
                     rounded-lg hover:scale-105 transition-all duration-200 ease-out

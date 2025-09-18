@@ -186,23 +186,7 @@ const HeroIncomeCalculator = () => {
         </div>
       </div>
 
-      {/* Кнопка регистрации */}
-      <div className="text-center mt-8">
-        <button
-          onClick={handleMagicClick}
-          onMouseEnter={() => playSound('hover')}
-          className="
-            backdrop-blur-sm bg-gradient-to-r from-yellow-400 to-orange-400 
-            text-black font-bold px-8 py-4 rounded-xl 
-            hover:from-yellow-300 hover:to-orange-300 
-            transition-all duration-200 hover:scale-105 
-            shadow-lg hover:shadow-xl ring-2 ring-yellow-400/50
-          "
-        >
-          <Icon name="UserPlus" size={20} className="mr-2" />
-          Зарегистрироваться курьером
-        </button>
-      </div>
+
 
       {/* Сноска */}
       <div className="text-xs text-gray-400 text-center leading-relaxed border-t border-white/10 pt-4"></div>
