@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import IncomeCalculator from "@/components/IncomeCalculator";
+
 import { useSound } from "@/hooks/useSound";
 
 const Navigation = () => {
@@ -12,7 +12,7 @@ const Navigation = () => {
   const { playSound } = useSound();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+
 
   const menuItems = [
     { path: "/", label: "Главная", icon: "Home" },
@@ -74,25 +74,7 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Calculator Button */}
-          <div className="hidden md:block ml-4">
-            <Button
-              onClick={() => {
-                playSound('pop');
-                setIsCalculatorOpen(!isCalculatorOpen);
-              }}
-              onMouseEnter={() => playSound('hover')}
-              variant="outline"
-              className="
-                bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500 hover:text-black
-                font-medium px-4 py-2 rounded-full
-                transition-all duration-200 hover:scale-105
-              "
-            >
-              <Icon name="Calculator" size={16} className="mr-2" />
-              Калькулятор доходности
-            </Button>
-          </div>
+
           
           {/* Game Button */}
           <div className="hidden md:block ml-2">
@@ -175,23 +157,7 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Calculator Button */}
-            <Button
-              onClick={() => {
-                playSound('pop');
-                setIsCalculatorOpen(!isCalculatorOpen);
-                handleMenuItemClick();
-              }}
-              onMouseEnter={() => playSound('hover')}
-              variant="outline"
-              className="
-                w-full justify-start border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-800
-                font-medium transition-all duration-200 hover:scale-105
-              "
-            >
-              <Icon name="Calculator" size={16} className="mr-2" />
-              Калькулятор доходности
-            </Button>
+
             
             {/* Mobile Game Button */}
             <Button
@@ -252,31 +218,7 @@ const Navigation = () => {
         </div>
       )}
       
-      {/* Модальное окно с калькулятором */}
-      {isCalculatorOpen && (
-        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="relative bg-white rounded-lg shadow-2xl overflow-hidden">
-            {/* Кнопка закрытия */}
-            <button
-              onClick={() => {
-                playSound('click');
-                setIsCalculatorOpen(false);
-              }}
-              onMouseEnter={() => playSound('hover')}
-              className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 hover:bg-red-600 
-                         text-white rounded-full flex items-center justify-center 
-                         transition-all duration-200 hover:scale-110"
-            >
-              <Icon name="X" size={16} />
-            </button>
 
-            {/* Калькулятор */}
-            <div className="p-4">
-              <IncomeCalculator />
-            </div>
-          </div>
-        </div>
-      )}
       
 
     </nav>
