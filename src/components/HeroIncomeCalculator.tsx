@@ -188,8 +188,7 @@ const HeroIncomeCalculator = () => {
 
 
 
-      {/* Сноска */}
-      <div className="text-xs text-gray-400 text-center leading-relaxed border-t border-white/10 pt-4"></div>
+
 
       <style jsx>{`
         .slider::-webkit-slider-thumb {
