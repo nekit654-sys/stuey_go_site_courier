@@ -26,7 +26,7 @@ const HeroSection = () => {
       className="relative bg-cover bg-center bg-no-repeat text-white px-6 border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
         backgroundImage:
-          "url(https://cdn.poehali.dev/files/7cac183a-71f5-4b31-b8af-49ec249a6874.png)",
+          "url(https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg)",
       }}
     >
       {/* Градиентный оверлей с анимацией */}
