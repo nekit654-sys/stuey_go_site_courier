@@ -103,21 +103,28 @@ const FeedbackTab: React.FC = () => {
       {/* Закладка */}
       <div
         className={`fixed top-32 right-0 z-40 cursor-pointer transition-all duration-300 ${
-          isExpanded ? 'translate-x-0' : 'translate-x-12 hover:translate-x-8'
+          isExpanded ? 'translate-x-0' : '-translate-x-2 hover:translate-x-0'
         }`}
         onClick={handleTabClick}
       >
-        <div className="bg-gradient-to-l from-green-500 to-green-600 text-white px-6 py-4 rounded-l-lg shadow-lg transform -rotate-90 origin-bottom-right">
-          <div className="flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Gift" size={20} />
-            <span className="font-bold text-sm">3000₽ за 30 заказов</span>
+        <div className="bg-gradient-to-b from-green-500 to-green-600 text-white px-4 py-6 rounded-l-xl shadow-lg transform">
+          <div className="flex flex-col items-center gap-1 text-center">
+            <Icon name="Gift" size={24} className="text-yellow-300" />
+            <div className="text-xs font-bold leading-tight">
+              <div className="text-yellow-300">3000₽</div>
+              <div className="text-white">за 30</div>
+              <div className="text-white">заказов</div>
+            </div>
           </div>
         </div>
         
-        {/* Стрелка */}
-        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1">
-          <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-green-600"></div>
+        {/* Стрелка указатель */}
+        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-2">
+          <div className="w-0 h-0 border-t-[8px] border-b-[8px] border-r-[8px] border-t-transparent border-b-transparent border-r-green-600"></div>
         </div>
+        
+        {/* Анимированная подсветка */}
+        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/20 to-transparent rounded-l-xl animate-pulse"></div>
       </div>
 
       {/* Модальное окно */}
