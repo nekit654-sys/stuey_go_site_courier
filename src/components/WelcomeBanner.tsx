@@ -140,7 +140,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
 
           {/* Фон баннера */}
           <div
-            className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] bg-cover bg-center"
+            className="relative w-full h-80 sm:h-80 md:h-96 lg:h-[28rem] bg-cover bg-center"
             style={{
               backgroundImage: `url('https://cdn.poehali.dev/files/da2d6308-de5f-45ad-ae8d-3ed07b41fcd9.jpg')`,
             }}
@@ -186,24 +186,24 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             </div>
 
             {/* Диалоговое окно */}
-            <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 sm:bottom-36 sm:left-10 sm:transform-none md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
+            <div className="absolute bottom-32 left-6 sm:bottom-36 sm:left-10 md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
                 {/* Само диалоговое окно */}
-                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md mx-2 sm:mx-0">
-                  <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md">
+                  <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 leading-relaxed text-center sm:text-left">
+                  <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 leading-relaxed">
                     Даем{' '}
                     <span className="text-yellow-600 font-bold">3000 рублей</span>{' '}
                     от нас, за первые{' '}
                     <span className="text-yellow-600 font-bold">30 выполненных заказов!</span>
                   </p>
-                  <div className="mt-2 flex items-center gap-1 justify-center sm:justify-start">
+                  <div className="mt-2 flex items-center gap-1">
                     <Icon name="FileText" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">Нужно заполнить форму обратной связи!</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Нужно заполнить форму обратной связи!</span>
                   </div>
                 </div>
               </div>
