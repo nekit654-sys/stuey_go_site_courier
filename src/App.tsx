@@ -9,7 +9,7 @@ import GameButton from "@/components/GameButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 import WelcomeBanner from "@/components/WelcomeBanner";
-import SalaryBanner from "@/components/SalaryBanner";
+
 import FeedbackTab from "@/components/FeedbackTab";
 
 import Index from "./pages/Index";
@@ -24,15 +24,13 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showBanner, setShowBanner] = useState(true);
-  const [showSalaryBanner, setShowSalaryBanner] = useState(true);
+
 
   const handleCloseBanner = () => {
     setShowBanner(false);
   };
 
-  const handleCloseSalaryBanner = () => {
-    setShowSalaryBanner(false);
-  };
+
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,8 +56,7 @@ const App = () => {
           <WhatsAppButton />
           <FeedbackTab />
 
-          {/* Баннер зарплаты */}
-          {showSalaryBanner && <SalaryBanner onClose={handleCloseSalaryBanner} />}
+
           
           {/* Приветственный баннер */}
           {showBanner && <WelcomeBanner onClose={handleCloseBanner} />}
