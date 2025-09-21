@@ -1238,14 +1238,35 @@
   let isBackgroundMusicPlaying = false;
   
   const melody = [
-    523.25, // C5
+    // Более энергичная и увлекательная мелодия для игры курьера
+    440.00, // A4
+    523.25, // C5  
     659.25, // E5
+    783.99, // G5
+    880.00, // A5
     783.99, // G5
     659.25, // E5
     698.46, // F5
     659.25, // E5
     587.33, // D5
     523.25, // C5
+    587.33, // D5
+    659.25, // E5
+    523.25, // C5
+    440.00, // A4
+    493.88, // B4
+  ];
+  
+  const bassLine = [
+    // Басовая линия для ритма
+    220.00, // A3
+    261.63, // C4
+    329.63, // E4
+    392.00, // G4
+    220.00, // A3
+    261.63, // C4
+    329.63, // E4
+    349.23, // F4
   ];
   let currentNoteIndex = 0;
   let nextNoteTime = 0;
@@ -1256,7 +1277,7 @@
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       backgroundMusicGain = audioContext.createGain();
       backgroundMusicGain.connect(audioContext.destination);
-      backgroundMusicGain.gain.value = 0.1; // Тихая фоновая музыка
+      backgroundMusicGain.gain.value = 0.15; // Чуть громче для большей вовлеченности
     }
     if (audioContext.state === 'suspended') {
       audioContext.resume();
@@ -1303,16 +1324,55 @@
         
         const frequency = melody[currentNoteIndex % melody.length];
         oscillator.frequency.value = frequency;
-        oscillator.type = 'sine';
+        oscillator.type = 'triangle'; // Более мягкий звук
         
         noteGain.gain.setValueAtTime(0, nextNoteTime);
-        noteGain.gain.linearRampToValueAtTime(0.15, nextNoteTime + 0.05);
+        noteGain.gain.linearRampToValueAtTime(0.12, nextNoteTime + 0.05);
         noteGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.4);
         
         oscillator.start(nextNoteTime);
         oscillator.stop(nextNoteTime + 0.5);
         
-        const secondsPerBeat = 60.0 / 120; // 120 BPM
+        // Добавляем гармонию (октава выше)
+        if (currentNoteIndex % 2 === 0) {
+          const harmonyOsc = audioContext.createOscillator();
+          const harmonyGain = audioContext.createGain();
+          
+          harmonyOsc.connect(harmonyGain);
+          harmonyGain.connect(backgroundMusicGain);
+          
+          harmonyOsc.frequency.value = frequency * 2; // Октава выше
+          harmonyOsc.type = 'sine';
+          
+          harmonyGain.gain.setValueAtTime(0, nextNoteTime);
+          harmonyGain.gain.linearRampToValueAtTime(0.06, nextNoteTime + 0.05);
+          harmonyGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.3);
+          
+          harmonyOsc.start(nextNoteTime);
+          harmonyOsc.stop(nextNoteTime + 0.4);
+        }
+        
+        // Добавляем басовую линию каждые 4 ноты
+        if (currentNoteIndex % 4 === 0) {
+          const bassOsc = audioContext.createOscillator();
+          const bassGain = audioContext.createGain();
+          
+          bassOsc.connect(bassGain);
+          bassGain.connect(backgroundMusicGain);
+          
+          const bassNote = bassLine[Math.floor(currentNoteIndex / 4) % bassLine.length];
+          bassOsc.frequency.value = bassNote;
+          bassOsc.type = 'square';
+          
+          bassGain.gain.setValueAtTime(0, nextNoteTime);
+          bassGain.gain.linearRampToValueAtTime(0.08, nextNoteTime + 0.02);
+          bassGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.6);
+          
+          bassOsc.start(nextNoteTime);
+          bassOsc.stop(nextNoteTime + 0.7);
+        }
+        
+        const secondsPerBeat = 60.0 / 140; // 140 BPM - более быстрый темп
         nextNoteTime += secondsPerBeat;
         currentNoteIndex++;
       }
