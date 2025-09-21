@@ -26,9 +26,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">🎉 Получи 3000 рублей за 30 заказов!</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Заполни форму и получи бонус за первую неделю работы
-            </p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Выполни первые 30 заказов и заполни форму!</p>
           </div>
           <PayoutForm />
         </div>
