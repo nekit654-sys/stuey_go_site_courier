@@ -150,7 +150,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
             <iframe
               src="/game.html"
               className="w-full h-full border-0"
-              title="Игра Приключения курьера Stuey.Go"
+              title="Приключения курьера"
               allow="fullscreen"
               ref={(iframe) => {
                 if (iframe) {
