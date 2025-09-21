@@ -37,9 +37,9 @@ const HeroSection = () => {
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
-      <div className="relative max-w-5xl mx-auto text-center">
+      <div className="relative max-w-6xl mx-auto text-center">
         {/* Главный контент */}
-        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2.5 py-[30px]">
+        <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-6 sm:p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-bold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl">
             <span className="text-white">Ищете работу</span> <br />
             <span className="text-white">со свободой и</span> <br />
