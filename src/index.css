@@ -7,6 +7,17 @@
   overflow: hidden;
 }
 
+/* Скрываем все элементы с низким z-index когда игра открыта */
+.game-modal-open .fixed:not([class*="z-[999999]"]):not([class*="z-[1000000]"]) {
+  visibility: hidden;
+}
+
+/* Исключение для элементов игры */
+.game-modal-open .fixed[class*="z-[999999]"],
+.game-modal-open .fixed[class*="z-[1000000]"] {
+  visibility: visible;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
