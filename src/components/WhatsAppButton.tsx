@@ -4,7 +4,7 @@ import { useSound } from '@/hooks/useSound';
 
 const WhatsAppButton: React.FC = () => {
   const [isPulsing, setIsPulsing] = useState(false);
-  const [showBubble, setShowBubble] = useState(true);
+  const [showBubble, setShowBubble] = useState(false);
   const { playSound } = useSound();
 
   useEffect(() => {
