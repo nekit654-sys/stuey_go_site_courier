@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "Test feedback form submission",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "fullName": "Иван Иванов",
+        "city": "Москва", 
+        "phone": "+7(999)123-45-67"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "message": "string",
+        "id": "number"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test missing required fields",
+      "method": "POST", 
+      "path": "/",
+      "body": {
+        "fullName": "Иван Иванов"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

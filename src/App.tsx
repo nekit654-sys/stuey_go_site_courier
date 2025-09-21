@@ -10,6 +10,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 
 import WelcomeBanner from "@/components/WelcomeBanner";
 import SalaryBanner from "@/components/SalaryBanner";
+import FeedbackTab from "@/components/FeedbackTab";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -55,6 +56,7 @@ const App = () => {
             onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
           />
           <WhatsAppButton />
+          <FeedbackTab />
 
           {/* Баннер зарплаты */}
           {showSalaryBanner && <SalaryBanner onClose={handleCloseSalaryBanner} />}
