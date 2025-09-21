@@ -81,7 +81,17 @@ const Navigation = () => {
             <Button
               onClick={() => {
                 playSound('whoosh');
-                setIsGameOpen(!isGameOpen);
+                const newGameState = !isGameOpen;
+                setIsGameOpen(newGameState);
+                
+                // Блокируем скролл и скрываем другие элементы
+                if (newGameState) {
+                  document.body.style.overflow = 'hidden';
+                  document.body.classList.add('game-modal-open');
+                } else {
+                  document.body.style.overflow = '';
+                  document.body.classList.remove('game-modal-open');
+                }
               }}
               onMouseEnter={() => playSound('hover')}
               className="
@@ -167,10 +177,12 @@ const Navigation = () => {
                 setIsGameOpen(newGameState);
                 handleMenuItemClick();
                 
-                // Управляем классом body для скрытия чата
+                // Блокируем скролл и скрываем другие элементы
                 if (newGameState) {
+                  document.body.style.overflow = 'hidden';
                   document.body.classList.add('game-modal-open');
                 } else {
+                  document.body.style.overflow = '';
                   document.body.classList.remove('game-modal-open');
                 }
               }}
@@ -197,6 +209,7 @@ const Navigation = () => {
               onClick={() => {
                 playSound('click');
                 setIsGameOpen(false);
+                document.body.style.overflow = '';
                 document.body.classList.remove('game-modal-open');
               }}
               onMouseEnter={() => playSound('hover')}

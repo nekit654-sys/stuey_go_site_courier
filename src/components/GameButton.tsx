@@ -50,10 +50,12 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     setIsGameOpen(newGameState);
     onToggle(newGameState);
     
-    // Добавляем/убираем класс для управления z-index чата
+    // Блокируем скролл и скрываем другие элементы
     if (newGameState) {
+      document.body.style.overflow = 'hidden';
       document.body.classList.add('game-modal-open');
     } else {
+      document.body.style.overflow = '';
       document.body.classList.remove('game-modal-open');
     }
   };
@@ -61,6 +63,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   const closeGame = () => {
     setIsGameOpen(false);
     onToggle(false);
+    document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
   };
 
@@ -74,6 +77,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     window.addEventListener("message", handleMessage);
     return () => {
       window.removeEventListener("message", handleMessage);
+      document.body.style.overflow = '';
       document.body.classList.remove('game-modal-open');
     };
   }, []);
