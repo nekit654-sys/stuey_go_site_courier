@@ -316,6 +316,7 @@ const Admin = () => {
                       <TableHead>Имя</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Тема</TableHead>
+                      <TableHead>Файл</TableHead>
                       <TableHead>Статус</TableHead>
                       <TableHead>Дата</TableHead>
                       <TableHead>Действия</TableHead>
@@ -328,6 +329,13 @@ const Admin = () => {
                         <TableCell>{request.name}</TableCell>
                         <TableCell>{request.email}</TableCell>
                         <TableCell className="max-w-xs truncate">{request.subject}</TableCell>
+                        <TableCell>
+                          {request.attachment_url ? (
+                            <Icon name="Paperclip" className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Icon name="Minus" className="w-4 h-4 text-gray-400" />
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(request.status)}>
                             {getStatusText(request.status)}
@@ -428,17 +436,35 @@ const Admin = () => {
 
                 {selectedRequest.attachment_url && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Вложение</label>
+                    <label className="text-sm font-medium text-gray-700">Скриншот</label>
                     <div className="mt-1">
-                      <a
-                        href={selectedRequest.attachment_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                      >
-                        <Icon name="Paperclip" className="w-4 h-4" />
-                        {selectedRequest.attachment_name || 'Скачать файл'}
-                      </a>
+                      {selectedRequest.attachment_url.startsWith('data:image') ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={selectedRequest.attachment_url} 
+                            alt="Скриншот клиента" 
+                            className="max-w-full max-h-96 object-contain rounded-lg border"
+                            onClick={() => window.open(selectedRequest.attachment_url, '_blank')}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <p className="text-sm text-gray-600">
+                            {selectedRequest.attachment_name || 'screenshot.jpg'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Нажмите на изображение для увеличения
+                          </p>
+                        </div>
+                      ) : (
+                        <a
+                          href={selectedRequest.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                        >
+                          <Icon name="Paperclip" className="w-4 h-4" />
+                          {selectedRequest.attachment_name || 'Скачать файл'}
+                        </a>
+                      )}
                     </div>
                   </div>
                 )}
