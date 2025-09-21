@@ -186,24 +186,24 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             </div>
 
             {/* Диалоговое окно */}
-            <div className="absolute bottom-28 left-6 sm:bottom-36 sm:left-10 md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
+            <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 sm:bottom-36 sm:left-10 sm:transform-none md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
                 {/* Само диалоговое окно */}
-                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md mx-2 sm:mx-0">
+                  <div className="flex items-center justify-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 leading-relaxed">
+                  <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 leading-relaxed text-center sm:text-left">
                     Даем{' '}
                     <span className="text-yellow-600 font-bold">3000 рублей</span>{' '}
                     от нас, за первые{' '}
-                    <span className="text-yellow-600 font-bold">30 выполненных заказов</span>
+                    <span className="text-yellow-600 font-bold">30 выполненных заказов!</span>
                   </p>
-                  <div className="mt-2 flex items-center gap-1">
+                  <div className="mt-2 flex items-center gap-1 justify-center sm:justify-start">
                     <Icon name="FileText" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Нужно заполнить форму обратной связи</span>
+                    <span className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">Нужно заполнить форму обратной связи!</span>
                   </div>
                 </div>
               </div>
@@ -212,7 +212,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           
           {/* Мини-баннер регистрации */}
           <div className="text-black px-4 py-3 text-center border-t border-blue-600 bg-yellow-400">
-            <div className="font-semibold text-sm">📝 Нужно заполнить форму обратной связи</div>
+            <div className="font-semibold text-sm">📝 Нужно заполнить форму обратной связи!</div>
           </div>
         </div>
       </div>
