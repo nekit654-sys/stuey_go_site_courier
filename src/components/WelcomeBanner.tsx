@@ -142,7 +142,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           <div
             className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] bg-cover bg-center"
             style={{
-              backgroundImage: `url('https://cdn.poehali.dev/files/28a9effa-e6f7-4f93-a6c7-1b9484f076be.jpg')`,
+              backgroundImage: `url('https://cdn.poehali.dev/files/da2d6308-de5f-45ad-ae8d-3ed07b41fcd9.jpg')`,
             }}
           >
             {/* Затемнение для лучшей читаемости */}
@@ -196,12 +196,14 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
                   <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800 leading-relaxed">
-                    Получай бонусы за первые{' '}
-                    <span className="text-yellow-600 font-bold">10 заказов</span>!
+                    Даем{' '}
+                    <span className="text-yellow-600 font-bold">3000 рублей</span>{' '}
+                    от нас, за первые{' '}
+                    <span className="text-yellow-600 font-bold">30 выполненных заказов</span>
                   </p>
                   <div className="mt-2 flex items-center gap-1">
-                    <Icon name="Gift" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Начни зарабатывать уже сейчас!</span>
+                    <Icon name="FileText" size={16} className="text-yellow-500" />
+                    <span className="text-xs sm:text-sm text-gray-600">Нужно заполнить форму обратной связи</span>
                   </div>
                 </div>
               </div>
@@ -210,7 +212,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           
           {/* Мини-баннер регистрации */}
           <div className="text-black px-4 py-3 text-center border-t border-blue-600 bg-yellow-400">
-            <div className="font-semibold text-sm">📝 Регистрируйся до конца! Заполняй ФИО, город и номер телефона!</div>
+            <div className="font-semibold text-sm">📝 Нужно заполнить форму обратной связи</div>
           </div>
         </div>
       </div>
