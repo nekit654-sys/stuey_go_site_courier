@@ -121,6 +121,7 @@ const PayoutForm = () => {
         name: formData.fullName,
         email: '',
         phone: formData.phone,
+        city: formData.city,
         subject: 'Заявка на выплату 3000 рублей',
         message: `Город: ${formData.city}\nТелефон: ${formData.phone}\nЗаявка на получение выплаты 3000 рублей.`,
         attachment_data: screenshotBase64,

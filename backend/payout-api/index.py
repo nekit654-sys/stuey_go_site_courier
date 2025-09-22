@@ -21,7 +21,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Max-Age': '86400'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     # Connect to database
@@ -31,7 +32,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {
                 'statusCode': 500,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'error': 'Database configuration error'})
+                'body': json.dumps({'error': 'Database configuration error'}),
+                'isBase64Encoded': False
             }
         
         conn = psycopg2.connect(database_url)
@@ -41,41 +43,47 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             # Parse request body
             body_data = json.loads(event.get('body', '{}'))
             
-            # Extract data
+            # Extract data from form
             full_name = body_data.get('name', '').strip()
-            city = body_data.get('city', '').strip() 
             phone = body_data.get('phone', '').strip()
+            
+            # Try to get city directly, or parse from message
+            city = body_data.get('city', '').strip()
+            if not city:
+                # Get city from message field (backup)
+                message = body_data.get('message', '')
+                if 'Город:' in message:
+                    city_part = message.split('Город:')[1].split('\n')[0].strip()
+                    city = city_part
+            
             screenshot_base64 = body_data.get('attachment_data', '')
             screenshot_name = body_data.get('attachment_name', '')
             
             # Validation
-            if not full_name or not phone:
+            if not full_name or not phone or not city:
                 cursor.close()
                 conn.close()
                 return {
                     'statusCode': 400,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': 'Name and phone are required'})
+                    'body': json.dumps({'error': 'Name, phone and city are required'}),
+                    'isBase64Encoded': False
                 }
             
             # Insert request into database using simple query
-            subject = 'Заявка на выплату 3000 рублей'
-            message = f'Город: {city}\nТелефон: {phone}\nЗаявка на получение выплаты 3000 рублей за 30 заказов.'
-            
             # Escape single quotes for simple query
             full_name_escaped = full_name.replace("'", "''")
             phone_escaped = phone.replace("'", "''")
-            subject_escaped = subject.replace("'", "''")
-            message_escaped = message.replace("'", "''")
-            screenshot_name_escaped = screenshot_name.replace("'", "''") if screenshot_name else ''
+            city_escaped = city.replace("'", "''")
             
-            # Truncate base64 data to avoid too long values
-            attachment_url_truncated = screenshot_base64[:500] if screenshot_base64 else ''
+            # Store full base64 data as screenshot_url
+            screenshot_url = screenshot_base64 if screenshot_base64 else ''
+            screenshot_url_escaped = screenshot_url.replace("'", "''") if screenshot_url else ''
             
             insert_query = f"""
-                INSERT INTO t_p25272970_courier_button_site.client_requests 
-                (name, email, phone, subject, message, attachment_url, attachment_name, status)
-                VALUES ('{full_name_escaped}', '', '{phone_escaped}', '{subject_escaped}', '{message_escaped}', '{attachment_url_truncated}', '{screenshot_name_escaped}', 'new')
+                INSERT INTO t_p25272970_courier_button_site.client_bonuses 
+                (name, phone, city, screenshot_url, status)
+                VALUES ('{full_name_escaped}', '{phone_escaped}', '{city_escaped}', '{screenshot_url_escaped}', 'new')
             """
             
             cursor.execute(insert_query)
@@ -89,16 +97,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'success': True,
-                    'message': 'Payout request saved successfully'
-                })
+                    'message': 'Bonus request saved successfully'
+                }),
+                'isBase64Encoded': False
             }
         
         elif method == 'GET':
-            # Get all payout requests
+            # Get all bonus requests
             select_query = """
-                SELECT id, name, phone, subject, message, attachment_name, status, created_at
-                FROM t_p25272970_courier_button_site.client_requests
-                WHERE subject LIKE '%выплату%' OR subject LIKE '%3000%'
+                SELECT id, name, phone, city, screenshot_url, status, created_at, updated_at
+                FROM t_p25272970_courier_button_site.client_bonuses
                 ORDER BY created_at DESC
             """
             
@@ -111,11 +119,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'id': row[0],
                     'name': row[1],
                     'phone': row[2],
-                    'subject': row[3],
-                    'message': row[4],
-                    'attachment_name': row[5],
-                    'status': row[6],
-                    'created_at': row[7].isoformat() if row[7] else None
+                    'city': row[3],
+                    'screenshot_url': row[4],
+                    'status': row[5],
+                    'created_at': row[6].isoformat() if row[6] else None,
+                    'updated_at': row[7].isoformat() if row[7] else None
                 })
             
             cursor.close()
@@ -127,18 +135,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'success': True,
                     'requests': requests
-                })
+                }),
+                'isBase64Encoded': False
             }
             
     except Exception as error:
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': f'Database error: {str(error)}'})
+            'body': json.dumps({'error': f'Database error: {str(error)}'}),
+            'isBase64Encoded': False
         }
     
     return {
         'statusCode': 405,
         'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'error': 'Method not allowed'})
+        'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
     }
