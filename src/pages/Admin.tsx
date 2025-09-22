@@ -43,7 +43,7 @@ const Admin = () => {
     total: 0,
     pages: 0
   });
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [adminToken, setAdminToken] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
@@ -86,13 +86,21 @@ const Admin = () => {
 
       const data = await response.json();
       console.log('API Response data:', data);
-      setRequests(data.requests || []);
+      
+      let filteredRequests = data.requests || [];
+      
+      // Применяем фильтр по статусу если он выбран
+      if (status && status !== 'all') {
+        filteredRequests = filteredRequests.filter((req: ClientRequest) => req.status === status);
+      }
+      
+      setRequests(filteredRequests);
       
       // Обновляем пагинацию для совместимости
       setPagination({
         page: 1,
         limit: 20,
-        total: data.requests ? data.requests.length : 0,
+        total: filteredRequests.length,
         pages: 1
       });
     } catch (error) {
@@ -286,7 +294,7 @@ const Admin = () => {
                 <SelectValue placeholder="Фильтр по статусу" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все статусы</SelectItem>
+                <SelectItem value="all">Все статусы</SelectItem>
                 <SelectItem value="new">Новые</SelectItem>
                 <SelectItem value="in_progress">В работе</SelectItem>
                 <SelectItem value="completed">Завершенные</SelectItem>
