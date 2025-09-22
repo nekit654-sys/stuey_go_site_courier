@@ -47,7 +47,7 @@ const Admin: React.FC = () => {
 
   const checkTokenValidity = async (token: string) => {
     try {
-      const response = await fetch('https://functions.poehali.dev/11c145d7-7d03-48ea-a061-b9f7b155196b', {
+      const response = await fetch('https://functions.poehali.dev/558e1ba4-9861-4d8f-b7f9-51e3e9ad04a2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ const Admin: React.FC = () => {
       const token = localStorage.getItem('adminToken');
       const username = localStorage.getItem('adminUsername') || 'admin';
       
-      const response = await fetch('https://functions.poehali.dev/11c145d7-7d03-48ea-a061-b9f7b155196b', {
+      const response = await fetch('https://functions.poehali.dev/558e1ba4-9861-4d8f-b7f9-51e3e9ad04a2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

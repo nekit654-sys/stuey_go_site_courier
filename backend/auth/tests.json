@@ -6,7 +6,7 @@
       "body": {
         "action": "login",
         "username": "admin",
-        "password": "admin123"
+        "password": "admin654654"
       },
       "expectedStatus": 200,
       "expectedBody": {
