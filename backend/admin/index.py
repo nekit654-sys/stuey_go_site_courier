@@ -26,10 +26,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'body': ''
         }
     
-    # Проверка админского токена (простая защита)
+    # Проверка админского токена (новая система авторизации)
+    def verify_token(token: str) -> bool:
+        try:
+            import time
+            parts = token.split('.')
+            if len(parts) != 2:
+                return False
+            
+            payload = json.loads(parts[1])
+            return payload.get('exp', 0) > time.time() and payload.get('admin', False)
+        except:
+            return False
+    
     headers = event.get('headers', {})
-    admin_token = headers.get('X-Admin-Token') or headers.get('x-admin-token')
-    if admin_token != 'courier-admin-2024':
+    auth_token = headers.get('X-Auth-Token') or headers.get('x-auth-token')
+    if not auth_token or not verify_token(auth_token):
         return {
             'statusCode': 401,
             'headers': {
@@ -53,12 +65,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             request_id = params.get('id')
             
             if request_id:
-                # Получение конкретной заявки
+                # Получение конкретной заявки из новой таблицы
                 cursor.execute("""
-                    SELECT id, name, email, phone, subject, message, 
-                           attachment_url, attachment_name, status, 
+                    SELECT id, name, phone, city, screenshot_url, status, 
                            created_at, updated_at
-                    FROM client_requests 
+                    FROM client_bonuses 
                     WHERE id = %s
                 """, (request_id,))
                 
@@ -76,15 +87,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 request_data = {
                     'id': row[0],
                     'name': row[1],
-                    'email': row[2],
-                    'phone': row[3],
-                    'subject': row[4],
-                    'message': row[5],
-                    'attachment_url': row[6],
-                    'attachment_name': row[7],
-                    'status': row[8],
-                    'created_at': row[9].isoformat() if row[9] else None,
-                    'updated_at': row[10].isoformat() if row[10] else None
+                    'phone': row[2],
+                    'city': row[3],
+                    'screenshot_url': row[4],
+                    'status': row[5],
+                    'created_at': row[6].isoformat() if row[6] else None,
+                    'updated_at': row[7].isoformat() if row[7] else None
                 }
                 
                 return {
@@ -112,16 +120,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 # Подсчет общего количества
                 cursor.execute(f"""
-                    SELECT COUNT(*) FROM client_requests {where_clause}
+                    SELECT COUNT(*) FROM client_bonuses {where_clause}
                 """, query_params)
                 total_count = cursor.fetchone()[0]
                 
                 # Получение заявок с пагинацией
                 cursor.execute(f"""
-                    SELECT id, name, email, phone, subject, message, 
-                           attachment_url, attachment_name, status, 
+                    SELECT id, name, phone, city, screenshot_url, status, 
                            created_at, updated_at
-                    FROM client_requests 
+                    FROM client_bonuses 
                     {where_clause}
                     ORDER BY created_at DESC 
                     LIMIT %s OFFSET %s
@@ -134,15 +141,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     requests.append({
                         'id': row[0],
                         'name': row[1],
-                        'email': row[2],
-                        'phone': row[3],
-                        'subject': row[4],
-                        'message': row[5][:100] + '...' if len(row[5]) > 100 else row[5],  # Краткая версия для списка
-                        'attachment_url': row[6],
-                        'attachment_name': row[7],
-                        'status': row[8],
-                        'created_at': row[9].isoformat() if row[9] else None,
-                        'updated_at': row[10].isoformat() if row[10] else None
+                        'phone': row[2],
+                        'city': row[3],
+                        'screenshot_url': row[4],
+                        'status': row[5],
+                        'created_at': row[6].isoformat() if row[6] else None,
+                        'updated_at': row[7].isoformat() if row[7] else None
                     })
                 
                 return {
@@ -179,7 +183,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             cursor.execute("""
-                UPDATE client_requests 
+                UPDATE client_bonuses 
                 SET status = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
                 RETURNING id
@@ -220,7 +224,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'ID заявки обязателен'})
                 }
             
-            cursor.execute("DELETE FROM client_requests WHERE id = %s RETURNING id", (request_id,))
+            cursor.execute("DELETE FROM client_bonuses WHERE id = %s RETURNING id", (request_id,))
             
             if cursor.fetchone():
                 conn.commit()

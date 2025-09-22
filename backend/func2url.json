@@ -1,6 +1,6 @@
 {
+  "auth": "https://functions.poehali.dev/11c145d7-7d03-48ea-a061-b9f7b155196b",
   "payout-api": "https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd",
   "submit-request": "https://functions.poehali.dev/e8f3a578-7791-45b1-a628-c4c4dbd1d8d7",
-  "admin": "https://functions.poehali.dev/eee58231-f232-44d1-9c15-033c5dfcf87b",
   "feedback": "https://functions.poehali.dev/832188b4-e931-4e2a-82d1-aff925ea0476"
 }

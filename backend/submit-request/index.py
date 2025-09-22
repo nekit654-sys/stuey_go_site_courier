@@ -1,14 +1,27 @@
 import json
 import os
+import re
 import psycopg2
 import base64
 import uuid
 from typing import Dict, Any
 from datetime import datetime
 
+def extract_city_from_message(message: str) -> str:
+    """Извлекает город из сообщения"""
+    if not message:
+        return ''
+    
+    # Ищем паттерн "Город: название"
+    match = re.search(r'Город:\s*([^\n\r]+)', message.strip())
+    if match:
+        return match.group(1).strip()
+    
+    return ''
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    API для приема заявок клиентов с файлами
+    API для приема заявок на бонусы от клиентов
     Args: event - dict с httpMethod, body, headers
           context - объект с атрибутами: request_id, function_name
     Returns: HTTP response dict с результатом сохранения
@@ -25,7 +38,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
                 'Access-Control-Max-Age': '86400'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     if method != 'POST':
@@ -35,15 +49,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': 'Только POST запросы разрешены'})
+            'body': json.dumps({'error': 'Только POST запросы разрешены'}),
+            'isBase64Encoded': False
         }
     
     try:
         # Парсинг данных запроса
         body_data = json.loads(event.get('body', '{}'))
         
-        # Валидация обязательных полей
-        required_fields = ['name', 'subject', 'message']
+        # Валидация обязательных полей для бонусных заявок
+        required_fields = ['name', 'phone', 'message']
         for field in required_fields:
             if not body_data.get(field, '').strip():
                 return {
@@ -52,8 +67,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': f'Поле {field} обязательно'})
+                    'body': json.dumps({'error': f'Поле {field} обязательно'}),
+                    'isBase64Encoded': False
                 }
+        
+        # Извлекаем город из сообщения
+        city = extract_city_from_message(body_data.get('message', ''))
+        if not city:
+            city = 'Не указан'
         
         # Подключение к базе данных
         database_url = os.environ.get('DATABASE_URL')
@@ -92,23 +113,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': f'Ошибка обработки файла: {str(e)}'})
+                    'body': json.dumps({'error': f'Ошибка обработки файла: {str(e)}'}),
+                    'isBase64Encoded': False
                 }
         
-        # Сохранение заявки в базу данных
+        # Сохранение заявки в таблицу бонусов
         cursor.execute("""
-            INSERT INTO client_requests 
-            (name, email, phone, subject, message, attachment_url, attachment_name, status, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            INSERT INTO client_bonuses 
+            (name, phone, city, screenshot_url, status, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             RETURNING id
         """, (
             body_data.get('name'),
-            body_data.get('email', ''),
             body_data.get('phone', ''),
-            body_data.get('subject'),
-            body_data.get('message'),
+            city,
             attachment_url,
-            attachment_name,
             'new'
         ))
         
@@ -123,9 +142,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
             'body': json.dumps({
                 'success': True,
-                'message': 'Заявка успешно отправлена',
+                'message': 'Заявка на бонус успешно отправлена',
                 'request_id': request_id
-            })
+            }),
+            'isBase64Encoded': False
         }
         
     except json.JSONDecodeError:
@@ -135,7 +155,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': 'Некорректный JSON в теле запроса'})
+            'body': json.dumps({'error': 'Некорректный JSON в теле запроса'}),
+            'isBase64Encoded': False
         }
     
     except Exception as e:
@@ -145,7 +166,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'})
+            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
         }
     finally:
         if 'conn' in locals():
