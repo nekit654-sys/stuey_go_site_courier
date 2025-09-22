@@ -14,13 +14,16 @@ import { ru } from 'date-fns/locale';
 interface ClientRequest {
   id: number;
   name: string;
+  email: string;
   phone: string;
-  city: string;
+  subject: string;
+  message: string;
   attachment_url?: string;
   attachment_name?: string;
   status: string;
   created_at: string;
   updated_at: string;
+  city?: string; // Парсим из message
 }
 
 interface PaginationInfo {
@@ -47,6 +50,12 @@ const Admin = () => {
   const { toast } = useToast();
 
   const API_URL = 'https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd';
+
+  // Функция для извлечения города из сообщения
+  const extractCityFromMessage = (message: string): string => {
+    const cityMatch = message.match(/Город:\s*([^\n]*)/);
+    return cityMatch ? cityMatch[1].trim() : 'Не указан';
+  };
 
   const authenticate = () => {
     console.log('Authentication attempt with token:', adminToken);
@@ -86,6 +95,12 @@ const Admin = () => {
       console.log('API Response data:', data);
       
       let filteredRequests = data.requests || [];
+      
+      // Добавляем парсинг города из message для каждой заявки
+      filteredRequests = filteredRequests.map((req: ClientRequest) => ({
+        ...req,
+        city: extractCityFromMessage(req.message || '')
+      }));
       
       // Применяем фильтр по статусу если он выбран
       if (status && status !== 'all') {
@@ -286,7 +301,7 @@ const Admin = () => {
                         <TableCell className="font-medium">{request.id}</TableCell>
                         <TableCell>{request.name}</TableCell>
                         <TableCell>{request.phone}</TableCell>
-                        <TableCell>{request.city}</TableCell>
+                        <TableCell>{request.city || extractCityFromMessage(request.message || '')}</TableCell>
                         <TableCell>
                           {request.attachment_url ? (
                             <div className="flex items-center gap-2">
@@ -383,7 +398,7 @@ const Admin = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Город</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.city}</p>
+                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.city || extractCityFromMessage(selectedRequest.message || '')}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Статус</label>
@@ -414,13 +429,25 @@ const Admin = () => {
                     <label className="text-sm font-medium text-gray-700">Скриншот заказов</label>
                     <div className="mt-1">
                       <div className="space-y-2">
-                        <img 
-                          src={selectedRequest.attachment_url} 
-                          alt="Скриншот заказов курьера" 
-                          className="max-w-full max-h-96 object-contain rounded-lg border shadow-sm"
-                          onClick={() => window.open(selectedRequest.attachment_url, '_blank')}
-                          style={{ cursor: 'pointer' }}
-                        />
+                        <div className="border rounded-lg p-2 bg-gray-50">
+                          <img 
+                            src={selectedRequest.attachment_url} 
+                            alt="Скриншот заказов курьера" 
+                            className="max-w-full max-h-96 object-contain rounded-lg border shadow-sm mx-auto block"
+                            onClick={() => {
+                              const newWindow = window.open();
+                              if (newWindow) {
+                                newWindow.document.write(`<img src="${selectedRequest.attachment_url}" style="max-width:100%; max-height:100vh;" />`);
+                              }
+                            }}
+                            style={{ cursor: 'pointer' }}
+                            onError={(e) => {
+                              console.error('Error loading image:', selectedRequest.attachment_url);
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                            onLoad={() => console.log('Image loaded successfully')}
+                          />
+                        </div>
                         <p className="text-sm text-gray-600">
                           {selectedRequest.attachment_name || 'screenshot.jpg'}
                         </p>
