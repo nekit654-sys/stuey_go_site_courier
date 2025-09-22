@@ -22,11 +22,14 @@ const FeedbackTab: React.FC = () => {
   });
 
   const handleTabClick = () => {
-    setIsExpanded(true);
-    setTimeout(() => {
-      setIsModalOpen(true);
-      setIsExpanded(false);
-    }, 300);
+    // Прокрутка к форме заявки внизу страницы
+    const payoutSection = document.querySelector('[data-payout-form]');
+    if (payoutSection) {
+      payoutSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
   };
 
   const handleCloseModal = () => {

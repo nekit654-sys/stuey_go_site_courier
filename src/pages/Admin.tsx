@@ -48,7 +48,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
-  const API_URL = 'https://functions.poehali.dev/eee58231-f232-44d1-9c15-033c5dfcf87b';
+  const API_URL = 'https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd';
 
   const authenticate = () => {
     if (adminToken === 'courier-admin-2024') {
@@ -66,19 +66,10 @@ const Admin = () => {
   const loadRequests = async (page = 1, status = statusFilter) => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: pagination.limit.toString()
-      });
-      
-      if (status) {
-        params.append('status', status);
-      }
 
-      const response = await fetch(`${API_URL}?${params}`, {
+      const response = await fetch(API_URL, {
         method: 'GET',
         headers: {
-          'X-Admin-Token': adminToken,
           'Content-Type': 'application/json'
         }
       });
@@ -89,7 +80,14 @@ const Admin = () => {
 
       const data = await response.json();
       setRequests(data.requests || []);
-      setPagination(data.pagination || pagination);
+      
+      // Обновляем пагинацию для совместимости
+      setPagination({
+        page: 1,
+        limit: 20,
+        total: data.requests ? data.requests.length : 0,
+        pages: 1
+      });
     } catch (error) {
       toast({
         title: 'Ошибка',

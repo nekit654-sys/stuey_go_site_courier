@@ -128,7 +128,7 @@ const PayoutForm = () => {
         request_type: 'payout'
       };
 
-      const response = await fetch('https://functions.poehali.dev/e8f3a578-7791-45b1-a628-c4c4dbd1d8d7', {
+      const response = await fetch('https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
