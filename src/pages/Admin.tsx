@@ -51,10 +51,13 @@ const Admin = () => {
   const API_URL = 'https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd';
 
   const authenticate = () => {
+    console.log('Authentication attempt with token:', adminToken);
     if (adminToken === 'courier-admin-2024') {
+      console.log('Token is correct, setting authenticated');
       setIsAuthenticated(true);
       loadRequests();
     } else {
+      console.log('Token is incorrect');
       toast({
         title: 'Ошибка',
         description: 'Неверный токен доступа',
@@ -65,6 +68,7 @@ const Admin = () => {
 
   const loadRequests = async (page = 1, status = statusFilter) => {
     try {
+      console.log('Loading requests from API:', API_URL);
       setLoading(true);
 
       const response = await fetch(API_URL, {
@@ -74,11 +78,14 @@ const Admin = () => {
         }
       });
 
+      console.log('API Response status:', response.status);
+
       if (!response.ok) {
         throw new Error('Ошибка загрузки данных');
       }
 
       const data = await response.json();
+      console.log('API Response data:', data);
       setRequests(data.requests || []);
       
       // Обновляем пагинацию для совместимости
@@ -89,6 +96,7 @@ const Admin = () => {
         pages: 1
       });
     } catch (error) {
+      console.error('Error loading requests:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить заявки',
