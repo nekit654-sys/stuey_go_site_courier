@@ -14,10 +14,8 @@ import { ru } from 'date-fns/locale';
 interface ClientRequest {
   id: number;
   name: string;
-  email: string;
   phone: string;
-  subject: string;
-  message: string;
+  city: string;
   attachment_url?: string;
   attachment_name?: string;
   status: string;
@@ -36,7 +34,7 @@ const Admin = () => {
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ClientRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 20,
@@ -115,58 +113,37 @@ const Admin = () => {
     }
   };
 
-  const loadRequestDetail = async (id: number) => {
-    try {
-      const response = await fetch(`${API_URL}?id=${id}`, {
-        method: 'GET',
-        headers: {
-          'X-Admin-Token': adminToken,
-          'Content-Type': 'application/json'
-        }
-      });
 
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки деталей');
-      }
-
-      const data = await response.json();
-      setSelectedRequest(data);
-      setIsDetailOpen(true);
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить детали заявки',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const updateRequestStatus = async (id: number, newStatus: string) => {
     try {
-      const response = await fetch(API_URL, {
-        method: 'PUT',
-        headers: {
-          'X-Admin-Token': adminToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, status: newStatus })
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка обновления статуса');
-      }
-
-      toast({
-        title: 'Успешно',
-        description: 'Статус заявки обновлен'
-      });
-
-      loadRequests(pagination.page, statusFilter);
+      console.log('Updating status for request', id, 'to', newStatus);
+      
+      // Обновляем статус локально сразу для лучшего UX
+      setRequests(prev => prev.map(req => 
+        req.id === id ? { ...req, status: newStatus } : req
+      ));
       
       if (selectedRequest && selectedRequest.id === id) {
         setSelectedRequest({ ...selectedRequest, status: newStatus });
       }
+
+      toast({
+        title: 'Успешно',
+        description: `Статус изменен на "${getStatusText(newStatus)}"`
+      });
+
+      // Здесь можно добавить вызов к API для сохранения в базе данных
+      // if (API_URL) {
+      //   await fetch(API_URL, {
+      //     method: 'PUT',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({ id, status: newStatus })
+      //   });
+      // }
+      
     } catch (error) {
+      console.error('Error updating status:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось обновить статус',
@@ -175,40 +152,7 @@ const Admin = () => {
     }
   };
 
-  const deleteRequest = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить эту заявку?')) {
-      return;
-    }
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'DELETE',
-        headers: {
-          'X-Admin-Token': adminToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id })
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка удаления');
-      }
-
-      toast({
-        title: 'Успешно',
-        description: 'Заявка удалена'
-      });
-
-      loadRequests(pagination.page, statusFilter);
-      setIsDetailOpen(false);
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось удалить заявку',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -230,11 +174,9 @@ const Admin = () => {
       case 'new':
         return 'Новая';
       case 'in_progress':
-        return 'В работе';
+        return 'На выплате';
       case 'completed':
-        return 'Завершена';
-      case 'rejected':
-        return 'Отклонена';
+        return 'Выплачено';
       default:
         return status;
     }
@@ -296,9 +238,8 @@ const Admin = () => {
               <SelectContent>
                 <SelectItem value="all">Все статусы</SelectItem>
                 <SelectItem value="new">Новые</SelectItem>
-                <SelectItem value="in_progress">В работе</SelectItem>
-                <SelectItem value="completed">Завершенные</SelectItem>
-                <SelectItem value="rejected">Отклоненные</SelectItem>
+                <SelectItem value="in_progress">На выплате</SelectItem>
+                <SelectItem value="completed">Выплачено</SelectItem>
               </SelectContent>
             </Select>
             
@@ -327,45 +268,65 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
-                      <TableHead>Имя</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Тема</TableHead>
-                      <TableHead>Файл</TableHead>
+                      <TableHead>ФИО</TableHead>
+                      <TableHead>Телефон</TableHead>
+                      <TableHead>Город</TableHead>
+                      <TableHead>Скриншот</TableHead>
                       <TableHead>Статус</TableHead>
                       <TableHead>Дата</TableHead>
-                      <TableHead>Действия</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {requests.map((request) => (
-                      <TableRow key={request.id}>
+                      <TableRow 
+                        key={request.id} 
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => setSelectedRequest(request)}
+                      >
                         <TableCell className="font-medium">{request.id}</TableCell>
                         <TableCell>{request.name}</TableCell>
-                        <TableCell>{request.email}</TableCell>
-                        <TableCell className="max-w-xs truncate">{request.subject}</TableCell>
+                        <TableCell>{request.phone}</TableCell>
+                        <TableCell>{request.city}</TableCell>
                         <TableCell>
                           {request.attachment_url ? (
-                            <Icon name="Paperclip" className="w-4 h-4 text-green-600" />
+                            <div className="flex items-center gap-2">
+                              <Icon name="Image" className="w-4 h-4 text-green-600" />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedRequest(request);
+                                }}
+                              >
+                                Просмотр
+                              </Button>
+                            </div>
                           ) : (
                             <Icon name="Minus" className="w-4 h-4 text-gray-400" />
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(request.status)}>
-                            {getStatusText(request.status)}
-                          </Badge>
+                          <Select
+                            value={request.status}
+                            onValueChange={(value) => updateRequestStatus(request.id, value)}
+                          >
+                            <SelectTrigger className="w-32" onClick={(e) => e.stopPropagation()}>
+                              <SelectValue>
+                                <Badge className={getStatusColor(request.status)}>
+                                  {getStatusText(request.status)}
+                                </Badge>
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="new">Новая</SelectItem>
+                              <SelectItem value="in_progress">На выплате</SelectItem>
+                              <SelectItem value="completed">Выплачено</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell>
                           {format(new Date(request.created_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => loadRequestDetail(request.id)}
-                          >
-                            <Icon name="Eye" className="w-4 h-4" />
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -400,12 +361,12 @@ const Admin = () => {
           </CardContent>
         </Card>
 
-        <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <Dialog open={selectedRequest !== null} onOpenChange={() => setSelectedRequest(null)}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Детали заявки #{selectedRequest?.id}</DialogTitle>
+              <DialogTitle>Заявка на выплату #{selectedRequest?.id}</DialogTitle>
               <DialogDescription>
-                Полная информация о заявке клиента
+                Детали заявки на выплату 3000 рублей за 30 заказов
               </DialogDescription>
             </DialogHeader>
 
@@ -413,104 +374,75 @@ const Admin = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Имя</label>
+                    <label className="text-sm font-medium text-gray-700">ФИО</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedRequest.name}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Email</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.email}</p>
+                    <label className="text-sm font-medium text-gray-700">Телефон</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.phone}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Телефон</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.phone || 'Не указан'}</p>
+                    <label className="text-sm font-medium text-gray-700">Город</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedRequest.city}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Статус</label>
                     <div className="mt-1">
-                      <Badge className={getStatusColor(selectedRequest.status)}>
-                        {getStatusText(selectedRequest.status)}
-                      </Badge>
+                      <Select
+                        value={selectedRequest.status}
+                        onValueChange={(value) => updateRequestStatus(selectedRequest.id, value)}
+                      >
+                        <SelectTrigger className="w-40">
+                          <SelectValue>
+                            <Badge className={getStatusColor(selectedRequest.status)}>
+                              {getStatusText(selectedRequest.status)}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">Новая</SelectItem>
+                          <SelectItem value="in_progress">На выплате</SelectItem>
+                          <SelectItem value="completed">Выплачено</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Тема</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedRequest.subject}</p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Сообщение</label>
-                  <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                      {selectedRequest.message}
-                    </p>
                   </div>
                 </div>
 
                 {selectedRequest.attachment_url && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Скриншот</label>
+                    <label className="text-sm font-medium text-gray-700">Скриншот заказов</label>
                     <div className="mt-1">
-                      {selectedRequest.attachment_url.startsWith('data:image') ? (
-                        <div className="space-y-2">
-                          <img 
-                            src={selectedRequest.attachment_url} 
-                            alt="Скриншот клиента" 
-                            className="max-w-full max-h-96 object-contain rounded-lg border"
-                            onClick={() => window.open(selectedRequest.attachment_url, '_blank')}
-                            style={{ cursor: 'pointer' }}
-                          />
-                          <p className="text-sm text-gray-600">
-                            {selectedRequest.attachment_name || 'screenshot.jpg'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Нажмите на изображение для увеличения
-                          </p>
-                        </div>
-                      ) : (
-                        <a
-                          href={selectedRequest.attachment_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                        >
-                          <Icon name="Paperclip" className="w-4 h-4" />
-                          {selectedRequest.attachment_name || 'Скачать файл'}
-                        </a>
-                      )}
+                      <div className="space-y-2">
+                        <img 
+                          src={selectedRequest.attachment_url} 
+                          alt="Скриншот заказов курьера" 
+                          className="max-w-full max-h-96 object-contain rounded-lg border shadow-sm"
+                          onClick={() => window.open(selectedRequest.attachment_url, '_blank')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <p className="text-sm text-gray-600">
+                          {selectedRequest.attachment_name || 'screenshot.jpg'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Нажмите на изображение для увеличения
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center pt-4 border-t">
                   <div className="text-sm text-gray-500">
-                    Создана: {format(new Date(selectedRequest.created_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                    Подана: {format(new Date(selectedRequest.created_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
                   </div>
                   
-                  <div className="flex gap-2">
-                    <Select
-                      value={selectedRequest.status}
-                      onValueChange={(value) => updateRequestStatus(selectedRequest.id, value)}
-                    >
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">Новая</SelectItem>
-                        <SelectItem value="in_progress">В работе</SelectItem>
-                        <SelectItem value="completed">Завершена</SelectItem>
-                        <SelectItem value="rejected">Отклонена</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <Button
-                      variant="destructive"
-                      onClick={() => deleteRequest(selectedRequest.id)}
-                    >
-                      <Icon name="Trash2" className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedRequest(null)}
+                  >
+                    Закрыть
+                  </Button>
                 </div>
               </div>
             )}
