@@ -20,10 +20,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
+                'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token, X-Admin-Token',
                 'Access-Control-Max-Age': '86400'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     # Проверка админского токена (новая система авторизации)
@@ -48,7 +49,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': 'Unauthorized access'})
+            'body': json.dumps({'error': 'Unauthorized access'}),
+            'isBase64Encoded': False
         }
     
     try:
@@ -69,7 +71,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cursor.execute("""
                     SELECT id, name, phone, city, screenshot_url, status, 
                            created_at, updated_at
-                    FROM client_bonuses 
+                    FROM t_p25272970_courier_button_site.client_bonuses 
                     WHERE id = %s
                 """, (request_id,))
                 
@@ -81,7 +83,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             'Content-Type': 'application/json',
                             'Access-Control-Allow-Origin': '*'
                         },
-                        'body': json.dumps({'error': 'Заявка не найдена'})
+                        'body': json.dumps({'error': 'Заявка не найдена'}),
+                        'isBase64Encoded': False
                     }
                 
                 request_data = {
@@ -101,7 +104,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps(request_data)
+                    'body': json.dumps(request_data),
+                    'isBase64Encoded': False
                 }
             else:
                 # Получение списка всех заявок
@@ -120,7 +124,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 # Подсчет общего количества
                 cursor.execute(f"""
-                    SELECT COUNT(*) FROM client_bonuses {where_clause}
+                    SELECT COUNT(*) FROM t_p25272970_courier_button_site.client_bonuses {where_clause}
                 """, query_params)
                 total_count = cursor.fetchone()[0]
                 
@@ -128,7 +132,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cursor.execute(f"""
                     SELECT id, name, phone, city, screenshot_url, status, 
                            created_at, updated_at
-                    FROM client_bonuses 
+                    FROM t_p25272970_courier_button_site.client_bonuses 
                     {where_clause}
                     ORDER BY created_at DESC 
                     LIMIT %s OFFSET %s
@@ -163,7 +167,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             'total': total_count,
                             'pages': (total_count + limit - 1) // limit
                         }
-                    })
+                    }),
+                    'isBase64Encoded': False
                 }
         
         elif method == 'PUT':
@@ -179,11 +184,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'ID и статус обязательны'})
+                    'body': json.dumps({'error': 'ID и статус обязательны'}),
+                    'isBase64Encoded': False
                 }
             
             cursor.execute("""
-                UPDATE client_bonuses 
+                UPDATE t_p25272970_courier_button_site.client_bonuses 
                 SET status = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
                 RETURNING id
@@ -197,7 +203,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'success': True, 'message': 'Статус обновлен'})
+                    'body': json.dumps({'success': True, 'message': 'Статус обновлен'}),
+                    'isBase64Encoded': False
                 }
             else:
                 return {
@@ -206,7 +213,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'Заявка не найдена'})
+                    'body': json.dumps({'error': 'Заявка не найдена'}),
+                    'isBase64Encoded': False
                 }
         
         elif method == 'DELETE':
@@ -221,10 +229,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'ID заявки обязателен'})
+                    'body': json.dumps({'error': 'ID заявки обязателен'}),
+                    'isBase64Encoded': False
                 }
             
-            cursor.execute("DELETE FROM client_bonuses WHERE id = %s RETURNING id", (request_id,))
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.client_bonuses WHERE id = %s RETURNING id", (request_id,))
             
             if cursor.fetchone():
                 conn.commit()
@@ -234,7 +243,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'success': True, 'message': 'Заявка удалена'})
+                    'body': json.dumps({'success': True, 'message': 'Заявка удалена'}),
+                    'isBase64Encoded': False
                 }
             else:
                 return {
@@ -243,7 +253,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'Заявка не найдена'})
+                    'body': json.dumps({'error': 'Заявка не найдена'}),
+                    'isBase64Encoded': False
                 }
         
         return {
@@ -252,7 +263,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': 'Метод не поддерживается'})
+            'body': json.dumps({'error': 'Метод не поддерживается'}),
+            'isBase64Encoded': False
         }
         
     except Exception as e:
@@ -262,7 +274,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'})
+            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
         }
     finally:
         if 'conn' in locals():

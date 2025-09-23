@@ -79,7 +79,7 @@ const Admin: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/eee58231-f232-44d1-9c15-033c5dfcf87b', {
+      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
         method: 'GET',
         headers: {
           'X-Auth-Token': token || ''
@@ -120,7 +120,7 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/eee58231-f232-44d1-9c15-033c5dfcf87b', {
+      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/eee58231-f232-44d1-9c15-033c5dfcf87b', {
+      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
