@@ -1,6 +1,5 @@
 {
   "admin-new": "https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d",
-  "auth-simple": "https://functions.poehali.dev/558e1ba4-9861-4d8f-b7f9-51e3e9ad04a2",
   "payout-api": "https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd",
   "feedback": "https://functions.poehali.dev/832188b4-e931-4e2a-82d1-aff925ea0476"
 }

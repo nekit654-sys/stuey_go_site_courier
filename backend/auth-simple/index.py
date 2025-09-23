@@ -35,7 +35,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             username = body_data.get('username', '')
             password = body_data.get('password', '')
             
-            if username == 'admin' and password == 'admin654654':
+            if username == 'nekit654' and password == 'admin654654':
                 return {
                     'statusCode': 200,
                     'headers': headers,
