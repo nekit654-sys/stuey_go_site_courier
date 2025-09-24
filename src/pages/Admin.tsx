@@ -47,7 +47,7 @@ const Admin: React.FC = () => {
 
   const checkTokenValidity = async (token: string) => {
     try {
-      const response = await fetch('https://functions.poehali.dev/558e1ba4-9861-4d8f-b7f9-51e3e9ad04a2', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ const Admin: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'GET',
         headers: {
           'X-Auth-Token': token || ''
@@ -120,7 +120,7 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       
-      const response = await fetch('https://functions.poehali.dev/4f9d81d3-18ff-4b1d-a8dc-4df5292f8f8d', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ const Admin: React.FC = () => {
       const token = localStorage.getItem('adminToken');
       const username = localStorage.getItem('adminUsername') || 'admin';
       
-      const response = await fetch('https://functions.poehali.dev/558e1ba4-9861-4d8f-b7f9-51e3e9ad04a2', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

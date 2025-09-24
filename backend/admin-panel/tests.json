@@ -1,0 +1,16 @@
+{
+  "tests": [{
+    "name": "Test admin get payout requests",
+    "method": "GET",
+    "path": "/",
+    "headers": {
+      "X-Auth-Token": "fake.{\"admin\":true,\"exp\":9999999999}"
+    },
+    "expectedStatus": 200,
+    "expectedBody": {
+      "success": true,
+      "requests": "array"
+    },
+    "bodyMatcher": "partial"
+  }]
+}

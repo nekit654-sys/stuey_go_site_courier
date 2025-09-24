@@ -8,8 +8,7 @@
         "name": "Тест Тестов",
         "city": "Москва",
         "phone": "+7 999 123 45 67",
-        "attachment_data": "data:image/png;base64,test",
-        "attachment_name": "screenshot.png"
+        "attachment_data": "data:image/png;base64,test"
       },
       "expectedStatus": 200,
       "expectedBody": {

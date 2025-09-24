@@ -118,18 +118,14 @@ const PayoutForm = () => {
       const screenshotBase64 = await convertToBase64(formData.screenshot);
 
       const requestData = {
+        action: 'payout',
         name: formData.fullName,
-        email: '',
         phone: formData.phone,
         city: formData.city,
-        subject: 'Заявка на выплату 3000 рублей',
-        message: `Город: ${formData.city}\nТелефон: ${formData.phone}\nЗаявка на получение выплаты 3000 рублей.`,
-        attachment_data: screenshotBase64,
-        attachment_name: formData.screenshot.name,
-        request_type: 'payout'
+        attachment_data: screenshotBase64
       };
 
-      const response = await fetch('https://functions.poehali.dev/8a95bd9e-7193-4143-af53-2d6617d01ffd', {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
