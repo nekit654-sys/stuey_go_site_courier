@@ -25,6 +25,15 @@ const ScrollToTop = () => {
   }, []);
 
   const scrollToTop = () => {
+    // Воспроизводим звук клика с уменьшенной громкостью
+    try {
+      const audio = new Audio('/click.mp3');
+      audio.volume = 0.1;
+      audio.play().catch(() => {}); // Игнорируем ошибки
+    } catch (error) {
+      // Игнорируем ошибки звука
+    }
+    
     window.scrollTo({
       top: 0,
       behavior: "smooth",

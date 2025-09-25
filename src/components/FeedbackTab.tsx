@@ -22,6 +22,15 @@ const FeedbackTab: React.FC = () => {
   });
 
   const handleTabClick = () => {
+    // Воспроизводим звук клика с уменьшенной громкостью
+    try {
+      const audio = new Audio('/click.mp3');
+      audio.volume = 0.15; // Чуть громче для привлечения внимания
+      audio.play().catch(() => {}); // Игнорируем ошибки
+    } catch (error) {
+      // Игнорируем ошибки звука
+    }
+    
     // Прокрутка к форме заявки внизу страницы
     const payoutSection = document.querySelector('[data-payout-form]');
     if (payoutSection) {

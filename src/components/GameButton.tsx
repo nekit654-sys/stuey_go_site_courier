@@ -45,6 +45,15 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   }, []);
 
   const toggleGame = () => {
+    // Воспроизводим звук клика с уменьшенной громкостью
+    try {
+      const audio = new Audio('/click.mp3');
+      audio.volume = 0.1;
+      audio.play().catch(() => {}); // Игнорируем ошибки
+    } catch (error) {
+      // Игнорируем ошибки звука
+    }
+    
     // Всегда открываем в модальном окне
     const newGameState = !isGameOpen;
     setIsGameOpen(newGameState);

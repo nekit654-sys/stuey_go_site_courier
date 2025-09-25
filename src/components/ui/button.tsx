@@ -40,12 +40,29 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      // Воспроизводим звук нажатия с уменьшенной громкостью
+      try {
+        const audio = new Audio('/click.mp3');
+        audio.volume = 0.1; // Уменьшили громкость до 10%
+        audio.play().catch(() => {}); // Игнорируем ошибки
+      } catch (error) {
+        // Игнорируем ошибки звука
+      }
+      
+      if (onClick) {
+        onClick(e);
+      }
+    };
+    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={handleClick}
         {...props}
       />
     )
