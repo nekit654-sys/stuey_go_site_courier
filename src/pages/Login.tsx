@@ -24,6 +24,7 @@ const Login: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string>('');
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [stats, setStats] = useState({ total: 0, new: 0, approved: 0, rejected: 0 });
   const { toast } = useToast();
@@ -56,8 +57,9 @@ const Login: React.FC = () => {
       const data = await response.json();
       
       if (response.ok && data.success) {
+        setAuthToken(data.token);
         setIsAuthenticated(true);
-        loadRequests();
+        loadRequests(data.token);
         toast({
           title: 'Вход выполнен успешно',
           description: 'Добро пожаловать в админ-панель!',
@@ -80,13 +82,20 @@ const Login: React.FC = () => {
     }
   };
 
-  const loadRequests = async () => {
+  const loadRequests = async (token?: string) => {
+    const tokenToUse = token || authToken;
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab');
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        headers: {
+          'X-Auth-Token': tokenToUse
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setRequests(data.requests || []);
         setStats(data.stats || { total: 0, new: 0, approved: 0, rejected: 0 });
+      } else {
+        console.error('Ошибка загрузки заявок:', response.status);
       }
     } catch (error) {
       console.error('Ошибка загрузки заявок:', error);
@@ -99,6 +108,7 @@ const Login: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-Auth-Token': authToken
         },
         body: JSON.stringify({ id, status })
       });
@@ -126,6 +136,7 @@ const Login: React.FC = () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'X-Auth-Token': authToken
           },
           body: JSON.stringify({ id })
         });
@@ -230,7 +241,10 @@ const Login: React.FC = () => {
           </h1>
           <Button 
             variant="outline" 
-            onClick={() => setIsAuthenticated(false)}
+            onClick={() => {
+              setIsAuthenticated(false);
+              setAuthToken('');
+            }}
           >
             <Icon name="LogOut" size={16} className="mr-2" />
             Выйти

@@ -158,6 +158,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             conn = psycopg2.connect(os.environ['DATABASE_URL'])
             cur = conn.cursor()
             
+            # Получаем заявки
             cur.execute("""
                 SELECT id, name, phone, city, attachment_data, status, created_at, updated_at
                 FROM payout_requests 
@@ -178,6 +179,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'updated_at': row[7].isoformat() if row[7] else None
                 })
             
+            # Получаем статистику
+            cur.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status = 'new' THEN 1 END) as new,
+                    COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
+                    COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
+                FROM payout_requests
+            """)
+            
+            stats_row = cur.fetchone()
+            stats = {
+                'total': stats_row[0] if stats_row else 0,
+                'new': stats_row[1] if stats_row else 0,
+                'approved': stats_row[2] if stats_row else 0,
+                'rejected': stats_row[3] if stats_row else 0
+            }
+            
             cur.close()
             conn.close()
             
@@ -186,7 +205,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'headers': headers,
                 'body': json.dumps({
                     'success': True,
-                    'requests': requests
+                    'requests': requests,
+                    'stats': stats
                 }),
                 'isBase64Encoded': False
             }
