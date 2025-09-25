@@ -38,7 +38,7 @@ const Navigation = () => {
             <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
               <Icon name="Zap" size={18} className="text-gray-800" />
             </div>
-            <span className="text-lg font-bold text-white font-rubik whitespace-nowrap">Stuey.Go | Яндекс Еда</span>
+            <span className="text-lg font-bold text-white font-rubik whitespace-nowrap">Stuey Go | Яндекс Еда</span>
           </Link>
 
           {/* Desktop menu */}
