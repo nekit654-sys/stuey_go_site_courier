@@ -18,7 +18,7 @@ import Hiring from "./pages/Hiring";
 import Culture from "./pages/Culture";
 import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
-import Admin from "./pages/Admin";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,7 +47,7 @@ const App = () => {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/contacts" element={<Contacts />} />
 
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/login" element={<Login />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

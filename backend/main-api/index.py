@@ -1,6 +1,7 @@
 import json
 import os
 import psycopg2
+import hashlib
 from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -37,14 +38,41 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             username = body_data.get('username', '')
             password = body_data.get('password', '')
             
-            if username == 'nekit654' and password == 'admin654654':
+            if not username or not password:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'message': 'Логин и пароль обязательны'
+                    }),
+                    'isBase64Encoded': False
+                }
+            
+            # Проверяем пользователя в базе данных
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            # Хешируем пароль MD5 для сравнения
+            password_hash = hashlib.md5(password.encode()).hexdigest()
+            
+            cur.execute("""
+                SELECT id, username FROM admin_users 
+                WHERE username = %s AND password_hash = %s
+            """, (username, password_hash))
+            
+            user = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if user:
                 return {
                     'statusCode': 200,
                     'headers': headers,
                     'body': json.dumps({
                         'success': True,
-                        'token': 'valid_token_123',
-                        'username': 'admin'
+                        'token': f'admin_token_{user[0]}',
+                        'username': user[1]
                     }),
                     'isBase64Encoded': False
                 }
