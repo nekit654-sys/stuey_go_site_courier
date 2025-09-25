@@ -16,7 +16,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
                 'Access-Control-Max-Age': '86400'
             },
@@ -85,9 +85,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur = conn.cursor()
                 
                 cur.execute("""
-                    INSERT INTO t_p25272970_courier_button_site.payout_requests 
-                    (name, phone, city, attachment_data, created_at) 
-                    VALUES (%s, %s, %s, %s, NOW())
+                    INSERT INTO payout_requests 
+                    (name, phone, city, attachment_data, status, created_at, updated_at) 
+                    VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
                 """, (name, phone, city, attachment_data))
                 
                 conn.commit()
@@ -131,8 +131,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur = conn.cursor()
             
             cur.execute("""
-                SELECT id, name, phone, city, attachment_data, created_at 
-                FROM t_p25272970_courier_button_site.payout_requests 
+                SELECT id, name, phone, city, attachment_data, status, created_at, updated_at
+                FROM payout_requests 
                 ORDER BY created_at DESC
             """)
             
@@ -144,8 +144,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'name': row[1],
                     'phone': row[2],
                     'city': row[3],
-                    'attachment_data': row[4],
-                    'created_at': row[5].isoformat() if row[5] else None
+                    'screenshot_url': row[4],  # переименовываем для фронтенда
+                    'status': row[5],
+                    'created_at': row[6].isoformat() if row[6] else None,
+                    'updated_at': row[7].isoformat() if row[7] else None
                 })
             
             cur.close()
@@ -169,6 +171,105 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'success': False,
                     'error': f'Database error: {str(e)}'
                 }),
+                'isBase64Encoded': False
+            }
+    
+    elif event.get('httpMethod') == 'PUT':
+        # Обновление статуса заявки
+        auth_token = event.get('headers', {}).get('X-Auth-Token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+            
+        body_data = json.loads(event.get('body', '{}'))
+        request_id = body_data.get('id')
+        new_status = body_data.get('status')
+        
+        if not request_id or not new_status:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'ID и статус обязательны'}),
+                'isBase64Encoded': False
+            }
+        
+        try:
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("""
+                UPDATE payout_requests 
+                SET status = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (new_status, request_id))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+            
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                'isBase64Encoded': False
+            }
+    
+    elif event.get('httpMethod') == 'DELETE':
+        # Удаление заявки
+        auth_token = event.get('headers', {}).get('X-Auth-Token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+            
+        body_data = json.loads(event.get('body', '{}'))
+        request_id = body_data.get('id')
+        
+        if not request_id:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'ID заявки обязателен'}),
+                'isBase64Encoded': False
+            }
+        
+        try:
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("DELETE FROM payout_requests WHERE id = %s", (request_id,))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+            
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({'error': f'Database error: {str(e)}'}),
                 'isBase64Encoded': False
             }
     
