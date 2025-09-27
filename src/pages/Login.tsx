@@ -34,6 +34,8 @@ const Login: React.FC = () => {
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   const [admins, setAdmins] = useState<Array<{id: number, username: string, created_at: string}>>([]);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +91,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const loadRequests = async (token?: string) => {
+  const loadRequests = async (token?: string, silent = false) => {
     const tokenToUse = token || authToken;
     try {
       const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
@@ -99,8 +101,31 @@ const Login: React.FC = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setRequests(data.requests || []);
-        setStats(data.stats || { total: 0, new: 0, approved: 0, rejected: 0 });
+        const newRequests = data.requests || [];
+        const newStats = data.stats || { total: 0, new: 0, approved: 0, rejected: 0 };
+        
+        // Проверяем, есть ли новые заявки
+        if (!silent && requests.length > 0 && newRequests.length > requests.length) {
+          const newCount = newRequests.length - requests.length;
+          
+          // Звуковое уведомление
+          try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAziR2e3Meg0AAABQiN/y36AVChZdpe7rpVYOC0Kk5fyWQQsLU6fQv2AcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAzh1');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // Игнорируем ошибки если звук заблокирован
+          } catch (e) {
+            // Браузер не поддерживает звук
+          }
+          
+          toast({
+            title: '🔔 Новые заявки!',
+            description: `Поступило ${newCount} новых заявок`,
+          });
+        }
+        
+        setRequests(newRequests);
+        setStats(newStats);
+        setLastUpdate(new Date());
       } else {
         console.error('Ошибка загрузки заявок:', response.status);
       }
@@ -108,6 +133,17 @@ const Login: React.FC = () => {
       console.error('Ошибка загрузки заявок:', error);
     }
   };
+
+  // Автоматическое обновление заявок
+  React.useEffect(() => {
+    if (!isAuthenticated || !autoRefresh) return;
+
+    const interval = setInterval(() => {
+      loadRequests(undefined, true); // silent = true для фоновых обновлений
+    }, 10000); // Каждые 10 секунд
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, autoRefresh, authToken, requests.length]);
 
   const updateRequestStatus = async (id: number, status: string) => {
     try {
@@ -414,6 +450,50 @@ const Login: React.FC = () => {
           </TabsList>
 
           <TabsContent value="requests" className="space-y-6">
+            
+            {/* Панель управления */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setAutoRefresh(!autoRefresh)}
+                        className={`w-10 h-6 rounded-full transition-colors ${
+                          autoRefresh ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div
+                          className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                            autoRefresh ? 'translate-x-5' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <span className="text-sm font-medium">
+                        Автообновление {autoRefresh ? 'включено' : 'выключено'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Icon name="Clock" size={14} />
+                      Последнее обновление: {lastUpdate.toLocaleTimeString('ru-RU')}
+                      {autoRefresh && (
+                        <span className="text-green-600 font-medium">(обновится через 10 сек)</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => loadRequests()}
+                      variant="outline"
+                    >
+                      <Icon name="RefreshCw" size={14} className="mr-1" />
+                      Обновить сейчас
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Статистика */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -466,9 +546,22 @@ const Login: React.FC = () => {
         {/* Таблица заявок */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="List" size={20} />
-              Заявки курьеров
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Icon name="List" size={20} />
+                Заявки курьеров
+                {stats.new > 0 && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                    {stats.new} новых
+                  </span>
+                )}
+              </div>
+              {autoRefresh && (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  Автообновление
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -492,8 +585,18 @@ const Login: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {requests.map((request) => (
-                      <tr key={request.id} className="border-b hover:bg-gray-50">
+                    {requests.map((request, index) => {
+                      // Подсвечиваем последние 3 заявки как новые
+                      const isNewRequest = index < 3 && request.status === 'new';
+                      return (
+                      <tr 
+                        key={request.id} 
+                        className={`border-b transition-colors duration-500 ${
+                          isNewRequest 
+                            ? 'bg-blue-50 hover:bg-blue-100 animate-pulse' 
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
                         <td className="py-3 px-4 font-medium">{request.name}</td>
                         <td className="py-3 px-4">
                           <a href={`tel:${request.phone}`} className="text-blue-600 hover:underline">
@@ -578,7 +681,8 @@ const Login: React.FC = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
