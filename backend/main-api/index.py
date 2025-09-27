@@ -92,6 +92,240 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        elif action == 'change_password':
+            # Смена пароля
+            auth_token = event.get('headers', {}).get('X-Auth-Token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            current_password = body_data.get('currentPassword', '')
+            new_password = body_data.get('newPassword', '')
+            
+            if not current_password or not new_password:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Все поля обязательны'}),
+                    'isBase64Encoded': False
+                }
+            
+            try:
+                conn = psycopg2.connect(os.environ['DATABASE_URL'])
+                cur = conn.cursor()
+                
+                # Проверяем текущий пароль
+                cur.execute("SELECT username FROM admins WHERE username = %s AND password_hash = %s", 
+                           ('nekit654', current_password))
+                admin = cur.fetchone()
+                
+                if not admin:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 400,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'Неверный текущий пароль'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Обновляем пароль
+                cur.execute("UPDATE admins SET password_hash = %s, updated_at = NOW() WHERE username = %s", 
+                           (new_password, 'nekit654'))
+                
+                conn.commit()
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+                
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
+        
+        elif action == 'get_admins':
+            # Получение списка админов
+            auth_token = event.get('headers', {}).get('X-Auth-Token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            try:
+                conn = psycopg2.connect(os.environ['DATABASE_URL'])
+                cur = conn.cursor()
+                
+                cur.execute("SELECT id, username, created_at FROM admins ORDER BY created_at DESC")
+                admins_data = cur.fetchall()
+                
+                admins = []
+                for admin in admins_data:
+                    admins.append({
+                        'id': admin[0],
+                        'username': admin[1],
+                        'created_at': admin[2].isoformat() if admin[2] else None
+                    })
+                
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'admins': admins}),
+                    'isBase64Encoded': False
+                }
+                
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
+        
+        elif action == 'add_admin':
+            # Добавление нового админа
+            auth_token = event.get('headers', {}).get('X-Auth-Token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            username = body_data.get('username', '')
+            password = body_data.get('password', '')
+            
+            if not username or not password:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Логин и пароль обязательны'}),
+                    'isBase64Encoded': False
+                }
+            
+            try:
+                conn = psycopg2.connect(os.environ['DATABASE_URL'])
+                cur = conn.cursor()
+                
+                # Проверяем, не существует ли уже такой пользователь
+                cur.execute("SELECT id FROM admins WHERE username = %s", (username,))
+                existing = cur.fetchone()
+                
+                if existing:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 400,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'Пользователь с таким логином уже существует'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Добавляем нового админа
+                cur.execute("""
+                    INSERT INTO admins (username, password_hash, created_at, updated_at) 
+                    VALUES (%s, %s, NOW(), NOW())
+                """, (username, password))
+                
+                conn.commit()
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+                
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
+        
+        elif action == 'delete_admin':
+            # Удаление админа
+            auth_token = event.get('headers', {}).get('X-Auth-Token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            admin_id = body_data.get('adminId')
+            
+            if not admin_id:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'ID админа обязателен'}),
+                    'isBase64Encoded': False
+                }
+            
+            try:
+                conn = psycopg2.connect(os.environ['DATABASE_URL'])
+                cur = conn.cursor()
+                
+                # Не даём удалить единственного админа
+                cur.execute("SELECT COUNT(*) FROM admins")
+                admin_count = cur.fetchone()[0]
+                
+                if admin_count <= 1:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 400,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'Нельзя удалить единственного администратора'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Удаляем админа
+                cur.execute("DELETE FROM admins WHERE id = %s", (admin_id,))
+                
+                conn.commit()
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+                
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
+        
         elif action == 'payout':
             # Обработка заявки на выплату
             name = body_data.get('name', '')

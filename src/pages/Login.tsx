@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
 interface AdminRequest {
@@ -27,6 +29,11 @@ const Login: React.FC = () => {
   const [authToken, setAuthToken] = useState<string>('');
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [stats, setStats] = useState({ total: 0, new: 0, approved: 0, rejected: 0 });
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('requests');
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [adminForm, setAdminForm] = useState({ username: '', password: '' });
+  const [admins, setAdmins] = useState<Array<{id: number, username: string, created_at: string}>>([]);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,6 +181,145 @@ const Login: React.FC = () => {
     }
   };
 
+  const loadAdmins = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': authToken
+        },
+        body: JSON.stringify({ action: 'get_admins' })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdmins(data.admins || []);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки админов:', error);
+    }
+  };
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароли не совпадают',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': authToken
+        },
+        body: JSON.stringify({
+          action: 'change_password',
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        toast({
+          title: 'Пароль изменен',
+          description: 'Пароль успешно обновлен',
+        });
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось изменить пароль',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось подключиться к серверу',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const addAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': authToken
+        },
+        body: JSON.stringify({
+          action: 'add_admin',
+          username: adminForm.username,
+          password: adminForm.password
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setAdminForm({ username: '', password: '' });
+        loadAdmins();
+        toast({
+          title: 'Админ добавлен',
+          description: 'Новый администратор успешно создан',
+        });
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось добавить админа',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось подключиться к серверу',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteAdmin = async (adminId: number) => {
+    if (confirm('Удалить администратора?')) {
+      try {
+        const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': authToken
+          },
+          body: JSON.stringify({
+            action: 'delete_admin',
+            adminId
+          })
+        });
+
+        if (response.ok) {
+          loadAdmins();
+          toast({
+            title: 'Админ удален',
+            description: 'Администратор успешно удален',
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось удалить админа',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800 flex items-center justify-center p-4">
@@ -237,7 +383,7 @@ const Login: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
             <Icon name="Settings" size={32} className="text-blue-600" />
-            Админ-панель заявок
+            Админ-панель
           </h1>
           <Button 
             variant="outline" 
@@ -251,8 +397,26 @@ const Login: React.FC = () => {
           </Button>
         </div>
 
-        {/* Статистика */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="requests" className="flex items-center gap-2">
+              <Icon name="FileText" size={16} />
+              Заявки
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Icon name="Lock" size={16} />
+              Безопасность
+            </TabsTrigger>
+            <TabsTrigger value="admins" className="flex items-center gap-2">
+              <Icon name="Users" size={16} />
+              Админы
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requests" className="space-y-6">
+
+            {/* Статистика */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -321,6 +485,7 @@ const Login: React.FC = () => {
                       <th className="text-left py-3 px-4 font-semibold">ФИО</th>
                       <th className="text-left py-3 px-4 font-semibold">Телефон</th>
                       <th className="text-left py-3 px-4 font-semibold">Город</th>
+                      <th className="text-left py-3 px-4 font-semibold">Скриншот</th>
                       <th className="text-left py-3 px-4 font-semibold">Статус</th>
                       <th className="text-left py-3 px-4 font-semibold">Дата</th>
                       <th className="text-left py-3 px-4 font-semibold">Действия</th>
@@ -329,16 +494,55 @@ const Login: React.FC = () => {
                   <tbody>
                     {requests.map((request) => (
                       <tr key={request.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">{request.name}</td>
-                        <td className="py-3 px-4">{request.phone}</td>
+                        <td className="py-3 px-4 font-medium">{request.name}</td>
+                        <td className="py-3 px-4">
+                          <a href={`tel:${request.phone}`} className="text-blue-600 hover:underline">
+                            {request.phone}
+                          </a>
+                        </td>
                         <td className="py-3 px-4">{request.city}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                          {request.screenshot_url ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedImage(request.screenshot_url)}
+                                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                                >
+                                  <Icon name="Eye" size={14} className="mr-1" />
+                                  Просмотр
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-3xl">
+                                <DialogHeader>
+                                  <DialogTitle>Скриншот от {request.name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="flex justify-center">
+                                  <img
+                                    src={request.screenshot_url}
+                                    alt="Скриншот заявки"
+                                    className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                                  />
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Нет</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                             {getStatusText(request.status)}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
-                          {new Date(request.created_at).toLocaleDateString('ru-RU')}
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {new Date(request.created_at).toLocaleDateString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
@@ -346,19 +550,20 @@ const Login: React.FC = () => {
                               <>
                                 <Button
                                   size="sm"
-                                  variant="outline"
                                   onClick={() => updateRequestStatus(request.id, 'approved')}
-                                  className="text-green-600 border-green-600 hover:bg-green-50"
+                                  className="bg-green-500 hover:bg-green-600 text-white px-3"
                                 >
-                                  <Icon name="Check" size={14} />
+                                  <Icon name="Check" size={14} className="mr-1" />
+                                  Принять
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => updateRequestStatus(request.id, 'rejected')}
-                                  className="text-red-600 border-red-600 hover:bg-red-50"
+                                  className="text-red-600 border-red-600 hover:bg-red-50 px-3"
                                 >
-                                  <Icon name="X" size={14} />
+                                  <Icon name="X" size={14} className="mr-1" />
+                                  Отклонить
                                 </Button>
                               </>
                             )}
@@ -378,8 +583,149 @@ const Login: React.FC = () => {
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="Key" size={20} />
+                  Смена пароля
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={changePassword} className="space-y-4 max-w-md">
+                  <div>
+                    <Label htmlFor="currentPassword">Текущий пароль</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newPassword">Новый пароль</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    <Icon name="Save" size={16} className="mr-2" />
+                    Сменить пароль
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="admins" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="UserPlus" size={20} />
+                    Добавить администратора
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={addAdmin} className="space-y-4">
+                    <div>
+                      <Label htmlFor="adminUsername">Логин</Label>
+                      <Input
+                        id="adminUsername"
+                        type="text"
+                        value={adminForm.username}
+                        onChange={(e) => setAdminForm({...adminForm, username: e.target.value})}
+                        placeholder="Введите логин"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="adminPassword">Пароль</Label>
+                      <Input
+                        id="adminPassword"
+                        type="password"
+                        value={adminForm.password}
+                        onChange={(e) => setAdminForm({...adminForm, password: e.target.value})}
+                        placeholder="Введите пароль"
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      <Icon name="Plus" size={16} className="mr-2" />
+                      Добавить админа
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="Users" size={20} />
+                    Список администраторов
+                  </CardTitle>
+                  <Button
+                    size="sm"
+                    onClick={loadAdmins}
+                    variant="outline"
+                    className="ml-auto"
+                  >
+                    <Icon name="RefreshCw" size={14} className="mr-1" />
+                    Обновить
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {admins.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500">
+                      <Icon name="Users" size={24} className="mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">Нажмите "Обновить" для загрузки списка</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {admins.map((admin) => (
+                        <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <div className="font-medium">{admin.username}</div>
+                            <div className="text-sm text-gray-500">
+                              Создан: {new Date(admin.created_at).toLocaleDateString('ru-RU')}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteAdmin(admin.id)}
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                          >
+                            <Icon name="Trash2" size={14} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
