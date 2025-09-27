@@ -558,7 +558,7 @@ const Login: React.FC = () => {
               </div>
               {autoRefresh && (
                 <div className="flex items-center gap-2 text-sm text-green-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   Автообновление
                 </div>
               )}
@@ -591,9 +591,9 @@ const Login: React.FC = () => {
                       return (
                       <tr 
                         key={request.id} 
-                        className={`border-b transition-colors duration-500 ${
+                        className={`border-b transition-all duration-700 ${
                           isNewRequest 
-                            ? 'bg-blue-50 hover:bg-blue-100 animate-pulse' 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-l-4 border-l-green-400 shadow-sm' 
                             : 'hover:bg-gray-50'
                         }`}
                       >
