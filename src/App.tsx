@@ -11,6 +11,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import WelcomeBanner from "@/components/WelcomeBanner";
 
 import FeedbackTab from "@/components/FeedbackTab";
+import PromoMarquee from "@/components/PromoMarquee";
 
 import Index from "./pages/Index";
 import Vacancies from "./pages/Vacancies";
@@ -58,6 +59,7 @@ const App = () => {
           />
           <WhatsAppButton />
           <FeedbackTab />
+          <PromoMarquee />
 
 
           
