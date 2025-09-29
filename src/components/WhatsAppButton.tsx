@@ -32,7 +32,7 @@ const WhatsAppButton: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-20 right-6 z-50">
       {/* Текстовое облако */}
       {showBubble && (
         <div className="absolute -top-16 -left-32 animate-bounce">
