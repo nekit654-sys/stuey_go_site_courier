@@ -30,7 +30,7 @@ const PromoMarquee = () => {
           <Icon name="X" size={18} />
         </button>
         
-        <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-lg font-rubik font-semibold">
+        <div className="animate-marquee whitespace-nowrap flex items-center gap-12 md:gap-12 gap-6 text-base md:text-lg font-rubik font-semibold">
           <span className="inline-flex items-center gap-3">
             🚀 Старт без опыта — заработай с первого дня!
           </span>

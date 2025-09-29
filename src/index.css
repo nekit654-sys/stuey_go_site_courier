@@ -267,6 +267,13 @@
   animation: marquee 20s linear infinite;
 }
 
+/* Ускоренная анимация для мобильных */
+@media (max-width: 768px) {
+  .animate-marquee {
+    animation: marquee 10s linear infinite;
+  }
+}
+
 /* Плавная анимация переливания для кнопок с последовательным запуском */
 @keyframes shimmer-glow {
   0%,
