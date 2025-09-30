@@ -19,7 +19,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        rubik: ["Rubik", "sans-serif"],
+        sans: ['Inter', 'Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        heading: ['Manrope', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
