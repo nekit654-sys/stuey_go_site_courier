@@ -165,8 +165,9 @@ const PayoutForm = () => {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-green-600">
-          💰 Выплата 3000 ₽
+        <CardTitle className="text-2xl font-bold text-green-600 flex items-center justify-center gap-2">
+          <Icon name="BadgeDollarSign" size={28} className="text-green-600" />
+          Выплата 3000 ₽
         </CardTitle>
         <CardDescription>
           Заполните форму для получения выплаты
@@ -231,9 +232,10 @@ const PayoutForm = () => {
                       alt="Превью скриншота" 
                       className="max-w-full h-32 object-contain mx-auto rounded"
                     />
-                    <p className="text-sm text-green-600 font-medium">
-                      Файл загружен ✓
-                    </p>
+                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
+                      <Icon name="CheckCircle" size={16} className="text-green-600" />
+                      Файл загружен
+                    </div>
                     <p className="text-xs text-gray-500">
                       Нажмите, чтобы изменить
                     </p>
