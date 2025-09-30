@@ -112,31 +112,26 @@ const FeedbackTab: React.FC = () => {
 
   return (
     <>
-      {/* Закладка */}
+      {/* Кнопка бонуса */}
       <div
-        className={`fixed top-32 right-0 z-40 cursor-pointer transition-all duration-300 ${
-          isExpanded ? 'translate-x-0' : '-translate-x-2 hover:translate-x-0'
-        }`}
+        className="fixed top-32 right-0 z-40 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95"
         onClick={handleTabClick}
       >
-        <div className="bg-gradient-to-b from-green-500 to-green-600 text-white px-4 py-6 rounded-l-xl shadow-lg transform">
-          <div className="flex flex-col items-center gap-1 text-center">
-            <Icon name="Gift" size={24} className="text-yellow-300" />
-            <div className="text-xs font-bold leading-tight">
-              <div className="text-yellow-300">3000₽</div>
-              <div className="text-white">за 30</div>
-              <div className="text-white">заказов</div>
+        <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white px-6 py-4 rounded-l-2xl shadow-2xl relative overflow-hidden">
+          {/* Волновой эффект при наведении */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700"></div>
+          
+          <div className="flex flex-col items-center gap-2 text-center relative z-10">
+            <Icon name="Gift" size={32} className="text-yellow-300 animate-bounce" />
+            <div className="text-sm font-bold leading-tight">
+              <div className="text-2xl text-yellow-300 font-black">3000₽</div>
+              <div className="text-white text-xs">за 30 заказов</div>
             </div>
           </div>
+          
+          {/* Блестящая рамка */}
+          <div className="absolute inset-0 rounded-l-2xl ring-2 ring-yellow-300/50 ring-inset"></div>
         </div>
-        
-        {/* Стрелка указатель */}
-        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-2">
-          <div className="w-0 h-0 border-t-[8px] border-b-[8px] border-r-[8px] border-t-transparent border-b-transparent border-r-green-600"></div>
-        </div>
-        
-        {/* Анимированная подсветка */}
-        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/20 to-transparent rounded-l-xl animate-pulse"></div>
       </div>
 
       {/* Модальное окно */}
@@ -274,21 +269,7 @@ const FeedbackTab: React.FC = () => {
         </div>
       )}
 
-      {/* CSS для анимаций */}
-      <style jsx>{`
-        .animate-tab-expand {
-          animation: tabExpand 0.3s ease-out forwards;
-        }
 
-        @keyframes tabExpand {
-          from {
-            transform: translateX(12px);
-          }
-          to {
-            transform: translateX(-20px);
-          }
-        }
-      `}</style>
     </>
   );
 };
