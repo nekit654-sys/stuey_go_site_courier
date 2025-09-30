@@ -57,7 +57,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             password_hash = hashlib.md5(password.encode()).hexdigest()
             
             cur.execute("""
-                SELECT id, username FROM admin_users 
+                SELECT id, username FROM t_p25272970_courier_button_site.admins 
                 WHERE username = %s AND password_hash = %s
             """, (username, password_hash))
             
@@ -119,7 +119,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur = conn.cursor()
                 
                 # Проверяем текущий пароль
-                cur.execute("SELECT username FROM admins WHERE username = %s AND password_hash = %s", 
+                cur.execute("SELECT username FROM t_p25272970_courier_button_site.admins WHERE username = %s AND password_hash = %s", 
                            ('nekit654', current_password))
                 admin = cur.fetchone()
                 
@@ -134,7 +134,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 # Обновляем пароль
-                cur.execute("UPDATE admins SET password_hash = %s, updated_at = NOW() WHERE username = %s", 
+                cur.execute("UPDATE t_p25272970_courier_button_site.admins SET password_hash = %s, updated_at = NOW() WHERE username = %s", 
                            (new_password, 'nekit654'))
                 
                 conn.commit()
@@ -171,7 +171,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 conn = psycopg2.connect(os.environ['DATABASE_URL'])
                 cur = conn.cursor()
                 
-                cur.execute("SELECT id, username, created_at FROM admins ORDER BY created_at DESC")
+                cur.execute("SELECT id, username, created_at FROM t_p25272970_courier_button_site.admins ORDER BY created_at DESC")
                 admins_data = cur.fetchall()
                 
                 admins = []
@@ -227,7 +227,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur = conn.cursor()
                 
                 # Проверяем, не существует ли уже такой пользователь
-                cur.execute("SELECT id FROM admins WHERE username = %s", (username,))
+                cur.execute("SELECT id FROM t_p25272970_courier_button_site.admins WHERE username = %s", (username,))
                 existing = cur.fetchone()
                 
                 if existing:
@@ -240,11 +240,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
+                # Хешируем пароль MD5
+                password_hash = hashlib.md5(password.encode()).hexdigest()
+                
                 # Добавляем нового админа
                 cur.execute("""
-                    INSERT INTO admins (username, password_hash, created_at, updated_at) 
+                    INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at) 
                     VALUES (%s, %s, NOW(), NOW())
-                """, (username, password))
+                """, (username, password_hash))
                 
                 conn.commit()
                 cur.close()
@@ -291,7 +294,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur = conn.cursor()
                 
                 # Не даём удалить единственного админа
-                cur.execute("SELECT COUNT(*) FROM admins")
+                cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
                 admin_count = cur.fetchone()[0]
                 
                 if admin_count <= 1:
@@ -305,7 +308,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 # Удаляем админа
-                cur.execute("DELETE FROM admins WHERE id = %s", (admin_id,))
+                cur.execute("DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s", (admin_id,))
                 
                 conn.commit()
                 cur.close()
@@ -347,7 +350,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur = conn.cursor()
                 
                 cur.execute("""
-                    INSERT INTO payout_requests 
+                    INSERT INTO t_p25272970_courier_button_site.payout_requests 
                     (name, phone, city, attachment_data, status, created_at, updated_at) 
                     VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
                 """, (name, phone, city, attachment_data))
@@ -395,7 +398,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             # Получаем заявки
             cur.execute("""
                 SELECT id, name, phone, city, attachment_data, status, created_at, updated_at
-                FROM payout_requests 
+                FROM t_p25272970_courier_button_site.payout_requests 
                 ORDER BY created_at DESC
             """)
             
@@ -420,7 +423,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     COUNT(CASE WHEN status = 'new' THEN 1 END) as new,
                     COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
                     COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
-                FROM payout_requests
+                FROM t_p25272970_courier_button_site.payout_requests
             """)
             
             stats_row = cur.fetchone()
@@ -484,7 +487,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur = conn.cursor()
             
             cur.execute("""
-                UPDATE payout_requests 
+                UPDATE t_p25272970_courier_button_site.payout_requests 
                 SET status = %s, updated_at = NOW()
                 WHERE id = %s
             """, (new_status, request_id))
@@ -534,7 +537,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             conn = psycopg2.connect(os.environ['DATABASE_URL'])
             cur = conn.cursor()
             
-            cur.execute("DELETE FROM payout_requests WHERE id = %s", (request_id,))
+            cur.execute("DELETE FROM t_p25272970_courier_button_site.payout_requests WHERE id = %s", (request_id,))
             
             conn.commit()
             cur.close()
