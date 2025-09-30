@@ -41,12 +41,18 @@ const HeroSection = () => {
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/5 border border-yellow-400/30 rounded-2xl p-6 sm:p-10 shadow-xl ring-1 ring-white/10 my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-bold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl">
-            <span className="text-white">Ищете работу</span> <br />
-            <span className="text-white">со свободой и</span> <br />
-            <span className="text-yellow-400">заработком в вашем городе?</span>
+            <span className="text-white">Свобода выбора — </span>
+            <span className="text-yellow-400">ваш ключ к успеху!</span>
           </h1>
 
-          <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">Станьте частью команды курьеров и работайте по своему графику! Выбирайте удобный способ доставки и зарабатывайте больше!</p>
+          <p className="md:text-xl mb-3 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">
+            Зарабатывайте от 1000₽/час в своём городе —<br />
+            ваш график, ваш транспорт, ваши правила!
+          </p>
+          
+          <p className="text-xs md:text-sm text-gray-300 mb-8 max-w-2xl mx-auto italic">
+            * Доход зависит от количества отработанных часов и региона работы
+          </p>
 
           <div className="mb-10">
             <HeroIncomeCalculator />
