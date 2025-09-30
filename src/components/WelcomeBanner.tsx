@@ -212,7 +212,10 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           
           {/* Мини-баннер регистрации */}
           <div className="text-black px-4 py-3 text-center border-t border-yellow-600 bg-yellow-400">
-            <div className="font-semibold text-sm">📝 Нужно заполнить форму обратной связи!</div>
+            <div className="font-semibold text-sm md:text-base flex items-center justify-center gap-2 whitespace-nowrap">
+              <Icon name="FileText" size={20} className="text-black flex-shrink-0" />
+              <span>Нужно заполнить форму обратной связи!</span>
+            </div>
           </div>
         </div>
       </div>
