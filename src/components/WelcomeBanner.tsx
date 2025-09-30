@@ -153,7 +153,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               {coins.map((coin) => (
                 <div
                   key={coin.id}
-                  className="absolute animate-[coinFall_2s_infinite_linear]"
+                  className="absolute animate-[coinFall_4s_infinite_linear]"
                   style={{
                     left: `${coin.left}%`,
                     top: '-20px',
