@@ -98,18 +98,31 @@ const HeroIncomeCalculator = () => {
       {/* Чекбокс бонуса за друга */}
       <div className="mb-8">
         <label 
-          className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200"
+          className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200 group"
           onMouseEnter={() => playSound('hover')}
         >
-          <input
-            type="checkbox"
-            checked={referralBonus}
-            onChange={(e) => {
-              playSound('click');
-              setReferralBonus(e.target.checked);
-            }}
-            className="w-5 h-5 text-yellow-400 bg-white/10 border-yellow-400/50 rounded focus:ring-yellow-400 focus:ring-2"
-          />
+          <div className="relative flex items-center justify-center">
+            <input
+              type="checkbox"
+              checked={referralBonus}
+              onChange={(e) => {
+                playSound('click');
+                setReferralBonus(e.target.checked);
+              }}
+              className="sr-only peer"
+            />
+            <div className={`
+              w-6 h-6 rounded-lg border-2 transition-all duration-200 flex items-center justify-center
+              ${referralBonus 
+                ? 'bg-yellow-400 border-yellow-400' 
+                : 'bg-white/10 border-yellow-400/50 group-hover:border-yellow-400'
+              }
+            `}>
+              {referralBonus && (
+                <Icon name="Check" size={16} className="text-black font-bold" />
+              )}
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <Icon name="UserPlus" size={20} className="text-yellow-400" />
             <span className="text-white font-medium">Приведи друга</span>
