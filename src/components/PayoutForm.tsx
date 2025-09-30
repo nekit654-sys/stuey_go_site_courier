@@ -232,8 +232,8 @@ const PayoutForm = () => {
                       alt="Превью скриншота" 
                       className="max-w-full h-32 object-contain mx-auto rounded"
                     />
-                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
-                      <Icon name="CheckCircle" size={16} className="text-green-600" />
+                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium animate-in fade-in slide-in-from-top-2 duration-500">
+                      <Icon name="CheckCircle" size={16} className="text-green-600 animate-in zoom-in-50 duration-300" />
                       Файл загружен
                     </div>
                     <p className="text-xs text-gray-500">
