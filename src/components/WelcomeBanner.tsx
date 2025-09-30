@@ -37,9 +37,9 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
     // Добавляем первую купюру сразу
     addCoin();
     
-    // Затем добавляем новые купюры каждые 300-800мс (рандомный интервал)
+    // Затем добавляем новые купюры каждые 150-400мс (рандомный интервал)
     const scheduleNextCoin = () => {
-      const randomDelay = 300 + Math.random() * 500;
+      const randomDelay = 150 + Math.random() * 250;
       setTimeout(() => {
         addCoin();
         scheduleNextCoin();
@@ -114,14 +114,14 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               transform: translateY(-20px) translateX(0) rotate(0deg);
               opacity: 1;
             }
-            10% {
+            50% {
               opacity: 1;
             }
-            90% {
-              opacity: 1;
+            70% {
+              opacity: 0.5;
             }
             100% {
-              transform: translateY(120vh) translateX(0) rotate(360deg);
+              transform: translateY(50vh) translateX(0) rotate(360deg);
               opacity: 0;
             }
           }
