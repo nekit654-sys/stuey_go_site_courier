@@ -189,21 +189,18 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             <div className="absolute bottom-32 left-6 sm:bottom-36 sm:left-10 md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
                 {/* Само диалоговое окно */}
-                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-5 max-w-[260px] sm:max-w-[280px] md:max-w-[320px]">
+                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-800 leading-snug">
-                    Даем{' '}
-                    <span className="text-yellow-600 font-bold">3000₽</span>{' '}
-                    за первые{' '}
-                    <span className="text-yellow-600 font-bold">30 заказов!</span>
+                  <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-800 whitespace-nowrap">
+                    Даем <span className="text-yellow-600 font-bold">3000₽</span> за первые <span className="text-yellow-600 font-bold">30 заказов!</span>
                   </p>
                   <div className="mt-2 flex items-center gap-1">
-                    <Icon name="FileText" size={16} className="text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Нужно заполнить форму обратной связи!</span>
+                    <Icon name="FileText" size={16} className="text-yellow-500 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Нужно заполнить форму обратной связи!</span>
                   </div>
                 </div>
               </div>
