@@ -123,9 +123,9 @@ const FeedbackTab: React.FC = () => {
           
           <div className="flex flex-col items-center gap-1 text-center relative z-10">
             <Icon name="Gift" size={20} className="text-yellow-300 animate-bounce" />
-            <div className="text-[10px] font-bold leading-tight">
-              <div className="text-lg text-yellow-300 font-black">3000₽</div>
-              <div className="text-white text-[8px]">за 30</div>
+            <div className="text-[9px] font-bold leading-tight">
+              <div className="text-base text-yellow-300 font-black">3000₽</div>
+              <div className="text-white text-[8px]">за 30 заказов</div>
             </div>
           </div>
           
