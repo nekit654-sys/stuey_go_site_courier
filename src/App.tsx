@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
-import ScrollToTop from "@/components/ScrollToTop";
 import GameButton from "@/components/GameButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -53,7 +52,6 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
 
-          <ScrollToTop />
           <GameButton
             onToggle={(isOpen) => console.log("Game toggle:", isOpen)}
           />
