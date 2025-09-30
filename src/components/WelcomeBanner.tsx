@@ -148,7 +148,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             {/* Затемнение для лучшей читаемости */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             
-            {/* Падающие монеты */}
+            {/* Падающие купюры 3000₽ */}
             <div className="absolute inset-0 overflow-hidden">
               {coins.map((coin) => (
                 <div
@@ -160,16 +160,15 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                     animationDelay: `${coin.delay}s`,
                   }}
                 >
-                  <div
-                    className="bg-yellow-400 rounded-full border-2 border-yellow-500 shadow-lg flex items-center justify-center font-bold text-yellow-800"
+                  <img
+                    src="https://cdn.poehali.dev/files/047dd184-97dc-4d08-8be6-0b6782b11d60.jpg"
+                    alt="3000₽"
+                    className="object-contain shadow-lg rounded-sm"
                     style={{
-                      width: `${coin.size}px`,
-                      height: `${coin.size}px`,
-                      fontSize: `${coin.size * 0.6}px`,
+                      width: `${coin.size * 3}px`,
+                      height: `${coin.size * 1.5}px`,
                     }}
-                  >
-                    ₽
-                  </div>
+                  />
                 </div>
               ))}
             </div>
