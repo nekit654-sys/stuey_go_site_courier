@@ -90,11 +90,20 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           
           @keyframes coinFall {
             0% {
-              transform: translateY(-20px) rotate(0deg);
+              transform: translateY(-20px) translateX(0) rotate(0deg);
               opacity: 1;
             }
+            25% {
+              transform: translateY(50px) translateX(15px) rotate(90deg);
+            }
+            50% {
+              transform: translateY(100px) translateX(-10px) rotate(180deg);
+            }
+            75% {
+              transform: translateY(150px) translateX(20px) rotate(270deg);
+            }
             100% {
-              transform: translateY(200px) rotate(360deg);
+              transform: translateY(200px) translateX(0) rotate(360deg);
               opacity: 0;
             }
           }
