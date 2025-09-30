@@ -38,9 +38,10 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
     addCoin();
     
     // Затем добавляем новые купюры каждые 150-400мс (рандомный интервал)
+    let timeoutId: number;
     const scheduleNextCoin = () => {
       const randomDelay = 150 + Math.random() * 250;
-      setTimeout(() => {
+      timeoutId = window.setTimeout(() => {
         addCoin();
         scheduleNextCoin();
       }, randomDelay);
@@ -60,7 +61,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
     }, 1000);
 
     return () => {
-      clearInterval(coinsInterval);
+      if (timeoutId) clearTimeout(timeoutId);
       clearInterval(countdownInterval);
     };
   }, []);
