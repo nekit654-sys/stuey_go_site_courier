@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Icon from "@/components/ui/icon";
 import { useMagicEffect } from "@/hooks/useMagicEffect";
 import { useSound } from "@/hooks/useSound";
+import PromoMarquee from "@/components/PromoMarquee";
 
 const CourierTypes = () => {
   const referralLink =
@@ -56,6 +57,9 @@ const CourierTypes = () => {
   return (
     <section className="py-16 px-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
+        <div className="mb-12">
+          <PromoMarquee />
+        </div>
         <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 font-rubik">
           Выбери свой способ доставки!
         </h2>

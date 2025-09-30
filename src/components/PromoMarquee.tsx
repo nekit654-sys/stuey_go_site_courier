@@ -15,16 +15,16 @@ const PromoMarquee = () => {
 
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 text-white shadow-2xl cursor-pointer hover:from-orange-600 hover:via-orange-700 hover:to-orange-600 transition-all duration-300"
+      className="w-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 text-white shadow-xl cursor-pointer hover:from-orange-600 hover:via-orange-700 hover:to-orange-600 transition-all duration-300 rounded-2xl"
       onClick={scrollToForm}
     >
-      <div className="relative overflow-hidden py-3.5">
+      <div className="relative overflow-hidden py-4">
         <button
           onClick={(e) => {
             e.stopPropagation();
             setIsVisible(false);
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 rounded-full p-1.5 transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 rounded-full p-1.5 transition-colors"
           aria-label="Закрыть"
         >
           <Icon name="X" size={18} />
