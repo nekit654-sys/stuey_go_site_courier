@@ -194,7 +194,7 @@ const HeroIncomeCalculator = () => {
       <div className="bg-yellow-400 border border-yellow-500 rounded-xl p-3 sm:p-4 mt-6 shadow-lg">
         <div className="text-center">
           <div className="text-black font-bold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2 flex-wrap">
-            <span>💰</span>
+            <Icon name="BadgeDollarSign" size={24} className="text-black flex-shrink-0" />
             <span className="leading-tight">Минимальная гарантированная ставка от 320 рублей/час!</span>
           </div>
           <div className="text-black font-medium text-xs sm:text-sm mt-1">
