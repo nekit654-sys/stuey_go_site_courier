@@ -8,24 +8,45 @@ interface WelcomeBannerProps {
 const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [timeLeft, setTimeLeft] = useState(10);
-  const [coins, setCoins] = useState<Array<{ id: number; left: number; delay: number; size: number }>>([]);
+  const [coins, setCoins] = useState<Array<{ id: number; left: number; delay: number; size: number; duration: number }>>([]);
+  const [coinCounter, setCoinCounter] = useState(0);
 
   useEffect(() => {
-    const generateCoins = () => {
-      const newCoins = [];
-      for (let i = 0; i < 8; i++) {
-        newCoins.push({
-          id: i,
-          left: Math.random() * 80 + 10,
-          delay: Math.random() * 2,
-          size: 15 + Math.random() * 10,
+    // Генерация одной купюры с рандомными параметрами
+    const addCoin = () => {
+      setCoinCounter((prev) => {
+        const newId = prev + 1;
+        const newCoin = {
+          id: newId,
+          left: Math.random() * 80 + 10, // Рандомная позиция 10-90%
+          delay: 0,
+          size: 15 + Math.random() * 10, // Рандомный размер
+          duration: 4 + Math.random() * 2, // Рандомная длительность 4-6 секунд
+        };
+        
+        setCoins((prevCoins) => {
+          // Удаляем старые купюры (старше 10 секунд)
+          const filtered = prevCoins.filter(coin => newId - coin.id < 20);
+          return [...filtered, newCoin];
         });
-      }
-      setCoins(newCoins);
+        
+        return newId;
+      });
     };
 
-    generateCoins();
-    const coinsInterval = setInterval(generateCoins, 3000);
+    // Добавляем первую купюру сразу
+    addCoin();
+    
+    // Затем добавляем новые купюры каждые 300-800мс (рандомный интервал)
+    const scheduleNextCoin = () => {
+      const randomDelay = 300 + Math.random() * 500;
+      setTimeout(() => {
+        addCoin();
+        scheduleNextCoin();
+      }, randomDelay);
+    };
+    
+    scheduleNextCoin();
 
     // Таймер обратного отсчета
     const countdownInterval = setInterval(() => {
@@ -93,17 +114,14 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               transform: translateY(-20px) translateX(0) rotate(0deg);
               opacity: 1;
             }
-            25% {
-              transform: translateY(50px) translateX(15px) rotate(90deg);
+            10% {
+              opacity: 1;
             }
-            50% {
-              transform: translateY(100px) translateX(-10px) rotate(180deg);
-            }
-            75% {
-              transform: translateY(150px) translateX(20px) rotate(270deg);
+            90% {
+              opacity: 1;
             }
             100% {
-              transform: translateY(200px) translateX(0) rotate(360deg);
+              transform: translateY(120vh) translateX(0) rotate(360deg);
               opacity: 0;
             }
           }
@@ -162,11 +180,11 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               {coins.map((coin) => (
                 <div
                   key={coin.id}
-                  className="absolute animate-[coinFall_4s_infinite_linear]"
+                  className="absolute"
                   style={{
                     left: `${coin.left}%`,
                     top: '-20px',
-                    animationDelay: `${coin.delay}s`,
+                    animation: `coinFall ${coin.duration}s linear forwards`,
                   }}
                 >
                   <img
