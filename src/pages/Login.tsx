@@ -585,17 +585,11 @@ const Login: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {requests.map((request, index) => {
-                      // Подсвечиваем последние 3 заявки как новые
-                      const isNewRequest = index < 3 && request.status === 'new';
+                    {requests.map((request) => {
                       return (
                       <tr 
                         key={request.id} 
-                        className={`border-b transition-all duration-700 ${
-                          isNewRequest 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-l-4 border-l-green-400 shadow-sm' 
-                            : 'hover:bg-gray-50'
-                        }`}
+                        className="border-b hover:bg-gray-50"
                       >
                         <td className="py-3 px-4 font-medium">{request.name}</td>
                         <td className="py-3 px-4">
