@@ -216,6 +216,11 @@ const HeroIncomeCalculator = () => {
         </div>
       </div>
 
+      {/* Сноска о зависимости дохода */}
+      <p className="text-xs md:text-sm text-gray-300 mt-4 text-center italic">
+        * Доход зависит от количества отработанных часов и региона работы
+      </p>
+
       <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;

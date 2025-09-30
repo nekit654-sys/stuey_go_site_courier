@@ -45,13 +45,9 @@ const HeroSection = () => {
             <span className="text-yellow-400">ваш ключ к успеху!</span>
           </h1>
 
-          <p className="md:text-xl mb-3 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">
+          <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">
             Зарабатывайте от 1000₽/час в своём городе —<br />
             ваш график, ваш транспорт, ваши правила!
-          </p>
-          
-          <p className="text-xs md:text-sm text-gray-300 mb-8 max-w-2xl mx-auto italic">
-            * Доход зависит от количества отработанных часов и региона работы
           </p>
 
           <div className="mb-10">
