@@ -121,7 +121,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
               opacity: 0.5;
             }
             100% {
-              transform: translateY(50vh) translateX(0) rotate(360deg);
+              transform: translateY(200px) translateX(0) rotate(360deg);
               opacity: 0;
             }
           }
