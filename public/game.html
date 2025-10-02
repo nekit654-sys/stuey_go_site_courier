@@ -78,7 +78,7 @@
     justify-content: space-around;
     padding: 0 1vw;
 
-    background: none;
+    background: linear-gradient(#555 10%, #444 50%, #555 90%);
   }
   .lane {
     flex: 1;
@@ -658,6 +658,7 @@
   </div>
   <button id="playBtn" role="menuitem">Играть</button>
   <button id="rulesBtn" role="menuitem">Правила</button>
+  <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
   <button id="becomeBtn" role="menuitem" style="background-color: #dc2626 !important; color: #fff !important; border-color: #dc2626 !important;">Подать заявку</button>
   <button id="exitBtn" role="menuitem">Выход из игры</button>
 
@@ -776,6 +777,7 @@
   const restartBtn = document.getElementById('restartBtn');
   const toMenuBtn = document.getElementById('toMenuBtn');
   const becomeBtn = document.getElementById('becomeBtn');
+  const toggleMusicBtn = document.getElementById('toggleMusicBtn');
   const game = document.getElementById('game');
   const speechBubble = document.getElementById('speechBubble');
   const lanes = document.querySelectorAll('.lane');
@@ -1224,6 +1226,8 @@
   // Фоновая музыка
   let backgroundMusic = null;
   let musicStarted = false;
+  let musicEnabled = true;
+  let tryPlayOnInteraction = false;
   
   function initBackgroundMusic() {
     if (!backgroundMusic) {
@@ -1231,46 +1235,58 @@
       backgroundMusic.loop = true;
       backgroundMusic.volume = 0.3;
       backgroundMusic.preload = 'auto';
+      
+      // Обработка событий загрузки
+      backgroundMusic.addEventListener('loadeddata', () => {
+        console.log('Music loaded successfully');
+        if (tryPlayOnInteraction) {
+          playBackgroundMusic();
+        }
+      });
     }
   }
   
   function playBackgroundMusic() {
+    if (!musicEnabled) return;
+    
     initBackgroundMusic();
     
-    if (!musicStarted) {
-      try {
-        const playPromise = backgroundMusic.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            musicStarted = true;
-            console.log('Music started successfully');
-          }).catch(err => {
-            console.log('Autoplay blocked, will try on user interaction:', err);
-            // Пробуем запустить при любом клике
-            document.addEventListener('click', function startMusic() {
-              if (!musicStarted) {
-                backgroundMusic.play().then(() => {
-                  musicStarted = true;
-                  document.removeEventListener('click', startMusic);
-                }).catch(() => {});
-              }
-            });
-            // Пробуем запустить при любом тапе на мобильных
-            document.addEventListener('touchstart', function startMusicTouch() {
-              if (!musicStarted) {
-                backgroundMusic.play().then(() => {
-                  musicStarted = true;
-                  document.removeEventListener('touchstart', startMusicTouch);
-                }).catch(() => {});
-              }
-            });
-          });
-        }
-      } catch (error) {
-        console.warn('Background music playback failed:', error);
+    try {
+      const playPromise = backgroundMusic.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          musicStarted = true;
+          tryPlayOnInteraction = false;
+          console.log('Music playing');
+          updateMusicButton();
+        }).catch(err => {
+          console.log('Autoplay blocked, waiting for interaction:', err);
+          tryPlayOnInteraction = true;
+          
+          // Универсальный обработчик для всех типов взаимодействий
+          const startMusicOnInteraction = () => {
+            if (!musicStarted && musicEnabled && backgroundMusic) {
+              backgroundMusic.play().then(() => {
+                musicStarted = true;
+                tryPlayOnInteraction = false;
+                updateMusicButton();
+                // Удаляем все обработчики после успешного запуска
+                document.removeEventListener('click', startMusicOnInteraction);
+                document.removeEventListener('touchstart', startMusicOnInteraction);
+                document.removeEventListener('touchend', startMusicOnInteraction);
+                document.removeEventListener('keydown', startMusicOnInteraction);
+              }).catch(() => {});
+            }
+          };
+          
+          document.addEventListener('click', startMusicOnInteraction);
+          document.addEventListener('touchstart', startMusicOnInteraction);
+          document.addEventListener('touchend', startMusicOnInteraction);
+          document.addEventListener('keydown', startMusicOnInteraction);
+        });
       }
-    } else {
-      backgroundMusic.play().catch(() => {});
+    } catch (error) {
+      console.warn('Background music playback failed:', error);
     }
   }
   
@@ -1278,6 +1294,31 @@
     if (backgroundMusic) {
       backgroundMusic.pause();
       backgroundMusic.currentTime = 0;
+      musicStarted = false;
+    }
+  }
+  
+  function toggleMusic() {
+    musicEnabled = !musicEnabled;
+    
+    if (musicEnabled) {
+      playBackgroundMusic();
+    } else {
+      if (backgroundMusic && !backgroundMusic.paused) {
+        backgroundMusic.pause();
+      }
+    }
+    
+    updateMusicButton();
+  }
+  
+  function updateMusicButton() {
+    if (toggleMusicBtn) {
+      if (musicEnabled) {
+        toggleMusicBtn.textContent = '🔊 Музыка: ВКЛ';
+      } else {
+        toggleMusicBtn.textContent = '🔇 Музыка: ВЫКЛ';
+      }
     }
   }
   
@@ -1525,7 +1566,14 @@
   });
   exitBtn.addEventListener('click', () => {
     // Останавливаем музыку
-    stopBackgroundMusic();
+    if (backgroundMusic) {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      musicStarted = false;
+    }
+    
+    // Останавливаем игру
+    stopGame();
     
     // Скрываем все элементы
     mainMenu.style.display = 'none';
@@ -1538,11 +1586,12 @@
     touchControls.style.display = 'none';
     welcomeScreen.style.display = 'none';
     
-    // Останавливаем игру
-    stopGame();
-    
-    // Отправляем сообщение родительскому окну СРАЗУ для закрытия модального окна
-    window.parent.postMessage('closeGame', '*');
+    // Отправляем сообщение родительскому окну для закрытия модального окна
+    try {
+      window.parent.postMessage('closeGame', '*');
+    } catch (e) {
+      console.log('Could not send message to parent:', e);
+    }
   });
   closeRulesBtn.addEventListener('click', () => {
     rulesDialog.style.display = 'none';
@@ -1561,6 +1610,9 @@
   becomeBtn.addEventListener('click', () => {
     const referralLink = 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank';
     window.open(referralLink, '_blank');
+  });
+  toggleMusicBtn.addEventListener('click', () => {
+    toggleMusic();
   });
 
   // Сенсорное управление
@@ -1585,22 +1637,35 @@
     // Инициализируем музыку
     initBackgroundMusic();
     
-    // Пробуем запустить музыку при загрузке
-    playBackgroundMusic();
+    // Пробуем запустить музыку при загрузке (работает на ПК)
+    setTimeout(() => playBackgroundMusic(), 100);
     
-    // Для мобильных устройств - запускаем при первом тапе на экран приветствия
-    welcomeScreen.addEventListener('click', () => {
-      playBackgroundMusic();
-    });
-    welcomeScreen.addEventListener('touchstart', () => {
-      playBackgroundMusic();
+    // Для мобильных устройств - множественные попытки запуска
+    const tryStartMusic = () => {
+      if (!musicStarted && musicEnabled) {
+        playBackgroundMusic();
+      }
+    };
+    
+    // Запускаем при любом взаимодействии с экраном приветствия
+    welcomeScreen.addEventListener('click', tryStartMusic, { once: false });
+    welcomeScreen.addEventListener('touchstart', tryStartMusic, { once: false });
+    welcomeScreen.addEventListener('touchend', tryStartMusic, { once: false });
+    
+    // Запускаем при любом взаимодействии с кнопками меню
+    const menuButtons = [playBtn, rulesBtn, toggleMusicBtn, becomeBtn, exitBtn];
+    menuButtons.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('touchstart', tryStartMusic, { once: false });
+        btn.addEventListener('click', tryStartMusic, { once: false });
+      }
     });
     
     setTimeout(() => {
       welcomeScreen.style.display = 'none';
       mainMenu.style.display = 'block';
       // Ещё одна попытка запустить музыку при показе меню
-      playBackgroundMusic();
+      setTimeout(() => playBackgroundMusic(), 100);
     }, 5000);
   });
 
