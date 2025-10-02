@@ -264,22 +264,22 @@
 
 /* Анимация бегущей строки */
 @keyframes marquee {
-  0% {
-    transform: translateX(0);
+  from {
+    transform: translateX(0%);
   }
-  100% {
-    transform: translateX(-50%);
+  to {
+    transform: translateX(-100%);
   }
 }
 
 .animate-marquee {
-  animation: marquee 10s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
-/* Ускоренная анимация для мобильных */
+/* Замедленная анимация для мобильных */
 @media (max-width: 768px) {
   .animate-marquee {
-    animation: marquee 5s linear infinite;
+    animation: marquee 30s linear infinite;
   }
 }
 
