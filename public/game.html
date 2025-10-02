@@ -14,7 +14,7 @@
     width: 100%;
     overflow: hidden;
     font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
-    background: linear-gradient(#555 10%, #444 50%, #555 90%);
+    background: #000;
     color: #FFD700;
     user-select: none;
   }
@@ -1223,20 +1223,54 @@
 
   // Фоновая музыка
   let backgroundMusic = null;
+  let musicStarted = false;
   
-  function playBackgroundMusic() {
+  function initBackgroundMusic() {
     if (!backgroundMusic) {
       backgroundMusic = new Audio('/The_Black_Eyed_Peas_-_Pump_It_Ost_Taxi_64072506.mp3');
       backgroundMusic.loop = true;
       backgroundMusic.volume = 0.3;
+      backgroundMusic.preload = 'auto';
     }
+  }
+  
+  function playBackgroundMusic() {
+    initBackgroundMusic();
     
-    try {
-      backgroundMusic.play().catch(err => {
-        console.log('Autoplay blocked, waiting for user interaction:', err);
-      });
-    } catch (error) {
-      console.warn('Background music playback failed:', error);
+    if (!musicStarted) {
+      try {
+        const playPromise = backgroundMusic.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            musicStarted = true;
+            console.log('Music started successfully');
+          }).catch(err => {
+            console.log('Autoplay blocked, will try on user interaction:', err);
+            // Пробуем запустить при любом клике
+            document.addEventListener('click', function startMusic() {
+              if (!musicStarted) {
+                backgroundMusic.play().then(() => {
+                  musicStarted = true;
+                  document.removeEventListener('click', startMusic);
+                }).catch(() => {});
+              }
+            });
+            // Пробуем запустить при любом тапе на мобильных
+            document.addEventListener('touchstart', function startMusicTouch() {
+              if (!musicStarted) {
+                backgroundMusic.play().then(() => {
+                  musicStarted = true;
+                  document.removeEventListener('touchstart', startMusicTouch);
+                }).catch(() => {});
+              }
+            });
+          });
+        }
+      } catch (error) {
+        console.warn('Background music playback failed:', error);
+      }
+    } else {
+      backgroundMusic.play().catch(() => {});
     }
   }
   
@@ -1478,6 +1512,9 @@
 
   // Обработчики меню
   playBtn.addEventListener('click', () => {
+    // Запускаем музыку если ещё не запущена
+    playBackgroundMusic();
+    
     mainMenu.style.display = 'none';
     // Музыка продолжает играть при переходе в игру
     startGame();
@@ -1487,6 +1524,10 @@
     rulesDialog.style.display = 'block';
   });
   exitBtn.addEventListener('click', () => {
+    // Останавливаем музыку
+    stopBackgroundMusic();
+    
+    // Скрываем все элементы
     mainMenu.style.display = 'none';
     container.style.display = 'none';
     info.style.display = 'none';
@@ -1495,24 +1536,13 @@
     rulesDialog.style.display = 'none';
     gtaGameOverScreen.style.display = 'none';
     touchControls.style.display = 'none';
+    welcomeScreen.style.display = 'none';
+    
+    // Останавливаем игру
     stopGame();
-    stopBackgroundMusic();
-
-    // Отправляем сообщение родительскому окну для закрытия модального окна
+    
+    // Отправляем сообщение родительскому окну СРАЗУ для закрытия модального окна
     window.parent.postMessage('closeGame', '*');
-
-    setTimeout(() => {
-      if (!window.closed) {
-        // Проверяем, если мы в iframe или родительском окне
-        if (window.parent !== window.self) {
-          // Мы в iframe, закрываем модальное окно
-          window.parent.postMessage('closeGame', '*');
-        } else {
-          // Мы в отдельной вкладке, возвращаемся на главную страницу
-          window.location.href = window.location.origin;
-        }
-      }
-    }, 500);
   });
   closeRulesBtn.addEventListener('click', () => {
     rulesDialog.style.display = 'none';
@@ -1552,12 +1582,25 @@
 
   // При загрузке страницы показываем приветственный экран 5 секунд, потом меню
   window.addEventListener('load', () => {
-    // Запускаем фоновую музыку сразу при загрузке
+    // Инициализируем музыку
+    initBackgroundMusic();
+    
+    // Пробуем запустить музыку при загрузке
     playBackgroundMusic();
+    
+    // Для мобильных устройств - запускаем при первом тапе на экран приветствия
+    welcomeScreen.addEventListener('click', () => {
+      playBackgroundMusic();
+    });
+    welcomeScreen.addEventListener('touchstart', () => {
+      playBackgroundMusic();
+    });
     
     setTimeout(() => {
       welcomeScreen.style.display = 'none';
       mainMenu.style.display = 'block';
+      // Ещё одна попытка запустить музыку при показе меню
+      playBackgroundMusic();
     }, 5000);
   });
 

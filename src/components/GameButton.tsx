@@ -143,8 +143,8 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
       {/* Модальное окно с игрой */}
       {isGameOpen && (
-        <div className="fixed inset-0 z-[999999] bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-6xl h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-[999999] bg-black flex items-center justify-center p-4">
+          <div className="relative w-full max-w-6xl h-[80vh] bg-black rounded-lg shadow-2xl overflow-hidden">
             {/* Кнопка закрытия */}
             <button
               onClick={closeGame}
