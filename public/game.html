@@ -1044,7 +1044,6 @@
           if (!shieldActive) {
             loseLife(1);
             showSpeechRandom(pedestrianPhrases);
-            playSound('hit');
           }
           p.elem.remove();
           pedestrians.splice(i, 1);
@@ -1060,7 +1059,6 @@
           if (!shieldActive) {
             loseLife(0.5);
             showSpeechRandom(pedestrianPhrases);
-            playSound('hit');
           }
           p.elem.remove();
           standingPeds.splice(i, 1);
@@ -1076,7 +1074,6 @@
           if (!shieldActive) {
             loseLife(1.5);
             showSpeechRandom(policePhrases);
-            playSound('hit');
           }
           p.elem.remove();
           policeStandings.splice(i, 1);
@@ -1092,7 +1089,6 @@
           if (!shieldActive) {
             loseLife(2);
             showSpeechRandom(policePhrases);
-            playSound('hit');
           }
           p.elem.remove();
           policeCars.splice(i, 1);
@@ -1117,7 +1113,6 @@
           updateScoreDisplay();
           f.elem.remove();
           foods.splice(i, 1);
-          playSound('eat');
           return;
         }
       }
@@ -1130,7 +1125,6 @@
           if (lives < 3) {
             lives = Math.min(3, lives + 1);
             updateLivesDisplay();
-            playSound('medkit');
           }
           m.elem.remove();
           medkits.splice(i, 1);
@@ -1145,10 +1139,8 @@
         if (isCollide(courierRect, r)) {
           if (b.type === '⚡️') {
             activateSpeedBoost();
-            playSound('bonus');
           } else if (b.type === '🛡️') {
             activateShield();
-            playSound('bonus');
           }
           b.elem.remove();
           bonuses.splice(i, 1);
@@ -1229,200 +1221,34 @@
     }, 7000);
   }
 
-  // Система звуков
-  let audioContext;
-  let backgroundMusicGain;
-  let backgroundMusicOscillator;
-  let isBackgroundMusicPlaying = false;
-  
-  const melody = [
-    // Более энергичная и увлекательная мелодия для игры курьера
-    440.00, // A4
-    523.25, // C5  
-    659.25, // E5
-    783.99, // G5
-    880.00, // A5
-    783.99, // G5
-    659.25, // E5
-    698.46, // F5
-    659.25, // E5
-    587.33, // D5
-    523.25, // C5
-    587.33, // D5
-    659.25, // E5
-    523.25, // C5
-    440.00, // A4
-    493.88, // B4
-  ];
-  
-  const bassLine = [
-    // Басовая линия для ритма
-    220.00, // A3
-    261.63, // C4
-    329.63, // E4
-    392.00, // G4
-    220.00, // A3
-    261.63, // C4
-    329.63, // E4
-    349.23, // F4
-  ];
-  let currentNoteIndex = 0;
-  let nextNoteTime = 0;
-  let musicScheduler;
-  
-  function initAudioContext() {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      backgroundMusicGain = audioContext.createGain();
-      backgroundMusicGain.connect(audioContext.destination);
-      backgroundMusicGain.gain.value = 0.15; // Чуть громче для большей вовлеченности
-    }
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-  }
-  
-  function createSound(frequency, duration, type = 'sine', volume = 0.3) {
-    if (!audioContext) initAudioContext();
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = frequency;
-    oscillator.type = type;
-    
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + duration);
-  }
+  // Фоновая музыка
+  let backgroundMusic = null;
   
   function playBackgroundMusic() {
-    if (!audioContext || isBackgroundMusicPlaying) return;
-    initAudioContext();
-    
-    isBackgroundMusicPlaying = true;
-    nextNoteTime = audioContext.currentTime;
-    currentNoteIndex = 0;
-    
-    function scheduleNote() {
-      if (!isBackgroundMusicPlaying) return;
-      
-      while (nextNoteTime < audioContext.currentTime + 0.1) {
-        const oscillator = audioContext.createOscillator();
-        const noteGain = audioContext.createGain();
-        
-        oscillator.connect(noteGain);
-        noteGain.connect(backgroundMusicGain);
-        
-        const frequency = melody[currentNoteIndex % melody.length];
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'triangle'; // Более мягкий звук
-        
-        noteGain.gain.setValueAtTime(0, nextNoteTime);
-        noteGain.gain.linearRampToValueAtTime(0.12, nextNoteTime + 0.05);
-        noteGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.4);
-        
-        oscillator.start(nextNoteTime);
-        oscillator.stop(nextNoteTime + 0.5);
-        
-        // Добавляем гармонию (октава выше)
-        if (currentNoteIndex % 2 === 0) {
-          const harmonyOsc = audioContext.createOscillator();
-          const harmonyGain = audioContext.createGain();
-          
-          harmonyOsc.connect(harmonyGain);
-          harmonyGain.connect(backgroundMusicGain);
-          
-          harmonyOsc.frequency.value = frequency * 2; // Октава выше
-          harmonyOsc.type = 'sine';
-          
-          harmonyGain.gain.setValueAtTime(0, nextNoteTime);
-          harmonyGain.gain.linearRampToValueAtTime(0.06, nextNoteTime + 0.05);
-          harmonyGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.3);
-          
-          harmonyOsc.start(nextNoteTime);
-          harmonyOsc.stop(nextNoteTime + 0.4);
-        }
-        
-        // Добавляем басовую линию каждые 4 ноты
-        if (currentNoteIndex % 4 === 0) {
-          const bassOsc = audioContext.createOscillator();
-          const bassGain = audioContext.createGain();
-          
-          bassOsc.connect(bassGain);
-          bassGain.connect(backgroundMusicGain);
-          
-          const bassNote = bassLine[Math.floor(currentNoteIndex / 4) % bassLine.length];
-          bassOsc.frequency.value = bassNote;
-          bassOsc.type = 'square';
-          
-          bassGain.gain.setValueAtTime(0, nextNoteTime);
-          bassGain.gain.linearRampToValueAtTime(0.08, nextNoteTime + 0.02);
-          bassGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.6);
-          
-          bassOsc.start(nextNoteTime);
-          bassOsc.stop(nextNoteTime + 0.7);
-        }
-        
-        const secondsPerBeat = 60.0 / 140; // 140 BPM - более быстрый темп
-        nextNoteTime += secondsPerBeat;
-        currentNoteIndex++;
-      }
-      
-      if (isBackgroundMusicPlaying) {
-        musicScheduler = setTimeout(scheduleNote, 25);
-      }
+    if (!backgroundMusic) {
+      backgroundMusic = new Audio('/The_Black_Eyed_Peas_-_Pump_It_Ost_Taxi_64072506.mp3');
+      backgroundMusic.loop = true;
+      backgroundMusic.volume = 0.3;
     }
     
-    scheduleNote();
+    try {
+      backgroundMusic.play().catch(err => {
+        console.log('Autoplay blocked, waiting for user interaction:', err);
+      });
+    } catch (error) {
+      console.warn('Background music playback failed:', error);
+    }
   }
   
   function stopBackgroundMusic() {
-    isBackgroundMusicPlaying = false;
-    if (musicScheduler) {
-      clearTimeout(musicScheduler);
-      musicScheduler = null;
+    if (backgroundMusic) {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
     }
   }
   
   function playSound(name) {
-    if (!audioContext) initAudioContext();
-    
-    try {
-      switch (name) {
-        case 'eat':
-          createSound(800, 0.15, 'square', 0.4);
-          setTimeout(() => createSound(1200, 0.1, 'sine', 0.3), 50);
-          break;
-        case 'medkit':
-          createSound(523, 0.2, 'sine', 0.4);
-          setTimeout(() => createSound(659, 0.2, 'sine', 0.4), 100);
-          setTimeout(() => createSound(784, 0.3, 'sine', 0.4), 200);
-          break;
-        case 'hit':
-          createSound(200, 0.3, 'sawtooth', 0.5);
-          break;
-        case 'gameOver':
-          createSound(440, 0.3, 'sawtooth', 0.6);
-          setTimeout(() => createSound(330, 0.3, 'sawtooth', 0.6), 300);
-          setTimeout(() => createSound(262, 0.5, 'sawtooth', 0.6), 600);
-          break;
-        case 'bonus':
-          createSound(1200, 0.1, 'sine', 0.4);
-          setTimeout(() => createSound(1600, 0.15, 'triangle', 0.3), 50);
-          break;
-        default:
-          createSound(440, 0.1, 'sine', 0.3);
-      }
-    } catch (error) {
-      console.warn('Sound playback failed:', error);
-    }
+    // Звуки отключены, остаётся только музыка
   }
 
   function startSpawning() {
@@ -1563,9 +1389,7 @@
     bonuses = [];
     policeCars = [];
     
-    // Запускаем фоновую музыку
-    initAudioContext();
-    setTimeout(() => playBackgroundMusic(), 500);
+    // Музыка уже играет, продолжаем
 
     score = 0;
     lives = 3;
@@ -1604,7 +1428,7 @@
     cancelAnimationFrame(gameLoopId);
     stopSpawning();
     stopTimer();
-    stopBackgroundMusic();
+    // НЕ останавливаем музыку здесь - она продолжает играть
     pedestrians.forEach(p => p.elem.remove());
     standingPeds.forEach(p => p.elem.remove());
     policeStandings.forEach(p => p.elem.remove());
@@ -1647,8 +1471,7 @@
     if (gameOverFlag) return;
     gameOverFlag = true;
     stopGame();
-    stopBackgroundMusic();
-    playSound('gameOver');
+    // Музыка продолжает играть даже после game over
 
     showGameOverAnimation();
   }
@@ -1656,6 +1479,7 @@
   // Обработчики меню
   playBtn.addEventListener('click', () => {
     mainMenu.style.display = 'none';
+    // Музыка продолжает играть при переходе в игру
     startGame();
   });
   rulesBtn.addEventListener('click', () => {
@@ -1672,6 +1496,7 @@
     gtaGameOverScreen.style.display = 'none';
     touchControls.style.display = 'none';
     stopGame();
+    stopBackgroundMusic();
 
     // Отправляем сообщение родительскому окну для закрытия модального окна
     window.parent.postMessage('closeGame', '*');
@@ -1700,6 +1525,8 @@
   toMenuBtn.addEventListener('click', () => {
     gameOverMenu.style.display = 'none';
     mainMenu.style.display = 'block';
+    // Продолжаем музыку в меню
+    playBackgroundMusic();
   });
   becomeBtn.addEventListener('click', () => {
     const referralLink = 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank';
@@ -1725,6 +1552,9 @@
 
   // При загрузке страницы показываем приветственный экран 5 секунд, потом меню
   window.addEventListener('load', () => {
+    // Запускаем фоновую музыку сразу при загрузке
+    playBackgroundMusic();
+    
     setTimeout(() => {
       welcomeScreen.style.display = 'none';
       mainMenu.style.display = 'block';
