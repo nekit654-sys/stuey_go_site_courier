@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Приключения курьера</title>
+
+<!-- Предзагрузка критических ресурсов -->
+<link rel="preload" href="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" as="image" />
+<link rel="preload" href="https://cdn.poehali.dev/files/6f16d2d4-f371-4b0f-a43e-c70a6de7b033.jpg" as="image" />
+
 <style>
   /* --- Сброс и базовые стили --- */
   *, *::before, *::after {
@@ -128,7 +133,6 @@
     z-index: 10;
     text-shadow: 1px 1px 0.2vw #2e1b0c;
     transform-origin: center bottom;
-    animation: sway 2s ease-in-out infinite;
     width: 1em;
     height: 1em;
     transform-origin: center bottom;
@@ -136,6 +140,18 @@
     transform-box: fill-box;
     transform: scaleX(-1);
     transition: top 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: top;
+  }
+  /* Упрощенная анимация для слабых устройств */
+  @media (max-width: 767px) {
+    #courier {
+      animation: none;
+    }
+  }
+  @media (min-width: 768px) {
+    #courier {
+      animation: sway 2s ease-in-out infinite;
+    }
   }
   @keyframes sway {
     0%, 100% { transform: scaleX(-1) translateX(0) rotate(0deg); }
@@ -218,38 +234,37 @@
     border-color: #222c transparent transparent transparent;
   }
 
-  /* --- Объекты --- */
+  /* --- Объекты (оптимизировано для производительности) --- */
   .pedestrian, .food, .medkit, .bonus, .policeCar, .policeStanding {
     position: absolute;
     font-size: clamp(2rem, 6vw, 3rem);
     user-select: none;
     pointer-events: none;
     z-index: 5;
-    transition: transform 0.2s ease;
     text-shadow: 1px 1px 0.1vw #422d1f;
+    will-change: left;
   }
-  .pedestrian {
-    filter: drop-shadow(0 0 0.15rem #8b0000);
-  }
-  .food {
-    filter: drop-shadow(0 0 0.2rem #ffd54f);
-    text-shadow: 1px 1px 0.1vw #7a4a19;
-  }
-  .medkit {
-    filter: drop-shadow(0 0 0.25rem #e57373);
-    text-shadow: 1px 1px 0.1vw #c62828;
-  }
-  .bonus {
-    filter: drop-shadow(0 0 0.25rem #64b5f6);
-    text-shadow: 1px 1px 0.1vw #1565c0;
-  }
-  .policeCar {
-    filter: drop-shadow(0 0 0.3rem #2196f3);
-    text-shadow: 1px 1px 0.15vw #0d47a1;
-  }
-  .policeStanding {
-    filter: drop-shadow(0 0 0.25rem #1565c0);
-    text-shadow: 1px 1px 0.1vw #0d47a1;
+  
+  /* Упрощаем эффекты на мобильных для производительности */
+  @media (min-width: 768px) {
+    .pedestrian {
+      filter: drop-shadow(0 0 0.15rem #8b0000);
+    }
+    .food {
+      filter: drop-shadow(0 0 0.2rem #ffd54f);
+    }
+    .medkit {
+      filter: drop-shadow(0 0 0.25rem #e57373);
+    }
+    .bonus {
+      filter: drop-shadow(0 0 0.25rem #64b5f6);
+    }
+    .policeCar {
+      filter: drop-shadow(0 0 0.3rem #2196f3);
+    }
+    .policeStanding {
+      filter: drop-shadow(0 0 0.25rem #1565c0);
+    }
   }
 
   /* --- Главное меню --- */
@@ -1064,10 +1079,11 @@
   const speechBubble = document.getElementById('speechBubble');
   const lanes = document.querySelectorAll('.lane');
 
-  // Определяем мобильное устройство (по ширине экрана)
+  // Определяем мобильное устройство и производительность
   const isMobile = window.innerWidth <= 767;
+  const isLowEndDevice = isMobile && (navigator.hardwareConcurrency <= 4 || navigator.deviceMemory <= 4);
 
-  // Переменные
+  // Переменные (оптимизировано для слабых устройств)
   let score = 0;
   let lives = 3;
   let gameOverFlag = false;
@@ -1075,8 +1091,8 @@
   let gameTime = 0;
   let comboCount = 0;
   let comboTimeout = null;
-  const maxSpeedX = isMobile ? 7 : 12;
-  let speedX = isMobile ? 3 : 4;
+  const maxSpeedX = isLowEndDevice ? 5 : (isMobile ? 7 : 12);
+  let speedX = isLowEndDevice ? 2 : (isMobile ? 3 : 4);
 
   let lanePositions = [];
   let courierLane = 2;
@@ -1515,8 +1531,8 @@
     if (!backgroundMusic) {
       backgroundMusic = new Audio('/The_Black_Eyed_Peas_-_Pump_It_Ost_Taxi_64072506.mp3');
       backgroundMusic.loop = true;
-      backgroundMusic.volume = 0.3;
-      backgroundMusic.preload = 'auto';
+      backgroundMusic.volume = isLowEndDevice ? 0.2 : 0.3; // Тише на слабых устройствах
+      backgroundMusic.preload = isLowEndDevice ? 'metadata' : 'auto'; // Меньше предзагрузки на слабых устройствах
       
       // Обработка событий загрузки
       backgroundMusic.addEventListener('loadeddata', () => {
@@ -1609,13 +1625,16 @@
   }
 
   function startSpawning() {
-    pedestrianSpawnTimer = setInterval(createPedestrian, 2200);
-    standingPedSpawnTimer = setInterval(createStandingPedestrian, 2500);
-    policeStandingSpawnTimer = setInterval(createPoliceStanding, 12000);
-    foodSpawnTimer = setInterval(createFood, 1800);
-    medkitSpawnTimer = setInterval(createMedkit, 9000);
-    bonusSpawnTimer = setInterval(createBonus, 15000);
-    policeCarSpawnTimer = setInterval(createPoliceCar, 25000);
+    // Оптимизация для слабых устройств - меньше объектов
+    const spawnMultiplier = isLowEndDevice ? 1.5 : 1;
+    
+    pedestrianSpawnTimer = setInterval(createPedestrian, 2200 * spawnMultiplier);
+    standingPedSpawnTimer = setInterval(createStandingPedestrian, 2500 * spawnMultiplier);
+    policeStandingSpawnTimer = setInterval(createPoliceStanding, 12000 * spawnMultiplier);
+    foodSpawnTimer = setInterval(createFood, 1800 * spawnMultiplier);
+    medkitSpawnTimer = setInterval(createMedkit, 9000 * spawnMultiplier);
+    bonusSpawnTimer = setInterval(createBonus, 15000 * spawnMultiplier);
+    policeCarSpawnTimer = setInterval(createPoliceCar, 25000 * spawnMultiplier);
   }
   function stopSpawning() {
     clearInterval(pedestrianSpawnTimer);
@@ -1689,7 +1708,10 @@
     lastFrameTime = timestamp;
 
     if (!paused && !gameOverFlag) {
-      checkUpcomingThreat();
+      // Оптимизация: речь проверяем реже на слабых устройствах
+      if (!isLowEndDevice || gameTime % 2 === 0) {
+        checkUpcomingThreat();
+      }
 
       if (moveCooldown > 0) {
         moveCooldown -= delta * 16.67;

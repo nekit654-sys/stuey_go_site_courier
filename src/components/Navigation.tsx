@@ -12,6 +12,7 @@ const Navigation = () => {
   const { playSound } = useSound();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
+  const [isGameLoading, setIsGameLoading] = useState(false);
 
 
   const menuItems = [
@@ -83,11 +84,12 @@ const Navigation = () => {
                 const newGameState = !isGameOpen;
                 setIsGameOpen(newGameState);
                 
-                // Блокируем скролл и скрываем другие элементы
                 if (newGameState) {
+                  setIsGameLoading(true);
                   document.body.style.overflow = 'hidden';
                   document.body.classList.add('game-modal-open');
                 } else {
+                  setIsGameLoading(false);
                   document.body.style.overflow = '';
                   document.body.classList.remove('game-modal-open');
                 }
@@ -130,11 +132,11 @@ const Navigation = () => {
         {/* Mobile menu */}
         <div
           className={`
-          md:hidden overflow-hidden transition-all duration-300 ease-in-out
-          ${isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+          md:hidden overflow-hidden transition-all duration-500 ease-out
+          ${isMenuOpen ? "max-h-[500px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-4"}
         `}
         >
-          <div className="py-4 space-y-2 border-t border-yellow-400/20">
+          <div className="py-4 space-y-2 border-t border-yellow-400/20 animate-in slide-in-from-top-5 duration-500">
             {menuItems.map((item) => (
               <Link
                 key={item.path}
@@ -176,11 +178,12 @@ const Navigation = () => {
                 setIsGameOpen(newGameState);
                 handleMenuItemClick();
                 
-                // Блокируем скролл и скрываем другие элементы
                 if (newGameState) {
+                  setIsGameLoading(true);
                   document.body.style.overflow = 'hidden';
                   document.body.classList.add('game-modal-open');
                 } else {
+                  setIsGameLoading(false);
                   document.body.style.overflow = '';
                   document.body.classList.remove('game-modal-open');
                 }
@@ -219,12 +222,25 @@ const Navigation = () => {
               <Icon name="X" size={16} />
             </button>
 
+            {/* Индикатор загрузки */}
+            {isGameLoading && (
+              <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
+                <div className="text-yellow-400 text-center">
+                  <Icon name="Loader2" size={48} className="animate-spin mx-auto mb-4" />
+                  <p className="text-lg font-bold">Загрузка игры...</p>
+                </div>
+              </div>
+            )}
+
             {/* Iframe с игрой */}
             <iframe
               src="/game.html"
               className="w-full h-full border-0"
               title="Игра Приключения курьера Stuey.Go"
               allow="fullscreen"
+              onLoad={() => {
+                setTimeout(() => setIsGameLoading(false), 500);
+              }}
             />
           </div>
         </div>

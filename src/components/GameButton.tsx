@@ -125,83 +125,35 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   return (
     <>
-      {/* Плавающая кнопка игры - только для мобильных и планшетов */}
-      <div
-        className={`fixed bottom-6 left-6 transition-all duration-300 z-50 lg:hidden ${
-          isVisible
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
-      >
-        <button
-          onClick={toggleGame}
-          className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 
-                     rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 
-                     hover:scale-110 active:scale-95 flex items-center justify-center group
-                     animate-shake hover:animate-none"
-          style={{
-            animation: isVisible ? "shake 3s ease-in-out infinite" : "none",
-            animationDelay: "2s",
-          }}
-        >
-          {/* Иконка игры */}
-          <Gamepad2 size={28} className="text-white drop-shadow-sm" />
+      {/* Плавающая кнопка игры убрана - игра доступна только через меню */}
 
-          {/* Анимация потряхивания */}
-          <style jsx>{`
-            @keyframes shake {
-              0%,
-              90%,
-              100% {
-                transform: translateX(0);
-              }
-              91%,
-              93%,
-              95%,
-              97%,
-              99% {
-                transform: translateX(-2px);
-              }
-              92%,
-              94%,
-              96%,
-              98% {
-                transform: translateX(2px);
-              }
-            }
-          `}</style>
-        </button>
-      </div>
-
-      {/* Модальное окно с игрой */}
+      {/* Модальное окно с игрой - оптимизировано для слабых устройств */}
       {isGameOpen && (
-        <div className="fixed inset-0 z-[999999] bg-black flex items-center justify-center p-4">
-          <div className="relative w-full max-w-6xl h-[80vh] bg-black rounded-lg shadow-2xl overflow-hidden border-4 border-yellow-400">
+        <div className="fixed inset-0 z-[999999] bg-black flex items-center justify-center p-2 md:p-4">
+          <div className="relative w-full h-full md:max-w-6xl md:h-[85vh] bg-black md:rounded-lg shadow-2xl overflow-hidden md:border-4 border-yellow-400">
             {/* Кнопка закрытия */}
             <button
               onClick={closeGame}
-              className="absolute top-4 right-4 z-[1000000] w-8 h-8 bg-red-500 hover:bg-red-600 
+              className="absolute top-2 right-2 md:top-4 md:right-4 z-[1000000] w-10 h-10 md:w-8 md:h-8 bg-red-500 hover:bg-red-600 
                          text-white rounded-full flex items-center justify-center 
-                         transition-all duration-200 hover:scale-110"
+                         transition-all duration-200 hover:scale-110 active:scale-95"
             >
-              <X size={16} />
+              <X size={20} className="md:w-4 md:h-4" />
             </button>
 
-            {/* Iframe с игрой */}
+            {/* Iframe с игрой - оптимизирован */}
             <iframe
               src="/game.html"
               className="w-full h-full border-0"
               title="Приключения курьера"
               allow="fullscreen"
+              loading="lazy"
               ref={(iframe) => {
                 if (iframe) {
                   iframe.onload = () => {
-                    // Передаём функцию закрытия в iframe
                     const iframeWindow = iframe.contentWindow;
                     if (iframeWindow) {
-                      // Делаем функцию closeGame доступной для iframe
                       (iframeWindow as any).parentCloseGame = closeGame;
-                      console.log('closeGame function passed to iframe');
                     }
                   };
                 }
