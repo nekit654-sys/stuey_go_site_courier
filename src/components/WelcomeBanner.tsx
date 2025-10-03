@@ -18,15 +18,14 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
         const newId = prev + 1;
         const newCoin = {
           id: newId,
-          left: Math.random() * 80 + 10, // Рандомная позиция 10-90%
+          left: Math.random() * 80 + 10,
           delay: 0,
-          size: 15 + Math.random() * 10, // Рандомный размер
-          duration: 4 + Math.random() * 2, // Рандомная длительность 4-6 секунд
+          size: 15 + Math.random() * 10,
+          duration: 3 + Math.random() * 2,
         };
         
         setCoins((prevCoins) => {
-          // Удаляем старые купюры (старше 10 секунд)
-          const filtered = prevCoins.filter(coin => newId - coin.id < 20);
+          const filtered = prevCoins.filter(coin => newId - coin.id < 30);
           return [...filtered, newCoin];
         });
         
@@ -34,13 +33,15 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
       });
     };
 
-    // Добавляем первую купюру сразу
+    // Добавляем первые 3 купюры сразу
     addCoin();
+    setTimeout(addCoin, 100);
+    setTimeout(addCoin, 200);
     
-    // Затем добавляем новые купюры каждые 150-400мс (рандомный интервал)
+    // Затем добавляем новые купюры каждые 80-200мс (чаще = больше купюр)
     let timeoutId: number;
     const scheduleNextCoin = () => {
-      const randomDelay = 150 + Math.random() * 250;
+      const randomDelay = 80 + Math.random() * 120;
       timeoutId = window.setTimeout(() => {
         addCoin();
         scheduleNextCoin();
@@ -49,20 +50,27 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
     
     scheduleNextCoin();
 
-    // Таймер обратного отсчета
-    const countdownInterval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          handleClose();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // ТОЧНЫЙ таймер обратного отсчета строго по секундам
+    const startTime = Date.now();
+    const duration = 10000; // 10 секунд в миллисекундах
+    
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+      
+      setTimeLeft(remaining);
+      
+      if (remaining === 0) {
+        handleClose();
+      }
+    };
+    
+    // Обновляем каждые 100мс для точности, но показываем только целые секунды
+    const timerInterval = setInterval(updateTimer, 100);
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
-      clearInterval(countdownInterval);
+      clearInterval(timerInterval);
     };
   }, []);
 
