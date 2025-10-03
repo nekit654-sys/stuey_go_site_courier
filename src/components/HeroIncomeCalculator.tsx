@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Icon from '@/components/ui/icon';
 import { useMagicEffect } from '@/hooks/useMagicEffect';
 import { useSound } from '@/hooks/useSound';
@@ -37,7 +37,10 @@ const HeroIncomeCalculator = () => {
     return Math.round(income) + (withBonus ? 18000 : 0);
   }, []);
 
-  const income = calculateIncome(days, hours, referralBonus, courierType);
+  const income = useMemo(() => 
+    calculateIncome(days, hours, referralBonus, courierType),
+    [days, hours, referralBonus, courierType, calculateIncome]
+  );
 
   return (
     <div className="backdrop-blur-md bg-white/10 border border-yellow-400/30 rounded-2xl p-8 shadow-xl ring-1 ring-white/10">
@@ -150,7 +153,6 @@ const HeroIncomeCalculator = () => {
               max="31"
               value={days}
               onChange={(e) => {
-                playSound('beep');
                 setDays(Number(e.target.value));
               }}
               className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
@@ -183,7 +185,6 @@ const HeroIncomeCalculator = () => {
               max="12"
               value={hours}
               onChange={(e) => {
-                playSound('beep');
                 setHours(Number(e.target.value));
               }}
               className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"

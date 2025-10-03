@@ -15,29 +15,39 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       setIsMobile(window.innerWidth <= 767);
     };
 
+    let ticking = false;
     const handleScroll = () => {
-      // Показываем кнопку только на мобильных и планшетах когда прокрутили до середины страницы
-      if (window.innerWidth > 1024) {
-        setIsVisible(false);
-        return;
-      }
+      if (ticking) return;
       
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const documentHeight = document.documentElement.scrollHeight;
-      const windowHeight = window.innerHeight;
-      const scrollPercentage = scrollTop / (documentHeight - windowHeight);
-      
-      // Показываем кнопку когда прокрутили до середины страницы (50%)
-      setIsVisible(scrollPercentage >= 0.5);
+      ticking = true;
+      requestAnimationFrame(() => {
+        // Показываем кнопку только на мобильных и планшетах когда прокрутили до середины страницы
+        if (window.innerWidth > 1024) {
+          setIsVisible(false);
+          ticking = false;
+          return;
+        }
+        
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const documentHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+        const scrollPercentage = scrollTop / (documentHeight - windowHeight);
+        
+        // Показываем кнопку когда прокрутили до середины страницы (50%)
+        setIsVisible(scrollPercentage >= 0.5);
+        ticking = false;
+      });
     };
 
     checkDevice();
-    handleScroll(); // Вызываем сразу для проверки начального состояния
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", () => {
       checkDevice();
       handleScroll();
-    });
+    }, { passive: true });
+    
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", checkDevice);

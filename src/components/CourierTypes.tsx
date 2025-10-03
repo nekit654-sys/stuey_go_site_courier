@@ -111,16 +111,12 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={(e) => handleMagicClick(e, courier.type)}
-                  onMouseEnter={() => playSound('hover')}
                   className={`w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4 px-6 text-lg 
-                    shadow-lg hover:shadow-xl active:shadow-md
+                    shadow-lg hover:shadow-xl
                     rounded-lg hover:scale-105 transition-all duration-200 ease-out
                     ring-2 ring-amber-300/50 hover:ring-amber-400/70
-                    border-0 backdrop-blur-sm
-                    animate-bounce-sequence-${index + 1}
-                    relative overflow-hidden
-                    before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
-                    before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700`}
+                    border-0
+                    animate-bounce-sequence-${index + 1}`}
                 >
                   Заполнить заявку
                 </Button>

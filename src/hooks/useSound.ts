@@ -109,7 +109,7 @@ const playComplexSound = async (type: SoundType): Promise<void> => {
 };
 
 export const useSound = () => {
-  const isEnabledRef = useRef(true);
+  const isEnabledRef = useRef(false); // Отключаем звуки по умолчанию для производительности
   
   const playSound = useCallback(async (soundType: SoundType) => {
     if (!isEnabledRef.current) return;
@@ -117,7 +117,7 @@ export const useSound = () => {
     try {
       await playComplexSound(soundType);
     } catch (error) {
-      console.warn('Sound playback failed:', error);
+      // Тихо игнорируем ошибки
     }
   }, []);
   

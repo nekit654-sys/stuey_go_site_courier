@@ -31,15 +31,15 @@ const PromoMarquee = () => {
 
   return (
     <div 
-      className="w-full bg-white border-y-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-all duration-300"
+      className="w-full bg-white border-y-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
       onClick={scrollToForm}
     >
       <div className="relative overflow-hidden py-5">
         <div className="flex items-center">
-          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-bold text-gray-900 shrink-0">
+          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-bold text-gray-900 shrink-0" style={{ backfaceVisibility: 'hidden' }}>
             {messages}
           </div>
-          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-bold text-gray-900 shrink-0">
+          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-bold text-gray-900 shrink-0" style={{ backfaceVisibility: 'hidden' }}>
             {messages}
           </div>
         </div>

@@ -94,6 +94,17 @@
       "rlig" 1,
       "calt" 1;
   }
+
+  /* Оптимизация изображений */
+  img {
+    content-visibility: auto;
+  }
+
+  /* Оптимизация рендеринга */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* Оптимизированная анимация подпрыгивания */
@@ -101,13 +112,13 @@
   0%,
   94%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   2% {
-    transform: translateY(-8px);
+    transform: translate3d(0, -8px, 0);
   }
   4% {
-    transform: translateY(-4px);
+    transform: translate3d(0, -4px, 0);
   }
 }
 
@@ -215,43 +226,50 @@
   0%,
   96%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   3% {
-    transform: translateY(-12px);
+    transform: translate3d(0, -12px, 0);
   }
   6% {
-    transform: translateY(-6px);
+    transform: translate3d(0, -6px, 0);
   }
 }
 
 .animate-bounce-sequence-1 {
-  animation: bounce-smooth 8s ease-in-out infinite;
-  will-change: transform;
+  animation: bounce-smooth 10s ease-in-out infinite;
 }
 
 .animate-bounce-sequence-2 {
-  animation: bounce-smooth 8s ease-in-out infinite 1s;
-  will-change: transform;
+  animation: bounce-smooth 10s ease-in-out infinite 1.5s;
 }
 
 .animate-bounce-sequence-3 {
-  animation: bounce-smooth 8s ease-in-out infinite 2s;
-  will-change: transform;
+  animation: bounce-smooth 10s ease-in-out infinite 3s;
 }
 
-/* Анимация бегущей строки */
-@keyframes marquee {
-  from {
-    transform: translateX(0%);
+/* Отключаем на мобильных */
+@media (max-width: 768px) {
+  .animate-bounce-sequence-1,
+  .animate-bounce-sequence-2,
+  .animate-bounce-sequence-3 {
+    animation: none;
   }
-  to {
-    transform: translateX(-100%);
+}
+
+/* Анимация бегущей строки - оптимизирована */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
 .animate-marquee {
   animation: marquee 40s linear infinite;
+  will-change: transform;
 }
 
 /* Замедленная анимация для мобильных */
@@ -295,10 +313,10 @@
 @keyframes gentle-bounce {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
@@ -349,4 +367,34 @@ body.game-modal-open .whatsapp-button {
   .magic-particles::after {
     display: none;
   }
+}
+
+/* Глобальные оптимизации производительности */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Отключаем hover эффекты на тач-устройствах */
+@media (hover: none) and (pointer: coarse) {
+  *:hover {
+    transition-duration: 0s !important;
+  }
+}
+
+/* Оптимизация для элементов с transform */
+.animate-marquee,
+.animate-bounce-sequence-1,
+.animate-bounce-sequence-2,
+.animate-bounce-sequence-3 {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Принудительное GPU ускорение для критичных элементов */
+button,
+a,
+input[type="range"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

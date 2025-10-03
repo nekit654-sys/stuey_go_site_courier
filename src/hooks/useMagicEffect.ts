@@ -7,22 +7,22 @@ export const useMagicEffect = () => {
 
     const particle = document.createElement("div");
     particle.className =
-      "absolute w-2 h-2 bg-yellow-300 rounded-full opacity-80 animate-particle-explode";
+      "absolute w-2 h-2 bg-yellow-300 rounded-full opacity-80";
     particle.style.left = `${x}px`;
     particle.style.top = `${y}px`;
-    particle.style.filter = "drop-shadow(0 0 7px #ffec3d)";
+    particle.style.willChange = "transform, opacity";
 
     // Случайное направление и скорость
     const angle = Math.random() * 2 * Math.PI;
-    const distance = 100 + Math.random() * 100;
-    const duration = 3000;
+    const distance = 80 + Math.random() * 80;
+    const duration = 2000;
 
-    // Анимация частицы
+    // Анимация частицы с использованием translate3d для GPU ускорения
     particle.animate(
       [
-        { transform: "translate(0, 0)", opacity: 0.8 },
+        { transform: "translate3d(0, 0, 0)", opacity: 0.8 },
         {
-          transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`,
+          transform: `translate3d(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px, 0)`,
           opacity: 0,
         },
       ],
@@ -33,7 +33,7 @@ export const useMagicEffect = () => {
       },
     );
 
-    // Удалить через 3 секунды
+    // Удалить через 2 секунды
     setTimeout(() => {
       particle.remove();
     }, duration);
@@ -50,34 +50,37 @@ export const useMagicEffect = () => {
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      // Запускаем анимацию свечения
+      // Уменьшаем количество частиц на мобильных
+      const isMobile = window.innerWidth <= 768;
+      const particleCount = isMobile ? 15 : 25;
+
+      // Запускаем анимацию свечения (упрощённую)
       const overlay = document.getElementById("magic-overlay");
       if (overlay) {
-        overlay.style.opacity = "0";
-        overlay.style.transform = "scale(0.8)";
+        overlay.style.willChange = "opacity, transform";
         overlay.animate(
           [
-            { opacity: "0", transform: "scale(0.8)" },
-            { opacity: "1", transform: "scale(1.2)" },
-            { opacity: "0", transform: "scale(1.5)" },
+            { opacity: "0", transform: "scale3d(0.9, 0.9, 1)" },
+            { opacity: "0.6", transform: "scale3d(1.1, 1.1, 1)" },
+            { opacity: "0", transform: "scale3d(1.3, 1.3, 1)" },
           ],
           {
-            duration: 3000,
-            easing: "ease",
+            duration: 2000,
+            easing: "ease-out",
             fill: "forwards",
           },
         );
       }
 
       // Создаем частицы
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < particleCount; i++) {
         createParticle(centerX, centerY);
       }
 
-      // Через 3 секунды выполняем действие
+      // Через 2 секунды выполняем действие
       setTimeout(() => {
         onComplete();
-      }, 3000);
+      }, 2000);
     },
     [createParticle],
   );

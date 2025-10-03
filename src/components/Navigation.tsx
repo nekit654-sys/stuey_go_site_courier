@@ -22,7 +22,6 @@ const Navigation = () => {
   ];
 
   const handleMenuItemClick = () => {
-    playSound('click');
     if (isMobile) {
       setIsMenuOpen(false);
     }
