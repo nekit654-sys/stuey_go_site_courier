@@ -71,13 +71,10 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   const closeGame = useCallback(() => {
     console.log('closeGame called - forcing close');
-    setIsGameOpen((prev) => {
-      console.log('Setting isGameOpen from', prev, 'to false');
-      document.body.style.overflow = '';
-      document.body.classList.remove('game-modal-open');
-      onToggle(false);
-      return false;
-    });
+    setIsGameOpen(false);
+    document.body.style.overflow = '';
+    document.body.classList.remove('game-modal-open');
+    onToggle(false);
   }, [onToggle]);
 
   // Делаем функцию закрытия доступной глобально для iframe
@@ -90,21 +87,24 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('Received message in GameButton:', event.data);
+      console.log('GameButton received message:', event.data, 'from origin:', event.origin);
       
       // Поддерживаем оба формата сообщений
       const isCloseMessage = 
         event.data === "closeGame" || 
-        (typeof event.data === 'object' && event.data.type === 'closeGame');
+        (typeof event.data === 'object' && event.data?.type === 'closeGame');
       
       if (isCloseMessage) {
-        console.log('Closing game modal...');
+        console.log('Close message detected - calling closeGame()');
         closeGame();
       }
     };
 
+    console.log('Setting up message listener in GameButton');
     window.addEventListener("message", handleMessage);
+    
     return () => {
+      console.log('Removing message listener in GameButton');
       window.removeEventListener("message", handleMessage);
       document.body.style.overflow = '';
       document.body.classList.remove('game-modal-open');
