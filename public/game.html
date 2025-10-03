@@ -341,7 +341,7 @@
     transform-origin: center bottom;
   }
   #mainMenu button {
-    margin: 0.75rem 0;
+    margin: 0;
     font-size: clamp(1rem, 4vw, 1.5rem);
     padding: 0.75rem 2rem;
     border: 2px solid #FFD700;
@@ -684,11 +684,13 @@
       </div>
     </div>
   </div>
-  <button id="playBtn" role="menuitem">Играть</button>
-  <button id="rulesBtn" role="menuitem">Правила</button>
-  <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
-  <button id="becomeBtn" role="menuitem" style="background-color: #dc2626 !important; color: #fff !important; border-color: #dc2626 !important;">Подать заявку</button>
-  <button id="exitBtn" role="menuitem">Выход из игры</button>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%;">
+    <button id="playBtn" role="menuitem">Играть</button>
+    <button id="rulesBtn" role="menuitem">Правила</button>
+    <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
+    <button id="becomeBtn" role="menuitem" style="background-color: #dc2626 !important; color: #fff !important; border-color: #dc2626 !important;">Подать заявку</button>
+    <button id="exitBtn" role="menuitem">Выход из игры</button>
+  </div>
 
 </div>
 
