@@ -70,12 +70,15 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   };
 
   const closeGame = useCallback(() => {
-    console.log('closeGame called, current state:', isGameOpen);
-    setIsGameOpen(false);
-    onToggle(false);
-    document.body.style.overflow = '';
-    document.body.classList.remove('game-modal-open');
-  }, [onToggle, isGameOpen]);
+    console.log('closeGame called - forcing close');
+    setIsGameOpen((prev) => {
+      console.log('Setting isGameOpen from', prev, 'to false');
+      document.body.style.overflow = '';
+      document.body.classList.remove('game-modal-open');
+      onToggle(false);
+      return false;
+    });
+  }, [onToggle]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -99,6 +102,8 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       document.body.classList.remove('game-modal-open');
     };
   }, [closeGame]);
+
+  console.log('GameButton render, isGameOpen:', isGameOpen);
 
   return (
     <>
