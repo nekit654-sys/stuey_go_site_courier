@@ -1613,7 +1613,15 @@
     // Останавливаем игру
     stopGame();
     
-    // Скрываем все элементы
+    // Сбрасываем все состояния игры
+    score = 0;
+    lives = 3;
+    gameOverFlag = false;
+    paused = false;
+    updateScoreDisplay();
+    updateLivesDisplay();
+    
+    // Скрываем все элементы и показываем приветственный экран для следующего запуска
     mainMenu.style.display = 'none';
     container.style.display = 'none';
     info.style.display = 'none';
@@ -1622,20 +1630,19 @@
     rulesDialog.style.display = 'none';
     gtaGameOverScreen.style.display = 'none';
     touchControls.style.display = 'none';
-    welcomeScreen.style.display = 'none';
+    welcomeScreen.style.display = 'flex'; // Готовим к следующему открытию
     
-    // СПОСОБ 1: Вызываем глобальную функцию родительского окна напрямую
+    // Закрываем модальное окно родительской страницы
     try {
       if (window.parent && typeof window.parent.closeGameModal === 'function') {
         console.log('Calling parent.closeGameModal() directly');
         window.parent.closeGameModal();
-        return;
       }
     } catch (e) {
       console.log('Direct call failed:', e);
     }
     
-    // СПОСОБ 2: Отправляем сообщение через postMessage (запасной вариант)
+    // Отправляем сообщение через postMessage (запасной вариант)
     try {
       console.log('Posting message to parent...');
       window.parent.postMessage('closeGame', '*');
