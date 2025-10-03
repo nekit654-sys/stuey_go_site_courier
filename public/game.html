@@ -271,6 +271,9 @@
     justify-content: center;
     align-items: center;
     padding: 2rem;
+    box-sizing: border-box;
+    border: 0.5vw solid #FFD700;
+    border-radius: 2vw;
   }
   #versionMenu {
     position: absolute;
@@ -519,21 +522,27 @@
     font-weight: 900;
     text-shadow: 0 0 1rem #FFD700, 0 0 2rem #FFA500;
     animation: blinkYellow 1s linear infinite alternate;
-    background: rgba(0, 0, 0, 0.7);
-    padding: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
-    border-radius: 1rem;
-    border: 0.3vw solid rgba(255, 215, 0, 0.5);
+    margin-bottom: 0;
   }
   #welcomeScreen .subtitle {
     font-size: clamp(2rem, 8vw, 3rem);
-    margin-top: 0.2em;
+    margin-top: 1rem;
     font-weight: 700;
     text-shadow: 0 0 0.8rem #FFD700;
-    animation: blinkYellow 1s linear infinite alternate;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.3rem;
+  }
+  #welcomeScreen .welcome-box {
+    background: rgba(0, 0, 0, 0.7);
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
+    border-radius: 1rem;
+    border: 0.3vw solid rgba(255, 215, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
   #welcomeScreen .subtitle strong {
     font-weight: 900;
@@ -655,10 +664,12 @@
 
 <!-- Экран приветствия -->
 <div id="welcomeScreen" role="alert" aria-live="assertive" aria-label="Приветственный экран игры">
-  <h1>Приключения курьера</h1>
-  <div class="subtitle">
-    <div id="welcomeCharacter" aria-label="Персонаж курьера корги" role="img" style="display:inline-block; margin-left:0.3rem;">
-      <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:80px; height:80px; object-fit:contain; animation: bounce 2s infinite ease-in-out;" />
+  <div class="welcome-box">
+    <h1>Приключения курьера</h1>
+    <div class="subtitle">
+      <div id="welcomeCharacter" aria-label="Персонаж курьера корги" role="img" style="display:inline-block; margin-left:0.3rem;">
+        <img src="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" alt="Курьер корги" style="width:80px; height:80px; object-fit:contain; animation: bounce 2s infinite ease-in-out;" />
+      </div>
     </div>
   </div>
 </div>
