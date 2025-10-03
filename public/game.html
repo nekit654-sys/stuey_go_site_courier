@@ -1621,7 +1621,7 @@
     updateScoreDisplay();
     updateLivesDisplay();
     
-    // Скрываем все элементы и показываем приветственный экран для следующего запуска
+    // Скрываем все элементы игры
     mainMenu.style.display = 'none';
     container.style.display = 'none';
     info.style.display = 'none';
@@ -1630,7 +1630,7 @@
     rulesDialog.style.display = 'none';
     gtaGameOverScreen.style.display = 'none';
     touchControls.style.display = 'none';
-    welcomeScreen.style.display = 'flex'; // Готовим к следующему открытию
+    welcomeScreen.style.display = 'none';
     
     // Закрываем модальное окно родительской страницы
     try {
