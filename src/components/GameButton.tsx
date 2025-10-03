@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X, Gamepad2 } from "lucide-react";
 
 interface GameButtonProps {
@@ -69,12 +69,13 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     }
   };
 
-  const closeGame = () => {
+  const closeGame = useCallback(() => {
+    console.log('closeGame called, current state:', isGameOpen);
     setIsGameOpen(false);
     onToggle(false);
     document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
-  };
+  }, [onToggle, isGameOpen]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -87,10 +88,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       
       if (isCloseMessage) {
         console.log('Closing game modal...');
-        setIsGameOpen(false);
-        onToggle(false);
-        document.body.style.overflow = '';
-        document.body.classList.remove('game-modal-open');
+        closeGame();
       }
     };
 
@@ -100,7 +98,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       document.body.style.overflow = '';
       document.body.classList.remove('game-modal-open');
     };
-  }, [onToggle]);
+  }, [closeGame]);
 
   return (
     <>
