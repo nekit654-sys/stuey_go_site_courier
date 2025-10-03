@@ -16,24 +16,24 @@ const Footer = () => {
           <div className="flex items-center gap-2">
             <Icon
               name="Phone"
-              size={18}
-              className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+              size={20}
+              className="text-yellow-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
             />
             <span>Поддержка 24/7</span>
           </div>
           <div className="flex items-center gap-2">
             <Icon
               name="Shield"
-              size={18}
-              className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+              size={20}
+              className="text-yellow-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
             />
             <span>Страхование</span>
           </div>
           <div className="flex items-center gap-2">
             <Icon
               name="Briefcase"
-              size={18}
-              className="text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+              size={20}
+              className="text-yellow-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
             />
             <span>Официальное трудоустройство</span>
           </div>
