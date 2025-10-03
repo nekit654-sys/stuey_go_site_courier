@@ -505,12 +505,22 @@
     box-sizing: border-box;
     border: 0.5vw solid #FFD700;
     border-radius: 2vw;
+    
+    /* Фоновая картинка */
+    background-image: url('https://cdn.poehali.dev/files/6f16d2d4-f371-4b0f-a43e-c70a6de7b033.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
   #welcomeScreen h1 {
     font-size: clamp(3rem, 15vw, 6rem);
     font-weight: 900;
     text-shadow: 0 0 1rem #FFD700, 0 0 2rem #FFA500;
     animation: blinkYellow 1s linear infinite alternate;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    border: 3px solid rgba(255, 215, 0, 0.5);
   }
   #welcomeScreen .subtitle {
     font-size: clamp(2rem, 8vw, 3rem);
