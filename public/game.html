@@ -695,9 +695,28 @@
     <button id="rulesBtn" role="menuitem">Правила</button>
     <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
     <button id="becomeBtn" role="menuitem" style="background-color: #dc2626 !important; color: #fff !important; border-color: #dc2626 !important;">Подать заявку</button>
-    <button id="exitBtn" role="menuitem">Выход из игры</button>
   </div>
 
+  <!-- Футер меню -->
+  <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255, 215, 0, 0.3); width: 100%; max-width: 400px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; font-size: clamp(0.75rem, 2.5vw, 0.9rem); color: #FFD700; opacity: 0.8; margin-bottom: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.3rem;">
+        <span style="font-size: 1.2em;">📞</span>
+        <span>Поддержка 24/7</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.3rem;">
+        <span style="font-size: 1.2em;">🛡️</span>
+        <span>Страхование</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.3rem;">
+        <span style="font-size: 1.2em;">💼</span>
+        <span>Официальное трудоустройство</span>
+      </div>
+    </div>
+    <div style="text-align: center; font-size: clamp(0.65rem, 2vw, 0.75rem); color: #FFD700; opacity: 0.6;">
+      <p>© 2025 | Все права защищены!</p>
+    </div>
+  </div>
 </div>
 
 <!-- Правила -->
@@ -808,7 +827,6 @@
   const touchControls = document.getElementById('touchControls');
   const playBtn = document.getElementById('playBtn');
   const rulesBtn = document.getElementById('rulesBtn');
-  const exitBtn = document.getElementById('exitBtn');
   const closeRulesBtn = document.getElementById('closeRulesBtn');
   const restartBtn = document.getElementById('restartBtn');
   const toMenuBtn = document.getElementById('toMenuBtn');
@@ -1600,69 +1618,6 @@
     mainMenu.style.display = 'none';
     rulesDialog.style.display = 'block';
   });
-  exitBtn.addEventListener('click', () => {
-    console.log('Exit button clicked - calling parent closeGame function');
-    
-    // Останавливаем музыку
-    if (backgroundMusic) {
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-      musicStarted = false;
-    }
-    
-    // Останавливаем игру
-    stopGame();
-    
-    // Сбрасываем все состояния игры
-    score = 0;
-    lives = 3;
-    gameOverFlag = false;
-    paused = false;
-    updateScoreDisplay();
-    updateLivesDisplay();
-    
-    // Скрываем все элементы игры
-    mainMenu.style.display = 'none';
-    container.style.display = 'none';
-    info.style.display = 'none';
-    livesElem.style.display = 'none';
-    gameOverMenu.style.display = 'none';
-    rulesDialog.style.display = 'none';
-    gtaGameOverScreen.style.display = 'none';
-    touchControls.style.display = 'none';
-    welcomeScreen.style.display = 'none';
-    
-    // Вызываем ту же функцию закрытия, что и красный крестик
-    try {
-      // Способ 1: Используем функцию, переданную родителем
-      if (typeof window.parentCloseGame === 'function') {
-        console.log('Calling parentCloseGame function');
-        window.parentCloseGame();
-        return;
-      }
-    } catch (e) {
-      console.error('parentCloseGame call failed:', e);
-    }
-    
-    // Способ 2: Через window.parent.closeGameModal
-    try {
-      if (window.parent && typeof window.parent.closeGameModal === 'function') {
-        console.log('Calling parent.closeGameModal');
-        window.parent.closeGameModal();
-        return;
-      }
-    } catch (e) {
-      console.error('closeGameModal call failed:', e);
-    }
-    
-    // Способ 3: postMessage как запасной вариант
-    try {
-      console.log('Sending closeGame message to parent');
-      window.parent.postMessage({ type: 'closeGame' }, '*');
-    } catch (e) {
-      console.error('postMessage failed:', e);
-    }
-  });
   closeRulesBtn.addEventListener('click', () => {
     rulesDialog.style.display = 'none';
     mainMenu.style.display = 'block';
@@ -1723,7 +1678,7 @@
     welcomeScreen.addEventListener('touchend', tryStartMusic, { once: false });
     
     // Запускаем при любом взаимодействии с кнопками меню
-    const menuButtons = [playBtn, rulesBtn, toggleMusicBtn, becomeBtn, exitBtn];
+    const menuButtons = [playBtn, rulesBtn, toggleMusicBtn, becomeBtn];
     menuButtons.forEach(btn => {
       if (btn) {
         btn.addEventListener('touchstart', tryStartMusic, { once: false });
