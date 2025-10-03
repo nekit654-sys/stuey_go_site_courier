@@ -255,25 +255,22 @@
   /* --- Главное меню --- */
   #mainMenu {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #000a;
-    border-radius: 1rem;
-    padding: clamp(1rem, 4vw, 2rem) clamp(2rem, 8vw, 4rem);
-    box-shadow: 0 0 1rem #FFD700;
+    inset: 0;
+    background: black;
     text-align: center;
     z-index: 1000;
     font-weight: 700;
     user-select: none;
     color: #FFD700;
-    max-width: 90vw;
-    width: 400px;
     background-image: url('https://cdn.poehali.dev/files/6f16d2d4-f371-4b0f-a43e-c70a6de7b033.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    backdrop-filter: brightness(0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
   }
   #versionMenu {
     position: absolute;
@@ -288,6 +285,10 @@
   #menuLogo {
     font-weight: 900;
     margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
+    border-radius: 1rem;
+    border: 0.3vw solid rgba(255, 215, 0, 0.5);
   }
   #menuLogo .text {
     font-size: clamp(1.5rem, 6vw, 2rem);
@@ -342,10 +343,11 @@
     padding: 0.75rem 2rem;
     border: 2px solid #FFD700;
     border-radius: 0.75rem;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.8);
     color: #FFD700;
     cursor: pointer;
     width: 100%;
+    max-width: 400px;
     transition: background-color 0.3s, color 0.3s;
   }
   #mainMenu button:hover,
@@ -518,7 +520,7 @@
     text-shadow: 0 0 1rem #FFD700, 0 0 2rem #FFA500;
     animation: blinkYellow 1s linear infinite alternate;
     background: rgba(0, 0, 0, 0.7);
-    padding: clamp(1rem, 3vw, 2rem);
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
     border-radius: 1rem;
     border: 0.3vw solid rgba(255, 215, 0, 0.5);
   }
