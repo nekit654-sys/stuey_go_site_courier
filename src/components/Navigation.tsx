@@ -211,15 +211,21 @@ const Navigation = () => {
               onClick={() => {
                 playSound('click');
                 setIsGameOpen(false);
+                setIsGameLoading(false);
                 document.body.style.overflow = '';
                 document.body.classList.remove('game-modal-open');
               }}
               onMouseEnter={() => playSound('hover')}
-              className="absolute top-4 right-4 z-[1000000] w-8 h-8 bg-red-500 hover:bg-red-600 
-                         text-white rounded-full flex items-center justify-center 
-                         transition-all duration-200 hover:scale-110"
+              className="absolute top-3 right-3 md:top-4 md:right-4 z-[1000000] 
+                         w-12 h-12 md:w-14 md:h-14
+                         bg-red-500 hover:bg-red-600 active:bg-red-700
+                         text-white rounded-xl 
+                         flex items-center justify-center 
+                         transition-all duration-200 hover:scale-105 active:scale-95
+                         shadow-lg hover:shadow-xl
+                         border-2 border-red-400"
             >
-              <Icon name="X" size={16} />
+              <Icon name="X" size={24} className="md:w-7 md:h-7" />
             </button>
 
             {/* Индикатор загрузки */}
