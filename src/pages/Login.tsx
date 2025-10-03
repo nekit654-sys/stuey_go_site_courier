@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import LoginForm from '@/components/admin/LoginForm';
+import StatsCards from '@/components/admin/StatsCards';
+import RequestsTable from '@/components/admin/RequestsTable';
+import ControlPanel from '@/components/admin/ControlPanel';
+import SecurityTab from '@/components/admin/SecurityTab';
+import AdminsTab from '@/components/admin/AdminsTab';
 
 interface AdminRequest {
   id: number;
@@ -29,7 +31,6 @@ const Login: React.FC = () => {
   const [authToken, setAuthToken] = useState<string>('');
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [stats, setStats] = useState({ total: 0, new: 0, approved: 0, rejected: 0 });
-  const [selectedImage, setSelectedImage] = useState<string>('');
   const [activeTab, setActiveTab] = useState('requests');
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
@@ -104,17 +105,14 @@ const Login: React.FC = () => {
         const newRequests = data.requests || [];
         const newStats = data.stats || { total: 0, new: 0, approved: 0, rejected: 0 };
         
-        // Проверяем, есть ли новые заявки
         if (!silent && requests.length > 0 && newRequests.length > requests.length) {
           const newCount = newRequests.length - requests.length;
           
-          // Звуковое уведомление
           try {
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAziR2e3Meg0AAABQiN/y36AVChZdpe7rpVYOC0Kk5fyWQQsLU6fQv2AcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAzh1');
             audio.volume = 0.3;
-            audio.play().catch(() => {}); // Игнорируем ошибки если звук заблокирован
+            audio.play().catch(() => {});
           } catch (e) {
-            // Браузер не поддерживает звук
           }
           
           toast({
@@ -134,13 +132,12 @@ const Login: React.FC = () => {
     }
   };
 
-  // Автоматическое обновление заявок
   React.useEffect(() => {
     if (!isAuthenticated || !autoRefresh) return;
 
     const interval = setInterval(() => {
-      loadRequests(undefined, true); // silent = true для фоновых обновлений
-    }, 10000); // Каждые 10 секунд
+      loadRequests(undefined, true);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [isAuthenticated, autoRefresh, authToken, requests.length]);
@@ -198,22 +195,6 @@ const Login: React.FC = () => {
           variant: 'destructive',
         });
       }
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'text-green-600 bg-green-100';
-      case 'rejected': return 'text-red-600 bg-red-100';
-      default: return 'text-yellow-600 bg-yellow-100';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'approved': return 'Одобрена';
-      case 'rejected': return 'Отклонена';
-      default: return 'Новая';
     }
   };
 
@@ -358,58 +339,12 @@ const Login: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-              <Icon name="Shield" size={24} className="text-blue-600" />
-              Вход в админ-панель
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="username">Логин</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={credentials.username}
-                  onChange={handleInputChange}
-                  placeholder="Введите логин"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Пароль</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={credentials.password}
-                  onChange={handleInputChange}
-                  placeholder="Введите пароль"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Вход...
-                  </div>
-                ) : (
-                  'Войти'
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+      <LoginForm
+        credentials={credentials}
+        isLoading={isLoading}
+        onInputChange={handleInputChange}
+        onSubmit={handleLogin}
+      />
     );
   }
 
@@ -450,378 +385,41 @@ const Login: React.FC = () => {
           </TabsList>
 
           <TabsContent value="requests" className="space-y-6">
-            
-            {/* Панель управления */}
-            <Card>
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setAutoRefresh(!autoRefresh)}
-                        className={`w-10 h-6 rounded-full transition-colors ${
-                          autoRefresh ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                            autoRefresh ? 'translate-x-5' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                      <span className="text-sm font-medium">
-                        Автообновление {autoRefresh ? 'включено' : 'выключено'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Icon name="Clock" size={14} />
-                      Последнее обновление: {lastUpdate.toLocaleTimeString('ru-RU')}
-                      {autoRefresh && (
-                        <span className="text-green-600 font-medium">(обновится через 10 сек)</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => loadRequests()}
-                      variant="outline"
-                    >
-                      <Icon name="RefreshCw" size={14} className="mr-1" />
-                      Обновить сейчас
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ControlPanel
+              autoRefresh={autoRefresh}
+              lastUpdate={lastUpdate}
+              onToggleAutoRefresh={() => setAutoRefresh(!autoRefresh)}
+              onRefresh={() => loadRequests()}
+            />
 
-            {/* Статистика */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Icon name="FileText" size={24} className="text-blue-600 mr-3" />
-                <div>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                  <div className="text-gray-600">Всего заявок</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Icon name="Clock" size={24} className="text-yellow-600 mr-3" />
-                <div>
-                  <div className="text-2xl font-bold">{stats.new}</div>
-                  <div className="text-gray-600">Новые</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Icon name="CheckCircle" size={24} className="text-green-600 mr-3" />
-                <div>
-                  <div className="text-2xl font-bold">{stats.approved}</div>
-                  <div className="text-gray-600">Одобрены</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Icon name="XCircle" size={24} className="text-red-600 mr-3" />
-                <div>
-                  <div className="text-2xl font-bold">{stats.rejected}</div>
-                  <div className="text-gray-600">Отклонены</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <StatsCards stats={stats} />
 
-        {/* Таблица заявок */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Icon name="List" size={20} />
-                Заявки курьеров
-                {stats.new > 0 && (
-                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
-                    {stats.new} новых
-                  </span>
-                )}
-              </div>
-              {autoRefresh && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  Автообновление
-                </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {requests.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Icon name="Inbox" size={48} className="mx-auto mb-4 text-gray-300" />
-                <p>Заявок пока нет</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-semibold">ФИО</th>
-                      <th className="text-left py-3 px-4 font-semibold">Телефон</th>
-                      <th className="text-left py-3 px-4 font-semibold">Город</th>
-                      <th className="text-left py-3 px-4 font-semibold">Скриншот</th>
-                      <th className="text-left py-3 px-4 font-semibold">Статус</th>
-                      <th className="text-left py-3 px-4 font-semibold">Дата</th>
-                      <th className="text-left py-3 px-4 font-semibold">Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {requests.map((request) => {
-                      return (
-                      <tr 
-                        key={request.id} 
-                        className="border-b hover:bg-gray-50"
-                      >
-                        <td className="py-3 px-4 font-medium">{request.name}</td>
-                        <td className="py-3 px-4">
-                          <a href={`tel:${request.phone}`} className="text-blue-600 hover:underline">
-                            {request.phone}
-                          </a>
-                        </td>
-                        <td className="py-3 px-4">{request.city}</td>
-                        <td className="py-3 px-4">
-                          {request.screenshot_url ? (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setSelectedImage(request.screenshot_url)}
-                                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                                >
-                                  <Icon name="Eye" size={14} className="mr-1" />
-                                  Просмотр
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-3xl">
-                                <DialogHeader>
-                                  <DialogTitle>Скриншот от {request.name}</DialogTitle>
-                                </DialogHeader>
-                                <div className="flex justify-center">
-                                  <img
-                                    src={request.screenshot_url}
-                                    alt="Скриншот заявки"
-                                    className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
-                                  />
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          ) : (
-                            <span className="text-gray-400 text-sm">Нет</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                            {getStatusText(request.status)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
-                          {new Date(request.created_at).toLocaleDateString('ru-RU', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-2">
-                            {request.status === 'new' && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  onClick={() => updateRequestStatus(request.id, 'approved')}
-                                  className="bg-green-500 hover:bg-green-600 text-white px-3"
-                                >
-                                  <Icon name="Check" size={14} className="mr-1" />
-                                  Принять
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateRequestStatus(request.id, 'rejected')}
-                                  className="text-red-600 border-red-600 hover:bg-red-50 px-3"
-                                >
-                                  <Icon name="X" size={14} className="mr-1" />
-                                  Отклонить
-                                </Button>
-                              </>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => deleteRequest(request.id)}
-                              className="text-red-600 border-red-600 hover:bg-red-50"
-                            >
-                              <Icon name="Trash2" size={14} />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            </CardContent>
-          </Card>
+            <RequestsTable
+              requests={requests}
+              stats={{ new: stats.new }}
+              autoRefresh={autoRefresh}
+              onUpdateStatus={updateRequestStatus}
+              onDelete={deleteRequest}
+            />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="Key" size={20} />
-                  Смена пароля
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={changePassword} className="space-y-4 max-w-md">
-                  <div>
-                    <Label htmlFor="currentPassword">Текущий пароль</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="newPassword">Новый пароль</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">
-                    <Icon name="Save" size={16} className="mr-2" />
-                    Сменить пароль
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <SecurityTab
+              passwordForm={passwordForm}
+              onPasswordFormChange={setPasswordForm}
+              onSubmit={changePassword}
+            />
           </TabsContent>
 
           <TabsContent value="admins" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="UserPlus" size={20} />
-                    Добавить администратора
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={addAdmin} className="space-y-4">
-                    <div>
-                      <Label htmlFor="adminUsername">Логин</Label>
-                      <Input
-                        id="adminUsername"
-                        type="text"
-                        value={adminForm.username}
-                        onChange={(e) => setAdminForm({...adminForm, username: e.target.value})}
-                        placeholder="Введите логин"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="adminPassword">Пароль</Label>
-                      <Input
-                        id="adminPassword"
-                        type="password"
-                        value={adminForm.password}
-                        onChange={(e) => setAdminForm({...adminForm, password: e.target.value})}
-                        placeholder="Введите пароль"
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full">
-                      <Icon name="Plus" size={16} className="mr-2" />
-                      Добавить админа
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Users" size={20} />
-                    Список администраторов
-                  </CardTitle>
-                  <Button
-                    size="sm"
-                    onClick={loadAdmins}
-                    variant="outline"
-                    className="ml-auto"
-                  >
-                    <Icon name="RefreshCw" size={14} className="mr-1" />
-                    Обновить
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {admins.length === 0 ? (
-                    <div className="text-center py-4 text-gray-500">
-                      <Icon name="Users" size={24} className="mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">Нажмите "Обновить" для загрузки списка</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {admins.map((admin) => (
-                        <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <div className="font-medium">{admin.username}</div>
-                            <div className="text-sm text-gray-500">
-                              Создан: {new Date(admin.created_at).toLocaleDateString('ru-RU')}
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteAdmin(admin.id)}
-                            className="text-red-600 border-red-600 hover:bg-red-50"
-                          >
-                            <Icon name="Trash2" size={14} />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <AdminsTab
+              admins={admins}
+              adminForm={adminForm}
+              onAdminFormChange={setAdminForm}
+              onAddAdmin={addAdmin}
+              onDeleteAdmin={deleteAdmin}
+              onLoadAdmins={loadAdmins}
+            />
           </TabsContent>
         </Tabs>
       </div>
