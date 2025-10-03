@@ -1595,6 +1595,8 @@
     rulesDialog.style.display = 'block';
   });
   exitBtn.addEventListener('click', () => {
+    console.log('Exit button clicked - sending close message');
+    
     // Останавливаем музыку
     if (backgroundMusic) {
       backgroundMusic.pause();
@@ -1617,10 +1619,18 @@
     welcomeScreen.style.display = 'none';
     
     // Отправляем сообщение родительскому окну для закрытия модального окна
+    // Пробуем несколько способов для надёжности
     try {
+      console.log('Posting message to parent...');
       window.parent.postMessage('closeGame', '*');
+      window.parent.postMessage({ type: 'closeGame' }, '*');
+      if (window.top && window.top !== window) {
+        window.top.postMessage('closeGame', '*');
+        window.top.postMessage({ type: 'closeGame' }, '*');
+      }
+      console.log('Messages sent successfully');
     } catch (e) {
-      console.log('Could not send message to parent:', e);
+      console.error('Could not send message to parent:', e);
     }
   });
   closeRulesBtn.addEventListener('click', () => {

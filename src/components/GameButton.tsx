@@ -78,7 +78,15 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data === "closeGame") {
+      console.log('Received message in GameButton:', event.data);
+      
+      // Поддерживаем оба формата сообщений
+      const isCloseMessage = 
+        event.data === "closeGame" || 
+        (typeof event.data === 'object' && event.data.type === 'closeGame');
+      
+      if (isCloseMessage) {
+        console.log('Closing game modal...');
         setIsGameOpen(false);
         onToggle(false);
         document.body.style.overflow = '';
