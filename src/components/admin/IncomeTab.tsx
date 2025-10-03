@@ -169,8 +169,8 @@ const IncomeTab: React.FC<IncomeTabProps> = ({ admins, onLoadAdmins }) => {
                 <div className="flex items-start gap-2">
                   <Icon name="AlertCircle" size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800">
-                    <p className="font-medium">Загрузите список администраторов</p>
-                    <p className="mt-1">Перейдите на вкладку "Админы" и нажмите "Обновить"</p>
+                    <p className="font-medium">Нет активных администраторов</p>
+                    <p className="mt-1">Перейдите на вкладку "Администраторы" для добавления</p>
                   </div>
                 </div>
               </div>
@@ -180,21 +180,9 @@ const IncomeTab: React.FC<IncomeTabProps> = ({ admins, onLoadAdmins }) => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Icon name="TrendingUp" size={20} />
-                Общая статистика
-              </div>
-              {admins.length > 0 && (
-                <Button
-                  size="sm"
-                  onClick={onLoadAdmins}
-                  variant="outline"
-                >
-                  <Icon name="RefreshCw" size={14} className="mr-1" />
-                  Обновить админов
-                </Button>
-              )}
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="TrendingUp" size={20} />
+              Общая статистика
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -71,6 +71,7 @@ const Login: React.FC = () => {
         setAuthToken(data.token);
         setIsAuthenticated(true);
         loadRequests(data.token);
+        loadAdmins(data.token);
         toast({
           title: 'Вход выполнен успешно',
           description: 'Добро пожаловать в админ-панель!',
@@ -143,6 +144,12 @@ const Login: React.FC = () => {
     return () => clearInterval(interval);
   }, [isAuthenticated, autoRefresh, authToken, requests.length]);
 
+  React.useEffect(() => {
+    if (isAuthenticated && (activeTab === 'admins' || activeTab === 'income')) {
+      loadAdmins();
+    }
+  }, [activeTab, isAuthenticated]);
+
   const updateRequestStatus = async (id: number, status: string) => {
     try {
       const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
@@ -199,13 +206,14 @@ const Login: React.FC = () => {
     }
   };
 
-  const loadAdmins = async () => {
+  const loadAdmins = async (token?: string) => {
+    const tokenToUse = token || authToken;
     try {
       const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Auth-Token': authToken
+          'X-Auth-Token': tokenToUse
         },
         body: JSON.stringify({ action: 'get_admins' })
       });
@@ -375,6 +383,10 @@ const Login: React.FC = () => {
               <Icon name="FileText" size={16} />
               Заявки
             </TabsTrigger>
+            <TabsTrigger value="admins" className="flex items-center gap-2">
+              <Icon name="Users" size={16} />
+              Администраторы
+            </TabsTrigger>
             <TabsTrigger value="income" className="flex items-center gap-2">
               <Icon name="DollarSign" size={16} />
               Доходы
@@ -382,10 +394,6 @@ const Login: React.FC = () => {
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Icon name="Lock" size={16} />
               Безопасность
-            </TabsTrigger>
-            <TabsTrigger value="admins" className="flex items-center gap-2">
-              <Icon name="Users" size={16} />
-              Админы
             </TabsTrigger>
           </TabsList>
 
@@ -416,13 +424,6 @@ const Login: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="income" className="space-y-6">
-            <IncomeTab
-              admins={admins}
-              onLoadAdmins={loadAdmins}
-            />
-          </TabsContent>
-
           <TabsContent value="admins" className="space-y-6">
             <AdminsTab
               admins={admins}
@@ -430,6 +431,13 @@ const Login: React.FC = () => {
               onAdminFormChange={setAdminForm}
               onAddAdmin={addAdmin}
               onDeleteAdmin={deleteAdmin}
+              onLoadAdmins={loadAdmins}
+            />
+          </TabsContent>
+
+          <TabsContent value="income" className="space-y-6">
+            <IncomeTab
+              admins={admins}
               onLoadAdmins={loadAdmins}
             />
           </TabsContent>
