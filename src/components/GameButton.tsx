@@ -79,7 +79,10 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "closeGame") {
-        closeGame();
+        setIsGameOpen(false);
+        onToggle(false);
+        document.body.style.overflow = '';
+        document.body.classList.remove('game-modal-open');
       }
     };
 
@@ -89,7 +92,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
       document.body.style.overflow = '';
       document.body.classList.remove('game-modal-open');
     };
-  }, []);
+  }, [onToggle]);
 
   return (
     <>
