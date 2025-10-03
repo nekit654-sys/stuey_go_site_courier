@@ -186,13 +186,12 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
               ref={(iframe) => {
                 if (iframe) {
                   iframe.onload = () => {
-                    // Отправляем функцию закрытия в iframe
+                    // Передаём функцию закрытия в iframe
                     const iframeWindow = iframe.contentWindow;
                     if (iframeWindow) {
-                      iframeWindow.postMessage(
-                        { type: "setCloseHandler" },
-                        "*",
-                      );
+                      // Делаем функцию closeGame доступной для iframe
+                      (iframeWindow as any).parentCloseGame = closeGame;
+                      console.log('closeGame function passed to iframe');
                     }
                   };
                 }

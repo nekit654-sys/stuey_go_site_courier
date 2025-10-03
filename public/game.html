@@ -1601,7 +1601,7 @@
     rulesDialog.style.display = 'block';
   });
   exitBtn.addEventListener('click', () => {
-    console.log('Exit button clicked - attempting to close game');
+    console.log('Exit button clicked - calling parent closeGame function');
     
     // Останавливаем музыку
     if (backgroundMusic) {
@@ -1632,42 +1632,35 @@
     touchControls.style.display = 'none';
     welcomeScreen.style.display = 'none';
     
-    // Закрываем модальное окно родительской страницы - несколько способов
-    console.log('Attempting to close parent modal...');
-    
-    // Способ 1: Прямой вызов функции
+    // Вызываем ту же функцию закрытия, что и красный крестик
     try {
-      if (window.parent && window.parent !== window) {
-        console.log('Parent exists, checking closeGameModal...');
-        if (typeof window.parent.closeGameModal === 'function') {
-          console.log('closeGameModal found, calling...');
-          window.parent.closeGameModal();
-        } else {
-          console.log('closeGameModal not found on parent');
-        }
+      // Способ 1: Используем функцию, переданную родителем
+      if (typeof window.parentCloseGame === 'function') {
+        console.log('Calling parentCloseGame function');
+        window.parentCloseGame();
+        return;
       }
     } catch (e) {
-      console.error('Direct call failed:', e);
+      console.error('parentCloseGame call failed:', e);
     }
     
-    // Способ 2: postMessage
+    // Способ 2: Через window.parent.closeGameModal
     try {
-      console.log('Sending postMessage to parent...');
-      window.parent.postMessage('closeGame', '*');
+      if (window.parent && typeof window.parent.closeGameModal === 'function') {
+        console.log('Calling parent.closeGameModal');
+        window.parent.closeGameModal();
+        return;
+      }
+    } catch (e) {
+      console.error('closeGameModal call failed:', e);
+    }
+    
+    // Способ 3: postMessage как запасной вариант
+    try {
+      console.log('Sending closeGame message to parent');
       window.parent.postMessage({ type: 'closeGame' }, '*');
     } catch (e) {
       console.error('postMessage failed:', e);
-    }
-    
-    // Способ 3: Через top window
-    try {
-      if (window.top && window.top !== window) {
-        console.log('Sending postMessage to top...');
-        window.top.postMessage('closeGame', '*');
-        window.top.postMessage({ type: 'closeGame' }, '*');
-      }
-    } catch (e) {
-      console.error('top.postMessage failed:', e);
     }
   });
   closeRulesBtn.addEventListener('click', () => {
