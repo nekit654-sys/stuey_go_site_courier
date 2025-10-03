@@ -62,10 +62,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             """, (username, password_hash))
             
             user = cur.fetchone()
-            cur.close()
-            conn.close()
             
             if user:
+                # Обновляем время последнего входа
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.admins 
+                    SET last_login = NOW() 
+                    WHERE id = %s
+                """, (user[0],))
+                conn.commit()
+                
+                cur.close()
+                conn.close()
+                
                 return {
                     'statusCode': 200,
                     'headers': headers,
@@ -77,6 +86,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             else:
+                cur.close()
+                conn.close()
+                
                 return {
                     'statusCode': 401,
                     'headers': headers,
@@ -171,7 +183,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 conn = psycopg2.connect(os.environ['DATABASE_URL'])
                 cur = conn.cursor()
                 
-                cur.execute("SELECT id, username, created_at FROM t_p25272970_courier_button_site.admins ORDER BY created_at DESC")
+                cur.execute("SELECT id, username, created_at, last_login FROM t_p25272970_courier_button_site.admins ORDER BY created_at DESC")
                 admins_data = cur.fetchall()
                 
                 admins = []
@@ -179,7 +191,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     admins.append({
                         'id': admin[0],
                         'username': admin[1],
-                        'created_at': admin[2].isoformat() if admin[2] else None
+                        'created_at': admin[2].isoformat() if admin[2] else None,
+                        'last_login': admin[3].isoformat() if admin[3] else None
                     })
                 
                 cur.close()
