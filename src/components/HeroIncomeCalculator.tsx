@@ -92,8 +92,8 @@ const HeroIncomeCalculator = () => {
 
       {/* Результат */}
       <div className="backdrop-blur-sm bg-yellow-400/20 border border-yellow-400/50 rounded-xl p-6 mb-8 text-center">
-        <div className="text-4xl font-bold text-yellow-400 mb-2">
-          {income.toLocaleString('ru-RU')} ₽
+        <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 whitespace-nowrap overflow-x-auto scrollbar-hide">
+          {income.toLocaleString('ru-RU')}&nbsp;₽
         </div>
         <div className="text-gray-200">за выбранный период</div>
       </div>
@@ -223,6 +223,15 @@ const HeroIncomeCalculator = () => {
       </p>
 
       <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
         .slider::-webkit-slider-thumb {
           appearance: none;
           height: 24px;
