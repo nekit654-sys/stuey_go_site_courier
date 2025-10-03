@@ -24,7 +24,7 @@ const WhatsAppButton: React.FC = () => {
 
   const handleTelegramClick = () => {
     playSound('notification');
-    const telegramUrl = 'https://t.me/your_bot_username'; // Замените на ваш бот
+    const telegramUrl = 'https://t.me/Stueygo_bot';
     window.open(telegramUrl, '_blank');
     setShowMenu(false);
   };
@@ -126,17 +126,6 @@ const WhatsAppButton: React.FC = () => {
           size={28} 
           className="text-white group-hover:scale-110 transition-transform duration-200"
         />
-        
-        {/* Индикатор */}
-        <div className={`
-          absolute -top-1 -right-1 w-4 h-4 
-          bg-red-500 rounded-full border-2 border-white
-          flex items-center justify-center
-          transition-all duration-300
-          ${isPulsing ? 'scale-125 animate-bounce' : 'scale-100'}
-        `}>
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-        </div>
       </button>
     </div>
   );
