@@ -80,6 +80,14 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     });
   }, [onToggle]);
 
+  // Делаем функцию закрытия доступной глобально для iframe
+  useEffect(() => {
+    (window as any).closeGameModal = closeGame;
+    return () => {
+      delete (window as any).closeGameModal;
+    };
+  }, [closeGame]);
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       console.log('Received message in GameButton:', event.data);

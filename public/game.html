@@ -1595,7 +1595,7 @@
     rulesDialog.style.display = 'block';
   });
   exitBtn.addEventListener('click', () => {
-    console.log('Exit button clicked - sending close message');
+    console.log('Exit button clicked - attempting to close game');
     
     // Останавливаем музыку
     if (backgroundMusic) {
@@ -1618,8 +1618,18 @@
     touchControls.style.display = 'none';
     welcomeScreen.style.display = 'none';
     
-    // Отправляем сообщение родительскому окну для закрытия модального окна
-    // Пробуем несколько способов для надёжности
+    // СПОСОБ 1: Вызываем глобальную функцию родительского окна напрямую
+    try {
+      if (window.parent && typeof window.parent.closeGameModal === 'function') {
+        console.log('Calling parent.closeGameModal() directly');
+        window.parent.closeGameModal();
+        return;
+      }
+    } catch (e) {
+      console.log('Direct call failed:', e);
+    }
+    
+    // СПОСОБ 2: Отправляем сообщение через postMessage (запасной вариант)
     try {
       console.log('Posting message to parent...');
       window.parent.postMessage('closeGame', '*');
