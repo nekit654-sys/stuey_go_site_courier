@@ -96,31 +96,17 @@
   }
 }
 
-/* Анимация подпрыгивания для кнопок с интервалом 7 секунд */
+/* Оптимизированная анимация подпрыгивания */
 @keyframes bounce-hint {
   0%,
-  2%,
-  4%,
-  6%,
-  8%,
-  10%,
-  12%,
-  14%,
-  16%,
-  18%,
-  20%,
-  96%,
-  98%,
+  94%,
   100% {
     transform: translateY(0);
   }
-  1%,
-  3%,
-  5% {
+  2% {
     transform: translateY(-8px);
   }
-  7%,
-  9% {
+  4% {
     transform: translateY(-4px);
   }
 }
@@ -128,25 +114,25 @@
 @keyframes sparkle {
   0%,
   100% {
-    transform: scale(0) rotate(0deg);
+    transform: scale(0);
     opacity: 0;
   }
   50% {
-    transform: scale(1) rotate(180deg);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
 @keyframes float-sparkle {
   0% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translateY(0);
     opacity: 0;
   }
   50% {
     opacity: 1;
   }
   100% {
-    transform: translateY(-20px) rotate(360deg);
+    transform: translateY(-20px);
     opacity: 0;
   }
 }
@@ -224,42 +210,34 @@
   animation-delay: 1.5s;
 }
 
-/* Плавная анимация подпрыгивания для кнопок с последовательным запуском */
+/* Оптимизированная анимация подпрыгивания */
 @keyframes bounce-smooth {
   0%,
   96%,
   100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
-  2%,
+  3% {
+    transform: translateY(-12px);
+  }
   6% {
-    transform: translateY(-12px) scale(1.02);
-  }
-  4% {
-    transform: translateY(-16px) scale(1.05);
-  }
-  8%,
-  12% {
-    transform: translateY(-6px) scale(1.01);
-  }
-  10% {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-6px);
   }
 }
 
 .animate-bounce-sequence-1 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 0s;
+  animation: bounce-smooth 8s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-bounce-sequence-2 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 0.8s;
+  animation: bounce-smooth 8s ease-in-out infinite 1s;
+  will-change: transform;
 }
 
 .animate-bounce-sequence-3 {
-  animation: bounce-smooth 6s ease-in-out infinite;
-  animation-delay: 1.6s;
+  animation: bounce-smooth 8s ease-in-out infinite 2s;
+  will-change: transform;
 }
 
 /* Анимация бегущей строки */
@@ -283,223 +261,44 @@
   }
 }
 
-/* Плавная анимация переливания для кнопок с последовательным запуском */
+/* Оптимизированная анимация переливания - используем только opacity */
 @keyframes shimmer-glow {
   0%,
-  88%,
+  94%,
   100% {
-    background: transparent;
-    box-shadow: none;
-    transform: scale(1);
+    opacity: 1;
   }
-  2% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
-    box-shadow:
-      0 0 8px rgba(255, 255, 255, 0.2),
-      inset 0 0 8px rgba(255, 255, 255, 0.08);
-    transform: scale(1.005);
-  }
-  4% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.25) 50%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    box-shadow:
-      0 0 12px rgba(255, 255, 255, 0.25),
-      inset 0 0 12px rgba(255, 255, 255, 0.12);
-    transform: scale(1.01);
+  3% {
+    opacity: 0.95;
   }
   6% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.35) 50%,
-      rgba(255, 255, 255, 0.12) 100%
-    );
-    box-shadow:
-      0 0 16px rgba(255, 255, 255, 0.3),
-      inset 0 0 16px rgba(255, 255, 255, 0.15);
-    transform: scale(1.015);
-  }
-  8% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.4) 50%,
-      rgba(255, 255, 255, 0.15) 100%
-    );
-    box-shadow:
-      0 0 20px rgba(255, 255, 255, 0.35),
-      inset 0 0 20px rgba(255, 255, 255, 0.18);
-    transform: scale(1.02);
-  }
-  10% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.45) 50%,
-      rgba(255, 255, 255, 0.18) 100%
-    );
-    box-shadow:
-      0 0 24px rgba(255, 255, 255, 0.4),
-      inset 0 0 24px rgba(255, 255, 255, 0.2);
-    transform: scale(1.025);
-  }
-  12% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.4) 50%,
-      rgba(255, 255, 255, 0.15) 100%
-    );
-    box-shadow:
-      0 0 20px rgba(255, 255, 255, 0.35),
-      inset 0 0 20px rgba(255, 255, 255, 0.18);
-    transform: scale(1.02);
-  }
-  14% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      rgba(255, 255, 255, 0.12) 100%
-    );
-    box-shadow:
-      0 0 16px rgba(255, 255, 255, 0.3),
-      inset 0 0 16px rgba(255, 255, 255, 0.15);
-    transform: scale(1.015);
-  }
-  16% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    box-shadow:
-      0 0 12px rgba(255, 255, 255, 0.25),
-      inset 0 0 12px rgba(255, 255, 255, 0.12);
-    transform: scale(1.01);
-  }
-  18% {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
-    box-shadow:
-      0 0 8px rgba(255, 255, 255, 0.2),
-      inset 0 0 8px rgba(255, 255, 255, 0.08);
-    transform: scale(1.005);
+    opacity: 0.9;
   }
 }
 
 .animate-shimmer-sequence-1 {
-  animation: shimmer-glow 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: 0s;
-  border-radius: inherit;
-  position: relative;
-  overflow: hidden;
+  animation: shimmer-glow 10s ease-in-out infinite;
+  will-change: opacity;
 }
 
 .animate-shimmer-sequence-2 {
-  animation: shimmer-glow 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: 1s;
-  border-radius: inherit;
-  position: relative;
-  overflow: hidden;
+  animation: shimmer-glow 10s ease-in-out infinite 1.5s;
+  will-change: opacity;
 }
 
 .animate-shimmer-sequence-3 {
-  animation: shimmer-glow 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: 2s;
-  border-radius: inherit;
-  position: relative;
-  overflow: hidden;
+  animation: shimmer-glow 10s ease-in-out infinite 3s;
+  will-change: opacity;
 }
 
-/* Плавная анимация прыжков корги с кроссбраузерными префиксами */
-@-webkit-keyframes gentle-bounce {
-  0%,
-  100% {
-    -webkit-transform: translateY(0px);
-    transform: translateY(0px);
-  }
-  25% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-  }
-  50% {
-    -webkit-transform: translateY(-12px);
-    transform: translateY(-12px);
-  }
-  75% {
-    -webkit-transform: translateY(-4px);
-    transform: translateY(-4px);
-  }
-}
-
-@-moz-keyframes gentle-bounce {
-  0%,
-  100% {
-    -moz-transform: translateY(0px);
-    transform: translateY(0px);
-  }
-  25% {
-    -moz-transform: translateY(-8px);
-    transform: translateY(-8px);
-  }
-  50% {
-    -moz-transform: translateY(-12px);
-    transform: translateY(-12px);
-  }
-  75% {
-    -moz-transform: translateY(-4px);
-    transform: translateY(-4px);
-  }
-}
-
-@-o-keyframes gentle-bounce {
-  0%,
-  100% {
-    -o-transform: translateY(0px);
-    transform: translateY(0px);
-  }
-  25% {
-    -o-transform: translateY(-8px);
-    transform: translateY(-8px);
-  }
-  50% {
-    -o-transform: translateY(-12px);
-    transform: translateY(-12px);
-  }
-  75% {
-    -o-transform: translateY(-4px);
-    transform: translateY(-4px);
-  }
-}
-
+/* Оптимизированная анимация прыжков корги */
 @keyframes gentle-bounce {
   0%,
   100% {
-    transform: translateY(0px);
-  }
-  25% {
-    transform: translateY(-8px);
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-12px);
-  }
-  75% {
-    transform: translateY(-4px);
+    transform: translateY(-10px);
   }
 }
 
@@ -523,4 +322,31 @@ body.game-modal-open .whatsapp-button {
   opacity: 0.3 !important;
   pointer-events: none !important;
   transition: all 0.3s ease !important;
+}
+
+/* Оптимизация производительности для слабых устройств */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Отключение сложных анимаций на мобильных для экономии ресурсов */
+@media (max-width: 768px) {
+  .animate-shimmer-sequence-1,
+  .animate-shimmer-sequence-2,
+  .animate-shimmer-sequence-3 {
+    animation: none;
+  }
+
+  .magic-dust::before,
+  .magic-dust::after,
+  .magic-particles::before,
+  .magic-particles::after {
+    display: none;
+  }
 }

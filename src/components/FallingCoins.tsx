@@ -12,22 +12,30 @@ const FallingCoins = () => {
   const [coins, setCoins] = useState<Coin[]>([]);
 
   useEffect(() => {
+    // Проверяем, хочет ли пользователь уменьшить анимации
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    // Уменьшаем количество монет на мобильных
+    const isMobile = window.innerWidth <= 768;
+    const coinCount = isMobile ? 8 : 12;
+
     const generateCoins = () => {
       const newCoins: Coin[] = [];
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < coinCount; i++) {
         newCoins.push({
           id: i,
           left: Math.random() * 100,
-          animationDuration: 3 + Math.random() * 4,
-          size: 20 + Math.random() * 15,
-          delay: Math.random() * 2,
+          animationDuration: 4 + Math.random() * 3,
+          size: 20 + Math.random() * 12,
+          delay: Math.random() * 3,
         });
       }
       setCoins(newCoins);
     };
 
     generateCoins();
-    const interval = setInterval(generateCoins, 8000);
+    const interval = setInterval(generateCoins, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -37,11 +45,11 @@ const FallingCoins = () => {
         {`
           @keyframes fall {
             0% {
-              transform: translateY(-50px) rotate(0deg);
+              transform: translateY(-50px);
               opacity: 1;
             }
             100% {
-              transform: translateY(100vh) rotate(360deg);
+              transform: translateY(100vh);
               opacity: 0;
             }
           }
@@ -56,6 +64,7 @@ const FallingCoins = () => {
               left: `${coin.left}%`,
               top: '-50px',
               animation: `fall ${coin.animationDuration}s ${coin.delay}s infinite linear`,
+              willChange: 'transform, opacity',
             }}
           >
             <div

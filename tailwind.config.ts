@@ -73,18 +73,15 @@ const config: Config = {
         magicGlow: {
           "0%": {
             opacity: "0",
-            transform: "scale(0.8)",
-            filter: "drop-shadow(0 0 10px #ffec3d)",
+            transform: "scale(0.9)",
           },
           "50%": {
-            opacity: "1",
-            transform: "scale(1.2)",
-            filter: "drop-shadow(0 0 40px #ffec3d)",
+            opacity: "0.6",
+            transform: "scale(1.1)",
           },
           "100%": {
             opacity: "0",
-            transform: "scale(1.5)",
-            filter: "drop-shadow(0 0 0 #ffec3d)",
+            transform: "scale(1.3)",
           },
         },
         "accordion-down": {
