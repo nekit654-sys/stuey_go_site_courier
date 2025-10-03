@@ -1,0 +1,14 @@
+[[redirects]]
+  from = "https://www.courier-button-site.vercel.app/*"
+  to = "https://courier-button-site.vercel.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build]
+  publish = "dist"
+  command = "npm run build"

@@ -1,0 +1,6 @@
+# Редирект с WWW на без WWW
+https://www.courier-button-site.vercel.app/* https://courier-button-site.vercel.app/:splat 301!
+http://www.courier-button-site.vercel.app/* https://courier-button-site.vercel.app/:splat 301!
+
+# SPA fallback - все неизвестные пути на index.html
+/*    /index.html   200

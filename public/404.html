@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>404 - Страница не найдена | Stuey.Go</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe8d9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .error-code {
+            font-size: 120px;
+            font-weight: bold;
+            color: #f97316;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        p {
+            font-size: 18px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: #f97316;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #ea580c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
+        }
+        
+        .links {
+            margin-top: 40px;
+        }
+        
+        .links a {
+            color: #f97316;
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 14px;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 640px) {
+            .error-code {
+                font-size: 80px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            p {
+                font-size: 16px;
+            }
+        }
+    </style>
+    
+    <!-- Редирект на главную через 10 секунд -->
+    <script>
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 10000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="error-code">404</div>
+        <h1>Упс! Страница не найдена</h1>
+        <p>
+            Похоже, эта страница отправилась в доставку и потерялась по пути. 
+            Но вы всегда можете вернуться на главную!
+        </p>
+        <a href="/" class="btn">Вернуться на главную</a>
+        
+        <div class="links">
+            <a href="/vacancies">Вакансии</a>
+            <a href="/contacts">Контакты</a>
+            <a href="/reviews">Отзывы</a>
+        </div>
+        
+        <p style="margin-top: 40px; font-size: 14px; color: #9ca3af;">
+            Автоматический переход на главную через 10 секунд...
+        </p>
+    </div>
+</body>
+</html>
