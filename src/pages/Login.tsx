@@ -9,6 +9,7 @@ import RequestsTable from '@/components/admin/RequestsTable';
 import ControlPanel from '@/components/admin/ControlPanel';
 import SecurityTab from '@/components/admin/SecurityTab';
 import AdminsTab from '@/components/admin/AdminsTab';
+import IncomeTab from '@/components/admin/IncomeTab';
 
 interface AdminRequest {
   id: number;
@@ -369,10 +370,14 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
+            </TabsTrigger>
+            <TabsTrigger value="income" className="flex items-center gap-2">
+              <Icon name="DollarSign" size={16} />
+              Доходы
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Icon name="Lock" size={16} />
@@ -408,6 +413,13 @@ const Login: React.FC = () => {
               passwordForm={passwordForm}
               onPasswordFormChange={setPasswordForm}
               onSubmit={changePassword}
+            />
+          </TabsContent>
+
+          <TabsContent value="income" className="space-y-6">
+            <IncomeTab
+              admins={admins}
+              onLoadAdmins={loadAdmins}
             />
           </TabsContent>
 
