@@ -56,10 +56,10 @@ const HeroSection = () => {
 
           <Button
             onClick={handleBecomeClick}
-            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-6 px-12 text-xl rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105 border-2 border-yellow-300"
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 sm:py-6 px-6 sm:px-12 text-base sm:text-xl rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105 border-2 border-yellow-300 w-full sm:w-auto"
           >
-            <Icon name="Rocket" size={24} className="mr-2" />
-            Стать курьером прямо сейчас
+            <Icon name="Rocket" size={20} className="mr-2 sm:w-6 sm:h-6" />
+            <span className="whitespace-nowrap">Стать курьером</span>
           </Button>
         </div>
       </div>
