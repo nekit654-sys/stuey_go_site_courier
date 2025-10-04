@@ -9,7 +9,6 @@ const Reviews = () => {
       name: "Алексей, 24 года",
       location: "Москва",
       experience: "8 месяцев",
-      avatar: "/img/d400fc2f-ba97-4605-b7bb-e17974672c14.jpg",
       rating: 5,
       text: "Отличная возможность подработать в свободное время. График гибкий, поддержка работает быстро. За 8 месяцев ни разу не было проблем с выплатами.",
       income: "65,000 ₽/мес",
@@ -18,7 +17,6 @@ const Reviews = () => {
       name: "Марина, 28 лет",
       location: "Санкт-Петербург",
       experience: "1 год 2 месяца",
-      avatar: "/img/2f2cdf7a-6e47-4293-bb2a-e6430d9169f4.jpg",
       rating: 5,
       text: "Работаю курьером на велосипеде уже больше года. Очень нравится система бонусов и то, что можно планировать свой день самостоятельно. Рекомендую!",
       income: "58,000 ₽/мес",
@@ -27,7 +25,6 @@ const Reviews = () => {
       name: "Дмитрий, 35 лет",
       location: "Екатеринбург",
       experience: "6 месяцев",
-      avatar: "/img/916db2ce-ca35-4984-ab6f-dba0ed17965f.jpg",
       rating: 4,
       text: "Хорошая подработка для студента. Работаю в основном вечером и в выходные. Приложение удобное, заказы поступают регулярно.",
       income: "35,000 ₽/мес",
@@ -36,7 +33,6 @@ const Reviews = () => {
       name: "Елена, 22 года",
       location: "Новосибирск",
       experience: "3 месяца",
-      avatar: "/img/12faf236-17d6-433d-a758-ab9eb0a55df1.jpg",
       rating: 5,
       text: "Начала работать недавно, но уже очень довольна. Обучение прошло быстро, техподдержка всегда помогает. Планирую работать дальше.",
       income: "42,000 ₽/мес",
@@ -45,7 +41,6 @@ const Reviews = () => {
       name: "Сергей, 30 лет",
       location: "Казань",
       experience: "2 года",
-      avatar: "/img/d734c2e7-759f-472b-b781-5c693371c854.jpg",
       rating: 5,
       text: "Работаю курьером уже 2 года. За это время компания сильно развилась, условия стали еще лучше. Особенно нравится программа лояльности.",
       income: "78,000 ₽/мес",
@@ -54,7 +49,6 @@ const Reviews = () => {
       name: "Анна, 42 года",
       location: "Ростов-на-Дону",
       experience: "4 месяца",
-      avatar: "/img/350143c9-7d3a-44cf-ab58-4fd1094964c2.jpg",
       rating: 4,
       text: "Отличная возможность совмещать с основной работой. Выходные провожу с пользой, зарабатывая дополнительные деньги. Всем довольна!",
       income: "28,000 ₽/мес",
@@ -63,7 +57,6 @@ const Reviews = () => {
       name: "Максим, 26 лет",
       location: "Краснодар",
       experience: "1 год",
-      avatar: "/img/9569050a-7ef4-4b6e-81e4-65b0f60f9aa3.jpg",
       rating: 5,
       text: "Супер работа! Каждый день новые места, общение с людьми. Плюс хорошие деньги за активную работу. Очень доволен выбором.",
       income: "62,000 ₽/мес",
@@ -72,7 +65,6 @@ const Reviews = () => {
       name: "Ольга, 32 года",
       location: "Волгоград",
       experience: "7 месяцев",
-      avatar: "/img/359e95a5-fca2-4bd5-a636-fff4b16e40d2.jpg",
       rating: 4,
       text: "Работаю в свободное время от основной работы. Удобное приложение, быстрые выплаты. Хороший способ подзаработать.",
       income: "31,000 ₽/мес",
@@ -81,7 +73,6 @@ const Reviews = () => {
       name: "Игорь, 21 год",
       location: "Уфа",
       experience: "5 месяцев",
-      avatar: "/img/b6fad65d-8f21-4442-a4cb-fc65f5bbca85.jpg",
       rating: 5,
       text: "Отличная команда, всегда готовы помочь. Гибкий график позволяет совмещать с учебой. Зарплата стабильная.",
       income: "45,000 ₽/мес",
@@ -90,7 +81,6 @@ const Reviews = () => {
       name: "Виктория, 29 лет",
       location: "Челябинск",
       experience: "9 месяцев",
-      avatar: "/img/d2c6950c-1076-47ce-943a-5b4f807dfa4f.jpg",
       rating: 5,
       text: "Начинала с подработки, теперь это моя основная работа. Нравится свобода и возможность самой планировать день.",
       income: "71,000 ₽/мес",
@@ -99,7 +89,6 @@ const Reviews = () => {
       name: "Роман, 19 лет",
       location: "Тюмень",
       experience: "3 месяца",
-      avatar: "/img/9c3bbadd-8155-4829-8bad-d144e8d5fb3d.jpg",
       rating: 4,
       text: "Молодая, динамично развивающаяся компания. Хорошие условия труда и справедливая оплата. Рекомендую!",
       income: "38,000 ₽/мес",
@@ -108,7 +97,6 @@ const Reviews = () => {
       name: "Татьяна, 27 лет",
       location: "Барнаул",
       experience: "6 месяцев",
-      avatar: "/img/97961464-2c3f-44e4-a64a-484a61e55c5a.jpg",
       rating: 5,
       text: "Очень довольна работой! Удобное расписание, отзывчивая поддержка. За полгода ни одной задержки выплат.",
       income: "48,000 ₽/мес",
@@ -117,7 +105,6 @@ const Reviews = () => {
       name: "Андрей, 38 лет",
       location: "Воронеж",
       experience: "1 год 4 месяца",
-      avatar: "/img/5d3f171a-543b-41cd-bc8f-a97e9eb3a7bc.jpg",
       rating: 5,
       text: "Работаю более года и очень доволен. Стабильный доход, гибкий график. Отличная работа для активных людей!",
       income: "69,000 ₽/мес",
@@ -126,7 +113,6 @@ const Reviews = () => {
       name: "Екатерина, 20 лет",
       location: "Хабаровск",
       experience: "4 месяца",
-      avatar: "/img/0889962c-d844-4e6e-b468-17f3cb6fb51f.jpg",
       rating: 4,
       text: "Прекрасная возможность для студентов! Работаю между парами, заработок помогает с расходами на учебу.",
       income: "29,000 ₽/мес",
@@ -135,7 +121,6 @@ const Reviews = () => {
       name: "Владимир, 33 года",
       location: "Иркутск",
       experience: "8 месяцев",
-      avatar: "/img/46ecf8bc-11a1-433c-bca6-386de039a8ae.jpg",
       rating: 5,
       text: "Отличная работа для тех, кто любит движение и общение. Хорошие бонусы за качественную работу.",
       income: "58,000 ₽/мес",
@@ -144,7 +129,6 @@ const Reviews = () => {
       name: "Наталья, 25 лет",
       location: "Омск",
       experience: "2 месяца",
-      avatar: "/img/f4c3de7c-f53b-468a-954a-341be30d8cc5.jpg",
       rating: 4,
       text: "Только начала работать, но уже вижу потенциал. Удобное приложение, понятная система оплаты.",
       income: "25,000 ₽/мес",
@@ -153,7 +137,6 @@ const Reviews = () => {
       name: "Михаил, 40 лет",
       location: "Пермь",
       experience: "1 год 6 месяцев",
-      avatar: "/img/6d410005-c2d4-4e08-b5ae-0ecca23b6e3d.jpg",
       rating: 5,
       text: "Полтора года работы - и ни разу не пожалел о выборе! Отличная команда, справедливые условия.",
       income: "74,000 ₽/мес",
@@ -162,7 +145,6 @@ const Reviews = () => {
       name: "Юлия, 26 лет",
       location: "Саратов",
       experience: "5 месяцев",
-      avatar: "/img/e7616d1d-7807-47f2-a298-e6021f0737dc.jpg",
       rating: 4,
       text: "Хорошая подработка для мам в декрете. Могу работать, когда удобно, не привязана к офису.",
       income: "33,000 ₽/мес",
@@ -171,7 +153,6 @@ const Reviews = () => {
       name: "Павел Г.",
       location: "Тольятти",
       experience: "7 месяцев",
-      avatar: "/img/b3d4b55a-c67a-482f-91ce-792f2b5ba379.jpg",
       rating: 5,
       text: "Работа мечты для тех, кто не любит сидеть в офисе! Каждый день - новые маршруты и впечатления.",
       income: "54,000 ₽/мес",
@@ -180,7 +161,6 @@ const Reviews = () => {
       name: "Светлана Ш.",
       location: "Липецк",
       experience: "3 месяца",
-      avatar: "/img/0a30f085-f00d-4148-a3b3-d7b9682089b1.jpg",
       rating: 4,
       text: "Отличные условия для новичков. Быстрое обучение, всегда есть к кому обратиться за помощью.",
       income: "27,000 ₽/мес",
@@ -189,7 +169,6 @@ const Reviews = () => {
       name: "Артем В.",
       location: "Ярославль",
       experience: "11 месяцев",
-      avatar: "/img/f0788ef6-49e3-4d0b-bfaa-02a57780fef8.jpg",
       rating: 5,
       text: "Почти год работы принес много положительных эмоций. Стабильный доход и интересная работа!",
       income: "61,000 ₽/мес",
@@ -198,7 +177,6 @@ const Reviews = () => {
       name: "Алина Ч.",
       location: "Киров",
       experience: "4 месяца",
-      avatar: "/img/6f97f7ce-bc7a-4f64-bba6-466c0694a7a8.jpg",
       rating: 4,
       text: "Удобно совмещать с учебой. Гибкий график позволяет работать между занятиями в университете.",
       income: "32,000 ₽/мес",
@@ -207,7 +185,6 @@ const Reviews = () => {
       name: "Константин Л.",
       location: "Астрахань",
       experience: "6 месяцев",
-      avatar: "/img/6a2f82e5-d608-4815-998d-744776c8bae4.jpg",
       rating: 5,
       text: "Отличная возможность заработать, познакомиться с городом. Поддержка всегда на связи.",
       income: "46,000 ₽/мес",
@@ -216,7 +193,6 @@ const Reviews = () => {
       name: "Валерия О.",
       location: "Курск",
       experience: "2 месяца",
-      avatar: "/img/d400fc2f-ba97-4605-b7bb-e17974672c14.jpg",
       rating: 4,
       text: "Начала недавно, но уже понравилось! Простая регистрация, быстрое оформление. Довольна!",
       income: "24,000 ₽/мес",
@@ -225,7 +201,6 @@ const Reviews = () => {
       name: "Денис М.",
       location: "Брянск",
       experience: "9 месяцев",
-      avatar: "/img/2f2cdf7a-6e47-4293-bb2a-e6430d9169f4.jpg",
       rating: 5,
       text: "Работаю почти год - только положительные впечатления! Хорошие люди, честная оплата.",
       income: "59,000 ₽/мес",
@@ -234,7 +209,6 @@ const Reviews = () => {
       name: "Кристина Э.",
       location: "Магнитогорск",
       experience: "5 месяцев",
-      avatar: "/img/12faf236-17d6-433d-a758-ab9eb0a55df1.jpg",
       rating: 4,
       text: "Хорошая работа для тех, кто ценит свободу. Можешь планировать день как хочешь.",
       income: "37,000 ₽/мес",
@@ -243,7 +217,6 @@ const Reviews = () => {
       name: "Руслан Х.",
       location: "Сочи",
       experience: "1 год 3 месяца",
-      avatar: "/img/d734c2e7-759f-472b-b781-5c693371c854.jpg",
       rating: 5,
       text: "Работаю в курортном городе больше года. Отличная работа, особенно летом! Туристы всегда благодарны.",
       income: "82,000 ₽/мес",
@@ -252,7 +225,6 @@ const Reviews = () => {
       name: "Диана П.",
       location: "Тула",
       experience: "7 месяцев",
-      avatar: "/img/d734c2e7-759f-472b-b781-5c693371c854.jpg",
       rating: 4,
       text: "Приятно работать в дружном коллективе. Всегда готовы помочь и поддержать новичков.",
       income: "41,000 ₽/мес",
@@ -261,7 +233,6 @@ const Reviews = () => {
       name: "Олег Б.",
       location: "Рязань",
       experience: "10 месяцев",
-      avatar: "/img/350143c9-7d3a-44cf-ab58-4fd1094964c2.jpg",
       rating: 5,
       text: "Уже почти год работаю курьером. Стабильная работа с хорошим доходом. Планирую продолжать!",
       income: "63,000 ₽/мес",
@@ -270,7 +241,6 @@ const Reviews = () => {
       name: "Мария Г.",
       location: "Владимир",
       experience: "8 месяцев",
-      avatar: "/img/9569050a-7ef4-4b6e-81e4-65b0f60f9aa3.jpg",
       rating: 5,
       text: "Замечательная работа! Помогает содержать семью, график позволяет заботиться о детях.",
       income: "52,000 ₽/мес",
@@ -279,7 +249,6 @@ const Reviews = () => {
       name: "Евгений К.",
       location: "Калуга",
       experience: "6 месяцев",
-      avatar: "/img/359e95a5-fca2-4bd5-a636-fff4b16e40d2.jpg",
       rating: 4,
       text: "Хорошая подработка после основной работы. Можно заработать дополнительно к зарплате.",
       income: "35,000 ₽/мес",
@@ -288,7 +257,6 @@ const Reviews = () => {
       name: "Анастасия Р.",
       location: "Смоленск",
       experience: "4 месяца",
-      avatar: "/img/b6fad65d-8f21-4442-a4cb-fc65f5bbca85.jpg",
       rating: 5,
       text: "Очень нравится! Работа на свежем воздухе, активный образ жизни. И деньги хорошие!",
       income: "39,000 ₽/мес",
@@ -297,7 +265,6 @@ const Reviews = () => {
       name: "Григорий Ф.",
       location: "Белгород",
       experience: "1 год 1 месяц",
-      avatar: "/img/d2c6950c-1076-47ce-943a-5b4f807dfa4f.jpg",
       rating: 5,
       text: "Больше года работы подтверждают - это отличная компания! Честные условия и стабильность.",
       income: "66,000 ₽/мес",
@@ -306,7 +273,6 @@ const Reviews = () => {
       name: "Полина С.",
       location: "Орел",
       experience: "3 месяца",
-      avatar: "/img/9c3bbadd-8155-4829-8bad-d144e8d5fb3d.jpg",
       rating: 4,
       text: "Недавно начала, но уже вижу перспективы. Удобное приложение, понятные правила работы.",
       income: "26,000 ₽/мес",
@@ -315,7 +281,6 @@ const Reviews = () => {
       name: "Станислав Н.",
       location: "Курган",
       experience: "7 месяцев",
-      avatar: "/img/97961464-2c3f-44e4-a64a-484a61e55c5a.jpg",
       rating: 5,
       text: "Отличная работа для людей, которые любят активность. Каждый день приносит что-то новое!",
       income: "49,000 ₽/мес",
@@ -324,7 +289,6 @@ const Reviews = () => {
       name: "Дарья В.",
       location: "Иваново",
       experience: "5 месяцев",
-      avatar: "/img/5d3f171a-543b-41cd-bc8f-a97e9eb3a7bc.jpg",
       rating: 4,
       text: "Работаю студенткой, очень удобно совмещать с учебой. Гибкий график - это то, что нужно!",
       income: "34,000 ₽/мес",
@@ -333,7 +297,6 @@ const Reviews = () => {
       name: "Вадим Ю.",
       location: "Псков",
       experience: "9 месяцев",
-      avatar: "/img/0889962c-d844-4e6e-b468-17f3cb6fb51f.jpg",
       rating: 5,
       text: "Почти год работы принес массу положительных эмоций. Хорошая команда, стабильный заработок!",
       income: "57,000 ₽/мес",
@@ -342,7 +305,6 @@ const Reviews = () => {
       name: "Лилия Т.",
       location: "Великий Новгород",
       experience: "6 месяцев",
-      avatar: "/img/46ecf8bc-11a1-433c-bca6-386de039a8ae.jpg",
       rating: 4,
       text: "Хорошая возможность подработать. Особенно нравится, что можно выбирать удобное время.",
       income: "36,000 ₽/мес",
@@ -351,7 +313,6 @@ const Reviews = () => {
       name: "Артур З.",
       location: "Мурманск",
       experience: "4 месяца",
-      avatar: "/img/f4c3de7c-f53b-468a-954a-341be30d8cc5.jpg",
       rating: 5,
       text: "Даже в северном городе работа курьером приносит хороший доход. Отличная поддержка!",
       income: "44,000 ₽/мес",
@@ -360,7 +321,6 @@ const Reviews = () => {
       name: "Кира Л.",
       location: "Петрозаводск",
       experience: "8 месяцев",
-      avatar: "/img/6d410005-c2d4-4e08-b5ae-0ecca23b6e3d.jpg",
       rating: 5,
       text: "Работаю уже 8 месяцев и очень довольна! Стабильные выплаты, понятные условия.",
       income: "50,000 ₽/мес",
@@ -369,7 +329,6 @@ const Reviews = () => {
       name: "Федор М.",
       location: "Архангельск",
       experience: "2 года 3 месяца",
-      avatar: "/img/e7616d1d-7807-47f2-a298-e6021f0737dc.jpg",
       rating: 5,
       text: "Работаю уже больше двух лет. За это время компания стала еще лучше! Рекомендую всем активным людям.",
       income: "73,000 ₽/мес",
@@ -378,7 +337,6 @@ const Reviews = () => {
       name: "Ирина Д.",
       location: "Вологда",
       experience: "1 год",
-      avatar: "/img/e7616d1d-7807-47f2-a298-e6021f0737dc.jpg",
       rating: 4,
       text: "Год работы показал, что это надежная компания. Хорошие условия и справедливая оплата.",
       income: "48,000 ₽/мес",
@@ -387,7 +345,6 @@ const Reviews = () => {
       name: "Николай Ж.",
       location: "Сыктывкар",
       experience: "5 месяцев",
-      avatar: "/img/b3d4b55a-c67a-482f-91ce-792f2b5ba379.jpg",
       rating: 5,
       text: "Отличная работа в любую погоду! Хорошее снаряжение, поддержка всегда поможет.",
       income: "43,000 ₽/мес",
@@ -396,7 +353,6 @@ const Reviews = () => {
       name: "Яна К.",
       location: "Калининград",
       experience: "7 месяцев",
-      avatar: "/img/0a30f085-f00d-4148-a3b3-d7b9682089b1.jpg",
       rating: 4,
       text: "Работаю в морском городе уже 7 месяцев. Красивые маршруты, приятные клиенты!",
       income: "47,000 ₽/мес",
@@ -405,7 +361,6 @@ const Reviews = () => {
       name: "Семен Р.",
       location: "Чебоксары",
       experience: "3 месяца",
-      avatar: "/img/f0788ef6-49e3-4d0b-bfaa-02a57780fef8.jpg",
       rating: 5,
       text: "Только начал, но уже понял - это моя работа! Активность, общение, хорошие деньги.",
       income: "31,000 ₽/мес",
@@ -414,7 +369,6 @@ const Reviews = () => {
       name: "Александра П.",
       location: "Йошкар-Ола",
       experience: "6 месяцев",
-      avatar: "/img/6f97f7ce-bc7a-4f64-bba6-466c0694a7a8.jpg",
       rating: 4,
       text: "Полгода работы научили меня ценить гибкость графика. Удобно для молодой мамы!",
       income: "33,000 ₽/мес",
@@ -423,7 +377,6 @@ const Reviews = () => {
       name: "Тимур С.",
       location: "Саранск",
       experience: "11 месяцев",
-      avatar: "/img/6a2f82e5-d608-4815-998d-744776c8bae4.jpg",
       rating: 5,
       text: "Почти год работы подтвердил правильность выбора. Стабильная работа с перспективами роста!",
       income: "64,000 ₽/мес",
@@ -432,7 +385,6 @@ const Reviews = () => {
       name: "Инна Ф.",
       location: "Пенза",
       experience: "4 месяца",
-      avatar: "/img/d400fc2f-ba97-4605-b7bb-e17974672c14.jpg",
       rating: 4,
       text: "Хорошая подработка для домохозяйки. Можно работать, пока дети в школе.",
       income: "29,000 ₽/мес",
@@ -441,7 +393,6 @@ const Reviews = () => {
       name: "Богдан Н.",
       location: "Ульяновск",
       experience: "8 месяцев",
-      avatar: "/img/b3d4b55a-c67a-482f-91ce-792f2b5ba379.jpg",
       rating: 5,
       text: "8 месяцев активной работы принесли отличный опыт и стабильный доход. Очень доволен!",
       income: "56,000 ₽/мес",
@@ -450,7 +401,6 @@ const Reviews = () => {
       name: "Лариса Б.",
       location: "Тамбов",
       experience: "2 месяца",
-      avatar: "/img/350143c9-7d3a-44cf-ab58-4fd1094964c2.jpg",
       rating: 4,
       text: "Недавно начала, но уже чувствую поддержку команды. Хорошее начало карьеры!",
       income: "23,000 ₽/мес",
@@ -459,7 +409,6 @@ const Reviews = () => {
       name: "Леонид В.",
       location: "Кострома",
       experience: "1 год 5 месяцев",
-      avatar: "/img/2f2cdf7a-6e47-4293-bb2a-e6430d9169f4.jpg",
       rating: 5,
       text: "Полтора года работы показали надежность компании. Отличные условия для долгосрочного сотрудничества!",
       income: "71,000 ₽/мес",
@@ -468,12 +417,59 @@ const Reviews = () => {
       name: "Елизавета Г.",
       location: "Владикавказ",
       experience: "9 месяцев",
-      avatar: "/img/916db2ce-ca35-4984-ab6f-dba0ed17965f.jpg",
       rating: 5,
       text: "Работаю в горном городе уже 9 месяцев. Красивые виды, активная работа, хорошие люди!",
       income: "53,000 ₽/мес",
     },
   ];
+
+  // Функция для определения пола по имени
+  const isFemale = (name: string): boolean => {
+    const firstName = name.split(',')[0].trim().split(' ')[0];
+    const femaleEndings = ['а', 'я', 'ь'];
+    const maleExceptions = ['Никита', 'Илья'];
+    
+    if (maleExceptions.includes(firstName)) return false;
+    
+    return femaleEndings.some(ending => firstName.endsWith(ending));
+  };
+
+  // Генерация уникального аватара на основе имени и пола
+  const generateAvatar = (name: string): string => {
+    const firstName = name.split(',')[0].trim().split(' ')[0];
+    const female = isFemale(name);
+    
+    // Палитры цветов для мужчин и женщин
+    const maleColors = [
+      { bg: '2563eb', color: 'ffffff' }, // синий
+      { bg: '7c3aed', color: 'ffffff' }, // фиолетовый
+      { bg: '0891b2', color: 'ffffff' }, // циан
+      { bg: '059669', color: 'ffffff' }, // зеленый
+      { bg: 'dc2626', color: 'ffffff' }, // красный
+      { bg: 'ea580c', color: 'ffffff' }, // оранжевый
+      { bg: '4b5563', color: 'ffffff' }, // серый
+      { bg: '0d9488', color: 'ffffff' }, // бирюзовый
+    ];
+    
+    const femaleColors = [
+      { bg: 'ec4899', color: 'ffffff' }, // розовый
+      { bg: 'a855f7', color: 'ffffff' }, // пурпурный
+      { bg: 'f43f5e', color: 'ffffff' }, // роза
+      { bg: '8b5cf6', color: 'ffffff' }, // индиго
+      { bg: '06b6d4', color: 'ffffff' }, // голубой
+      { bg: '10b981', color: 'ffffff' }, // мятный
+      { bg: 'f59e0b', color: 'ffffff' }, // янтарный
+      { bg: 'd946ef', color: 'ffffff' }, // фуксия
+    ];
+    
+    // Выбираем цвет на основе первой буквы имени
+    const colors = female ? femaleColors : maleColors;
+    const charCode = firstName.charCodeAt(0);
+    const colorIndex = charCode % colors.length;
+    const { bg, color } = colors[colorIndex];
+    
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=${bg}&color=${color}&size=100&bold=true&font-size=0.4`;
+  };
 
   // Функция для получения случайных отзывов
   const getRandomReviews = (count: number = 12) => {
@@ -520,13 +516,9 @@ const Reviews = () => {
               >
                 <div className="flex items-start space-x-4 mb-4">
                   <img
-                    src={review.avatar}
+                    src={generateAvatar(review.name)}
                     alt={review.name}
                     className="w-12 h-12 rounded-full object-cover shadow-lg"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}&background=fbbf24&color=1f2937&size=100`;
-                    }}
                   />
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-800">{review.name}</h3>
