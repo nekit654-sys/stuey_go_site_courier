@@ -177,12 +177,12 @@ const Hiring = () => {
                 key={index}
                 className="bg-white rounded-xl md:rounded-2xl p-4 md:p-8 shadow-xl border-l-4 md:border-l-8 border-yellow-400 hover:shadow-2xl transition-all duration-300"
               >
-                <div className="flex items-start space-x-3 md:space-x-6">
+                <div className="flex items-start space-x-4 md:space-x-6">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
                       <Icon
                         name={step.icon as any}
-                        size={20}
+                        size={24}
                         className="text-black md:w-6 md:h-6"
                       />
                     </div>
@@ -208,8 +208,8 @@ const Hiring = () => {
                         >
                           <Icon
                             name="CheckCircle2"
-                            size={16}
-                            className="text-green-500 mr-2 mt-1 flex-shrink-0 md:w-5 md:h-5"
+                            size={18}
+                            className="text-green-500 mr-2 mt-0.5 flex-shrink-0 md:w-5 md:h-5"
                           />
                           <span>{detail}</span>
                         </li>
@@ -328,7 +328,7 @@ const Hiring = () => {
               onMouseEnter={() => playSound("hover")}
               className="bg-white hover:bg-gray-100 text-green-600 font-bold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full md:w-auto"
             >
-              <Icon name="Rocket" size={18} className="mr-2 md:w-5 md:h-5" />
+              <Icon name="Rocket" size={20} className="mr-2 md:w-5 md:h-5" />
               Подать заявку сейчас
             </Button>
           </div>
