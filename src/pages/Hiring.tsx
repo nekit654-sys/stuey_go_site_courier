@@ -293,14 +293,14 @@ const Hiring = () => {
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full px-4 md:px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full px-4 md:px-6 py-4 text-left flex items-center justify-between gap-3 hover:bg-gray-50 transition-colors"
                   >
-                    <h3 className="text-base md:text-lg font-bold text-gray-800 pr-2 md:pr-4">
+                    <h3 className="text-base md:text-lg font-bold text-gray-800 flex-1">
                       {faq.question}
                     </h3>
                     <Icon
                       name={openFaq === index ? "ChevronUp" : "ChevronDown"}
-                      size={24}
+                      size={28}
                       className="text-yellow-500 flex-shrink-0"
                     />
                   </button>
