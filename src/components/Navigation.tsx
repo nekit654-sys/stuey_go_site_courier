@@ -98,12 +98,12 @@ const Navigation = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className="
-                bg-gradient-to-r from-yellow-400 to-yellow-500 
-                text-black font-bold px-4 py-2 rounded-full
+                bg-gradient-to-r from-green-500 to-green-600
+                text-white font-bold px-4 py-2 rounded-full
                 shadow-lg hover:shadow-xl transform hover:scale-105
                 transition-all duration-200
-                ring-2 ring-yellow-300/50 hover:ring-yellow-400/70
-                hover:from-yellow-300 hover:to-yellow-400
+                ring-2 ring-green-400/50 hover:ring-green-500/70
+                hover:from-green-600 hover:to-green-700
               "
             >
               <Icon name="Gamepad2" size={16} className="mr-2" />
@@ -115,7 +115,7 @@ const Navigation = () => {
           <div className="md:hidden">
             <Button
               variant="ghost"
-              className="text-black hover:bg-yellow-500 transition-all duration-200"
+              className="text-black hover:bg-yellow-500 transition-all duration-200 p-2"
               onClick={() => {
                 playSound('click');
                 setIsMenuOpen(!isMenuOpen);
@@ -124,8 +124,8 @@ const Navigation = () => {
             >
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
-                size={24}
-                className="text-black transition-transform duration-200"
+                size={32}
+                className="text-black transition-transform duration-200 stroke-[2.5]"
               />
             </Button>
           </div>
@@ -138,7 +138,7 @@ const Navigation = () => {
           ${isMenuOpen ? "max-h-[500px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-4"}
         `}
         >
-          <div className="py-4 space-y-2 border-t border-yellow-500/40 animate-in slide-in-from-top-5 duration-500">
+          <div className="py-4 space-y-3 border-t-2 border-black/20 animate-in slide-in-from-top-5 duration-500">
             {menuItems.map((item) => (
               <Link
                 key={item.path}
@@ -148,21 +148,21 @@ const Navigation = () => {
                 <Button
                   variant="ghost"
                   className={`
-                    w-full justify-start transition-all duration-200 hover:scale-105
+                    w-full justify-start transition-all duration-200 hover:scale-105 py-6 text-base font-semibold
                     ${
                       location.pathname === item.path
-                        ? "bg-black text-yellow-400 hover:bg-gray-900 shadow-lg"
-                        : "text-black hover:bg-yellow-500 hover:text-black"
+                        ? "bg-black text-yellow-400 hover:bg-gray-900 shadow-lg border-l-4 border-yellow-400"
+                        : "text-black hover:bg-yellow-500 hover:text-black border-l-4 border-transparent"
                     }
                   `}
                 >
                   <Icon
                     name={item.icon as any}
-                    size={16}
+                    size={20}
                     className={
                       location.pathname === item.path
-                        ? "text-yellow-400"
-                        : "text-black"
+                        ? "text-yellow-400 mr-3"
+                        : "text-black mr-3"
                     }
                   />
                   {item.label}
@@ -192,12 +192,13 @@ const Navigation = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className="
-                w-full justify-start bg-gradient-to-r from-yellow-400 to-yellow-500 
-                text-black font-bold transition-all duration-200 hover:scale-105
-                shadow-lg ring-2 ring-yellow-300/50
+                w-full justify-start bg-gradient-to-r from-green-500 to-green-600
+                text-white font-bold transition-all duration-200 hover:scale-105
+                shadow-lg ring-2 ring-green-400/50 py-6 text-base border-l-4 border-green-400
+                hover:from-green-600 hover:to-green-700
               "
             >
-              <Icon name="Gamepad2" size={16} className="mr-2" />
+              <Icon name="Gamepad2" size={20} className="mr-3" />
               Игра
             </Button>
           </div>
