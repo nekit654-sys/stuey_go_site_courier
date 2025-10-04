@@ -31,7 +31,7 @@ const Index = () => {
       <FAQ />
       
       {/* Секция с формой выплаты */}
-      <section data-payout-form className="py-20 bg-gradient-to-br from-yellow-50 to-yellow-100">
+      <section data-payout-form className="py-20 bg-gradient-to-br from-green-50 to-green-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-2">
