@@ -18,6 +18,9 @@ const config: Config = {
       },
     },
     extend: {
+      borderWidth: {
+        '3': '3px',
+      },
       fontFamily: {
         sans: ['Inter', 'Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         heading: ['Manrope', 'Inter', 'sans-serif'],

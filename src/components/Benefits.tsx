@@ -41,9 +41,9 @@ const Benefits = () => {
   ];
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-16 px-4 bg-gradient-to-b from-white to-yellow-50">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 font-rubik">
+        <h2 className="text-4xl font-extrabold text-center mb-4 text-black font-rubik drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
           Почему стоит выбрать работу курьером?
         </h2>
         <p className="text-xl text-center mb-12 text-gray-600 max-w-2xl mx-auto">
@@ -55,26 +55,23 @@ const Benefits = () => {
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-xl bg-gray-50 hover:bg-yellow-50 transition-all duration-300 border-2 border-gradient-to-br from-yellow-200 via-yellow-200 to-amber-200 hover:border-yellow-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 backdrop-blur-sm ring-1 ring-yellow-100/50 hover:ring-yellow-200/70 relative overflow-hidden"
+              className="text-center p-6 rounded-2xl bg-white transition-all duration-150 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none cursor-pointer"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-yellow-50/30 to-amber-50/30 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10">
-                <div className="mb-6 flex justify-center relative z-20">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-                    <Icon
-                      name={benefit.icon}
-                      size={40}
-                      className="text-black hover:text-gray-800 transition-all duration-300 hover:scale-110 relative z-30"
-                    />
-                  </div>
+              <div className="mb-6 flex justify-center">
+                <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                  <Icon
+                    name={benefit.icon}
+                    size={40}
+                    className="text-black"
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-gray-800 font-rubik">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {benefit.description}
-                </p>
               </div>
+              <h3 className="text-xl font-extrabold mb-3 text-black font-rubik">
+                {benefit.title}
+              </h3>
+              <p className="text-gray-700 leading-relaxed font-medium">
+                {benefit.description}
+              </p>
             </div>
           ))}
         </div>

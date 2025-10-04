@@ -38,11 +38,11 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-20 px-4 bg-gradient-to-b from-white to-yellow-50">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-rubik flex flex-col md:flex-row items-center justify-center gap-3 md:gap-2">
-            <Icon name="MessageCircleQuestion" size={48} className="text-yellow-500" />
+          <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-4 font-rubik flex flex-col md:flex-row items-center justify-center gap-3 md:gap-2 drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
+            <Icon name="MessageCircleQuestion" size={48} className="text-yellow-400" />
             <span>Частые вопросы</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -56,25 +56,21 @@ const FAQ = () => {
             return (
               <div
                 key={index}
-                className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-yellow-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                className="bg-white border-3 border-black rounded-2xl overflow-hidden transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left transition-all duration-200 hover:bg-gray-50"
+                  className="w-full flex items-center justify-between p-6 text-left transition-all duration-150"
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                      isOpen ? 'bg-yellow-400' : 'bg-gray-100'
-                    }`}>
+                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
                       <Icon
                         name={faq.icon as any}
                         size={24}
-                        className={isOpen ? 'text-black' : 'text-gray-600'}
+                        className="text-black"
                       />
                     </div>
-                    <span className={`font-semibold text-lg transition-colors duration-200 ${
-                      isOpen ? 'text-yellow-600' : 'text-gray-900'
-                    }`}>
+                    <span className="font-extrabold text-lg text-black">
                       {faq.question}
                     </span>
                   </div>

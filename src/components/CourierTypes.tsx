@@ -55,13 +55,13 @@ const CourierTypes = () => {
   };
 
   return (
-    <section className="bg-gray-50">
+    <section className="bg-gradient-to-b from-yellow-50 to-white">
       <div className="mb-12">
         <PromoMarquee />
       </div>
       <div className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 font-rubik">
+          <h2 className="text-4xl font-extrabold text-center mb-4 text-black font-rubik drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
             Выбери свой способ доставки!
           </h2>
         <p className="text-xl text-center mb-12 text-gray-600 max-w-2xl mx-auto">
@@ -73,23 +73,22 @@ const CourierTypes = () => {
           {courierTypes.map((courier, index) => (
             <Card
               key={index}
-              className={`${courier.bgColor} border-2 border-gradient-to-br from-yellow-300 via-yellow-300 to-amber-300 hover:border-yellow-400 transition-all duration-300 hover:shadow-xl shadow-lg transform hover:-translate-y-2 rounded-xl backdrop-blur-sm ring-1 ring-yellow-200/50 hover:ring-yellow-300/70 relative overflow-hidden`}
+              className="bg-white border-3 border-black transition-all duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] rounded-2xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-100/20 via-yellow-100/20 to-amber-100/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <CardContent className="p-8 text-center flex flex-col h-full">
-                <div className="mb-6 flex justify-center relative z-20">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                <div className="mb-6 flex justify-center">
+                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
                     <Icon
                       name={courier.icon}
                       size={48}
-                      className="text-black hover:text-gray-800 transition-colors duration-300 relative z-30"
+                      className="text-black"
                     />
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-800 font-rubik">
+                <h3 className="text-2xl font-extrabold mb-3 text-black font-rubik">
                   {courier.type}
                 </h3>
-                <p className="text-gray-600 mb-6 text-lg">
+                <p className="text-gray-700 mb-6 text-lg font-medium">
                   {courier.description}
                 </p>
 
@@ -111,12 +110,7 @@ const CourierTypes = () => {
 
                 <Button
                   onClick={(e) => handleMagicClick(e, courier.type)}
-                  className={`w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4 px-6 text-lg 
-                    shadow-lg hover:shadow-xl
-                    rounded-lg hover:scale-105 transition-all duration-200 ease-out
-                    ring-2 ring-amber-300/50 hover:ring-amber-400/70
-                    border-0
-                    animate-bounce-sequence-${index + 1}`}
+                  className="w-full bg-yellow-400 text-black font-extrabold py-4 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
                 >
                   Заполнить заявку
                 </Button>

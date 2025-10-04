@@ -202,13 +202,13 @@ const PayoutForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] bg-white">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-green-600 flex items-center justify-center gap-2">
-          <Icon name="BadgeDollarSign" size={28} className="text-green-600" />
+        <CardTitle className="text-2xl font-extrabold text-black flex items-center justify-center gap-2">
+          <Icon name="BadgeDollarSign" size={28} className="text-yellow-400" />
           Выплата 3000 ₽
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="font-medium text-gray-700">
           Заполните форму для получения выплаты
         </CardDescription>
       </CardHeader>
@@ -296,7 +296,7 @@ const PayoutForm = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-green-500 text-white font-extrabold py-3 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

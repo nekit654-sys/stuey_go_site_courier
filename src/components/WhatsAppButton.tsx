@@ -48,12 +48,12 @@ const WhatsAppButton: React.FC = () => {
             onClick={handleTelegramClick}
             onMouseEnter={() => playSound('hover')}
             className="
-              w-14 h-14 bg-blue-500 hover:bg-blue-600
-              rounded-full shadow-lg hover:shadow-xl
+              w-14 h-14 bg-blue-500
+              rounded-full border-3 border-black
+              shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]
               flex items-center justify-center
-              transition-all duration-300 ease-out
+              transition-all duration-150
               group
-              hover:scale-110
             "
             title="Написать в Telegram"
           >
@@ -73,12 +73,12 @@ const WhatsAppButton: React.FC = () => {
             onClick={handleWhatsAppClick}
             onMouseEnter={() => playSound('hover')}
             className="
-              w-14 h-14 bg-green-500 hover:bg-green-600
-              rounded-full shadow-lg hover:shadow-xl
+              w-14 h-14 bg-green-500
+              rounded-full border-3 border-black
+              shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]
               flex items-center justify-center
-              transition-all duration-300 ease-out
+              transition-all duration-150
               group
-              hover:scale-110
             "
             title="Написать в WhatsApp"
           >
@@ -100,10 +100,11 @@ const WhatsAppButton: React.FC = () => {
         onClick={handleSupportClick}
         onMouseEnter={() => playSound('hover')}
         className={`
-          w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600
-          rounded-full shadow-lg hover:shadow-xl
+          w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500
+          rounded-full border-3 border-black
+          shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px]
           flex items-center justify-center
-          transition-all duration-300 ease-out
+          transition-all duration-150
           group
           ${isPulsing ? 'animate-pulse scale-110' : 'scale-100'}
         `}
