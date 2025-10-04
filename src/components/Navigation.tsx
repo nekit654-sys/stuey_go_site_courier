@@ -35,9 +35,11 @@ const Navigation = () => {
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <Icon name="Zap" size={18} className="text-gray-800" />
-            </div>
+            <img 
+              src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
+              alt="Stuey Go Logo" 
+              className="w-10 h-10 rounded-lg object-cover"
+            />
             <span className="text-lg font-bold text-white font-rubik whitespace-nowrap">Stuey Go | Яндекс Еда</span>
           </Link>
 
