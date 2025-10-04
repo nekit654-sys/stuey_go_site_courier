@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
 import Benefits from "@/components/Benefits";
 import PayoutForm from "@/components/PayoutForm";
+import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import Icon from "@/components/ui/icon";
 
@@ -21,6 +22,8 @@ const Index = () => {
       </div>
       <CourierTypes />
       <Benefits />
+      
+      <FAQ />
       
       {/* Секция с формой выплаты */}
       <section data-payout-form className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
