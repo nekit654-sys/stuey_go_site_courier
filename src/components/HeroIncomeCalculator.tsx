@@ -46,13 +46,13 @@ const HeroIncomeCalculator = () => {
     <div className="backdrop-blur-md bg-white/10 border-3 border-black rounded-2xl p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)]">
       {/* Заголовок */}
       <div className="text-center mb-8">
-        <div className="inline-block bg-yellow-400 border-3 border-black rounded-2xl px-6 py-4 shadow-[0_4px_0_0_rgba(0,0,0,1)] mb-4">
-          <div className="flex items-center justify-center gap-3">
-            <Icon name="Calculator" size={32} className="text-black" />
-            <h3 className="text-2xl font-extrabold text-black">Калькулятор доходности</h3>
+        <div className="inline-block bg-yellow-400 border-3 border-black rounded-2xl px-3 sm:px-6 py-3 sm:py-4 shadow-[0_4px_0_0_rgba(0,0,0,1)] mb-4 max-w-full">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <Icon name="Calculator" size={24} className="text-black sm:w-8 sm:h-8 flex-shrink-0" />
+            <h3 className="text-lg sm:text-2xl font-extrabold text-black leading-tight">Калькулятор доходности</h3>
           </div>
         </div>
-        <p className="text-white font-extrabold text-lg">Рассчитай свой заработок курьера</p>
+        <p className="text-white font-extrabold text-base sm:text-lg">Рассчитай свой заработок курьера</p>
       </div>
 
       {/* Кнопки типов курьеров */}
