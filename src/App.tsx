@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -21,9 +21,56 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+declare global {
+  interface Window {
+    ym?: (id: number, action: string, ...args: any[]) => void;
+  }
+}
+
+const YandexMetrika = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window.ym !== 'undefined') {
+      window.ym(104067688, 'hit', location.pathname);
+    }
+  }, [location]);
+
+  return null;
+};
+
 const App = () => {
   const [showBanner, setShowBanner] = useState(true);
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.innerHTML = `
+      (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+      })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+      
+      ym(104067688, 'init', {
+        clickmap: true,
+        trackLinks: true,
+        accurateTrackBounce: true,
+        webvisor: true,
+        ecommerce: "dataLayer"
+      });
+    `;
+    document.head.appendChild(script);
+
+    const noscript = document.createElement('noscript');
+    noscript.innerHTML = '<div><img src="https://mc.yandex.ru/watch/104067688" style="position:absolute; left:-9999px;" alt="" /></div>';
+    document.body.appendChild(noscript);
+
+    return () => {
+      document.head.removeChild(script);
+      document.body.removeChild(noscript);
+    };
+  }, []);
 
   const handleCloseBanner = () => {
     setShowBanner(false);
@@ -37,6 +84,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <YandexMetrika />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/vacancies" element={<Vacancies />} />
