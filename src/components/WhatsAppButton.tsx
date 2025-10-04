@@ -48,7 +48,7 @@ const WhatsAppButton: React.FC = () => {
             onClick={handleTelegramClick}
             onMouseEnter={() => playSound('hover')}
             className="
-              w-14 h-14 bg-yellow-500 hover:bg-yellow-600
+              w-14 h-14 bg-blue-500 hover:bg-blue-600
               rounded-full shadow-lg hover:shadow-xl
               flex items-center justify-center
               transition-all duration-300 ease-out
@@ -73,7 +73,7 @@ const WhatsAppButton: React.FC = () => {
             onClick={handleWhatsAppClick}
             onMouseEnter={() => playSound('hover')}
             className="
-              w-14 h-14 bg-yellow-500 hover:bg-yellow-600
+              w-14 h-14 bg-green-500 hover:bg-green-600
               rounded-full shadow-lg hover:shadow-xl
               flex items-center justify-center
               transition-all duration-300 ease-out
@@ -100,7 +100,7 @@ const WhatsAppButton: React.FC = () => {
         onClick={handleSupportClick}
         onMouseEnter={() => playSound('hover')}
         className={`
-          w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600
+          w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600
           rounded-full shadow-lg hover:shadow-xl
           flex items-center justify-center
           transition-all duration-300 ease-out
@@ -111,11 +111,11 @@ const WhatsAppButton: React.FC = () => {
       >
         {/* Анимированные кольца */}
         <div className={`
-          absolute inset-0 rounded-full border-4 border-yellow-300
+          absolute inset-0 rounded-full border-4 border-purple-300
           ${isPulsing ? 'animate-ping opacity-75' : 'opacity-0'}
         `} />
         <div className={`
-          absolute inset-0 rounded-full border-2 border-yellow-200
+          absolute inset-0 rounded-full border-2 border-pink-200
           ${isPulsing ? 'animate-ping opacity-50' : 'opacity-0'}
           animation-delay-150
         `} />
