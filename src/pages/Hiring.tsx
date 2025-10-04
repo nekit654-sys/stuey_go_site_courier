@@ -316,17 +316,17 @@ const Hiring = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center shadow-2xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">
+          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center shadow-2xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
               Готовы начать?
             </h2>
-            <p className="text-gray-700 text-base md:text-lg mb-4 md:mb-6 px-2">
+            <p className="text-green-50 text-base md:text-lg mb-4 md:mb-6 px-2">
               Весь процесс займет менее часа. Начните зарабатывать уже сегодня!
             </p>
             <Button
               onClick={handleStart}
               onMouseEnter={() => playSound("hover")}
-              className="bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full md:w-auto"
+              className="bg-white hover:bg-gray-100 text-green-600 font-bold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full md:w-auto"
             >
               <Icon name="Rocket" size={18} className="mr-2 md:w-5 md:h-5" />
               Подать заявку сейчас
