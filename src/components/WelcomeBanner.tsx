@@ -162,7 +162,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           }`}
         >
           {/* Таймер обратного отсчета */}
-          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm animate-[timerPulse_1s_infinite_ease-in-out]">
+          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm">
             {timeLeft} сек
           </div>
 
