@@ -129,14 +129,15 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
 
       {/* Модальное окно с игрой - оптимизировано для слабых устройств */}
       {isGameOpen && (
-        <div className="fixed inset-0 z-[999999] bg-black flex items-center justify-center p-2 md:p-4">
-          <div className="relative w-full h-full md:max-w-6xl md:h-[85vh] bg-black md:rounded-lg shadow-2xl overflow-hidden md:border-4 border-yellow-400">
+        <div className="fixed inset-0 z-[999999] bg-black/80 flex items-center justify-center p-2 md:p-4">
+          <div className="relative w-full h-full md:max-w-6xl md:h-[85vh] bg-black md:rounded-2xl shadow-[0_8px_0_0_rgba(251,191,36,0.8)] overflow-hidden md:border-4 border-yellow-400">
             {/* Кнопка закрытия */}
             <button
               onClick={closeGame}
-              className="absolute top-2 right-2 md:top-4 md:right-4 z-[1000000] w-10 h-10 md:w-8 md:h-8 bg-red-500 hover:bg-red-600 
-                         text-white rounded-full flex items-center justify-center 
-                         transition-all duration-200 hover:scale-110 active:scale-95"
+              className="absolute top-2 right-2 md:top-4 md:right-4 z-[1000000] w-12 h-12 md:w-10 md:h-10 bg-red-500 border-3 border-black
+                         text-white font-extrabold rounded-full flex items-center justify-center 
+                         shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                         transition-all duration-150"
             >
               <X size={20} className="md:w-4 md:h-4" />
             </button>
