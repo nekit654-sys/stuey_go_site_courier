@@ -7,44 +7,110 @@ const Culture = () => {
     {
       title: 'Программа лояльности "Прогресс"',
       subtitle: "Бонусы за качественные доставки",
-      image:
-        "https://cdn.poehali.dev/files/a332b583-8ee3-4686-846e-cacf8e661bbe.png",
-      bgColor: "bg-yellow-400",
+      icon: "TrendingUp",
+      color: "from-yellow-400 to-orange-400",
+      details: [
+        "Накапливайте баллы за каждую доставку",
+        "Бонусы за высокий рейтинг (4.8+ звёзд)",
+        "Дополнительные +15% к заказам в часы пик",
+        "Приоритет в выборе заказов для лучших курьеров",
+        "Специальные квесты с денежными призами",
+      ],
+      stats: [
+        { value: "+500₽", label: "За 50 доставок в неделю" },
+        { value: "+15%", label: "Бонус в часы пик" },
+        { value: "До 3000₽", label: "Еженедельные квесты" },
+      ],
     },
     {
       title: "Заходите отдохнуть",
-      subtitle: "Бесплатный чай в перерывах между доставками",
-      image:
-        "https://cdn.poehali.dev/files/4780d84e-8c95-4633-a95a-57dcd58c664a.png",
-      bgColor: "bg-yellow-400",
+      subtitle: "Бесплатный чай и комфорт в перерывах",
+      icon: "Coffee",
+      color: "from-green-400 to-teal-400",
+      details: [
+        "Пункты отдыха в центре города",
+        "Бесплатный чай, кофе и печенье",
+        "Зарядка для телефона и повербанков",
+        "Кондиционер летом, отопление зимой",
+        "Wi-Fi и зона отдыха с диванами",
+      ],
+      stats: [
+        { value: "50+", label: "Точек по России" },
+        { value: "24/7", label: "Круглосуточно" },
+        { value: "Бесплатно", label: "Для всех курьеров" },
+      ],
     },
     {
       title: "Скидки на еду",
       subtitle: "Специальные предложения для курьеров",
-      image:
-        "https://cdn.poehali.dev/files/0259e292-26c4-4e05-bc59-a016548e8ce9.png",
-      bgColor: "bg-yellow-400",
+      icon: "UtensilsCrossed",
+      color: "from-red-400 to-pink-400",
+      details: [
+        "Скидка 20% в ресторанах-партнёрах",
+        "Бесплатная доставка для курьеров",
+        "Специальное меню по сниженным ценам",
+        "Акции и промокоды каждую неделю",
+        "Кешбэк баллами на следующие заказы",
+      ],
+      stats: [
+        { value: "20%", label: "Скидка" },
+        { value: "500+", label: "Ресторанов-партнёров" },
+        { value: "Бесплатно", label: "Доставка" },
+      ],
     },
     {
       title: "Бонусы от Яндекса",
-      subtitle: "Выгода с Про, самокаты с Яндекс Go и такси на поздних слотах",
-      image:
-        "https://cdn.poehali.dev/files/c5e01294-a5e2-450a-8a3d-7a7d46936a98.png",
-      bgColor: "bg-yellow-400",
+      subtitle: "Выгода с Про, самокаты и такси",
+      icon: "Gift",
+      color: "from-purple-400 to-indigo-400",
+      details: [
+        "Яндекс Плюс бесплатно на 6 месяцев",
+        "Бесплатные поездки на самокатах в рабочее время",
+        "Скидка 50% на Яндекс Такси после смены",
+        "Кешбэк баллами Плюса за заказы",
+        "Приоритетная поддержка как партнёр Яндекса",
+      ],
+      stats: [
+        { value: "6 мес", label: "Яндекс Плюс бесплатно" },
+        { value: "50%", label: "Скидка на такси" },
+        { value: "Бесплатно", label: "Самокаты на смене" },
+      ],
     },
     {
       title: "Всё для телефона",
-      subtitle: "Выгодные тарифы от наших партнёров",
-      image:
-        "https://cdn.poehali.dev/files/74f15575-fb8c-4020-ae34-92abbe98bae5.png",
-      bgColor: "bg-yellow-400",
+      subtitle: "Выгодные тарифы от партнёров",
+      icon: "Smartphone",
+      color: "from-blue-400 to-cyan-400",
+      details: [
+        "Безлимитный интернет от 300₽/мес",
+        "Специальные тарифы для курьеров",
+        "Бесплатные звонки внутри сети партнёров",
+        "Скидка 30% на роутеры и модемы",
+        "Техподдержка приоритетная 24/7",
+      ],
+      stats: [
+        { value: "От 300₽", label: "Безлимитный интернет" },
+        { value: "30%", label: "Скидка на оборудование" },
+        { value: "0₽", label: "Звонки курьерам" },
+      ],
     },
     {
       title: "Вело с выгодой",
-      subtitle: "Скидки на аренду и покупку велосипедов и электротранспорта",
-      image:
-        "https://cdn.poehali.dev/files/a35ec048-6a4b-4d01-8c1d-56c773f20f87.png",
-      bgColor: "bg-yellow-400",
+      subtitle: "Скидки на велосипеды и электротранспорт",
+      icon: "Bike",
+      color: "from-orange-400 to-red-400",
+      details: [
+        "Скидка до 25% на покупку велосипедов",
+        "Аренда электросамокатов от 150₽/день",
+        "Бесплатное обслуживание первые 3 месяца",
+        "Рассрочка 0% на 12 месяцев",
+        "Страховка транспорта со скидкой 40%",
+      ],
+      stats: [
+        { value: "До 25%", label: "Скидка на покупку" },
+        { value: "От 150₽", label: "Аренда в день" },
+        { value: "0%", label: "Рассрочка 12 мес" },
+      ],
     },
   ];
 
@@ -53,7 +119,7 @@ const Culture = () => {
       <Navigation />
 
       <div className="pt-24 pb-16 md:pt-32 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
               Мотивация и <span className="text-yellow-500">доход</span>
@@ -63,17 +129,68 @@ const Culture = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 mb-16">
+          <div className="grid grid-cols-1 gap-8 mb-16">
             {benefitCards.map((card, index) => (
               <div
                 key={index}
-                className="relative overflow-hidden rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] overflow-hidden"
               >
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-auto object-contain"
-                />
+                <div
+                  className={`bg-gradient-to-r ${card.color} p-6 md:p-8 text-white`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-4 mb-2">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                          <Icon
+                            name={card.icon as any}
+                            size={24}
+                            className="text-white md:w-8 md:h-8"
+                          />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl md:text-3xl font-bold">
+                            {card.title}
+                          </h2>
+                          <p className="text-white/90 text-sm md:text-base mt-1">
+                            {card.subtitle}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 md:p-8">
+                  <ul className="space-y-3 mb-6">
+                    {card.details.map((detail, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start text-gray-700 text-sm md:text-base"
+                      >
+                        <Icon
+                          name="CheckCircle2"
+                          size={20}
+                          className="text-green-500 mr-3 mt-0.5 flex-shrink-0"
+                        />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+                    {card.stats.map((stat, idx) => (
+                      <div key={idx} className="text-center">
+                        <div className="text-xl md:text-2xl font-bold text-gray-800">
+                          {stat.value}
+                        </div>
+                        <div className="text-xs md:text-sm text-gray-600 mt-1">
+                          {stat.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
