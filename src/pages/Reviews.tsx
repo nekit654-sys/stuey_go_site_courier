@@ -494,16 +494,16 @@ const Reviews = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
       <Navigation />
 
       <div className="pt-24 pb-16 md:pt-32 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Отзывы <span className="text-yellow-500">курьеров</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 font-rubik text-black drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
+              Отзывы <span className="text-yellow-400">курьеров</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-700 font-medium max-w-2xl mx-auto">
               Реальные истории людей, которые работают курьерами в Яндекс.Еда
             </p>
           </div>
@@ -512,7 +512,7 @@ const Reviews = () => {
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-6 shadow-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all duration-300 hover:shadow-2xl"
+                className="bg-white rounded-2xl p-6 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
               >
                 <div className="flex items-start space-x-4 mb-4">
                   <img
@@ -521,12 +521,12 @@ const Reviews = () => {
                     className="w-12 h-12 rounded-full object-cover shadow-lg"
                   />
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-800">{review.name}</h3>
-                    <p className="text-sm text-gray-600 flex items-center">
+                    <h3 className="font-extrabold text-gray-800">{review.name}</h3>
+                    <p className="text-sm text-gray-700 font-medium flex items-center">
                       <Icon name="MapPin" size={12} className="mr-1" />
                       {review.location}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-700 font-medium">
                       Опыт: {review.experience}
                     </p>
                   </div>
@@ -534,44 +534,44 @@ const Reviews = () => {
                     <div className="flex space-x-1 mb-1">
                       {renderStars(review.rating)}
                     </div>
-                    <div className="text-sm font-bold text-green-600">
+                    <div className="text-sm font-extrabold text-green-600">
                       {review.income}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-gray-700 leading-relaxed text-sm">
+                <p className="text-gray-700 font-medium leading-relaxed text-sm">
                   "{review.text}"
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)]">
             <Icon
               name="Users"
               size={48}
               className="mx-auto mb-6 text-gray-800"
             />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)] mb-4">
               Станьте частью нашей команды
             </h2>
-            <p className="text-gray-700 text-lg mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-800 font-medium text-lg mb-6 max-w-2xl mx-auto">
               Присоединяйтесь к тысячам курьеров, которые уже зарабатывают с
               Яндекс.Еда
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-center mb-8">
               <div>
-                <div className="text-3xl font-bold text-gray-800">4.8/5</div>
-                <div className="text-gray-700">Средний рейтинг</div>
+                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">4.8/5</div>
+                <div className="text-gray-800 font-extrabold">Средний рейтинг</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-800">87%</div>
-                <div className="text-gray-700">Рекомендуют работу</div>
+                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">87%</div>
+                <div className="text-gray-800 font-extrabold">Рекомендуют работу</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-800">78K ₽</div>
-                <div className="text-gray-700">Средний доход</div>
+                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">78K ₽</div>
+                <div className="text-gray-800 font-extrabold">Средний доход</div>
               </div>
             </div>
           </div>
