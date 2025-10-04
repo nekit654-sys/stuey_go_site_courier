@@ -125,7 +125,7 @@ const Navigation = () => {
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
                 size={32}
-                className="text-black transition-transform duration-200 stroke-[2.5]"
+                className="text-black transition-transform duration-200 stroke-[3]"
               />
             </Button>
           </div>
