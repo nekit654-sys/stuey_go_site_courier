@@ -5,9 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import WhatsAppButton from "@/components/WhatsAppButton";
-
-import WelcomeBanner from "@/components/WelcomeBanner";
-
 import FeedbackTab from "@/components/FeedbackTab";
 
 import Index from "./pages/Index";
@@ -40,11 +37,6 @@ const YandexMetrika = () => {
 };
 
 const App = () => {
-  const [showBanner, setShowBanner] = useState(true);
-
-  const handleCloseBanner = () => {
-    setShowBanner(false);
-  };
 
 
 
@@ -70,21 +62,6 @@ const App = () => {
 
           <WhatsAppButton />
           <FeedbackTab />
-
-
-          
-          {/* Приветственный баннер */}
-          {showBanner && <WelcomeBanner onClose={handleCloseBanner} />}
-
-          {/* Магический эффект */}
-          <div
-            id="magic-overlay"
-            className="fixed inset-0 pointer-events-none z-[9998] bg-gradient-radial from-yellow-300/80 via-yellow-300/20 to-transparent opacity-0 animate-magic-glow"
-          />
-          <div
-            id="particles-container"
-            className="fixed inset-0 pointer-events-none overflow-visible z-[9999]"
-          />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

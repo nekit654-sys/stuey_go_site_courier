@@ -46,13 +46,21 @@ const HeroSection = () => {
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-medium text-gray-100 text-base">
-            Зарабатывайте от 1000₽/час в своём городе —<br />
+            Зарабатывайте до 8 500₽ в день в своём городе —<br />
             ваш график, ваш транспорт, ваши правила!
           </p>
 
-          <div className="mb-10">
+          <div className="mb-6">
             <HeroIncomeCalculator />
           </div>
+
+          <Button
+            onClick={handleBecomeClick}
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-6 px-12 text-xl rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105 border-2 border-yellow-300"
+          >
+            <Icon name="Rocket" size={24} className="mr-2" />
+            Стать курьером прямо сейчас
+          </Button>
         </div>
       </div>
     </section>

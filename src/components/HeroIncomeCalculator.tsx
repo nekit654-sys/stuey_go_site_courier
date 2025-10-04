@@ -91,11 +91,12 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Результат */}
-      <div className="backdrop-blur-sm bg-yellow-400/20 border border-yellow-400/50 rounded-xl p-6 mb-8 text-center">
-        <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 whitespace-nowrap overflow-x-auto scrollbar-hide">
+      <div className="backdrop-blur-sm bg-gradient-to-br from-yellow-400/30 to-orange-400/30 border-2 border-yellow-400 rounded-2xl p-8 mb-8 text-center shadow-2xl">
+        <div className="text-sm sm:text-base text-white mb-2 font-medium">Ваш доход составит:</div>
+        <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-yellow-400 mb-3 drop-shadow-[0_2px_10px_rgba(250,204,21,0.5)]">
           {income.toLocaleString('ru-RU')}&nbsp;₽
         </div>
-        <div className="text-gray-200">за выбранный период</div>
+        <div className="text-gray-100 text-base sm:text-lg">в месяц при выбранном графике</div>
       </div>
 
       {/* Чекбокс бонуса за друга */}
