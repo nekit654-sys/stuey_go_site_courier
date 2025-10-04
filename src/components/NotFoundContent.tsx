@@ -33,13 +33,13 @@ const NotFoundContent = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 to-amber-50">
       <div className="text-center px-4 max-w-2xl">
         <div className="mb-8 flex justify-center">
-          <Icon name="PackageX" size={120} className="text-orange-400" />
+          <Icon name="PackageX" size={120} className="text-yellow-400" />
         </div>
         
-        <h1 className="text-6xl md:text-8xl font-bold text-orange-500 mb-4">404</h1>
+        <h1 className="text-6xl md:text-8xl font-bold text-yellow-500 mb-4">404</h1>
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-4">
           Упс! Страница не найдена
         </h2>
@@ -51,14 +51,14 @@ const NotFoundContent = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link to="/">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white gap-2">
+            <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black gap-2">
               <Icon name="Home" size={20} />
               На главную
             </Button>
           </Link>
           
           <Link to="/vacancies">
-            <Button size="lg" variant="outline" className="gap-2 border-orange-300 text-orange-600 hover:bg-orange-50">
+            <Button size="lg" variant="outline" className="gap-2 border-yellow-300 text-yellow-600 hover:bg-yellow-50">
               <Icon name="Briefcase" size={20} />
               Вакансии
             </Button>
@@ -67,7 +67,7 @@ const NotFoundContent = () => {
         
         <div className="mt-12 text-sm text-gray-500">
           <p className="mb-2">Нужна помощь? Свяжитесь с нами:</p>
-          <Link to="/contacts" className="text-orange-500 hover:text-orange-600 underline font-medium">
+          <Link to="/contacts" className="text-yellow-500 hover:text-yellow-600 underline font-medium">
             Контакты службы поддержки
           </Link>
         </div>

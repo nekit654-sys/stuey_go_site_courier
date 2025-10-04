@@ -4,7 +4,7 @@ import Icon from "@/components/ui/icon";
 
 const Advertising = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-50">
       <Header />
 
       <main className="container mx-auto px-4 py-16">
@@ -22,7 +22,7 @@ const Advertising = () => {
             {/* Правовые аспекты */}
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <Icon name="Scale" size={24} className="text-orange-500" />
+                <Icon name="Scale" size={24} className="text-yellow-500" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   Правовые аспекты
                 </h2>
@@ -45,7 +45,7 @@ const Advertising = () => {
             {/* Условия заработка */}
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <Icon name="TrendingUp" size={24} className="text-orange-500" />
+                <Icon name="TrendingUp" size={24} className="text-yellow-500" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   Условия заработка
                 </h2>
@@ -69,7 +69,7 @@ const Advertising = () => {
             {/* Налогообложение */}
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <Icon name="Calculator" size={24} className="text-orange-500" />
+                <Icon name="Calculator" size={24} className="text-yellow-500" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   Налогообложение
                 </h2>
@@ -91,7 +91,7 @@ const Advertising = () => {
             {/* Персональные данные */}
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <Icon name="UserCheck" size={24} className="text-orange-500" />
+                <Icon name="UserCheck" size={24} className="text-yellow-500" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   Обработка персональных данных
                 </h2>
@@ -110,12 +110,12 @@ const Advertising = () => {
             </div>
 
             {/* Отказ от ответственности */}
-            <div className="bg-orange-50 rounded-xl p-8 border border-orange-200">
+            <div className="bg-yellow-50 rounded-xl p-8 border border-yellow-200">
               <div className="flex items-center gap-3 mb-6">
                 <Icon
                   name="AlertTriangle"
                   size={24}
-                  className="text-orange-600"
+                  className="text-yellow-600"
                 />
                 <h2 className="text-2xl font-bold text-gray-900">
                   Отказ от ответственности

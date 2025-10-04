@@ -446,7 +446,7 @@ const Reviews = () => {
       { bg: '0891b2', color: 'ffffff' }, // циан
       { bg: '059669', color: 'ffffff' }, // зеленый
       { bg: 'dc2626', color: 'ffffff' }, // красный
-      { bg: 'ea580c', color: 'ffffff' }, // оранжевый
+      { bg: 'eab308', color: 'ffffff' }, // жёлтый
       { bg: '4b5563', color: 'ffffff' }, // серый
       { bg: '0d9488', color: 'ffffff' }, // бирюзовый
     ];
@@ -547,7 +547,7 @@ const Reviews = () => {
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl p-8 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center shadow-2xl">
             <Icon
               name="Users"
               size={48}

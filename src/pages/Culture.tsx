@@ -183,7 +183,7 @@ const Culture = () => {
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl md:rounded-3xl p-8 md:p-10 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl md:rounded-3xl p-8 md:p-10 text-center shadow-2xl">
             <Icon
               name="Users"
               size={48}

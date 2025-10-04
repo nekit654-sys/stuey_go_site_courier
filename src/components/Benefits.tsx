@@ -55,9 +55,9 @@ const Benefits = () => {
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-xl bg-gray-50 hover:bg-orange-50 transition-all duration-300 border-2 border-gradient-to-br from-orange-200 via-yellow-200 to-amber-200 hover:border-orange-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 backdrop-blur-sm ring-1 ring-orange-100/50 hover:ring-orange-200/70 relative overflow-hidden"
+              className="text-center p-6 rounded-xl bg-gray-50 hover:bg-yellow-50 transition-all duration-300 border-2 border-gradient-to-br from-yellow-200 via-yellow-200 to-amber-200 hover:border-yellow-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 backdrop-blur-sm ring-1 ring-yellow-100/50 hover:ring-yellow-200/70 relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-yellow-50/30 to-amber-50/30 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-yellow-50/30 to-amber-50/30 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative z-10">
                 <div className="mb-6 flex justify-center relative z-20">
                   <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">

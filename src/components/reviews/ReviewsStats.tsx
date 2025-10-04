@@ -12,7 +12,7 @@ const ReviewsStats = ({
   avgIncome,
 }: ReviewsStatsProps) => {
   return (
-    <div className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl p-8 text-center shadow-2xl">
+    <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center shadow-2xl">
       <Icon name="Users" size={48} className="mx-auto mb-6 text-gray-800" />
       <h2 className="text-3xl font-bold text-gray-800 mb-4">
         Станьте частью нашей команды

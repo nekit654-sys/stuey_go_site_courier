@@ -106,7 +106,7 @@ const Hiring = () => {
       icon: "Headphones",
       title: "Поддержка 24/7",
       description: "Техподдержка всегда на связи",
-      color: "bg-orange-500",
+      color: "bg-yellow-500",
     },
   ];
 
@@ -316,7 +316,7 @@ const Hiring = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-xl md:rounded-2xl p-6 md:p-8 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center shadow-2xl">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">
               Готовы начать?
             </h2>

@@ -11,19 +11,19 @@ const PromoMarquee = () => {
   const messages = (
     <>
       <span className="inline-flex items-center gap-3 px-8">
-        <Icon name="Rocket" size={28} className="text-orange-500" />
+        <Icon name="Rocket" size={28} className="text-yellow-500" />
         Старт без опыта — заработай с первого дня!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
-        <Icon name="DollarSign" size={28} className="text-green-600" />
+        <Icon name="DollarSign" size={28} className="text-yellow-500" />
         Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
-        <Icon name="Rocket" size={28} className="text-orange-500" />
+        <Icon name="Rocket" size={28} className="text-yellow-500" />
         Старт без опыта — заработай с первого дня!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
-        <Icon name="DollarSign" size={28} className="text-green-600" />
+        <Icon name="DollarSign" size={28} className="text-yellow-500" />
         Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!
       </span>
     </>

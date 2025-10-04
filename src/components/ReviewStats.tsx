@@ -2,7 +2,7 @@ import Icon from "@/components/ui/icon";
 
 const ReviewStats = () => {
   return (
-    <div className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl p-8 text-center shadow-2xl">
+    <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center shadow-2xl">
       <Icon
         name="Users"
         size={48}

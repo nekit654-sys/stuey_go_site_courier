@@ -73,9 +73,9 @@ const CourierTypes = () => {
           {courierTypes.map((courier, index) => (
             <Card
               key={index}
-              className={`${courier.bgColor} border-2 border-gradient-to-br from-orange-300 via-yellow-300 to-amber-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl shadow-lg transform hover:-translate-y-2 rounded-xl backdrop-blur-sm ring-1 ring-orange-200/50 hover:ring-orange-300/70 relative overflow-hidden`}
+              className={`${courier.bgColor} border-2 border-gradient-to-br from-yellow-300 via-yellow-300 to-amber-300 hover:border-yellow-400 transition-all duration-300 hover:shadow-xl shadow-lg transform hover:-translate-y-2 rounded-xl backdrop-blur-sm ring-1 ring-yellow-200/50 hover:ring-yellow-300/70 relative overflow-hidden`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-100/20 via-yellow-100/20 to-amber-100/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-100/20 via-yellow-100/20 to-amber-100/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <CardContent className="p-8 text-center flex flex-col h-full">
                 <div className="mb-6 flex justify-center relative z-20">
                   <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
