@@ -41,8 +41,8 @@ const FAQ = () => {
     <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-rubik flex items-center justify-center gap-3">
-            <Icon name="MessageCircleQuestion" size={40} className="text-yellow-500" />
+          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-rubik flex items-center justify-center gap-2">
+            <Icon name="MessageCircleQuestion" size={48} className="text-yellow-500" />
             Частые вопросы
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
