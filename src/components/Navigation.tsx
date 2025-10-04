@@ -99,7 +99,7 @@ const Navigation = () => {
               onMouseEnter={() => playSound('hover')}
               className="
                 bg-gradient-to-r from-green-500 to-green-600
-                text-yellow-300 font-bold px-4 py-2 rounded-full
+                text-black font-bold px-4 py-2 rounded-full
                 shadow-lg hover:shadow-xl transform hover:scale-105
                 transition-all duration-200
                 ring-2 ring-green-400/50 hover:ring-green-500/70
@@ -193,12 +193,12 @@ const Navigation = () => {
               onMouseEnter={() => playSound('hover')}
               className="
                 w-full justify-start bg-gradient-to-r from-green-500 to-green-600
-                text-yellow-300 font-bold transition-all duration-200 hover:scale-105
-                shadow-lg ring-2 ring-green-400/50 py-6 text-base border-l-4 border-yellow-300
+                text-black font-bold transition-all duration-200 hover:scale-105
+                shadow-lg ring-2 ring-green-400/50 py-6 text-base border-l-4 border-black
                 hover:from-green-600 hover:to-green-700
               "
             >
-              <Icon name="Gamepad2" size={20} className="mr-3 text-yellow-300" />
+              <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
               Игра
             </Button>
           </div>
