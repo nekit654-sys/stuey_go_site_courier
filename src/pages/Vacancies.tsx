@@ -48,16 +48,16 @@ const Vacancies = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-yellow-50">
       <Navigation />
 
       <div className="pt-24 pb-16 md:pt-32 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Открытые <span className="text-yellow-500">вакансии</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 font-rubik text-black drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
+              Открытые <span className="text-yellow-400">вакансии</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-700 font-medium max-w-2xl mx-auto">
               Выберите подходящую позицию и начните зарабатывать уже сегодня
             </p>
           </div>
@@ -66,25 +66,25 @@ const Vacancies = () => {
             {vacancies.map((vacancy, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all duration-300 hover:shadow-2xl"
+                className="bg-white rounded-2xl p-8 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h3 className="text-2xl font-extrabold text-gray-800 mb-2">
                       {vacancy.title}
                     </h3>
-                    <div className="flex items-center text-gray-600 mb-2">
+                    <div className="flex items-center text-gray-700 font-medium mb-2">
                       <Icon name="MapPin" size={16} className="mr-2" />
                       {vacancy.location}
                     </div>
-                    <div className="flex items-center text-green-600 font-bold text-lg">
+                    <div className="flex items-center text-green-600 font-extrabold text-lg">
                       <Icon name="DollarSign" size={16} className="mr-2" />
                       {vacancy.salary}
                     </div>
                   </div>
                   <Button
                     onClick={handleApply}
-                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold px-8 py-3 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all duration-150"
                   >
                     Откликнуться
                   </Button>
@@ -92,7 +92,7 @@ const Vacancies = () => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-bold text-gray-800 mb-3 flex items-center">
+                    <h4 className="font-extrabold text-gray-800 mb-3 flex items-center">
                       <Icon
                         name="CheckCircle"
                         size={16}
@@ -102,7 +102,7 @@ const Vacancies = () => {
                     </h4>
                     <ul className="space-y-2">
                       {vacancy.requirements.map((req, i) => (
-                        <li key={i} className="text-gray-600 flex items-start">
+                        <li key={i} className="text-gray-700 font-medium flex items-start">
                           <Icon
                             name="Dot"
                             size={16}
@@ -115,7 +115,7 @@ const Vacancies = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-gray-800 mb-3 flex items-center">
+                    <h4 className="font-extrabold text-gray-800 mb-3 flex items-center">
                       <Icon
                         name="Gift"
                         size={16}
@@ -125,7 +125,7 @@ const Vacancies = () => {
                     </h4>
                     <ul className="space-y-2">
                       {vacancy.benefits.map((benefit, i) => (
-                        <li key={i} className="text-gray-600 flex items-start">
+                        <li key={i} className="text-gray-700 font-medium flex items-start">
                           <Icon
                             name="Star"
                             size={16}

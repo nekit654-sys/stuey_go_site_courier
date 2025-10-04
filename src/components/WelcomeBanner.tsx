@@ -157,21 +157,21 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
       
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[55] p-4">
         <div
-          className={`relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border-4 border-yellow-400 ${
+          className={`relative bg-white rounded-2xl shadow-[0_8px_0_0_rgba(0,0,0,1)] max-w-4xl w-full max-h-[90vh] overflow-hidden border-4 border-black ${
             isVisible ? 'animate-[bannerFadeIn_0.5s_ease-out]' : 'animate-[bannerFadeOut_0.5s_ease-in]'
           }`}
         >
           {/* Таймер обратного отсчета */}
-          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold text-sm">
+          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-black px-3 py-1 rounded-full font-extrabold text-sm border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
             {timeLeft} сек
           </div>
 
           {/* Кнопка закрытия */}
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-colors"
+            className="absolute top-4 right-4 z-10 bg-yellow-400 text-black font-extrabold border-3 border-black rounded-full p-2 shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
           >
-            <Icon name="X" size={20} className="text-gray-600" />
+            <Icon name="X" size={20} className="text-black" />
           </button>
 
           {/* Фон баннера */}
@@ -224,18 +224,18 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             <div className="absolute bottom-32 left-6 sm:bottom-36 sm:left-10 md:bottom-44 md:left-14 lg:bottom-52 lg:left-18">
               <div className="relative animate-[dialogBounce_3s_infinite_ease-in-out]">
                 {/* Само диалоговое окно */}
-                <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-5">
+                <div className="bg-white rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] p-3 sm:p-4 md:p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-800 whitespace-nowrap">
-                    Даем <span className="text-yellow-600 font-bold">3000₽</span> за первые <span className="text-yellow-600 font-bold">30 заказов!</span>
+                  <p className="text-xs sm:text-sm md:text-base font-extrabold text-black whitespace-nowrap">
+                    Даем <span className="text-yellow-600 font-extrabold">3000₽</span> за первые <span className="text-yellow-600 font-extrabold">30 заказов!</span>
                   </p>
                   <div className="mt-2 flex items-center gap-1">
-                    <Icon name="FileText" size={16} className="text-yellow-500 flex-shrink-0" />
-                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Нужно заполнить форму обратной связи!</span>
+                    <Icon name="FileText" size={16} className="text-yellow-400 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-gray-700 font-medium whitespace-nowrap">Нужно заполнить форму обратной связи!</span>
                   </div>
                 </div>
               </div>
@@ -243,8 +243,8 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           </div>
           
           {/* Мини-баннер регистрации */}
-          <div className="text-black px-4 py-3 text-center border-t border-yellow-600 bg-yellow-400">
-            <div className="font-semibold text-sm md:text-base flex items-center justify-center gap-2 whitespace-nowrap">
+          <div className="text-black px-4 py-3 text-center border-t-3 border-black bg-yellow-400">
+            <div className="font-extrabold text-sm md:text-base flex items-center justify-center gap-2 whitespace-nowrap">
               <Icon name="FileText" size={20} className="text-black flex-shrink-0" />
               <span>Нужно заполнить форму обратной связи!</span>
             </div>

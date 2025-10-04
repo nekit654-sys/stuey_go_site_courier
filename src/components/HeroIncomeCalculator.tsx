@@ -43,14 +43,14 @@ const HeroIncomeCalculator = () => {
   );
 
   return (
-    <div className="backdrop-blur-md bg-white/10 border border-yellow-400/30 rounded-2xl p-8 shadow-xl ring-1 ring-white/10">
+    <div className="backdrop-blur-md bg-white/10 border-3 border-yellow-400 rounded-2xl p-8 shadow-[0_6px_0_0_rgba(0,0,0,0.5)]">
       {/* Заголовок */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-3">
           <Icon name="Calculator" size={32} className="text-yellow-400" />
-          <h3 className="text-2xl font-bold text-white">Калькулятор доходности</h3>
+          <h3 className="text-2xl font-extrabold text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]">Калькулятор доходности</h3>
         </div>
-        <p className="text-gray-200">Рассчитай свой заработок курьера</p>
+        <p className="text-white font-medium">Рассчитай свой заработок курьера</p>
       </div>
 
       {/* Кнопки типов курьеров */}
@@ -67,10 +67,10 @@ const HeroIncomeCalculator = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className={`
-                backdrop-blur-sm border rounded-lg sm:rounded-xl p-2 sm:p-4 text-center transition-all duration-200 ease-out hover:scale-105
+                backdrop-blur-sm border-3 rounded-xl p-2 sm:p-4 text-center transition-all duration-150
                 ${isActive 
-                  ? 'bg-yellow-400/30 border-yellow-400 ring-2 ring-yellow-400/50' 
-                  : 'bg-white/5 border-yellow-400/20 hover:bg-white/10 hover:border-yellow-400/40'
+                  ? 'bg-yellow-400/30 border-yellow-400 shadow-[0_4px_0_0_rgba(251,191,36,0.5)]' 
+                  : 'bg-white/5 border-white/30 hover:bg-white/10 shadow-[0_2px_0_0_rgba(255,255,255,0.2)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.2)] hover:translate-y-[1px]'
                 }
               `}
             >
@@ -91,7 +91,7 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Результат */}
-      <div className="backdrop-blur-sm bg-gradient-to-br from-yellow-400/30 to-yellow-500/30 border-2 border-yellow-400 rounded-2xl p-8 mb-8 text-center shadow-2xl">
+      <div className="backdrop-blur-sm bg-gradient-to-br from-yellow-400/30 to-yellow-500/30 border-3 border-yellow-400 rounded-2xl p-8 mb-8 text-center shadow-[0_6px_0_0_rgba(251,191,36,0.5)]">
         <div className="text-sm sm:text-base text-white mb-2 font-medium">Ваш доход составит:</div>
         <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-yellow-400 mb-3 drop-shadow-[0_2px_10px_rgba(250,204,21,0.5)]">
           {income.toLocaleString('ru-RU')}&nbsp;₽
@@ -102,7 +102,7 @@ const HeroIncomeCalculator = () => {
       {/* Чекбокс бонуса за друга */}
       <div className="mb-8">
         <label 
-          className="flex items-center gap-3 cursor-pointer bg-white/5 border border-yellow-400/20 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400/40 transition-all duration-200 group"
+          className="flex items-center gap-3 cursor-pointer bg-white/5 border-2 border-yellow-400/30 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400 transition-all duration-150 group shadow-[0_2px_0_0_rgba(255,255,255,0.1)]"
           onMouseEnter={() => playSound('hover')}
         >
           <div className="relative flex items-center justify-center">
@@ -206,9 +206,9 @@ const HeroIncomeCalculator = () => {
 
 
       {/* Баннер с минимальной ставкой */}
-      <div className="bg-yellow-400 border border-yellow-500 rounded-xl p-3 sm:p-4 mt-6 shadow-lg">
+      <div className="bg-yellow-400 border-3 border-black rounded-xl p-3 sm:p-4 mt-6 shadow-[0_4px_0_0_rgba(0,0,0,1)]">
         <div className="text-center">
-          <div className="text-black font-bold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2 flex-wrap">
+          <div className="text-black font-extrabold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2 flex-wrap">
             <Icon name="BadgeDollarSign" size={24} className="text-black flex-shrink-0" />
             <span className="leading-tight">Минимальная гарантированная ставка от 320 рублей/час!</span>
           </div>

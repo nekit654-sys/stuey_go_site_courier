@@ -117,14 +117,14 @@ const FeedbackTab: React.FC = () => {
         className="fixed top-32 right-0 z-40 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95"
         onClick={handleTabClick}
       >
-        <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white px-2 py-3 rounded-l-xl shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white px-2 py-3 rounded-l-xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] relative overflow-hidden">
           {/* Волновой эффект при наведении */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700"></div>
           
           <div className="flex flex-col items-center gap-1 text-center relative z-10">
             <Icon name="Gift" size={20} className="text-yellow-300 animate-bounce" />
-            <div className="text-[9px] font-bold leading-tight">
-              <div className="text-base text-yellow-300 font-black">3000₽</div>
+            <div className="text-[9px] font-extrabold leading-tight">
+              <div className="text-base text-yellow-300 font-extrabold">3000₽</div>
               <div className="text-white text-[8px]">за 30 заказов</div>
             </div>
           </div>
@@ -137,12 +137,12 @@ const FeedbackTab: React.FC = () => {
       {/* Модальное окно */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* Заголовок */}
             <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold">Получить 3000₽</h2>
+                  <h2 className="text-xl font-extrabold">Получить 3000₽</h2>
                   <p className="text-green-100 text-sm">За первые 30 выполненных заказов</p>
                 </div>
                 <button
@@ -161,55 +161,55 @@ const FeedbackTab: React.FC = () => {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon name="Check" size={32} className="text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Заявка отправлена!</h3>
-                  <p className="text-gray-600">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
+                  <h3 className="text-lg font-extrabold text-black mb-2">Заявка отправлена!</h3>
+                  <p className="text-gray-700 font-medium">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-1">
                       ФИО <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="Иванов Иван Иванович"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-1">
                       Город <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.city}
                       onChange={(e) => handleInputChange('city', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="Москва"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-1">
                       Номер телефона <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="+7 (999) 123-45-67"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-1">
                       Скриншот 30 выполненных заказов
                     </label>
                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-400 transition-colors">
@@ -246,7 +246,7 @@ const FeedbackTab: React.FC = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-yellow-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center gap-2">

@@ -84,16 +84,16 @@ const Contacts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-yellow-50">
       <Navigation />
 
       <div className="pt-24 pb-16 md:pt-32 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Наши <span className="text-yellow-500">контакты</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 font-rubik text-black drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
+              Наши <span className="text-yellow-400">контакты</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-700 font-medium max-w-2xl mx-auto">
               Свяжитесь с нами удобным способом. Мы всегда готовы помочь!
             </p>
           </div>
@@ -102,29 +102,28 @@ const Contacts = () => {
             {contactMethods.map((method, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-6 shadow-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all duration-300 hover:shadow-2xl text-center"
+                className="bg-white rounded-2xl p-6 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150 text-center"
               >
-                <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
                   <Icon
                     name={method.icon as any}
                     size={28}
                     className="text-gray-800"
                   />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-xl font-extrabold text-gray-800 mb-2">
                   {method.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-700 font-medium text-sm mb-4">
                   {method.description}
                 </p>
-                <div className="font-medium text-gray-800 mb-4">
+                <div className="font-extrabold text-gray-800 mb-4">
                   {method.contact}
                 </div>
                 {method.action && (
                   <Button
                     onClick={() => handleContact(method.action)}
-                    variant="outline"
-                    className="border-yellow-400 text-yellow-600 hover:bg-yellow-400 hover:text-gray-800"
+                    className="bg-yellow-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
                   >
                     Связаться
                   </Button>
@@ -133,25 +132,25 @@ const Contacts = () => {
             ))}
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-200 mb-16">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+          <div className="bg-white rounded-2xl p-8 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] mb-16">
+            <h2 className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)] mb-8 text-center">
               Центры поддержки курьеров
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {cities.map((city, index) => (
                 <div
                   key={index}
-                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-yellow-400 transition-colors"
+                  className="p-6 rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
                 >
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
+                  <h3 className="text-xl font-extrabold text-gray-800 mb-3 flex items-center">
                     <Icon
                       name="MapPin"
                       size={20}
-                      className="mr-2 text-yellow-500"
+                      className="mr-2 text-yellow-400"
                     />
                     {city.name}
                   </h3>
-                  <p className="text-gray-600 mb-2 flex items-start">
+                  <p className="text-gray-700 font-medium mb-2 flex items-start">
                     <Icon
                       name="Home"
                       size={16}
@@ -159,7 +158,7 @@ const Contacts = () => {
                     />
                     {city.address}
                   </p>
-                  <p className="text-gray-600 flex items-center">
+                  <p className="text-gray-700 font-medium flex items-center">
                     <Icon
                       name="Phone"
                       size={16}
@@ -172,32 +171,32 @@ const Contacts = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white shadow-2xl text-center">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] text-center">
             <Icon
               name="Clock"
               size={48}
               className="mx-auto mb-6 text-yellow-400"
             />
-            <h2 className="text-3xl font-bold mb-4">Время работы поддержки</h2>
+            <h2 className="text-3xl font-extrabold mb-4">Время работы поддержки</h2>
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div>
-                <h3 className="text-xl font-bold text-yellow-400 mb-2">
+                <h3 className="text-xl font-extrabold text-yellow-400 mb-2">
                   Телефон и чат
                 </h3>
-                <p className="text-gray-300">Круглосуточно, 7 дней в неделю</p>
+                <p className="text-gray-300 font-medium">Круглосуточно, 7 дней в неделю</p>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-yellow-400 mb-2">
+                <h3 className="text-xl font-extrabold text-yellow-400 mb-2">
                   Центры поддержки
                 </h3>
-                <p className="text-gray-300">
+                <p className="text-gray-300 font-medium">
                   Пн-Пт: 9:00-18:00, Сб-Вс: 10:00-16:00
                 </p>
               </div>
             </div>
             <Button
               onClick={handleApply}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              className="bg-yellow-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150 px-8 py-4 text-lg"
             >
               <Icon name="Send" size={20} className="mr-2" />
               Подать заявку на работу
