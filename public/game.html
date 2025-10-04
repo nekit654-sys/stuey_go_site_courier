@@ -338,6 +338,9 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+  #gameMarquee .emoji-icon {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+  }
   #versionMenu {
     position: absolute;
     bottom: 0.5rem;
@@ -962,15 +965,15 @@
     
     <!-- Бегущая строка -->
     <div id="gameMarquee" aria-label="Информация и бонусы">
-      <div class="marquee-content">
-        <span class="marquee-item">🎮 Собирай еду и очки!</span>
-        <span class="marquee-item">⚡️ Избегай препятствий!</span>
-        <span class="marquee-item">🏆 Бей рекорды!</span>
-        <span class="marquee-item">🚀 Стань лучшим курьером!</span>
-        <span class="marquee-item">🎮 Собирай еду и очки!</span>
-        <span class="marquee-item">⚡️ Избегай препятствий!</span>
-        <span class="marquee-item">🏆 Бей рекорды!</span>
-        <span class="marquee-item">🚀 Стань лучшим курьером!</span>
+      <div class="marquee-content" style="animation-duration: 15s;">
+        <span class="marquee-item"><span class="emoji-icon">🚀</span> Старт без опыта — заработай с первого дня!</span>
+        <span class="marquee-item"><span class="emoji-icon">💵</span> Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!</span>
+        <span class="marquee-item"><span class="emoji-icon">🚀</span> Старт без опыта — заработай с первого дня!</span>
+        <span class="marquee-item"><span class="emoji-icon">💵</span> Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!</span>
+        <span class="marquee-item"><span class="emoji-icon">🚀</span> Старт без опыта — заработай с первого дня!</span>
+        <span class="marquee-item"><span class="emoji-icon">💵</span> Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!</span>
+        <span class="marquee-item"><span class="emoji-icon">🚀</span> Старт без опыта — заработай с первого дня!</span>
+        <span class="marquee-item"><span class="emoji-icon">💵</span> Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!</span>
       </div>
     </div>
     
