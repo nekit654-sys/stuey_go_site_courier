@@ -170,8 +170,8 @@ const PayoutForm = () => {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-green-600 flex items-center justify-center gap-2">
-          <Icon name="BadgeDollarSign" size={28} className="text-green-600" />
+        <CardTitle className="text-2xl font-bold text-yellow-600 flex items-center justify-center gap-2">
+          <Icon name="BadgeDollarSign" size={28} className="text-yellow-600" />
           Выплата 3000 ₽
         </CardTitle>
         <CardDescription>
@@ -237,8 +237,8 @@ const PayoutForm = () => {
                       alt="Превью скриншота" 
                       className="max-w-full h-32 object-contain mx-auto rounded"
                     />
-                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium animate-in fade-in slide-in-from-top-2 duration-500">
-                      <Icon name="CheckCircle" size={16} className="text-green-600 animate-in zoom-in-50 duration-300" />
+                    <div className="flex items-center justify-center gap-1 text-sm text-yellow-600 font-medium animate-in fade-in slide-in-from-top-2 duration-500">
+                      <Icon name="CheckCircle" size={16} className="text-yellow-600 animate-in zoom-in-50 duration-300" />
                       Файл загружен
                     </div>
                     <p className="text-xs text-gray-500">
@@ -262,7 +262,7 @@ const PayoutForm = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

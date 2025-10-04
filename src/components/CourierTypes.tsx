@@ -16,16 +16,16 @@ const CourierTypes = () => {
       icon: "User",
       description: "Доставка пешком",
       benefits: ["До 4500₽ в день", "Минимум вложений", "Работа у дома"],
-      bgColor: "bg-purple-50 hover:bg-purple-100",
-      buttonColor: "bg-purple-600 hover:bg-purple-700",
+      bgColor: "bg-yellow-50 hover:bg-yellow-100",
+      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
     },
     {
       type: "Вело курьер",
       icon: "Bike",
       description: "Доставка на велосипеде",
       benefits: ["До 6500₽ в день", "Высокая скорость", "Экологичность"],
-      bgColor: "bg-green-50 hover:bg-green-100",
-      buttonColor: "bg-green-600 hover:bg-green-700",
+      bgColor: "bg-yellow-50 hover:bg-yellow-100",
+      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
     },
     {
       type: "Авто курьер",
@@ -36,8 +36,8 @@ const CourierTypes = () => {
         "Максимальный заработок",
         "Работа в любую погоду",
       ],
-      bgColor: "bg-blue-50 hover:bg-blue-100",
-      buttonColor: "bg-blue-600 hover:bg-blue-700",
+      bgColor: "bg-yellow-50 hover:bg-yellow-100",
+      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
     },
   ];
 
