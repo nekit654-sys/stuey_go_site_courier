@@ -40,7 +40,7 @@ const Navigation = () => {
               alt="Stuey Go Logo" 
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <span className="text-white font-rubik whitespace-nowrap text-xl font-black">Stuey Go | Яндекс Еда</span>
+            <span className="text-white font-rubik whitespace-nowrap text-xl font-black">Stuey.Go 🍕 Яндекс Еда</span>
           </Link>
 
           {/* Desktop menu */}
