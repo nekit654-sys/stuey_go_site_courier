@@ -285,7 +285,7 @@ const Hiring = () => {
               Часто задаваемые{" "}
               <span className="text-yellow-500">вопросы</span>
             </h2>
-            <div className="max-w-3xl mx-auto space-y-4">
+            <div className="max-w-3xl mx-auto space-y-4 px-4">
               {faqs.map((faq, index) => (
                 <div
                   key={index}
@@ -293,9 +293,9 @@ const Hiring = () => {
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full px-4 md:px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                   >
-                    <h3 className="text-base md:text-lg font-bold text-gray-800 pr-4">
+                    <h3 className="text-base md:text-lg font-bold text-gray-800 pr-2 md:pr-4">
                       {faq.question}
                     </h3>
                     <Icon
@@ -305,7 +305,7 @@ const Hiring = () => {
                     />
                   </button>
                   {openFaq === index && (
-                    <div className="px-6 pb-4">
+                    <div className="px-4 md:px-6 pb-4">
                       <p className="text-gray-600 text-sm md:text-base leading-relaxed">
                         {faq.answer}
                       </p>
