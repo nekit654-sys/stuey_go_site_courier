@@ -38,7 +38,7 @@ const Navigation = () => {
             <img 
               src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
               alt="Stuey Go Logo" 
-              className="w-10 h-10 rounded-lg object-cover"
+              className="w-10 h-10 rounded-lg object-cover border-2 border-black"
             />
             <span className="text-black font-rubik whitespace-nowrap text-xl font-black">Stuey.Go | Яндекс Еда</span>
           </Link>
