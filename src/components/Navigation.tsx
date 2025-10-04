@@ -19,7 +19,7 @@ const Navigation = () => {
     { path: "/", label: "Главная", icon: "Home" },
     { path: "/hiring", label: "Процесс найма", icon: "Users" },
     { path: "/culture", label: "Мотивация и доход", icon: "TrendingUp" },
-    { path: "/reviews", label: "Отзывы сотрудников", icon: "MessageSquare" },
+    { path: "/reviews", label: "Отзывы курьеров", icon: "MessageSquare" },
   ];
 
   const handleMenuItemClick = () => {

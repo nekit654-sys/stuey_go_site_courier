@@ -103,23 +103,7 @@ const FAQ = () => {
           })}
         </div>
 
-        <div className="mt-12 text-center">
-          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-6 inline-block">
-            <p className="text-gray-800 font-medium mb-3 flex items-center gap-2 justify-center">
-              <Icon name="HelpCircle" size={20} className="text-yellow-600" />
-              Остались вопросы?
-            </p>
-            <a
-              href="https://wa.me/79999999999"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105"
-            >
-              <Icon name="MessageCircle" size={20} />
-              Написать в WhatsApp
-            </a>
-          </div>
-        </div>
+
       </div>
     </section>
   );

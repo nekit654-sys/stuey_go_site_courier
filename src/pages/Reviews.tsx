@@ -6,61 +6,55 @@ const Reviews = () => {
   // Большая база отзывов (100+ отзывов)
   const allReviews = [
     {
-      name: "Алексей М.",
+      name: "Алексей, 24 года",
       location: "Москва",
       experience: "8 месяцев",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/d400fc2f-ba97-4605-b7bb-e17974672c14.jpg",
       rating: 5,
       text: "Отличная возможность подработать в свободное время. График гибкий, поддержка работает быстро. За 8 месяцев ни разу не было проблем с выплатами.",
       income: "65,000 ₽/мес",
     },
     {
-      name: "Марина К.",
+      name: "Марина, 28 лет",
       location: "Санкт-Петербург",
       experience: "1 год 2 месяца",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b1c2?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/2f2cdf7a-6e47-4293-bb2a-e6430d9169f4.jpg",
       rating: 5,
       text: "Работаю курьером на велосипеде уже больше года. Очень нравится система бонусов и то, что можно планировать свой день самостоятельно. Рекомендую!",
       income: "58,000 ₽/мес",
     },
     {
-      name: "Дмитрий П.",
+      name: "Дмитрий, 35 лет",
       location: "Екатеринбург",
       experience: "6 месяцев",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/916db2ce-ca35-4984-ab6f-dba0ed17965f.jpg",
       rating: 4,
       text: "Хорошая подработка для студента. Работаю в основном вечером и в выходные. Приложение удобное, заказы поступают регулярно.",
       income: "35,000 ₽/мес",
     },
     {
-      name: "Елена С.",
+      name: "Елена, 22 года",
       location: "Новосибирск",
       experience: "3 месяца",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/12faf236-17d6-433d-a758-ab9eb0a55df1.jpg",
       rating: 5,
       text: "Начала работать недавно, но уже очень довольна. Обучение прошло быстро, техподдержка всегда помогает. Планирую работать дальше.",
       income: "42,000 ₽/мес",
     },
     {
-      name: "Сергей Т.",
+      name: "Сергей, 30 лет",
       location: "Казань",
       experience: "2 года",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/d734c2e7-759f-472b-b781-5c693371c854.jpg",
       rating: 5,
       text: "Работаю курьером уже 2 года. За это время компания сильно развилась, условия стали еще лучше. Особенно нравится программа лояльности.",
       income: "78,000 ₽/мес",
     },
     {
-      name: "Анна В.",
+      name: "Анна, 42 года",
       location: "Ростов-на-Дону",
       experience: "4 месяца",
-      avatar:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
+      avatar: "/img/350143c9-7d3a-44cf-ab58-4fd1094964c2.jpg",
       rating: 4,
       text: "Отличная возможность совмещать с основной работой. Выходные провожу с пользой, зарабатывая дополнительные деньги. Всем довольна!",
       income: "28,000 ₽/мес",
@@ -557,7 +551,7 @@ const Reviews = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Отзывы <span className="text-yellow-500">сотрудников</span>
+              Отзывы <span className="text-yellow-500">курьеров</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Реальные истории людей, которые работают курьерами в Яндекс.Еда
