@@ -29,8 +29,8 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-gray-800 border-b-4 border-yellow-400 shadow-2xl fixed top-0 left-0 right-0 z-50">
-      <div className="absolute inset-0 from-orange-900/10 via-yellow-900/10 to-amber-900/10 bg-neutral-900"></div>
+    <nav className="bg-yellow-400 border-b-4 border-yellow-500 shadow-2xl fixed top-0 left-0 right-0 z-50">
+      <div className="absolute inset-0 bg-yellow-400"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between py-4">
@@ -40,7 +40,7 @@ const Navigation = () => {
               alt="Stuey Go Logo" 
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <span className="text-white font-rubik whitespace-nowrap text-xl font-black">Stuey.Go 🍕 Яндекс Еда</span>
+            <span className="text-black font-rubik whitespace-nowrap text-xl font-black">Stuey.Go | Яндекс Еда</span>
           </Link>
 
           {/* Desktop menu */}
@@ -56,8 +56,8 @@ const Navigation = () => {
                     transition-all duration-200 hover:scale-105
                     ${
                       location.pathname === item.path
-                        ? "bg-yellow-400 text-gray-800 hover:bg-yellow-500 shadow-lg ring-2 ring-yellow-300/50"
-                        : "text-white hover:bg-yellow-400/20 hover:text-yellow-300"
+                        ? "bg-black text-yellow-400 hover:bg-gray-900 shadow-lg ring-2 ring-black/50"
+                        : "text-black hover:bg-yellow-500 hover:text-black"
                     }
                   `}
                 >
@@ -66,8 +66,8 @@ const Navigation = () => {
                     size={16}
                     className={
                       location.pathname === item.path
-                        ? "text-gray-800"
-                        : "text-yellow-300"
+                        ? "text-yellow-400"
+                        : "text-black"
                     }
                   />
                   {item.label}
@@ -115,7 +115,7 @@ const Navigation = () => {
           <div className="md:hidden">
             <Button
               variant="ghost"
-              className="text-white hover:bg-yellow-400/20 transition-all duration-200"
+              className="text-black hover:bg-yellow-500 transition-all duration-200"
               onClick={() => {
                 playSound('click');
                 setIsMenuOpen(!isMenuOpen);
@@ -125,7 +125,7 @@ const Navigation = () => {
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
                 size={24}
-                className="text-yellow-300 transition-transform duration-200"
+                className="text-black transition-transform duration-200"
               />
             </Button>
           </div>
@@ -138,7 +138,7 @@ const Navigation = () => {
           ${isMenuOpen ? "max-h-[500px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-4"}
         `}
         >
-          <div className="py-4 space-y-2 border-t border-yellow-400/20 animate-in slide-in-from-top-5 duration-500">
+          <div className="py-4 space-y-2 border-t border-yellow-500/40 animate-in slide-in-from-top-5 duration-500">
             {menuItems.map((item) => (
               <Link
                 key={item.path}
@@ -151,8 +151,8 @@ const Navigation = () => {
                     w-full justify-start transition-all duration-200 hover:scale-105
                     ${
                       location.pathname === item.path
-                        ? "bg-yellow-400 text-gray-800 hover:bg-yellow-500 shadow-lg"
-                        : "text-white hover:bg-yellow-400/20 hover:text-yellow-300"
+                        ? "bg-black text-yellow-400 hover:bg-gray-900 shadow-lg"
+                        : "text-black hover:bg-yellow-500 hover:text-black"
                     }
                   `}
                 >
@@ -161,8 +161,8 @@ const Navigation = () => {
                     size={16}
                     className={
                       location.pathname === item.path
-                        ? "text-gray-800"
-                        : "text-yellow-300"
+                        ? "text-yellow-400"
+                        : "text-black"
                     }
                   />
                   {item.label}
