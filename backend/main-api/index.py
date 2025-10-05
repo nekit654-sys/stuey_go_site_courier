@@ -468,6 +468,46 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }),
                 'isBase64Encoded': False
             }
+        
+        elif action == 'feedback':
+            full_name = body_data.get('fullName', '')
+            phone = body_data.get('phone', '')
+            city = body_data.get('city', '')
+            screenshot_url = body_data.get('screenshotUrl', None)
+            
+            if not full_name or not phone or not city:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Missing required fields'}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("""
+                INSERT INTO feedback_requests (full_name, city, phone, screenshot_url, status)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, created_at
+            """, (full_name, city, phone, screenshot_url, 'pending'))
+            
+            result = cur.fetchone()
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Заявка успешно отправлена',
+                    'id': result[0],
+                    'created_at': result[1].isoformat()
+                }),
+                'isBase64Encoded': False
+            }
     
     elif event.get('httpMethod') == 'GET':
         auth_token = event.get('headers', {}).get('X-Auth-Token')
