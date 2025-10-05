@@ -52,7 +52,7 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://functions.poehali.dev/31e22995-f5a1-4fe8-a32b-d4027ca5f719?action=stats', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=stats', {
         headers: {
           'X-User-Id': user?.id.toString() || '',
         },
@@ -72,7 +72,7 @@ export default function Dashboard() {
 
   const fetchReferrals = async () => {
     try {
-      const response = await fetch('https://functions.poehali.dev/31e22995-f5a1-4fe8-a32b-d4027ca5f719?action=list', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=list', {
         headers: {
           'X-User-Id': user?.id.toString() || '',
         },

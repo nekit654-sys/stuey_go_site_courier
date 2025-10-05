@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (authToken: string) => {
     try {
-      const response = await fetch('https://functions.poehali.dev/d2ba9440-34fc-491e-97b9-1627c9a7442d', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -164,7 +164,7 @@ const PayoutForm = () => {
         attachment_data: screenshotBase64
       };
 
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

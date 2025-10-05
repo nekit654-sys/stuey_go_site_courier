@@ -13,6 +13,8 @@ import IncomeTab from '@/components/admin/IncomeTab';
 import ReferralsTab from '@/components/admin/ReferralsTab';
 import StatsTab from '@/components/admin/StatsTab';
 
+const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
+
 interface AdminRequest {
   id: number;
   name: string;
@@ -61,7 +63,7 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +107,7 @@ const Login: React.FC = () => {
   const loadRequests = async (token?: string, silent = false) => {
     const tokenToUse = token || authToken;
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         headers: {
           'X-Auth-Token': tokenToUse
         }
@@ -163,7 +165,7 @@ const Login: React.FC = () => {
 
   const updateRequestStatus = async (id: number, status: string) => {
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +193,7 @@ const Login: React.FC = () => {
   const deleteRequest = async (id: number) => {
     if (confirm('Удалить заявку?')) {
       try {
-        const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        const response = await fetch(API_URL, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -220,7 +222,7 @@ const Login: React.FC = () => {
   const loadAdmins = async (token?: string) => {
     const tokenToUse = token || authToken;
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +251,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -288,7 +290,7 @@ const Login: React.FC = () => {
   const addAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -328,7 +330,7 @@ const Login: React.FC = () => {
   const deleteAdmin = async (adminId: number) => {
     if (confirm('Удалить администратора?')) {
       try {
-        const response = await fetch('https://functions.poehali.dev/6b2cc30f-1820-4fa4-b15d-fca5cf330fab', {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -360,7 +362,7 @@ const Login: React.FC = () => {
   const loadReferralStats = async () => {
     setIsLoadingReferrals(true);
     try {
-      const response = await fetch('https://functions.poehali.dev/31e22995-f5a1-4fe8-a32b-d4027ca5f719?action=admin_stats', {
+      const response = await fetch(`${API_URL}?route=referrals&action=admin_stats`, {
         headers: {
           'X-Auth-Token': authToken
         }
