@@ -54,7 +54,7 @@ const Navigation = () => {
                   variant="ghost"
                   onMouseEnter={() => playSound('hover')}
                   className={`
-                    flex items-center justify-center gap-2 font-extrabold transition-all duration-150 px-5 py-2.5 rounded-xl border-3 border-black whitespace-nowrap
+                    flex items-center justify-center gap-2 font-extrabold transition-all duration-150 px-5 py-2.5 rounded-xl border-3 border-black whitespace-nowrap min-w-[120px]
                     ${
                       location.pathname === item.path
                         ? "bg-white text-black shadow-[0_5px_0_0_rgba(0,0,0,1)] translate-y-0"
@@ -67,7 +67,7 @@ const Navigation = () => {
                     size={18}
                     className="text-black"
                   />
-                  <span className="hidden xl:inline">{item.label}</span>
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Button>
               </Link>
             ))}
@@ -97,11 +97,11 @@ const Navigation = () => {
                 hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
                 transition-all duration-150
                 border-3 border-black
-                flex items-center justify-center gap-2 whitespace-nowrap
+                flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
               "
             >
               <Icon name="Gamepad2" size={18} />
-              <span className="hidden xl:inline">Игра</span>
+              <span className="hidden lg:inline">Игра</span>
             </Button>
             
             {/* Login/Profile Button */}
@@ -115,11 +115,11 @@ const Navigation = () => {
                   hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
                   transition-all duration-150
                   border-3 border-black
-                  flex items-center justify-center gap-2 whitespace-nowrap
+                  flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
                 "
               >
                 <Icon name="User" size={18} />
-                <span className="hidden xl:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
+                <span className="hidden lg:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
               </Button>
             </Link>
           </div>
