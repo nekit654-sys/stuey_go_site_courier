@@ -29,20 +29,20 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-yellow-400 border-t-2 border-b-2 border-black shadow-2xl fixed top-0 left-0 right-0 z-50">
-      <div className="absolute inset-0 bg-yellow-400"></div>
+    <nav className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 border-b-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,0.3)] fixed top-0 left-0 right-0 z-50">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="w-10 h-10 bg-white rounded-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
+            <div className="w-12 h-12 bg-white rounded-xl border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all duration-150 flex items-center justify-center">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
                 alt="Stuey Go Logo" 
-                className="w-8 h-8 rounded object-cover"
+                className="w-10 h-10 rounded object-cover"
               />
             </div>
-            <span className="text-black font-rubik whitespace-nowrap text-xl font-extrabold drop-shadow-[2px_2px_0_rgba(255,255,255,0.5)]">Stuey.Go | Яндекс Еда</span>
+            <span className="text-black font-rubik whitespace-nowrap text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)]">Stuey.Go | Яндекс Еда</span>
           </Link>
 
           {/* Desktop menu */}
@@ -53,11 +53,11 @@ const Navigation = () => {
                   variant="ghost"
                   onMouseEnter={() => playSound('hover')}
                   className={`
-                    flex items-center gap-2 font-bold transition-all duration-150 px-4 py-2 rounded-lg relative
+                    flex items-center gap-2 font-extrabold transition-all duration-150 px-5 py-2.5 rounded-xl border-3 border-black relative
                     ${
                       location.pathname === item.path
-                        ? "bg-yellow-500 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)] translate-y-0 after:content-[''] after:absolute after:bottom-[-6px] after:left-3 after:right-3 after:h-[3px] after:bg-black after:rounded-full"
-                        : "bg-yellow-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+                        ? "bg-white text-black shadow-[0_5px_0_0_rgba(0,0,0,1)] translate-y-0"
+                        : "bg-gradient-to-b from-yellow-300 to-yellow-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
                     }
                   `}
                 >
@@ -94,12 +94,12 @@ const Navigation = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className="
-                bg-gradient-to-r from-green-500 to-green-600
-                text-black font-bold px-4 py-2 rounded-full
-                shadow-lg hover:shadow-xl transform hover:scale-105
-                transition-all duration-200
-                ring-2 ring-green-400/50 hover:ring-green-500/70
-                hover:from-green-600 hover:to-green-700
+                bg-gradient-to-b from-green-400 to-green-500
+                text-black font-extrabold px-5 py-2.5 rounded-xl
+                shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                transition-all duration-150
+                border-3 border-black
               "
             >
               <Icon name="Gamepad2" size={16} className="mr-2" />
@@ -111,7 +111,7 @@ const Navigation = () => {
           <div className="md:hidden">
             <Button
               variant="ghost"
-              className="text-black hover:bg-yellow-500 transition-all duration-200 p-2"
+              className="text-black bg-white hover:bg-gray-100 transition-all duration-150 p-2 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]"
               onClick={() => {
                 playSound('click');
                 setIsMenuOpen(!isMenuOpen);
@@ -120,7 +120,7 @@ const Navigation = () => {
             >
               <Icon
                 name={isMenuOpen ? "X" : "Menu"}
-                size={32}
+                size={28}
                 className="text-black transition-transform duration-200 stroke-[3]"
               />
             </Button>
@@ -134,7 +134,7 @@ const Navigation = () => {
           ${isMenuOpen ? "max-h-[500px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-4"}
         `}
         >
-          <div className="py-4 space-y-3 border-t-2 border-black/20 animate-in slide-in-from-top-5 duration-500">
+          <div className="py-4 space-y-3 border-t-4 border-black/30 animate-in slide-in-from-top-5 duration-500">
             {menuItems.map((item) => (
               <Link
                 key={item.path}
@@ -144,11 +144,11 @@ const Navigation = () => {
                 <Button
                   variant="ghost"
                   className={`
-                    w-full justify-start transition-all duration-200 hover:scale-105 py-6 text-base font-semibold
+                    w-full justify-start transition-all duration-150 py-6 text-base font-extrabold rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
                     ${
                       location.pathname === item.path
-                        ? "bg-black text-yellow-400 hover:bg-gray-900 shadow-lg border-l-4 border-yellow-400"
-                        : "text-black hover:bg-yellow-500 hover:text-black border-l-4 border-transparent"
+                        ? "bg-white text-black"
+                        : "bg-gradient-to-b from-yellow-300 to-yellow-400 text-black hover:from-yellow-400 hover:to-yellow-500"
                     }
                   `}
                 >
@@ -188,10 +188,11 @@ const Navigation = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className="
-                w-full justify-start bg-gradient-to-r from-green-500 to-green-600
-                text-black font-bold transition-all duration-200 hover:scale-105
-                shadow-lg ring-2 ring-green-400/50 py-6 text-base border-l-4 border-black
-                hover:from-green-600 hover:to-green-700
+                w-full justify-start bg-gradient-to-b from-green-400 to-green-500
+                text-black font-extrabold transition-all duration-150
+                shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                py-6 text-base rounded-xl border-3 border-black
+                hover:from-green-500 hover:to-green-600
               "
             >
               <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
