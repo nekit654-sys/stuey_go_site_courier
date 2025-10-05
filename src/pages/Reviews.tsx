@@ -508,35 +508,37 @@ const Reviews = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-6 border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
+                className="bg-white rounded-xl md:rounded-2xl p-5 md:p-6 border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
+                style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}
               >
                 <div className="flex items-start space-x-4 mb-4">
-                  <img
-                    src={generateAvatar(review.name)}
-                    alt={review.name}
-                    className="w-12 h-12 rounded-full object-cover shadow-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-extrabold text-gray-800">{review.name}</h3>
-                    <p className="text-sm text-gray-700 font-medium flex items-center">
-                      <Icon name="MapPin" size={12} className="mr-1" />
-                      {review.location}
+                  <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center border-3 border-black flex-shrink-0" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                    <span className="text-2xl font-bold text-black">
+                      {review.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-extrabold text-gray-800 text-base truncate">{review.name}</h3>
+                    <p className="text-xs text-gray-700 font-medium flex items-center">
+                      <Icon name="MapPin" size={12} className="mr-1 flex-shrink-0" />
+                      <span className="truncate">{review.location}</span>
                     </p>
-                    <p className="text-sm text-gray-700 font-medium">
+                    <p className="text-xs text-gray-700 font-medium">
                       Опыт: {review.experience}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <div className="flex space-x-1 mb-1">
-                      {renderStars(review.rating)}
-                    </div>
-                    <div className="text-sm font-extrabold text-green-600">
-                      {review.income}
-                    </div>
+                </div>
+
+                <div className="flex items-center justify-between mb-3 pb-3 border-b-2 border-black">
+                  <div className="flex space-x-0.5">
+                    {renderStars(review.rating)}
+                  </div>
+                  <div className="bg-green-400 px-3 py-1 rounded-full text-xs font-extrabold text-black border-2 border-black" style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                    {review.income}
                   </div>
                 </div>
 
@@ -547,31 +549,33 @@ const Reviews = () => {
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)]">
-            <Icon
-              name="Users"
-              size={48}
-              className="mx-auto mb-6 text-gray-800"
-            />
-            <h2 className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)] mb-4">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center border-4 border-black" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
+            <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
+              <Icon
+                name="Users"
+                size={32}
+                className="text-yellow-400"
+              />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-black mb-4" style={{textShadow: '2px 2px 0 rgba(255, 255, 255, 0.3)'}}>
               Станьте частью нашей команды
             </h2>
-            <p className="text-gray-800 font-medium text-lg mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-800 font-bold text-base md:text-lg mb-6 max-w-2xl mx-auto">
               Присоединяйтесь к тысячам курьеров, которые уже зарабатывают с
               Яндекс.Еда
             </p>
-            <div className="grid md:grid-cols-3 gap-6 text-center mb-8">
-              <div>
-                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">4.8/5</div>
-                <div className="text-gray-800 font-extrabold">Средний рейтинг</div>
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6 text-center">
+              <div className="bg-white rounded-xl p-4 border-3 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-3xl md:text-4xl font-extrabold text-black">4.8/5</div>
+                <div className="text-gray-800 font-bold text-sm md:text-base mt-1">Средний рейтинг</div>
               </div>
-              <div>
-                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">87%</div>
-                <div className="text-gray-800 font-extrabold">Рекомендуют работу</div>
+              <div className="bg-white rounded-xl p-4 border-3 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-3xl md:text-4xl font-extrabold text-black">87%</div>
+                <div className="text-gray-800 font-bold text-sm md:text-base mt-1">Рекомендуют работу</div>
               </div>
-              <div>
-                <div className="text-3xl font-extrabold text-black drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">78K ₽</div>
-                <div className="text-gray-800 font-extrabold">Средний доход</div>
+              <div className="bg-white rounded-xl p-4 border-3 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-3xl md:text-4xl font-extrabold text-black">78K ₽</div>
+                <div className="text-gray-800 font-bold text-sm md:text-base mt-1">Средний доход</div>
               </div>
             </div>
           </div>
