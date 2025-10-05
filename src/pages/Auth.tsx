@@ -31,7 +31,16 @@ export default function Auth() {
     }
 
     const code = searchParams.get('code');
-    const provider = searchParams.get('provider');
+    const state = searchParams.get('state');
+    
+    // Извлекаем provider из state (формат: provider=vk или provider=apple)
+    let provider = searchParams.get('provider');
+    if (!provider && state) {
+      const stateMatch = state.match(/provider=(\w+)/);
+      if (stateMatch) {
+        provider = stateMatch[1];
+      }
+    }
 
     if (code && provider) {
       handleOAuthCallback(provider, code);
@@ -101,7 +110,7 @@ export default function Auth() {
   const handleAppleAuth = () => {
     const appleClientId = 'YOUR_APPLE_CLIENT_ID';
     const redirectUri = `${window.location.origin}/auth`;
-    const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${appleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name&response_mode=form_post&state=provider=apple`;
+    const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${appleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name&response_mode=query&state=provider=apple`;
     
     window.location.href = appleAuthUrl;
   };

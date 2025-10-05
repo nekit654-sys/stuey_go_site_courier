@@ -1,5 +1,5 @@
 '''
-Business: OAuth авторизация через VK, Telegram, Google, Yandex + генерация JWT токенов
+Business: OAuth авторизация через VK, Telegram, Google, Yandex, Apple + генерация JWT токенов
 Args: event - dict с httpMethod, body, queryStringParameters
       context - объект с request_id, function_name
 Returns: HTTP response с JWT токеном или ошибкой
@@ -57,6 +57,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_google_auth(body, headers)
     elif action == 'yandex':
         return handle_yandex_auth(body, headers)
+    elif action == 'apple':
+        return handle_apple_auth(body, headers)
     elif action == 'verify':
         return verify_token(body, headers)
     else:
@@ -344,6 +346,106 @@ def handle_yandex_auth(body: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             'statusCode': 500,
             'headers': headers,
             'body': json.dumps({'error': f'Yandex auth failed: {str(e)}'}),
+            'isBase64Encoded': False
+        }
+
+
+def handle_apple_auth(body: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Обработка Apple OAuth"""
+    code = body.get('code')
+    redirect_uri = body.get('redirect_uri')
+    referral_code = body.get('referral_code')
+    
+    if not code:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'Code required'}),
+            'isBase64Encoded': False
+        }
+    
+    client_id = os.environ.get('APPLE_CLIENT_ID')
+    team_id = os.environ.get('APPLE_TEAM_ID')
+    key_id = os.environ.get('APPLE_KEY_ID')
+    private_key = os.environ.get('APPLE_PRIVATE_KEY', '').replace('\\n', '\n')
+    
+    # Генерируем client_secret для Apple
+    try:
+        import time
+        
+        headers_token = {
+            'kid': key_id,
+            'alg': 'ES256'
+        }
+        
+        payload = {
+            'iss': team_id,
+            'iat': int(time.time()),
+            'exp': int(time.time()) + 86400 * 180,  # 180 дней
+            'aud': 'https://appleid.apple.com',
+            'sub': client_id
+        }
+        
+        client_secret = jwt.encode(payload, private_key, algorithm='ES256', headers=headers_token)
+        
+        # Получаем токен от Apple
+        token_url = "https://appleid.apple.com/auth/token"
+        token_data = {
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'code': code,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_uri
+        }
+        
+        req = urllib.request.Request(
+            token_url,
+            data=urllib.parse.urlencode(token_data).encode(),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+        
+        with urllib.request.urlopen(req) as response:
+            token_response = json.loads(response.read().decode())
+        
+        id_token = token_response.get('id_token')
+        
+        # Декодируем id_token (без проверки подписи для упрощения)
+        decoded_token = jwt.decode(id_token, options={"verify_signature": False})
+        
+        apple_id = decoded_token.get('sub')
+        email = decoded_token.get('email')
+        
+        # Apple не предоставляет имя и фото в id_token после первой авторизации
+        # Имя приходит только в первый раз в POST параметре user
+        full_name = email.split('@')[0] if email else 'Apple User'
+        
+        user = create_or_update_user(
+            oauth_provider='apple',
+            oauth_id=apple_id,
+            full_name=full_name,
+            email=email,
+            avatar_url=None,
+            referral_code=referral_code
+        )
+        
+        token = generate_jwt_token(user)
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'token': token,
+                'user': user
+            }),
+            'isBase64Encoded': False
+        }
+        
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': f'Apple auth failed: {str(e)}'}),
             'isBase64Encoded': False
         }
 
