@@ -12,7 +12,6 @@ interface FormData {
 
 const FeedbackTab: React.FC = () => {
   const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -27,23 +26,14 @@ const FeedbackTab: React.FC = () => {
     // Воспроизводим звук клика с уменьшенной громкостью
     try {
       const audio = new Audio('/click.mp3');
-      audio.volume = 0.15; // Чуть громче для привлечения внимания
-      audio.play().catch(() => {}); // Игнорируем ошибки
+      audio.volume = 0.15;
+      audio.play().catch(() => {});
     } catch (error) {
       // Игнорируем ошибки звука
     }
     
-    // Прокрутка к форме заявки внизу страницы
-    const payoutSection = document.querySelector('[data-payout-form]');
-    if (payoutSection) {
-      payoutSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
-      });
-    } else {
-      // Если формы нет на странице, открываем модалку
-      setIsModalOpen(true);
-    }
+    // Всегда открываем модальное окно с формой
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -83,7 +73,6 @@ const FeedbackTab: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Отправляем JSON вместо FormData для простоты
       const jsonData = {
         fullName: formData.fullName,
         city: formData.city,
@@ -146,20 +135,32 @@ const FeedbackTab: React.FC = () => {
 
       {/* Модальное окно */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseModal();
+            }
+          }}
+        >
+          <div className="bg-white rounded-xl md:rounded-2xl border-4 border-black max-w-md w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200" style={{boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.9)'}}>
             {/* Заголовок */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-t-xl">
-              <div className="flex items-center justify-between">
+            <div className="bg-gradient-to-br from-green-400 to-green-500 text-white p-6 rounded-t-xl border-b-4 border-black relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <h2 className="text-xl font-extrabold">Получить 3000₽</h2>
-                  <p className="text-green-100 text-sm">За первые 30 выполненных заказов</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Icon name="Gift" size={24} className="text-yellow-300" />
+                    <h2 className="text-2xl font-extrabold" style={{textShadow: '2px 2px 0 rgba(0, 0, 0, 0.2)'}}>Получить 3000₽</h2>
+                  </div>
+                  <p className="text-green-50 text-sm font-bold">За первые 30 выполненных заказов</p>
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                  className="bg-red-500 hover:bg-red-600 rounded-full p-2 transition-all border-2 border-black hover:scale-110 active:scale-95"
+                  style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}
                 >
-                  <Icon name="X" size={20} />
+                  <Icon name="X" size={20} className="text-white" />
                 </button>
               </div>
             </div>
@@ -167,68 +168,70 @@ const FeedbackTab: React.FC = () => {
             {/* Содержимое */}
             <div className="p-6">
               {isSuccess ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon name="Check" size={32} className="text-green-600" />
+                <div className="text-center py-8 animate-in zoom-in-50 duration-300">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black" style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                    <Icon name="Check" size={40} className="text-white" />
                   </div>
-                  <h3 className="text-lg font-extrabold text-black mb-2">Заявка отправлена!</h3>
-                  <p className="text-gray-700 font-medium">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
+                  <h3 className="text-2xl font-extrabold text-black mb-2">Заявка отправлена!</h3>
+                  <p className="text-gray-700 font-bold text-base">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-extrabold text-black mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-2">
                       ФИО <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-green-400 focus:border-green-500 transition-all"
                       placeholder="Иванов Иван Иванович"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-extrabold text-black mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-2">
                       Город <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.city}
                       onChange={(e) => handleInputChange('city', e.target.value)}
-                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-green-400 focus:border-green-500 transition-all"
                       placeholder="Москва"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-extrabold text-black mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-2">
                       Номер телефона <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border-3 border-black rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-green-400 focus:border-green-500 transition-all"
                       placeholder="+7 (999) 123-45-67"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-extrabold text-black mb-1">
+                    <label className="block text-sm font-extrabold text-black mb-2">
                       Скриншот 30 выполненных заказов
                     </label>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-400 transition-colors">
-                      <div className="space-y-1 text-center">
-                        <Icon name="Upload" size={40} className="mx-auto text-gray-400" />
-                        <div className="flex text-sm text-gray-600">
+                    <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-3 border-dashed border-gray-400 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
+                      <div className="space-y-2 text-center">
+                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto border-2 border-green-400">
+                          <Icon name="Upload" size={24} className="text-green-600" />
+                        </div>
+                        <div className="flex text-sm text-gray-700 font-bold justify-center">
                           <label
                             htmlFor="file-upload"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none"
+                            className="relative cursor-pointer bg-white rounded-md font-extrabold text-green-600 hover:text-green-500 px-2"
                           >
                             <span>Загрузить файл</span>
                             <input
@@ -240,13 +243,16 @@ const FeedbackTab: React.FC = () => {
                               onChange={handleFileChange}
                             />
                           </label>
-                          <p className="pl-1">или перетащите сюда</p>
+                          <p className="pl-1">или перетащите</p>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG до 10MB</p>
+                        <p className="text-xs text-gray-500 font-medium">PNG, JPG до 10MB</p>
                         {formData.screenshot && (
-                          <p className="text-sm text-green-600 font-medium">
-                            ✓ {formData.screenshot.name}
-                          </p>
+                          <div className="bg-green-100 border-2 border-green-500 rounded-lg p-2 mt-2">
+                            <p className="text-sm text-green-700 font-extrabold flex items-center justify-center gap-2">
+                              <Icon name="CheckCircle" size={16} />
+                              {formData.screenshot.name}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -256,20 +262,23 @@ const FeedbackTab: React.FC = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-yellow-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-gradient-to-b from-yellow-400 to-yellow-500 text-black font-extrabold text-lg border-4 border-black rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_6px_0_0_rgba(0,0,0,1)]"
                     >
                       {isSubmitting ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Отправляем...
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="w-5 h-5 border-3 border-black border-t-transparent rounded-full animate-spin"></div>
+                          <span>Отправляем...</span>
                         </div>
                       ) : (
-                        'Отправить заявку'
+                        <div className="flex items-center justify-center gap-2">
+                          <Icon name="Send" size={20} />
+                          <span>Отправить заявку</span>
+                        </div>
                       )}
                     </Button>
                   </div>
 
-                  <div className="text-xs text-gray-500 text-center">
+                  <div className="text-xs text-gray-600 text-center font-medium bg-gray-100 p-3 rounded-lg border-2 border-gray-300">
                     Нажимая "Отправить заявку", вы соглашаетесь с обработкой персональных данных
                   </div>
                 </form>
@@ -278,8 +287,6 @@ const FeedbackTab: React.FC = () => {
           </div>
         </div>
       )}
-
-
     </>
   );
 };
