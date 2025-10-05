@@ -15,6 +15,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
+from decimal import Decimal
 import urllib.parse
 import urllib.request
 
@@ -450,6 +451,17 @@ def handle_apple_auth(body: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
         }
 
 
+def convert_decimals(obj: Any) -> Any:
+    """Конвертирует Decimal в float для JSON сериализации"""
+    if isinstance(obj, dict):
+        return {key: convert_decimals(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_decimals(item) for item in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    return obj
+
+
 def verify_telegram_auth(auth_data: Dict[str, Any], bot_token: str) -> bool:
     """Проверка подписи Telegram Widget"""
     check_hash = auth_data.get('hash')
@@ -539,7 +551,8 @@ def create_or_update_user(
     cur.close()
     conn.close()
     
-    return user
+    # Конвертируем Decimal в float
+    return convert_decimals(user)
 
 
 def generate_referral_code() -> str:
