@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { useSound } from "@/hooks/useSound";
 
@@ -10,6 +11,7 @@ const Navigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { playSound } = useSound();
+  const { isAuthenticated, user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isGameLoading, setIsGameLoading] = useState(false);
@@ -73,6 +75,26 @@ const Navigation = () => {
           </div>
 
 
+          
+          {/* Login/Profile Button */}
+          <div className="hidden md:block ml-2">
+            <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+              <Button
+                onMouseEnter={() => playSound('hover')}
+                className="
+                  bg-gradient-to-b from-blue-400 to-blue-500
+                  text-white font-extrabold px-5 py-2.5 rounded-xl
+                  shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                  hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                  transition-all duration-150
+                  border-3 border-black
+                "
+              >
+                <Icon name="User" size={16} className="mr-2" />
+                {isAuthenticated ? 'Кабинет' : 'Войти'}
+              </Button>
+            </Link>
+          </div>
           
           {/* Game Button */}
           <div className="hidden md:block ml-2">
@@ -166,8 +188,23 @@ const Navigation = () => {
               </Link>
             ))}
             
+            {/* Mobile Login/Profile Button */}
+            <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>
+              <Button
+                onMouseEnter={() => playSound('hover')}
+                className="
+                  w-full justify-start bg-gradient-to-b from-blue-400 to-blue-500
+                  text-white font-extrabold transition-all duration-150
+                  shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                  py-6 text-base rounded-xl border-3 border-black
+                  hover:from-blue-500 hover:to-blue-600
+                "
+              >
+                <Icon name="User" size={20} className="mr-3 text-white" />
+                {isAuthenticated ? 'Личный кабинет' : 'Войти'}
+              </Button>
+            </Link>
 
-            
             {/* Mobile Game Button */}
             <Button
               onClick={() => {

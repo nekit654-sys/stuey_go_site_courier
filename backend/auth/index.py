@@ -1,5 +1,5 @@
 '''
-Business: OAuth авторизация через VK, Telegram, Google + генерация JWT токенов
+Business: OAuth авторизация через VK, Telegram, Google, Yandex + генерация JWT токенов
 Args: event - dict с httpMethod, body, queryStringParameters
       context - объект с request_id, function_name
 Returns: HTTP response с JWT токеном или ошибкой
@@ -55,6 +55,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_telegram_auth(body, headers)
     elif action == 'google':
         return handle_google_auth(body, headers)
+    elif action == 'yandex':
+        return handle_yandex_auth(body, headers)
     elif action == 'verify':
         return verify_token(body, headers)
     else:
@@ -260,6 +262,88 @@ def handle_google_auth(body: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             'statusCode': 500,
             'headers': headers,
             'body': json.dumps({'error': f'Google auth failed: {str(e)}'}),
+            'isBase64Encoded': False
+        }
+
+
+def handle_yandex_auth(body: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Обработка Yandex OAuth"""
+    code = body.get('code')
+    redirect_uri = body.get('redirect_uri')
+    referral_code = body.get('referral_code')
+    
+    if not code:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'Code required'}),
+            'isBase64Encoded': False
+        }
+    
+    client_id = os.environ.get('YANDEX_CLIENT_ID')
+    client_secret = os.environ.get('YANDEX_CLIENT_SECRET')
+    
+    token_url = "https://oauth.yandex.ru/token"
+    token_data = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret
+    }
+    
+    try:
+        req = urllib.request.Request(
+            token_url,
+            data=urllib.parse.urlencode(token_data).encode(),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+        
+        with urllib.request.urlopen(req) as response:
+            token_response = json.loads(response.read().decode())
+        
+        access_token = token_response.get('access_token')
+        
+        user_info_url = "https://login.yandex.ru/info?format=json"
+        req = urllib.request.Request(
+            user_info_url,
+            headers={'Authorization': f'OAuth {access_token}'}
+        )
+        
+        with urllib.request.urlopen(req) as response:
+            user_info = json.loads(response.read().decode())
+        
+        yandex_id = user_info.get('id')
+        full_name = user_info.get('display_name', user_info.get('real_name', ''))
+        email = user_info.get('default_email')
+        avatar_url = f"https://avatars.yandex.net/get-yapic/{user_info.get('default_avatar_id')}/islands-200" if user_info.get('default_avatar_id') else None
+        
+        user = create_or_update_user(
+            oauth_provider='yandex',
+            oauth_id=yandex_id,
+            full_name=full_name,
+            email=email,
+            avatar_url=avatar_url,
+            referral_code=referral_code
+        )
+        
+        token = generate_jwt_token(user)
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'token': token,
+                'user': user
+            }),
+            'isBase64Encoded': False
+        }
+        
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': f'Yandex auth failed: {str(e)}'}),
             'isBase64Encoded': False
         }
 

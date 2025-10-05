@@ -90,6 +90,14 @@ export default function Auth() {
     window.location.href = googleAuthUrl;
   };
 
+  const handleYandexAuth = () => {
+    const yandexClientId = 'YOUR_YANDEX_CLIENT_ID';
+    const redirectUri = `${window.location.origin}/auth`;
+    const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandexClientId}&redirect_uri=${redirectUri}&state=provider=yandex`;
+    
+    window.location.href = yandexAuthUrl;
+  };
+
   const handleTelegramAuth = (telegramData: any) => {
     setLoading(true);
     
@@ -175,6 +183,15 @@ export default function Auth() {
           >
             <Icon name="Mail" className="mr-2 h-5 w-5" />
             Войти через Google
+          </Button>
+
+          <Button
+            onClick={handleYandexAuth}
+            className="w-full bg-[#FFCC00] hover:bg-[#FFD633] text-black font-semibold"
+            size="lg"
+          >
+            <Icon name="Circle" className="mr-2 h-5 w-5" />
+            Войти через Яндекс
           </Button>
 
           <div className="text-center">
