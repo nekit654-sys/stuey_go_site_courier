@@ -33,7 +33,7 @@ export default function Auth() {
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     
-    // Извлекаем provider из state (формат: provider=vk или provider=apple)
+    // Извлекаем provider из state (формат: provider=vk)
     let provider = searchParams.get('provider');
     if (!provider && state) {
       const stateMatch = state.match(/provider=(\w+)/);
@@ -107,13 +107,7 @@ export default function Auth() {
     window.location.href = yandexAuthUrl;
   };
 
-  const handleAppleAuth = () => {
-    const appleClientId = 'YOUR_APPLE_CLIENT_ID';
-    const redirectUri = `${window.location.origin}/auth`;
-    const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${appleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name&response_mode=query&state=provider=apple`;
-    
-    window.location.href = appleAuthUrl;
-  };
+
 
   const handleTelegramAuth = (telegramData: any) => {
     setLoading(true);
@@ -200,15 +194,6 @@ export default function Auth() {
           >
             <Icon name="Globe" className="mr-2 h-5 w-5" />
             Войти через ВКонтакте
-          </Button>
-
-          <Button
-            onClick={handleAppleAuth}
-            className="w-full bg-black hover:bg-gray-800 text-white"
-            size="lg"
-          >
-            <Icon name="Apple" className="mr-2 h-5 w-5" />
-            Войти через Apple
           </Button>
 
           <Button
