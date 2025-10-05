@@ -3,10 +3,8 @@ import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
 import Benefits from "@/components/Benefits";
-import PayoutForm from "@/components/PayoutForm";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import Icon from "@/components/ui/icon";
 import WelcomeBanner from "@/components/WelcomeBanner";
 
 const Index = () => {
@@ -27,23 +25,7 @@ const Index = () => {
       </div>
       <CourierTypes />
       <Benefits />
-      
       <FAQ />
-      
-      {/* Секция с формой выплаты */}
-      <section data-payout-form className="py-20 bg-gradient-to-br from-green-50 to-green-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-2">
-              <Icon name="PartyPopper" size={48} className="text-yellow-500" />
-              <span>Получи 3000 рублей за 30 заказов!</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Выполни свои первые 30 заказов и заполни форму!</p>
-          </div>
-          <PayoutForm />
-        </div>
-      </section>
-      
       <Footer />
     </div>
   );
