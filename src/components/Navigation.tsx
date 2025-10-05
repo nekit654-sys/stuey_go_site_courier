@@ -35,7 +35,7 @@ const Navigation = () => {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex items-center gap-4 py-4">
-          <Link to="/" className="flex items-center space-x-3 mr-2">
+          <Link to="/" className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-white rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
@@ -47,7 +47,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop menu */}
-          <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
+          <div className="hidden md:flex items-center gap-3 ml-6">
             {menuItems.map((item) => (
               <Link key={item.path} to={item.path}>
                 <Button
