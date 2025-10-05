@@ -346,19 +346,19 @@ const Career = () => {
           </div>
 
           {/* Блок 5: CTA */}
-          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center border-4 border-black" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
+          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center border-4 border-black shadow-[6px_6px_0_0_rgba(0,0,0,0.9)]">
+            <h2 className="text-2xl md:text-3xl font-black text-black mb-3 md:mb-4 drop-shadow-[2px_2px_0_rgba(255,255,255,0.5)]">
               Готовы начать?
             </h2>
-            <p className="text-green-50 text-base md:text-lg mb-4 md:mb-6 px-2">
+            <p className="text-black text-base md:text-lg mb-4 md:mb-6 px-2 font-bold">
               Весь процесс займет менее часа. Начните зарабатывать уже сегодня!
             </p>
             <Button
               onClick={handleStart}
               onMouseEnter={() => playSound("hover")}
-              className="bg-white hover:bg-gray-100 text-green-600 font-bold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full md:w-auto"
+              className="bg-white text-black font-extrabold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 w-full md:w-auto rounded-xl"
             >
-              <Icon name="Rocket" size={20} className="mr-2 md:w-5 md:h-5" />
+              <Icon name="Rocket" size={20} className="mr-2" />
               Подать заявку сейчас
             </Button>
           </div>
