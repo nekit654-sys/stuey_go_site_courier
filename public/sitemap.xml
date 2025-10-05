@@ -4,39 +4,23 @@
   <!-- Главная страница -->
   <url>
     <loc>https://stuey-go.ru/</loc>
-    <lastmod>2025-10-05</lastmod>
+    <lastmod>2025-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
-  <!-- Вакансии -->
+  <!-- Карьера и доход -->
   <url>
-    <loc>https://stuey-go.ru/vacancies</loc>
-    <lastmod>2025-10-05</lastmod>
+    <loc>https://stuey-go.ru/career</loc>
+    <lastmod>2025-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
-  <!-- Устройство на работу -->
-  <url>
-    <loc>https://stuey-go.ru/hiring</loc>
-    <lastmod>2025-10-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Корпоративная культура -->
-  <url>
-    <loc>https://stuey-go.ru/culture</loc>
-    <lastmod>2025-10-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- Отзывы сотрудников -->
+  <!-- Отзывы курьеров -->
   <url>
     <loc>https://stuey-go.ru/reviews</loc>
-    <lastmod>2025-10-05</lastmod>
+    <lastmod>2025-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -44,9 +28,9 @@
   <!-- Контакты -->
   <url>
     <loc>https://stuey-go.ru/contacts</loc>
-    <lastmod>2025-10-05</lastmod>
+    <lastmod>2025-10-06</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   
 </urlset>

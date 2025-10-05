@@ -9,8 +9,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import FeedbackTab from "@/components/FeedbackTab";
 
 import Index from "./pages/Index";
-import Hiring from "./pages/Hiring";
-import Culture from "./pages/Culture";
+import Career from "./pages/Career";
 import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
@@ -52,8 +51,7 @@ const App = () => {
             <YandexMetrika />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/hiring" element={<Hiring />} />
-              <Route path="/culture" element={<Culture />} />
+              <Route path="/career" element={<Career />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/contacts" element={<Contacts />} />
 
