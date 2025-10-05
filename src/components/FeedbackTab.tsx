@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +11,7 @@ interface FormData {
 }
 
 const FeedbackTab: React.FC = () => {
+  const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,6 +40,9 @@ const FeedbackTab: React.FC = () => {
         behavior: 'smooth',
         block: 'center'
       });
+    } else {
+      // Если формы нет на странице, открываем модалку
+      setIsModalOpen(true);
     }
   };
 
@@ -109,6 +114,11 @@ const FeedbackTab: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Скрываем на странице админки
+  if (location.pathname === '/dashboard' || location.pathname === '/login' || location.pathname === '/auth') {
+    return null;
+  }
 
   return (
     <>
