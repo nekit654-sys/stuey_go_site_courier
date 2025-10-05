@@ -334,8 +334,9 @@
     gap: clamp(0.3rem, 1vw, 0.5rem);
     padding: 0 clamp(1rem, 3vw, 2rem);
     font-size: clamp(0.85rem, 2.5vw, 1rem);
-    font-weight: 600;
-    color: #FFD700;
+    font-weight: 900;
+    color: #000;
+    text-shadow: 1px 1px 0 rgba(255, 215, 0, 0.3);
   }
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
@@ -359,7 +360,8 @@
     padding: clamp(0.75rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
     border-radius: clamp(8px, 0.8rem, 12px);
     border: 3px solid #000;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
     box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.5);
   }
   #menuLogo .text {
