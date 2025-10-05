@@ -168,6 +168,15 @@ export default function Auth() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
+            onClick={handleYandexAuth}
+            className="w-full bg-[#FFCC00] hover:bg-[#FFD633] text-black font-semibold"
+            size="lg"
+          >
+            <Icon name="Circle" className="mr-2 h-5 w-5" />
+            Войти через Яндекс
+          </Button>
+
+          <Button
             onClick={handleVKAuth}
             className="w-full bg-[#0077FF] hover:bg-[#0066DD] text-white"
             size="lg"
@@ -183,15 +192,6 @@ export default function Auth() {
           >
             <Icon name="Mail" className="mr-2 h-5 w-5" />
             Войти через Google
-          </Button>
-
-          <Button
-            onClick={handleYandexAuth}
-            className="w-full bg-[#FFCC00] hover:bg-[#FFD633] text-black font-semibold"
-            size="lg"
-          >
-            <Icon name="Circle" className="mr-2 h-5 w-5" />
-            Войти через Яндекс
           </Button>
 
           <div className="text-center">
