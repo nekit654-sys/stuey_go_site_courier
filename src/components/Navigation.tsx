@@ -29,17 +29,17 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 border-b-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,0.3)] fixed top-0 left-0 right-0 z-50">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
+    <nav className="bg-yellow-400 border-b-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,0.3)] fixed top-0 left-0 right-0 z-50">
+      <div className="absolute inset-0 bg-yellow-400"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="w-12 h-12 bg-white rounded-xl border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all duration-150 flex items-center justify-center">
+            <div className="w-10 h-10 bg-white rounded-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
                 alt="Stuey Go Logo" 
-                className="w-10 h-10 rounded object-cover"
+                className="w-8 h-8 rounded object-cover"
               />
             </div>
             <span className="text-black font-rubik whitespace-nowrap text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)]">Stuey.Go | Яндекс Еда</span>
