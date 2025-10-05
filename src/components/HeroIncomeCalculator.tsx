@@ -69,22 +69,22 @@ const HeroIncomeCalculator = () => {
               }}
               onMouseEnter={() => playSound('hover')}
               className={`
-                backdrop-blur-sm border-3 rounded-xl p-2 sm:p-4 text-center transition-all duration-150
+                border-3 border-black rounded-xl p-2 sm:p-4 text-center transition-all duration-150
                 ${isActive 
-                  ? 'bg-yellow-400/30 border-yellow-400 shadow-[0_4px_0_0_rgba(251,191,36,0.5)]' 
-                  : 'bg-white/5 border-white/30 hover:bg-white/10 shadow-[0_2px_0_0_rgba(255,255,255,0.2)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.2)] hover:translate-y-[1px]'
+                  ? 'bg-yellow-400 shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
+                  : 'bg-white shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none'
                 }
               `}
             >
               <Icon 
                 name={config.icon as any} 
                 size={20} 
-                className={`${isActive ? 'text-yellow-400' : 'text-gray-300'} mx-auto mb-1 sm:mb-2 sm:w-7 sm:h-7`} 
+                className={`${isActive ? 'text-black' : 'text-black'} mx-auto mb-1 sm:mb-2 sm:w-7 sm:h-7`} 
               />
-              <div className={`text-xs sm:text-sm font-medium ${isActive ? 'text-white' : 'text-gray-300'} leading-tight px-1 break-words text-center`}>
+              <div className={`text-xs sm:text-sm font-extrabold ${isActive ? 'text-black' : 'text-black'} leading-tight px-1 break-words text-center`}>
                 {config.label}
               </div>
-              <div className="text-[10px] sm:text-xs text-yellow-400 font-semibold mt-0.5 sm:mt-1 leading-tight">
+              <div className={`text-[10px] sm:text-xs font-extrabold mt-0.5 sm:mt-1 leading-tight ${isActive ? 'text-black' : 'text-gray-700'}`}>
                 до {(config.maxIncome / 1000).toFixed(0)}к ₽
               </div>
             </button>
@@ -93,18 +93,18 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Результат */}
-      <div className="backdrop-blur-sm bg-gradient-to-br from-yellow-400/30 to-yellow-500/30 border-3 border-yellow-400 rounded-2xl p-8 mb-8 text-center shadow-[0_6px_0_0_rgba(251,191,36,0.5)]">
-        <div className="text-sm sm:text-base text-white mb-2 font-medium">Ваш доход составит:</div>
-        <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-yellow-400 mb-3 drop-shadow-[0_2px_10px_rgba(250,204,21,0.5)]">
+      <div className="bg-yellow-400 border-3 border-black rounded-2xl p-6 sm:p-8 mb-8 text-center shadow-[0_6px_0_0_rgba(0,0,0,1)]">
+        <div className="text-sm sm:text-base text-black mb-2 font-extrabold">Ваш доход составит:</div>
+        <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-black mb-3 drop-shadow-[2px_2px_0_rgba(255,255,255,0.3)]">
           {income.toLocaleString('ru-RU')}&nbsp;₽
         </div>
-        <div className="text-gray-100 text-base sm:text-lg">в месяц при выбранном графике</div>
+        <div className="text-black text-base sm:text-lg font-bold">в месяц при выбранном графике</div>
       </div>
 
       {/* Чекбокс бонуса за друга */}
       <div className="mb-8">
         <label 
-          className="flex items-center gap-3 cursor-pointer bg-white/5 border-2 border-yellow-400/30 rounded-xl p-4 hover:bg-white/10 hover:border-yellow-400 transition-all duration-150 group shadow-[0_2px_0_0_rgba(255,255,255,0.1)]"
+          className="flex items-center gap-3 cursor-pointer bg-white border-3 border-black rounded-xl p-4 hover:bg-yellow-100 transition-all duration-150 group shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
           onMouseEnter={() => playSound('hover')}
         >
           <div className="relative flex items-center justify-center">
@@ -118,10 +118,10 @@ const HeroIncomeCalculator = () => {
               className="sr-only peer"
             />
             <div className={`
-              w-6 h-6 rounded-lg border-2 transition-all duration-200 flex items-center justify-center
+              w-6 h-6 rounded-lg border-3 border-black transition-all duration-200 flex items-center justify-center
               ${referralBonus 
-                ? 'bg-yellow-400 border-yellow-400' 
-                : 'bg-white/10 border-yellow-400/50 group-hover:border-yellow-400'
+                ? 'bg-yellow-400' 
+                : 'bg-white'
               }
             `}>
               {referralBonus && (
@@ -130,9 +130,9 @@ const HeroIncomeCalculator = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Icon name="UserPlus" size={20} className="text-yellow-400" />
-            <span className="text-white font-medium">Приведи друга</span>
-            <span className="text-yellow-400 font-bold">+18 000 ₽</span>
+            <Icon name="UserPlus" size={20} className="text-black" />
+            <span className="text-black font-extrabold">Приведи друга</span>
+            <span className="text-black font-extrabold">+18 000 ₽</span>
           </div>
         </label>
       </div>
@@ -141,11 +141,11 @@ const HeroIncomeCalculator = () => {
         {/* Ползунок дней */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="text-white font-medium flex items-center gap-2">
+            <label className="text-white font-extrabold flex items-center gap-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
               <Icon name="Calendar" size={20} className="text-yellow-400" />
               Рабочих дней
             </label>
-            <span className="bg-yellow-400/20 border border-yellow-400/40 px-4 py-2 rounded-full text-yellow-400 font-bold">
+            <span className="bg-yellow-400 border-3 border-black px-4 py-2 rounded-xl text-black font-extrabold shadow-[0_3px_0_0_rgba(0,0,0,1)]">
               {days} дн.
             </span>
           </div>
@@ -158,12 +158,12 @@ const HeroIncomeCalculator = () => {
               onChange={(e) => {
                 setDays(Number(e.target.value));
               }}
-              className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+              className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider border-2 border-black"
               style={{
                 background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${((days - 5) / (31 - 5)) * 100}%, rgba(255,255,255,0.2) ${((days - 5) / (31 - 5)) * 100}%, rgba(255,255,255,0.2) 100%)`
               }}
             />
-            <div className="flex justify-between text-sm text-gray-300 mt-2">
+            <div className="flex justify-between text-sm text-white font-extrabold mt-3 drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
               <span>5 дней</span>
               <span>31 день</span>
             </div>
@@ -173,11 +173,11 @@ const HeroIncomeCalculator = () => {
         {/* Ползунок часов */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="text-white font-medium flex items-center gap-2">
+            <label className="text-white font-extrabold flex items-center gap-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
               <Icon name="Clock" size={20} className="text-yellow-400" />
               Часов в день
             </label>
-            <span className="bg-yellow-400/20 border border-yellow-400/40 px-4 py-2 rounded-full text-yellow-400 font-bold">
+            <span className="bg-yellow-400 border-3 border-black px-4 py-2 rounded-xl text-black font-extrabold shadow-[0_3px_0_0_rgba(0,0,0,1)]">
               {hours} ч.
             </span>
           </div>
@@ -190,12 +190,12 @@ const HeroIncomeCalculator = () => {
               onChange={(e) => {
                 setHours(Number(e.target.value));
               }}
-              className="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+              className="w-full h-4 bg-white/20 rounded-lg appearance-none cursor-pointer slider border-2 border-black"
               style={{
                 background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${((hours - 2) / (12 - 2)) * 100}%, rgba(255,255,255,0.2) ${((hours - 2) / (12 - 2)) * 100}%, rgba(255,255,255,0.2) 100%)`
               }}
             />
-            <div className="flex justify-between text-sm text-gray-300 mt-2">
+            <div className="flex justify-between text-sm text-white font-extrabold mt-3 drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
               <span>2 часа</span>
               <span>12 часов</span>
             </div>
@@ -221,7 +221,7 @@ const HeroIncomeCalculator = () => {
       </div>
 
       {/* Сноска о зависимости дохода */}
-      <p className="text-xs md:text-sm text-gray-300 mt-4 text-center italic">
+      <p className="text-xs md:text-sm text-white font-bold mt-4 text-center drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
         * Доход зависит от количества отработанных часов и региона работы
       </p>
 
@@ -237,35 +237,45 @@ const HeroIncomeCalculator = () => {
         
         .slider::-webkit-slider-thumb {
           appearance: none;
-          height: 24px;
-          width: 24px;
+          height: 28px;
+          width: 28px;
           border-radius: 50%;
           background: #fbbf24;
-          border: 3px solid #fff;
-          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+          border: 4px solid #000;
+          box-shadow: 0 4px 0 0 rgba(0, 0, 0, 1);
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
         }
         
         .slider::-webkit-slider-thumb:hover {
-          transform: scale(1.15);
-          box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 0 0 rgba(0, 0, 0, 1);
+        }
+        
+        .slider::-webkit-slider-thumb:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 0 rgba(0, 0, 0, 1);
         }
         
         .slider::-moz-range-thumb {
-          height: 24px;
-          width: 24px;
+          height: 28px;
+          width: 28px;
           border-radius: 50%;
           background: #fbbf24;
-          border: 3px solid #fff;
-          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+          border: 4px solid #000;
+          box-shadow: 0 4px 0 0 rgba(0, 0, 0, 1);
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
         }
         
         .slider::-moz-range-thumb:hover {
-          transform: scale(1.15);
-          box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 0 0 rgba(0, 0, 0, 1);
+        }
+        
+        .slider::-moz-range-thumb:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 0 rgba(0, 0, 0, 1);
         }
       `}</style>
     </div>
