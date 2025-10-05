@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Test verify token - no token",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "verify"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Token required"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test VK auth - no code",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "vk"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Code required"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

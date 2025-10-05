@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Test unauthorized access",
+      "method": "GET",
+      "path": "/?action=stats",
+      "expectedStatus": 401,
+      "expectedBody": {
+        "error": "Unauthorized"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test invalid action",
+      "method": "GET",
+      "path": "/?action=invalid",
+      "headers": {
+        "X-User-Id": "1"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Invalid action"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

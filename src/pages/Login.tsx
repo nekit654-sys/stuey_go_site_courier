@@ -10,6 +10,8 @@ import ControlPanel from '@/components/admin/ControlPanel';
 import SecurityTab from '@/components/admin/SecurityTab';
 import AdminsTab from '@/components/admin/AdminsTab';
 import IncomeTab from '@/components/admin/IncomeTab';
+import ReferralsTab from '@/components/admin/ReferralsTab';
+import StatsTab from '@/components/admin/StatsTab';
 
 interface AdminRequest {
   id: number;
@@ -38,6 +40,12 @@ const Login: React.FC = () => {
   const [admins, setAdmins] = useState<Array<{id: number, username: string, created_at: string}>>([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [referralStats, setReferralStats] = useState<{
+    overall_stats: any;
+    all_referrals: any[];
+    top_referrers: any[];
+  } | null>(null);
+  const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,6 +155,9 @@ const Login: React.FC = () => {
   React.useEffect(() => {
     if (isAuthenticated && (activeTab === 'admins' || activeTab === 'income')) {
       loadAdmins();
+    }
+    if (isAuthenticated && (activeTab === 'referrals' || activeTab === 'stats')) {
+      loadReferralStats();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -346,6 +357,36 @@ const Login: React.FC = () => {
     }
   };
 
+  const loadReferralStats = async () => {
+    setIsLoadingReferrals(true);
+    try {
+      const response = await fetch('https://functions.poehali.dev/31e22995-f5a1-4fe8-a32b-d4027ca5f719?action=admin_stats', {
+        headers: {
+          'X-Auth-Token': authToken
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReferralStats(data);
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось загрузить статистику рефералов',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки статистики рефералов:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось подключиться к серверу',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingReferrals(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <LoginForm
@@ -378,7 +419,7 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
@@ -390,6 +431,14 @@ const Login: React.FC = () => {
             <TabsTrigger value="admins" className="flex items-center gap-2">
               <Icon name="Users" size={16} />
               Администраторы
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center gap-2">
+              <Icon name="UserPlus" size={16} />
+              Рефералы
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="flex items-center gap-2">
+              <Icon name="BarChart" size={16} />
+              Статистика
             </TabsTrigger>
           </TabsList>
 
@@ -430,6 +479,23 @@ const Login: React.FC = () => {
               passwordForm={passwordForm}
               onPasswordFormChange={setPasswordForm}
               onChangePassword={changePassword}
+            />
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-6">
+            <ReferralsTab
+              referrals={referralStats?.all_referrals || []}
+              isLoading={isLoadingReferrals}
+              onRefresh={loadReferralStats}
+            />
+          </TabsContent>
+
+          <TabsContent value="stats" className="space-y-6">
+            <StatsTab
+              overallStats={referralStats?.overall_stats || null}
+              topReferrers={referralStats?.top_referrers || []}
+              isLoading={isLoadingReferrals}
+              onRefresh={loadReferralStats}
             />
           </TabsContent>
         </Tabs>

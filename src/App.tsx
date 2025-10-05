@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FeedbackTab from "@/components/FeedbackTab";
 
@@ -13,6 +14,8 @@ import Culture from "./pages/Culture";
 import Reviews from "./pages/Reviews";
 import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,25 +45,29 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <YandexMetrika />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/hiring" element={<Hiring />} />
-            <Route path="/culture" element={<Culture />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/contacts" element={<Contacts />} />
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <YandexMetrika />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/hiring" element={<Hiring />} />
+              <Route path="/culture" element={<Culture />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/contacts" element={<Contacts />} />
 
-            <Route path="/login" element={<Login />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
 
-          <WhatsAppButton />
-          <FeedbackTab />
-        </BrowserRouter>
+            <WhatsAppButton />
+            <FeedbackTab />
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
