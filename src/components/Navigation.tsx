@@ -48,14 +48,14 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop menu */}
-          <div className="hidden md:flex flex-1 justify-evenly items-center ml-8">
+          <div className="hidden md:flex items-center gap-2 flex-1 ml-8">
             {menuItems.map((item) => (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={item.path} className="flex-1">
                 <Button
                   variant="ghost"
                   onMouseEnter={() => playSound('hover')}
                   className={`
-                    flex items-center gap-2 font-extrabold transition-all duration-150 px-5 py-2.5 rounded-xl border-3 border-black relative
+                    w-full flex items-center justify-center gap-2 font-extrabold transition-all duration-150 px-3 py-2.5 rounded-xl border-3 border-black relative
                     ${
                       location.pathname === item.path
                         ? "bg-white text-black shadow-[0_5px_0_0_rgba(0,0,0,1)] translate-y-0"
@@ -68,65 +68,65 @@ const Navigation = () => {
                     size={16}
                     className="text-black"
                   />
-                  {item.label}
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Button>
               </Link>
             ))}
-          </div>
-
-
-          
-          {/* Login/Profile Button */}
-          <div className="hidden md:block ml-2">
-            <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+            
+            {/* Game Button */}
+            <div className="flex-1">
               <Button
+                onClick={() => {
+                  playSound('whoosh');
+                  const newGameState = !isGameOpen;
+                  setIsGameOpen(newGameState);
+                  
+                  if (newGameState) {
+                    setIsGameLoading(true);
+                    document.body.style.overflow = 'hidden';
+                    document.body.classList.add('game-modal-open');
+                  } else {
+                    setIsGameLoading(false);
+                    document.body.style.overflow = '';
+                    document.body.classList.remove('game-modal-open');
+                  }
+                }}
                 onMouseEnter={() => playSound('hover')}
                 className="
-                  bg-gradient-to-b from-blue-400 to-blue-500
-                  text-white font-extrabold px-5 py-2.5 rounded-xl
+                  w-full bg-gradient-to-b from-green-400 to-green-500
+                  text-black font-extrabold px-3 py-2.5 rounded-xl
                   shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
                   hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
                   transition-all duration-150
                   border-3 border-black
+                  flex items-center justify-center gap-2
                 "
               >
-                <Icon name="User" size={16} className="mr-2" />
-                {isAuthenticated ? 'Кабинет' : 'Войти'}
+                <Icon name="Gamepad2" size={16} />
+                <span className="hidden lg:inline">Игра</span>
               </Button>
-            </Link>
-          </div>
-          
-          {/* Game Button */}
-          <div className="hidden md:block ml-2">
-            <Button
-              onClick={() => {
-                playSound('whoosh');
-                const newGameState = !isGameOpen;
-                setIsGameOpen(newGameState);
-                
-                if (newGameState) {
-                  setIsGameLoading(true);
-                  document.body.style.overflow = 'hidden';
-                  document.body.classList.add('game-modal-open');
-                } else {
-                  setIsGameLoading(false);
-                  document.body.style.overflow = '';
-                  document.body.classList.remove('game-modal-open');
-                }
-              }}
-              onMouseEnter={() => playSound('hover')}
-              className="
-                bg-gradient-to-b from-green-400 to-green-500
-                text-black font-extrabold px-5 py-2.5 rounded-xl
-                shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
-                hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
-                transition-all duration-150
-                border-3 border-black
-              "
-            >
-              <Icon name="Gamepad2" size={16} className="mr-2" />
-              Игра
-            </Button>
+            </div>
+            
+            {/* Login/Profile Button */}
+            <div className="flex-1">
+              <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+                <Button
+                  onMouseEnter={() => playSound('hover')}
+                  className="
+                    w-full bg-gradient-to-b from-blue-400 to-blue-500
+                    text-white font-extrabold px-3 py-2.5 rounded-xl
+                    shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                    hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                    transition-all duration-150
+                    border-3 border-black
+                    flex items-center justify-center gap-2
+                  "
+                >
+                  <Icon name="User" size={16} />
+                  <span className="hidden lg:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -188,23 +188,6 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Login/Profile Button */}
-            <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>
-              <Button
-                onMouseEnter={() => playSound('hover')}
-                className="
-                  w-full justify-start bg-gradient-to-b from-blue-400 to-blue-500
-                  text-white font-extrabold transition-all duration-150
-                  shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
-                  py-6 text-base rounded-xl border-3 border-black
-                  hover:from-blue-500 hover:to-blue-600
-                "
-              >
-                <Icon name="User" size={20} className="mr-3 text-white" />
-                {isAuthenticated ? 'Личный кабинет' : 'Войти'}
-              </Button>
-            </Link>
-
             {/* Mobile Game Button */}
             <Button
               onClick={() => {
@@ -235,6 +218,23 @@ const Navigation = () => {
               <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
               Игра
             </Button>
+            
+            {/* Mobile Login/Profile Button */}
+            <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>
+              <Button
+                onMouseEnter={() => playSound('hover')}
+                className="
+                  w-full justify-start bg-gradient-to-b from-blue-400 to-blue-500
+                  text-white font-extrabold transition-all duration-150
+                  shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                  py-6 text-base rounded-xl border-3 border-black
+                  hover:from-blue-500 hover:to-blue-600
+                "
+              >
+                <Icon name="User" size={20} className="mr-3 text-white" />
+                {isAuthenticated ? 'Личный кабинет' : 'Войти'}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
