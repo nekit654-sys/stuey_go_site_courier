@@ -34,28 +34,28 @@ const Navigation = () => {
     <nav className="bg-yellow-400 border-b-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,0.3)] fixed top-0 left-0 right-0 z-50">
       <div className="absolute inset-0 bg-yellow-400"></div>
 
-      <div className="w-full px-4 relative z-10">
-        <div className="flex items-center gap-2 py-4">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-white rounded-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex items-center gap-4 py-4">
+          <Link to="/" className="flex items-center space-x-3 mr-2">
+            <div className="w-12 h-12 bg-white rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
                 alt="Stuey Go Logo" 
-                className="w-8 h-8 rounded object-cover"
+                className="w-9 h-9 rounded object-cover"
               />
             </div>
-            <span className="text-black font-rubik whitespace-nowrap text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)]">Stuey.Go | Яндекс Еда</span>
+            <span className="hidden lg:block text-black font-rubik whitespace-nowrap text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)]">Stuey.Go | Яндекс Еда</span>
           </Link>
 
           {/* Desktop menu */}
-          <div className="hidden md:flex items-center gap-2 flex-1">
+          <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
             {menuItems.map((item) => (
-              <Link key={item.path} to={item.path} className="flex-1">
+              <Link key={item.path} to={item.path}>
                 <Button
                   variant="ghost"
                   onMouseEnter={() => playSound('hover')}
                   className={`
-                    w-full flex items-center justify-center gap-2 font-extrabold transition-all duration-150 px-3 py-2.5 rounded-xl border-3 border-black relative
+                    flex items-center justify-center gap-2 font-extrabold transition-all duration-150 px-5 py-2.5 rounded-xl border-3 border-black whitespace-nowrap
                     ${
                       location.pathname === item.path
                         ? "bg-white text-black shadow-[0_5px_0_0_rgba(0,0,0,1)] translate-y-0"
@@ -65,68 +65,64 @@ const Navigation = () => {
                 >
                   <Icon
                     name={item.icon as any}
-                    size={16}
+                    size={18}
                     className="text-black"
                   />
-                  <span className="hidden lg:inline">{item.label}</span>
+                  <span className="hidden xl:inline">{item.label}</span>
                 </Button>
               </Link>
             ))}
             
             {/* Game Button */}
-            <div className="flex-1">
+            <Button
+              onClick={() => {
+                playSound('whoosh');
+                const newGameState = !isGameOpen;
+                setIsGameOpen(newGameState);
+                
+                if (newGameState) {
+                  setIsGameLoading(true);
+                  document.body.style.overflow = 'hidden';
+                  document.body.classList.add('game-modal-open');
+                } else {
+                  setIsGameLoading(false);
+                  document.body.style.overflow = '';
+                  document.body.classList.remove('game-modal-open');
+                }
+              }}
+              onMouseEnter={() => playSound('hover')}
+              className="
+                bg-gradient-to-b from-green-400 to-green-500
+                text-black font-extrabold px-5 py-2.5 rounded-xl
+                shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                transition-all duration-150
+                border-3 border-black
+                flex items-center justify-center gap-2 whitespace-nowrap
+              "
+            >
+              <Icon name="Gamepad2" size={18} />
+              <span className="hidden xl:inline">Игра</span>
+            </Button>
+            
+            {/* Login/Profile Button */}
+            <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
               <Button
-                onClick={() => {
-                  playSound('whoosh');
-                  const newGameState = !isGameOpen;
-                  setIsGameOpen(newGameState);
-                  
-                  if (newGameState) {
-                    setIsGameLoading(true);
-                    document.body.style.overflow = 'hidden';
-                    document.body.classList.add('game-modal-open');
-                  } else {
-                    setIsGameLoading(false);
-                    document.body.style.overflow = '';
-                    document.body.classList.remove('game-modal-open');
-                  }
-                }}
                 onMouseEnter={() => playSound('hover')}
                 className="
-                  w-full bg-gradient-to-b from-green-400 to-green-500
-                  text-black font-extrabold px-3 py-2.5 rounded-xl
+                  bg-gradient-to-b from-blue-400 to-blue-500
+                  text-white font-extrabold px-5 py-2.5 rounded-xl
                   shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
                   hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
                   transition-all duration-150
                   border-3 border-black
-                  flex items-center justify-center gap-2
+                  flex items-center justify-center gap-2 whitespace-nowrap
                 "
               >
-                <Icon name="Gamepad2" size={16} />
-                <span className="hidden lg:inline">Игра</span>
+                <Icon name="User" size={18} />
+                <span className="hidden xl:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
               </Button>
-            </div>
-            
-            {/* Login/Profile Button */}
-            <div className="flex-1">
-              <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                <Button
-                  onMouseEnter={() => playSound('hover')}
-                  className="
-                    w-full bg-gradient-to-b from-blue-400 to-blue-500
-                    text-white font-extrabold px-3 py-2.5 rounded-xl
-                    shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
-                    hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
-                    transition-all duration-150
-                    border-3 border-black
-                    flex items-center justify-center gap-2
-                  "
-                >
-                  <Icon name="User" size={16} />
-                  <span className="hidden lg:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
-                </Button>
-              </Link>
-            </div>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
