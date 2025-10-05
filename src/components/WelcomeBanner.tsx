@@ -199,10 +199,11 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                   <img
                     src="https://cdn.poehali.dev/files/047dd184-97dc-4d08-8be6-0b6782b11d60.jpg"
                     alt="3000₽"
-                    className="object-contain shadow-lg rounded-sm"
+                    className="object-contain rounded-sm border-2 border-black"
                     style={{
                       width: `${coin.size * 3}px`,
                       height: `${coin.size * 1.5}px`,
+                      boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.8)',
                     }}
                   />
                 </div>
