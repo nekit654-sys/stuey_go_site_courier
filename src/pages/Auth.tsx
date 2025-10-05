@@ -100,7 +100,7 @@ export default function Auth() {
   };
 
   const handleYandexAuth = () => {
-    const yandexClientId = 'YOUR_YANDEX_CLIENT_ID';
+    const yandexClientId = '97aff4efd9cd4403854397576fed94d5';
     const redirectUri = `${window.location.origin}/auth`;
     const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandexClientId}&redirect_uri=${redirectUri}&state=provider=yandex`;
     
