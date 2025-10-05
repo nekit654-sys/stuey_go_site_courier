@@ -10,7 +10,20 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from typing import Dict, Any
+from decimal import Decimal
 import jwt
+
+
+def convert_decimals(obj: Any) -> Any:
+    """Конвертирует Decimal в float для JSON сериализации"""
+    if isinstance(obj, dict):
+        return {key: convert_decimals(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_decimals(item) for item in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    return obj
+
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
@@ -131,23 +144,25 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     cur.close()
     conn.close()
     
+    stats_data = {
+        'success': True,
+        'referral_code': user_data['referral_code'],
+        'stats': {
+            'total_referrals': total_referrals,
+            'active_referrals': active_referrals,
+            'total_bonus_earned': total_bonus_earned,
+            'total_bonus_paid': total_bonus_paid,
+            'pending_bonus': total_bonus_earned - total_bonus_paid,
+            'referral_earnings': user_data['referral_earnings'],
+            'total_orders': user_data['total_orders'],
+            'total_earnings': user_data['total_earnings']
+        }
+    }
+    
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
-            'success': True,
-            'referral_code': user_data['referral_code'],
-            'stats': {
-                'total_referrals': total_referrals,
-                'active_referrals': active_referrals,
-                'total_bonus_earned': total_bonus_earned,
-                'total_bonus_paid': total_bonus_paid,
-                'pending_bonus': total_bonus_earned - total_bonus_paid,
-                'referral_earnings': float(user_data['referral_earnings']),
-                'total_orders': user_data['total_orders'],
-                'total_earnings': float(user_data['total_earnings'])
-            }
-        }, default=str),
+        'body': json.dumps(convert_decimals(stats_data)),
         'isBase64Encoded': False
     }
 
@@ -187,10 +202,10 @@ def get_user_referrals_list(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
+        'body': json.dumps(convert_decimals({
             'success': True,
             'referrals': referrals_list
-        }, default=str),
+        })),
         'isBase64Encoded': False
     }
 
@@ -264,12 +279,12 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
+        'body': json.dumps(convert_decimals({
             'success': True,
             'overall_stats': dict(overall_stats),
             'all_referrals': [dict(r) for r in all_referrals],
             'top_referrers': [dict(r) for r in top_referrers]
-        }, default=str),
+        })),
         'isBase64Encoded': False
     }
 
