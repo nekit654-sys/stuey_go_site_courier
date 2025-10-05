@@ -215,7 +215,10 @@ const PayoutForm = () => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">ФИО *</Label>
+            <Label htmlFor="fullName" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+              <Icon name="User" size={18} className="text-yellow-400" />
+              ФИО *
+            </Label>
             <Input
               id="fullName"
               name="fullName"
@@ -223,12 +226,16 @@ const PayoutForm = () => {
               placeholder="Иванов Иван Иванович"
               value={formData.fullName}
               onChange={handleInputChange}
+              className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="city">Город *</Label>
+            <Label htmlFor="city" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+              <Icon name="MapPin" size={18} className="text-yellow-400" />
+              Город *
+            </Label>
             <Input
               id="city"
               name="city"
@@ -236,12 +243,16 @@ const PayoutForm = () => {
               placeholder="Москва"
               value={formData.city}
               onChange={handleInputChange}
+              className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Номер телефона *</Label>
+            <Label htmlFor="phone" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+              <Icon name="Phone" size={18} className="text-yellow-400" />
+              Номер телефона *
+            </Label>
             <Input
               id="phone"
               name="phone"
@@ -249,13 +260,17 @@ const PayoutForm = () => {
               placeholder="+7 (999) 123-45-67"
               value={formData.phone || '+7'}
               onChange={handleInputChange}
+              className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="screenshot">Скриншот подтверждения *</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+            <Label htmlFor="screenshot" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+              <Icon name="Image" size={18} className="text-yellow-400" />
+              Скриншот подтверждения *
+            </Label>
+            <div className="border-3 border-black border-dashed rounded-xl p-6 text-center shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all duration-150 bg-yellow-50">
               <input
                 id="screenshot"
                 type="file"
@@ -281,11 +296,11 @@ const PayoutForm = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Icon name="Upload" className="w-8 h-8 mx-auto text-gray-400" />
-                    <p className="text-sm text-gray-600">
+                    <Icon name="Upload" className="w-12 h-12 mx-auto text-yellow-400" />
+                    <p className="text-base font-bold text-gray-800">
                       Нажмите для загрузки скриншота
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-600 font-medium">
                       Поддерживаются: JPG, PNG, GIF (до 5MB)
                     </p>
                   </div>
@@ -312,7 +327,7 @@ const PayoutForm = () => {
             )}
           </Button>
 
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-sm text-gray-600 text-center font-bold">
             * Все поля обязательны для заполнения
           </div>
         </form>
