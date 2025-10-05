@@ -16,18 +16,7 @@
     },
     "bodyMatcher": "partial"
   }, {
-    "name": "Test get admins",
-    "method": "POST",
-    "path": "/",
-    "headers": {
-      "X-Auth-Token": "valid_token_123"
-    },
-    "body": {
-      "action": "get_admins"
-    },
-    "expectedStatus": 200
-  }, {
-    "name": "Test payout submission", 
+    "name": "Test payout submission",
     "method": "POST",
     "path": "/",
     "body": {

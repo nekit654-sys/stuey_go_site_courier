@@ -1,17 +1,52 @@
 import json
 import os
 import psycopg2
+import bcrypt
+import jwt
 import hashlib
+from datetime import datetime, timedelta
 from typing import Dict, Any
+
+JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_HOURS = 24
+
+login_attempts = {}
+
+def verify_token(token: str) -> Dict[str, Any]:
+    """Проверка JWT токена"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return {'valid': True, 'user_id': payload.get('user_id'), 'username': payload.get('username')}
+    except jwt.ExpiredSignatureError:
+        return {'valid': False, 'error': 'Токен истёк'}
+    except jwt.InvalidTokenError:
+        return {'valid': False, 'error': 'Неверный токен'}
+
+def check_rate_limit(username: str) -> bool:
+    """Проверка rate limiting - максимум 5 попыток за 15 минут"""
+    now = datetime.now()
+    if username in login_attempts:
+        attempts = login_attempts[username]
+        attempts = [t for t in attempts if (now - t).seconds < 900]
+        login_attempts[username] = attempts
+        if len(attempts) >= 5:
+            return False
+    return True
+
+def record_login_attempt(username: str):
+    """Запись попытки входа"""
+    if username not in login_attempts:
+        login_attempts[username] = []
+    login_attempts[username].append(datetime.now())
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
-    Business: Авторизация админа и управление заявками на выплаты
-    Args: event с httpMethod, body
-    Returns: HTTP response
+    Business: Авторизация админа и управление заявками на выплаты с улучшенной безопасностью
+    Args: event с httpMethod, body, headers
+    Returns: HTTP response с JWT токенами и bcrypt хешами
     """
     
-    # CORS
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -49,22 +84,58 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            # Проверяем пользователя в базе данных
+            if not check_rate_limit(username):
+                return {
+                    'statusCode': 429,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'message': 'Слишком много попыток входа. Попробуйте через 15 минут'
+                    }),
+                    'isBase64Encoded': False
+                }
+            
+            record_login_attempt(username)
+            
             conn = psycopg2.connect(os.environ['DATABASE_URL'])
             cur = conn.cursor()
             
-            # Хешируем пароль MD5 для сравнения
-            password_hash = hashlib.md5(password.encode()).hexdigest()
-            
             cur.execute("""
-                SELECT id, username FROM t_p25272970_courier_button_site.admins 
-                WHERE username = %s AND password_hash = %s
-            """, (username, password_hash))
+                SELECT id, username, password_hash FROM t_p25272970_courier_button_site.admins 
+                WHERE username = %s
+            """, (username,))
             
             user = cur.fetchone()
             
+            password_valid = False
+            needs_migration = False
+            
             if user:
-                # Обновляем время последнего входа
+                password_hash = user[2]
+                
+                if password_hash.startswith('$2b$') or password_hash.startswith('$2a$'):
+                    password_valid = bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+                else:
+                    md5_hash = hashlib.md5(password.encode()).hexdigest()
+                    password_valid = (password_hash == md5_hash)
+                    needs_migration = True
+            
+            if user and password_valid:
+                if needs_migration:
+                    new_bcrypt_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.admins 
+                        SET password_hash = %s, password_hash_old = %s, updated_at = NOW() 
+                        WHERE id = %s
+                    """, (new_bcrypt_hash, password_hash, user[0]))
+                    conn.commit()
+                payload = {
+                    'user_id': user[0],
+                    'username': user[1],
+                    'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+                }
+                token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+                
                 cur.execute("""
                     UPDATE t_p25272970_courier_button_site.admins 
                     SET last_login = NOW() 
@@ -75,12 +146,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.close()
                 conn.close()
                 
+                login_attempts[username] = []
+                
                 return {
                     'statusCode': 200,
                     'headers': headers,
                     'body': json.dumps({
                         'success': True,
-                        'token': f'admin_token_{user[0]}',
+                        'token': token,
                         'username': user[1]
                     }),
                     'isBase64Encoded': False
@@ -97,21 +170,39 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         elif action == 'verify':
+            auth_token = event.get('headers', {}).get('X-Auth-Token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'valid': False}),
+                    'isBase64Encoded': False
+                }
+            
+            result = verify_token(auth_token)
             return {
-                'statusCode': 200,
+                'statusCode': 200 if result['valid'] else 401,
                 'headers': headers,
-                'body': json.dumps({'valid': True}),
+                'body': json.dumps(result),
                 'isBase64Encoded': False
             }
         
         elif action == 'change_password':
-            # Смена пароля
             auth_token = event.get('headers', {}).get('X-Auth-Token')
             if not auth_token:
                 return {
                     'statusCode': 401,
                     'headers': headers,
                     'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                     'isBase64Encoded': False
                 }
             
@@ -126,50 +217,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            try:
-                conn = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur = conn.cursor()
-                
-                # Проверяем текущий пароль
-                cur.execute("SELECT username FROM t_p25272970_courier_button_site.admins WHERE username = %s AND password_hash = %s", 
-                           ('nekit654', current_password))
-                admin = cur.fetchone()
-                
-                if not admin:
-                    cur.close()
-                    conn.close()
-                    return {
-                        'statusCode': 400,
-                        'headers': headers,
-                        'body': json.dumps({'error': 'Неверный текущий пароль'}),
-                        'isBase64Encoded': False
-                    }
-                
-                # Обновляем пароль
-                cur.execute("UPDATE t_p25272970_courier_button_site.admins SET password_hash = %s, updated_at = NOW() WHERE username = %s", 
-                           (new_password, 'nekit654'))
-                
-                conn.commit()
+            if len(new_password) < 8:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Пароль должен быть минимум 8 символов'}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("SELECT id, password_hash FROM t_p25272970_courier_button_site.admins WHERE id = %s", 
+                       (token_data['user_id'],))
+            admin = cur.fetchone()
+            
+            if not admin or not bcrypt.checkpw(current_password.encode('utf-8'), admin[1].encode('utf-8')):
                 cur.close()
                 conn.close()
-                
                 return {
-                    'statusCode': 200,
+                    'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'success': True}),
+                    'body': json.dumps({'error': 'Неверный текущий пароль'}),
                     'isBase64Encoded': False
                 }
-                
-            except Exception as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                    'isBase64Encoded': False
-                }
+            
+            new_password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            cur.execute("UPDATE t_p25272970_courier_button_site.admins SET password_hash = %s, updated_at = NOW() WHERE id = %s", 
+                       (new_password_hash, token_data['user_id']))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
         
         elif action == 'get_admins':
-            # Получение списка админов
             auth_token = event.get('headers', {}).get('X-Auth-Token')
             if not auth_token:
                 return {
@@ -179,48 +268,56 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            try:
-                conn = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur = conn.cursor()
-                
-                cur.execute("SELECT id, username, created_at, last_login FROM t_p25272970_courier_button_site.admins ORDER BY created_at DESC")
-                admins_data = cur.fetchall()
-                
-                admins = []
-                for admin in admins_data:
-                    admins.append({
-                        'id': admin[0],
-                        'username': admin[1],
-                        'created_at': admin[2].isoformat() if admin[2] else None,
-                        'last_login': admin[3].isoformat() if admin[3] else None
-                    })
-                
-                cur.close()
-                conn.close()
-                
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
                 return {
-                    'statusCode': 200,
+                    'statusCode': 401,
                     'headers': headers,
-                    'body': json.dumps({'admins': admins}),
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                     'isBase64Encoded': False
                 }
-                
-            except Exception as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                    'isBase64Encoded': False
-                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("SELECT id, username, created_at, last_login FROM t_p25272970_courier_button_site.admins ORDER BY created_at DESC")
+            admins_data = cur.fetchall()
+            
+            admins = []
+            for admin in admins_data:
+                admins.append({
+                    'id': admin[0],
+                    'username': admin[1],
+                    'created_at': admin[2].isoformat() if admin[2] else None,
+                    'last_login': admin[3].isoformat() if admin[3] else None
+                })
+            
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'admins': admins}),
+                'isBase64Encoded': False
+            }
         
         elif action == 'add_admin':
-            # Добавление нового админа
             auth_token = event.get('headers', {}).get('X-Auth-Token')
             if not auth_token:
                 return {
                     'statusCode': 401,
                     'headers': headers,
                     'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                     'isBase64Encoded': False
                 }
             
@@ -235,60 +332,64 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            try:
-                conn = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur = conn.cursor()
-                
-                # Проверяем, не существует ли уже такой пользователь
-                cur.execute("SELECT id FROM t_p25272970_courier_button_site.admins WHERE username = %s", (username,))
-                existing = cur.fetchone()
-                
-                if existing:
-                    cur.close()
-                    conn.close()
-                    return {
-                        'statusCode': 400,
-                        'headers': headers,
-                        'body': json.dumps({'error': 'Пользователь с таким логином уже существует'}),
-                        'isBase64Encoded': False
-                    }
-                
-                # Хешируем пароль MD5
-                password_hash = hashlib.md5(password.encode()).hexdigest()
-                
-                # Добавляем нового админа
-                cur.execute("""
-                    INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at) 
-                    VALUES (%s, %s, NOW(), NOW())
-                """, (username, password_hash))
-                
-                conn.commit()
+            if len(password) < 8:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Пароль должен быть минимум 8 символов'}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("SELECT id FROM t_p25272970_courier_button_site.admins WHERE username = %s", (username,))
+            existing = cur.fetchone()
+            
+            if existing:
                 cur.close()
                 conn.close()
-                
                 return {
-                    'statusCode': 200,
+                    'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'success': True}),
+                    'body': json.dumps({'error': 'Пользователь с таким логином уже существует'}),
                     'isBase64Encoded': False
                 }
-                
-            except Exception as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                    'isBase64Encoded': False
-                }
+            
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at) 
+                VALUES (%s, %s, NOW(), NOW())
+            """, (username, password_hash))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
         
         elif action == 'delete_admin':
-            # Удаление админа
             auth_token = event.get('headers', {}).get('X-Auth-Token')
             if not auth_token:
                 return {
                     'statusCode': 401,
                     'headers': headers,
                     'body': json.dumps({'error': 'Требуется авторизация'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                     'isBase64Encoded': False
                 }
             
@@ -302,48 +403,36 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            try:
-                conn = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur = conn.cursor()
-                
-                # Не даём удалить единственного админа
-                cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
-                admin_count = cur.fetchone()[0]
-                
-                if admin_count <= 1:
-                    cur.close()
-                    conn.close()
-                    return {
-                        'statusCode': 400,
-                        'headers': headers,
-                        'body': json.dumps({'error': 'Нельзя удалить единственного администратора'}),
-                        'isBase64Encoded': False
-                    }
-                
-                # Удаляем админа
-                cur.execute("DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s", (admin_id,))
-                
-                conn.commit()
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
+            admin_count = cur.fetchone()[0]
+            
+            if admin_count <= 1:
                 cur.close()
                 conn.close()
-                
                 return {
-                    'statusCode': 200,
+                    'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'success': True}),
+                    'body': json.dumps({'error': 'Нельзя удалить единственного администратора'}),
                     'isBase64Encoded': False
                 }
-                
-            except Exception as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                    'isBase64Encoded': False
-                }
+            
+            cur.execute("DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s", (admin_id,))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
         
         elif action == 'payout':
-            # Обработка заявки на выплату
             name = body_data.get('name', '')
             phone = body_data.get('phone', '')
             city = body_data.get('city', '')
@@ -357,44 +446,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            # Сохранение в базу данных
-            try:
-                conn = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur = conn.cursor()
-                
-                cur.execute("""
-                    INSERT INTO t_p25272970_courier_button_site.payout_requests 
-                    (name, phone, city, attachment_data, status, created_at, updated_at) 
-                    VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
-                """, (name, phone, city, attachment_data))
-                
-                conn.commit()
-                cur.close()
-                conn.close()
-                
-                return {
-                    'statusCode': 200,
-                    'headers': headers,
-                    'body': json.dumps({
-                        'success': True,
-                        'message': 'Payout request saved successfully'
-                    }),
-                    'isBase64Encoded': False
-                }
-                
-            except Exception as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({
-                        'success': False,
-                        'error': f'Database error: {str(e)}'
-                    }),
-                    'isBase64Encoded': False
-                }
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.payout_requests 
+                (name, phone, city, attachment_data, status, created_at, updated_at) 
+                VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
+            """, (name, phone, city, attachment_data))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Payout request saved successfully'
+                }),
+                'isBase64Encoded': False
+            }
     
     elif event.get('httpMethod') == 'GET':
-        # Получение заявок на выплаты (только с токеном)
         auth_token = event.get('headers', {}).get('X-Auth-Token')
         if not auth_token:
             return {
@@ -404,82 +479,85 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        try:
-            conn = psycopg2.connect(os.environ['DATABASE_URL'])
-            cur = conn.cursor()
-            
-            # Получаем заявки
-            cur.execute("""
-                SELECT id, name, phone, city, attachment_data, status, created_at, updated_at
-                FROM t_p25272970_courier_button_site.payout_requests 
-                ORDER BY created_at DESC
-            """)
-            
-            rows = cur.fetchall()
-            requests = []
-            for row in rows:
-                requests.append({
-                    'id': row[0],
-                    'name': row[1],
-                    'phone': row[2],
-                    'city': row[3],
-                    'screenshot_url': row[4],  # переименовываем для фронтенда
-                    'status': row[5],
-                    'created_at': row[6].isoformat() if row[6] else None,
-                    'updated_at': row[7].isoformat() if row[7] else None
-                })
-            
-            # Получаем статистику
-            cur.execute("""
-                SELECT 
-                    COUNT(*) as total,
-                    COUNT(CASE WHEN status = 'new' THEN 1 END) as new,
-                    COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
-                    COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
-                FROM t_p25272970_courier_button_site.payout_requests
-            """)
-            
-            stats_row = cur.fetchone()
-            stats = {
-                'total': stats_row[0] if stats_row else 0,
-                'new': stats_row[1] if stats_row else 0,
-                'approved': stats_row[2] if stats_row else 0,
-                'rejected': stats_row[3] if stats_row else 0
-            }
-            
-            cur.close()
-            conn.close()
-            
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
             return {
-                'statusCode': 200,
+                'statusCode': 401,
                 'headers': headers,
-                'body': json.dumps({
-                    'success': True,
-                    'requests': requests,
-                    'stats': stats
-                }),
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                 'isBase64Encoded': False
             }
-            
-        except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': False,
-                    'error': f'Database error: {str(e)}'
-                }),
-                'isBase64Encoded': False
-            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, name, phone, city, attachment_data, status, created_at, updated_at
+            FROM t_p25272970_courier_button_site.payout_requests 
+            ORDER BY created_at DESC
+        """)
+        
+        rows = cur.fetchall()
+        requests = []
+        for row in rows:
+            requests.append({
+                'id': row[0],
+                'name': row[1],
+                'phone': row[2],
+                'city': row[3],
+                'screenshot_url': row[4],
+                'status': row[5],
+                'created_at': row[6].isoformat() if row[6] else None,
+                'updated_at': row[7].isoformat() if row[7] else None
+            })
+        
+        cur.execute("""
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'new' THEN 1 END) as new,
+                COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved,
+                COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected
+            FROM t_p25272970_courier_button_site.payout_requests
+        """)
+        
+        stats_row = cur.fetchone()
+        stats = {
+            'total': stats_row[0] if stats_row else 0,
+            'new': stats_row[1] if stats_row else 0,
+            'approved': stats_row[2] if stats_row else 0,
+            'rejected': stats_row[3] if stats_row else 0
+        }
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'requests': requests,
+                'stats': stats
+            }),
+            'isBase64Encoded': False
+        }
     
     elif event.get('httpMethod') == 'PUT':
-        # Обновление статуса заявки
         auth_token = event.get('headers', {}).get('X-Auth-Token')
         if not auth_token:
             return {
                 'statusCode': 401,
                 'headers': headers,
                 'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                 'isBase64Encoded': False
             }
             
@@ -495,43 +573,42 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        try:
-            conn = psycopg2.connect(os.environ['DATABASE_URL'])
-            cur = conn.cursor()
-            
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.payout_requests 
-                SET status = %s, updated_at = NOW()
-                WHERE id = %s
-            """, (new_status, request_id))
-            
-            conn.commit()
-            cur.close()
-            conn.close()
-            
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({'success': True}),
-                'isBase64Encoded': False
-            }
-            
-        except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                'isBase64Encoded': False
-            }
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.payout_requests 
+            SET status = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (new_status, request_id))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True}),
+            'isBase64Encoded': False
+        }
     
     elif event.get('httpMethod') == 'DELETE':
-        # Удаление заявки
         auth_token = event.get('headers', {}).get('X-Auth-Token')
         if not auth_token:
             return {
                 'statusCode': 401,
                 'headers': headers,
                 'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
                 'isBase64Encoded': False
             }
             
@@ -546,30 +623,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        try:
-            conn = psycopg2.connect(os.environ['DATABASE_URL'])
-            cur = conn.cursor()
-            
-            cur.execute("DELETE FROM t_p25272970_courier_button_site.payout_requests WHERE id = %s", (request_id,))
-            
-            conn.commit()
-            cur.close()
-            conn.close()
-            
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({'success': True}),
-                'isBase64Encoded': False
-            }
-            
-        except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({'error': f'Database error: {str(e)}'}),
-                'isBase64Encoded': False
-            }
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM t_p25272970_courier_button_site.payout_requests WHERE id = %s", (request_id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True}),
+            'isBase64Encoded': False
+        }
     
     return {
         'statusCode': 405,
