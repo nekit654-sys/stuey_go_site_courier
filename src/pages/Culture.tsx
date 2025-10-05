@@ -115,8 +115,8 @@ const Culture = () => {
       <div className="pt-24 pb-16 md:pt-32 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-rubik text-gray-800">
-              Мотивация и <span className="text-yellow-500">доход</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 font-rubik text-black" style={{textShadow: '3px 3px 0 rgba(251, 191, 36, 0.8)'}}>
+              Мотивация и <span className="text-yellow-400">доход</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Дополнительные возможности для заработка и мотивации курьеров
@@ -127,16 +127,17 @@ const Culture = () => {
             {benefitCards.map((card, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] border-l-4 md:border-l-8 border-yellow-400 overflow-hidden"
+                className="bg-white rounded-2xl md:rounded-3xl border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 overflow-hidden"
+                style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}
               >
                 <div className="p-6 md:p-8">
                   <div className="flex items-start space-x-4 mb-6">
                     <div className="flex-shrink-0">
-                      <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-lg">
+                      <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-400 rounded-2xl flex items-center justify-center border-2 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
                         <Icon
                           name={card.icon as any}
                           size={24}
-                          className="text-gray-800 md:w-7 md:h-7"
+                          className="text-black md:w-7 md:h-7"
                         />
                       </div>
                     </div>
@@ -166,13 +167,13 @@ const Culture = () => {
                     ))}
                   </ul>
 
-                  <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-3 gap-4 pt-6 border-t-4 border-black">
                     {card.stats.map((stat, idx) => (
                       <div key={idx} className="text-center">
-                        <div className="text-xl md:text-2xl font-bold text-yellow-600">
+                        <div className="text-xl md:text-2xl font-extrabold text-black">
                           {stat.value}
                         </div>
-                        <div className="text-xs md:text-sm text-gray-600 mt-1">
+                        <div className="text-xs md:text-sm text-gray-700 mt-1 font-medium">
                           {stat.label}
                         </div>
                       </div>
@@ -183,7 +184,7 @@ const Culture = () => {
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl md:rounded-3xl p-8 md:p-10 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl md:rounded-3xl p-8 md:p-10 text-center border-4 border-black" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
             <Icon
               name="Users"
               size={48}
@@ -197,17 +198,17 @@ const Culture = () => {
               Станьте частью большой и дружной команды!
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6">
-                <div className="text-4xl font-bold text-gray-800">100K+</div>
-                <div className="text-gray-700 font-medium mt-2">Курьеров</div>
+              <div className="bg-white rounded-xl p-6 border-2 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-4xl font-extrabold text-black">100K+</div>
+                <div className="text-gray-700 font-bold mt-2">Курьеров</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6">
-                <div className="text-4xl font-bold text-gray-800">50+</div>
-                <div className="text-gray-700 font-medium mt-2">Городов</div>
+              <div className="bg-white rounded-xl p-6 border-2 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-4xl font-extrabold text-black">50+</div>
+                <div className="text-gray-700 font-bold mt-2">Городов</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6">
-                <div className="text-4xl font-bold text-gray-800">4.8</div>
-                <div className="text-gray-700 font-medium mt-2">
+              <div className="bg-white rounded-xl p-6 border-2 border-black" style={{boxShadow: '3px 3px 0 0 rgba(0, 0, 0, 0.9)'}}>
+                <div className="text-4xl font-extrabold text-black">4.8</div>
+                <div className="text-gray-700 font-bold mt-2">
                   Рейтинг в App Store
                 </div>
               </div>

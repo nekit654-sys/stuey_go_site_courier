@@ -163,7 +163,7 @@ const Hiring = () => {
       <div className="pt-24 pb-8 md:pt-32 md:pb-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-16">
-            <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold mb-4 md:mb-6 font-rubik text-black drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
+            <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold mb-4 md:mb-6 font-rubik text-black" style={{textShadow: '3px 3px 0 rgba(251, 191, 36, 0.8)'}}>
               Процесс <span className="text-yellow-400">найма</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-700 font-medium max-w-2xl mx-auto px-2">
@@ -175,11 +175,12 @@ const Hiring = () => {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl md:rounded-2xl p-4 md:p-8 shadow-xl border-l-4 md:border-l-8 border-yellow-400 hover:shadow-2xl transition-all duration-300"
+                className="bg-white rounded-xl md:rounded-2xl p-4 md:p-8 border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
+                style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}
               >
                 <div className="flex items-start space-x-4 md:space-x-6">
                   <div className="flex-shrink-0">
-                    <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-black" style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}>
                       <Icon
                         name={step.icon as any}
                         size={24}
@@ -193,7 +194,7 @@ const Hiring = () => {
                       <h3 className="text-lg md:text-2xl font-bold text-gray-800 mb-2 md:mb-0">
                         {step.title}
                       </h3>
-                      <span className="bg-yellow-100 text-yellow-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium w-fit">
+                      <span className="bg-yellow-400 text-black px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold w-fit border-2 border-black" style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}>
                         {step.time}
                       </span>
                     </div>
@@ -230,13 +231,14 @@ const Hiring = () => {
               {requirements.map((req, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="bg-white rounded-xl p-6 border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
+                  style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}
                 >
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-yellow-400 rounded-lg flex items-center justify-center mb-4 border-2 border-black" style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}>
                     <Icon
                       name={req.icon as any}
                       size={24}
-                      className="text-yellow-600"
+                      className="text-black"
                     />
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-2">
@@ -256,10 +258,12 @@ const Hiring = () => {
               {benefits.map((benefit, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-start space-x-4"
+                  className="bg-white rounded-xl p-6 border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all duration-200 flex items-start space-x-4"
+                  style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}
                 >
                   <div
-                    className={`w-12 h-12 ${benefit.color} rounded-lg flex items-center justify-center flex-shrink-0`}
+                    className={`w-12 h-12 ${benefit.color} rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-black`}
+                    style={{boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.9)'}}
                   >
                     <Icon
                       name={benefit.icon as any}
@@ -289,7 +293,8 @@ const Hiring = () => {
               {faqs.map((faq, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden"
+                  className="bg-white rounded-xl overflow-hidden border-4 border-black"
+                  style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}
                 >
                   <button
                     onClick={() => toggleFaq(index)}
@@ -316,7 +321,7 @@ const Hiring = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center shadow-2xl">
+          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center border-4 border-black" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
               Готовы начать?
             </h2>
