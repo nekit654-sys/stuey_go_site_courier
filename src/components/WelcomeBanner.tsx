@@ -157,7 +157,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
       
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[55] p-4">
         <div
-          className={`relative bg-white rounded-2xl shadow-[0_8px_0_0_rgba(0,0,0,1)] max-w-4xl w-full max-h-[90vh] overflow-hidden border-4 border-black ${
+          className={`relative bg-white rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] max-w-4xl w-full max-h-[90vh] overflow-hidden border-4 border-black ${
             isVisible ? 'animate-[bannerFadeIn_0.5s_ease-out]' : 'animate-[bannerFadeOut_0.5s_ease-in]'
           }`}
         >
