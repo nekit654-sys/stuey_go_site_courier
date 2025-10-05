@@ -48,10 +48,43 @@ const FeedbackTab: React.FC = () => {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'phone') {
+      // Форматируем номер телефона
+      let phoneDigits = value.replace(/\D/g, '');
+      
+      // Если первая цифра не 7, добавляем 7
+      if (phoneDigits.length > 0 && phoneDigits[0] !== '7') {
+        phoneDigits = '7' + phoneDigits;
+      }
+      
+      // Ограничиваем длину до 11 цифр
+      phoneDigits = phoneDigits.slice(0, 11);
+      
+      // Форматируем: +7 (XXX) XXX-XX-XX
+      let formatted = '+7';
+      if (phoneDigits.length > 1) {
+        formatted += ' (' + phoneDigits.slice(1, 4);
+      }
+      if (phoneDigits.length >= 5) {
+        formatted += ') ' + phoneDigits.slice(4, 7);
+      }
+      if (phoneDigits.length >= 8) {
+        formatted += '-' + phoneDigits.slice(7, 9);
+      }
+      if (phoneDigits.length >= 10) {
+        formatted += '-' + phoneDigits.slice(9, 11);
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [field]: formatted
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
