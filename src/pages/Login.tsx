@@ -378,22 +378,18 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
-            </TabsTrigger>
-            <TabsTrigger value="admins" className="flex items-center gap-2">
-              <Icon name="Users" size={16} />
-              Администраторы
             </TabsTrigger>
             <TabsTrigger value="income" className="flex items-center gap-2">
               <Icon name="DollarSign" size={16} />
               Доходы
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Icon name="Lock" size={16} />
-              Безопасность
+            <TabsTrigger value="admins" className="flex items-center gap-2">
+              <Icon name="Users" size={16} />
+              Администраторы
             </TabsTrigger>
           </TabsList>
 
@@ -416,11 +412,10 @@ const Login: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="security" className="space-y-6">
-            <SecurityTab
-              passwordForm={passwordForm}
-              onPasswordFormChange={setPasswordForm}
-              onSubmit={changePassword}
+          <TabsContent value="income" className="space-y-6">
+            <IncomeTab
+              admins={admins}
+              onLoadAdmins={loadAdmins}
             />
           </TabsContent>
 
@@ -432,13 +427,9 @@ const Login: React.FC = () => {
               onAddAdmin={addAdmin}
               onDeleteAdmin={deleteAdmin}
               onLoadAdmins={loadAdmins}
-            />
-          </TabsContent>
-
-          <TabsContent value="income" className="space-y-6">
-            <IncomeTab
-              admins={admins}
-              onLoadAdmins={loadAdmins}
+              passwordForm={passwordForm}
+              onPasswordFormChange={setPasswordForm}
+              onChangePassword={changePassword}
             />
           </TabsContent>
         </Tabs>

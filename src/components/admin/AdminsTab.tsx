@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
 interface Admin {
@@ -22,6 +23,13 @@ interface AdminsTabProps {
   onAddAdmin: (e: React.FormEvent) => void;
   onDeleteAdmin: (adminId: number) => void;
   onLoadAdmins: () => void;
+  passwordForm: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  };
+  onPasswordFormChange: (form: any) => void;
+  onChangePassword: (e: React.FormEvent) => void;
 }
 
 const AdminsTab: React.FC<AdminsTabProps> = ({
@@ -30,7 +38,11 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
   onAdminFormChange,
   onAddAdmin,
   onDeleteAdmin,
+  passwordForm,
+  onPasswordFormChange,
+  onChangePassword,
 }) => {
+  const [adminSubTab, setAdminSubTab] = useState('list');
   const getLastSeenText = (lastLogin?: string) => {
     if (!lastLogin) return 'Никогда не входил';
     
@@ -65,7 +77,20 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
     return 'bg-gray-400';
   };
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <Tabs value={adminSubTab} onValueChange={setAdminSubTab} className="space-y-6">
+      <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="list" className="flex items-center gap-2">
+          <Icon name="Users" size={16} />
+          Управление
+        </TabsTrigger>
+        <TabsTrigger value="security" className="flex items-center gap-2">
+          <Icon name="Lock" size={16} />
+          Безопасность
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="list" className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -173,7 +198,76 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
           )}
         </CardContent>
       </Card>
-    </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="security" className="space-y-6">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Lock" size={20} />
+              Смена пароля
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onChangePassword} className="space-y-4">
+              <div>
+                <Label htmlFor="currentPassword">Текущий пароль</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => onPasswordFormChange({...passwordForm, currentPassword: e.target.value})}
+                  placeholder="Введите текущий пароль"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="newPassword">Новый пароль</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => onPasswordFormChange({...passwordForm, newPassword: e.target.value})}
+                  placeholder="Введите новый пароль (минимум 8 символов)"
+                  required
+                  minLength={8}
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => onPasswordFormChange({...passwordForm, confirmPassword: e.target.value})}
+                  placeholder="Повторите новый пароль"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                <Icon name="Key" size={16} className="mr-2" />
+                Изменить пароль
+              </Button>
+            </form>
+
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Icon name="ShieldAlert" size={16} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium">Требования к паролю:</p>
+                  <ul className="mt-2 space-y-1 list-disc list-inside">
+                    <li>Минимум 8 символов</li>
+                    <li>Используйте сложные комбинации</li>
+                    <li>Не используйте личные данные</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 };
 
