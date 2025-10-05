@@ -217,6 +217,9 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                   src="https://cdn.poehali.dev/files/01665182-15dc-4b4f-a2bd-8b021378fdea.png"
                   alt="Корги курьер"
                   className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain"
+                  style={{
+                    filter: 'drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.8))',
+                  }}
                 />
               </div>
             </div>
