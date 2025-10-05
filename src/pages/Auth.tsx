@@ -198,7 +198,7 @@ export default function Auth() {
 
           <Button
             onClick={handleGoogleAuth}
-            className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
+            className="w-full bg-red-500 hover:bg-red-600 text-white"
             size="lg"
           >
             <Icon name="Mail" className="mr-2 h-5 w-5" />
