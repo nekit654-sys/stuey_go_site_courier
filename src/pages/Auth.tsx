@@ -187,22 +187,14 @@ export default function Auth() {
             Войти через Яндекс
           </Button>
 
-          <div className="text-center">
-            <div
-              id="telegram-login-container"
-              className="flex justify-center"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                    data-telegram-login="YOUR_BOT_USERNAME" 
-                    data-size="large" 
-                    data-onauth="onTelegramAuth(user)" 
-                    data-request-access="write">
-                  </script>
-                `,
-              }}
-            />
-          </div>
+          <Button
+            onClick={() => toast.info('Вход через Telegram временно недоступен')}
+            className="w-full bg-[#0088cc] hover:bg-[#0077bb] text-white"
+            size="lg"
+          >
+            <Icon name="Send" className="mr-2 h-5 w-5" />
+            Войти через Telegram
+          </Button>
 
           <Button
             onClick={handleVKAuth}
