@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
@@ -12,6 +12,46 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.innerHTML = `
+      var rad_backcolor="#434242"; 
+      var rad_logo = "black"; 
+      var rad_autoplay = true; 
+      var rad_width = "responsive"; 
+      var rad_width_px = 330;
+      var rad_stations =[
+        ['https://ep256.hostingradio.ru:8052/europaplus256.mp3','Европа плюс','europaplus'],
+        ['https://radiorecord.hostingradio.ru/rr_main96.aacp','Радио Рекорд','radiorecord'],
+        ['https://nashe1.hostingradio.ru/nashe-256','Наше радио','nashe'],
+        ['https://pub0101.101.ru/stream/air/aac/64/100','Авторадио','avtoradio'],
+        ['https://pub0202.101.ru:8443/stream/air/aac/64/99','Радио Energy','nrj']
+      ];
+    `;
+    document.head.appendChild(script);
+
+    const link = document.createElement('link');
+    link.href = 'https://www.radiobells.com/script/style.css';
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    const radioScript = document.createElement('script');
+    radioScript.type = 'text/javascript';
+    radioScript.src = 'https://www.radiobells.com/script/v2_1.js';
+    radioScript.charset = 'UTF-8';
+    document.body.appendChild(radioScript);
+
+    return () => {
+      document.head.removeChild(script);
+      document.head.removeChild(link);
+      if (document.body.contains(radioScript)) {
+        document.body.removeChild(radioScript);
+      }
+    };
+  }, []);
 
   const checkPassword = async () => {
     if (!password.trim()) {
@@ -110,6 +150,21 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
                       <span>Ожидаемое время: скоро</span>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Радиоплеер */}
+            <div className="max-w-md mx-auto mb-8">
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">
+                <div className="flex items-center gap-2 mb-4 justify-center">
+                  <Icon name="Radio" size={20} className="text-purple-600" />
+                  <h3 className="font-semibold text-gray-800">Послушайте музыку пока ждёте</h3>
+                </div>
+                <div id="radiobells_container" className="flex justify-center">
+                  <a href="https://www.radiobells.com/" id="RP_link" className="text-xs text-gray-400 hover:text-gray-600">
+                    Онлайн радио
+                  </a>
                 </div>
               </div>
             </div>
