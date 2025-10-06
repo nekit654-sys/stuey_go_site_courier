@@ -136,7 +136,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
               alt="Курьер корги на велосипеде"
               className="w-full h-full object-cover object-top"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
           </div>
 
           {/* Контент */}
