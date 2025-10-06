@@ -39,6 +39,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviterCode, setInviterCode] = useState('');
+  const [submittingInviter, setSubmittingInviter] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -96,6 +98,41 @@ export default function Dashboard() {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const submitInviterCode = async () => {
+    if (!inviterCode.trim()) {
+      toast.error('Введите реферальный код');
+      return;
+    }
+
+    setSubmittingInviter(true);
+    try {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=set_inviter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': user?.id.toString() || '',
+        },
+        body: JSON.stringify({
+          inviter_code: inviterCode.trim().toUpperCase()
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('Реферальный код применён!');
+        setInviterCode('');
+        fetchStats();
+      } else {
+        toast.error(data.error || 'Неверный реферальный код');
+      }
+    } catch (error) {
+      console.error('Failed to submit inviter code:', error);
+      toast.error('Не удалось применить код');
+    } finally {
+      setSubmittingInviter(false);
+    }
   };
 
   if (loading) {
@@ -299,6 +336,64 @@ export default function Dashboard() {
                     <p className="mt-1 capitalize">{user?.oauth_provider}</p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Меня пригласили</CardTitle>
+                <CardDescription>
+                  Если вы забыли указать реферальный код при регистрации
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {user?.invited_by ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-green-800">
+                      <Icon name="CheckCircle" className="h-5 w-5" />
+                      <p className="font-medium">Вы уже привязаны к рефералу</p>
+                    </div>
+                    <p className="text-sm text-green-600 mt-2">
+                      Изменить реферальную связь невозможно
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm text-blue-800">
+                        <Icon name="Info" className="inline h-4 w-4 mr-1" />
+                        Введите реферальный код друга, который вас пригласил
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={inviterCode}
+                        onChange={(e) => setInviterCode(e.target.value.toUpperCase())}
+                        placeholder="Введите код (например: ABC123)"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        maxLength={10}
+                        disabled={submittingInviter}
+                      />
+                      <Button
+                        onClick={submitInviterCode}
+                        disabled={!inviterCode.trim() || submittingInviter}
+                      >
+                        {submittingInviter ? (
+                          <Icon name="Loader2" className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Icon name="Check" className="mr-2 h-4 w-4" />
+                            Применить
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      ⚠️ Указать реферальный код можно только один раз
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

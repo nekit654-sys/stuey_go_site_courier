@@ -122,10 +122,12 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
     
     elif method == 'POST':
         body = json.loads(event.get('body', '{}'))
-        action = body.get('action')
+        action = query_params.get('action') or body.get('action')
         
         if action == 'update_orders':
             return update_referral_orders(user_id, body, headers)
+        elif action == 'set_inviter':
+            return set_inviter_code(user_id, body, headers)
         else:
             return {
                 'statusCode': 400,
@@ -367,6 +369,100 @@ def update_referral_orders(user_id: int, body: Dict[str, Any], headers: Dict[str
             'success': True,
             'message': 'Orders updated successfully'
         }),
+        'isBase64Encoded': False
+    }
+
+
+def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    inviter_code = body.get('inviter_code', '').strip().upper()
+    
+    if not inviter_code:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Реферальный код обязателен'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT invited_by FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (user_id,))
+    
+    user = cur.fetchone()
+    
+    if not user:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Пользователь не найден'}),
+            'isBase64Encoded': False
+        }
+    
+    if user['invited_by']:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Вы уже привязаны к реферу'}),
+            'isBase64Encoded': False
+        }
+    
+    cur.execute("""
+        SELECT id FROM t_p25272970_courier_button_site.users
+        WHERE referral_code = %s
+    """, (inviter_code,))
+    
+    referrer = cur.fetchone()
+    
+    if not referrer:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Неверный реферальный код'}),
+            'isBase64Encoded': False
+        }
+    
+    referrer_id = referrer['id']
+    
+    if referrer_id == user_id:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Нельзя указать свой код'}),
+            'isBase64Encoded': False
+        }
+    
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.users
+        SET invited_by = %s, updated_at = NOW()
+        WHERE id = %s
+    """, (referrer_id, user_id))
+    
+    cur.execute("""
+        INSERT INTO t_p25272970_courier_button_site.referrals 
+        (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
+        VALUES (%s, %s, 0, false, 0)
+    """, (referrer_id, user_id))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': 'Реферальный код применён'}),
         'isBase64Encoded': False
     }
 

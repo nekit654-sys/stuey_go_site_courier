@@ -12,6 +12,8 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [manualRefCode, setManualRefCode] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -227,6 +229,54 @@ export default function Auth() {
               <p className="text-green-600">
                 После регистрации вы будете привязаны к пригласившему вас курьеру
               </p>
+            </div>
+          )}
+
+          {!referralCode && (
+            <div className="border-t pt-4">
+              {!showManualInput ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowManualInput(true)}
+                >
+                  <Icon name="Gift" className="mr-2 h-4 w-4" />
+                  У меня есть реферальный код
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Реферальный код (необязательно)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={manualRefCode}
+                      onChange={(e) => setManualRefCode(e.target.value.toUpperCase())}
+                      placeholder="Введите код"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      maxLength={10}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (manualRefCode.trim()) {
+                          setReferralCode(manualRefCode.trim());
+                          localStorage.setItem('referral_code', manualRefCode.trim());
+                          toast.success('Реферальный код применён!');
+                        }
+                      }}
+                      disabled={!manualRefCode.trim()}
+                    >
+                      Применить
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Введите код, который вам дал друг-курьер
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
