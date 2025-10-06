@@ -32,8 +32,12 @@ const Login: React.FC = () => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authToken, setAuthToken] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('authToken') !== null;
+  });
+  const [authToken, setAuthToken] = useState<string>(() => {
+    return localStorage.getItem('authToken') || '';
+  });
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [stats, setStats] = useState({ total: 0, new: 0, approved: 0, rejected: 0 });
   const [activeTab, setActiveTab] = useState('requests');
@@ -80,6 +84,7 @@ const Login: React.FC = () => {
       const data = await response.json();
       
       if (response.ok && data.success) {
+        localStorage.setItem('authToken', data.token);
         setAuthToken(data.token);
         setIsAuthenticated(true);
         loadRequests(data.token);
@@ -145,6 +150,13 @@ const Login: React.FC = () => {
       console.error('Ошибка загрузки заявок:', error);
     }
   };
+
+  React.useEffect(() => {
+    if (isAuthenticated && authToken) {
+      loadRequests(authToken, true);
+      loadAdmins(authToken);
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!isAuthenticated || !autoRefresh) return;
@@ -446,6 +458,7 @@ const Login: React.FC = () => {
           <Button 
             variant="outline" 
             onClick={() => {
+              localStorage.removeItem('authToken');
               setIsAuthenticated(false);
               setAuthToken('');
             }}
