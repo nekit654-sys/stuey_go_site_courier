@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
@@ -12,6 +12,29 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const targetDate = new Date('2025-10-31T00:00:00');
+      const now = new Date();
+      const difference = targetDate.getTime() - now.getTime();
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -111,7 +134,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
             <img 
               src="https://cdn.poehali.dev/files/b3334dd7-7607-4394-bb8a-e9c9a53eb67d.jpg" 
               alt="Курьер корги на велосипеде"
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-top"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
           </div>
@@ -135,19 +158,36 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
               Мы улучшаем наш сервис для вас! 🚀
             </p>
 
-            {/* Описание */}
+            {/* Обратный отсчёт */}
             <div className="max-w-2xl mx-auto mb-8">
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border-2 border-yellow-200">
                 <div className="flex items-start gap-4">
-                  <Icon name="Info" className="text-yellow-600 flex-shrink-0 mt-1" size={24} />
-                  <div className="text-left">
-                    <p className="text-gray-700 leading-relaxed mb-3">
+                  <Icon name="Timer" className="text-yellow-600 flex-shrink-0 mt-1" size={24} />
+                  <div className="text-left flex-1">
+                    <p className="text-gray-700 leading-relaxed mb-4">
                       Наша команда работает над важными обновлениями системы. 
                       Скоро мы вернёмся с новыми возможностями!
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Icon name="Clock" size={16} />
-                      <span>Ожидаемое время: скоро</span>
+                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                      <div className="text-sm text-gray-600 mb-2 font-medium">До запуска осталось:</div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="text-center">
+                          <div className="text-2xl md:text-3xl font-bold text-yellow-600">{timeLeft.days}</div>
+                          <div className="text-xs text-gray-500">дней</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl md:text-3xl font-bold text-orange-600">{timeLeft.hours}</div>
+                          <div className="text-xs text-gray-500">часов</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl md:text-3xl font-bold text-red-600">{timeLeft.minutes}</div>
+                          <div className="text-xs text-gray-500">минут</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl md:text-3xl font-bold text-pink-600">{timeLeft.seconds}</div>
+                          <div className="text-xs text-gray-500">секунд</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
