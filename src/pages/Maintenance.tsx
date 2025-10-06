@@ -9,6 +9,7 @@ interface MaintenanceProps {
 }
 
 export default function Maintenance({ onUnlock }: MaintenanceProps) {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -77,8 +78,8 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   }, []);
 
   const checkPassword = async () => {
-    if (!password.trim()) {
-      toast.error('Введите пароль');
+    if (!username.trim() || !password.trim()) {
+      toast.error('Введите логин и пароль');
       return;
     }
 
@@ -91,8 +92,8 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'admin_login',
-          username: 'admin',
+          action: 'login',
+          username: username,
           password: password
         })
       });
@@ -101,10 +102,12 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
       if (data.success) {
         localStorage.setItem('maintenance_bypass', 'true');
+        localStorage.setItem('authToken', data.token);
         toast.success('Доступ разрешен!');
         onUnlock();
       } else {
-        toast.error('Неверный пароль');
+        toast.error('Неверный логин или пароль');
+        setUsername('');
         setPassword('');
       }
     } catch (error) {
@@ -242,27 +245,38 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
                     <Icon name="Lock" size={18} className="text-gray-600" />
                     <p className="text-sm font-medium text-gray-700">Вход для администратора</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
                     <Input
-                      type="password"
-                      placeholder="Введите пароль"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      type="text"
+                      placeholder="Логин"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="flex-1"
+                      className="w-full"
                       disabled={isChecking}
                     />
-                    <Button 
-                      onClick={checkPassword}
-                      disabled={isChecking}
-                      className="bg-yellow-500 hover:bg-yellow-600"
-                    >
-                      {isChecking ? (
-                        <Icon name="Loader2" className="animate-spin" size={20} />
-                      ) : (
-                        <Icon name="ArrowRight" size={20} />
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        placeholder="Пароль"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        className="flex-1"
+                        disabled={isChecking}
+                      />
+                      <Button 
+                        onClick={checkPassword}
+                        disabled={isChecking}
+                        className="bg-yellow-500 hover:bg-yellow-600"
+                      >
+                        {isChecking ? (
+                          <Icon name="Loader2" className="animate-spin" size={20} />
+                        ) : (
+                          <Icon name="ArrowRight" size={20} />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
