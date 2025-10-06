@@ -862,19 +862,53 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         }
     
     user_id = int(user_id_header)
-    action = body_data.get('action', 'update')
     
-    if action == 'update_vehicle':
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'update')
+    
+    if action == 'update':
+        full_name = body_data.get('full_name')
+        phone = body_data.get('phone')
+        city = body_data.get('city')
+        
+        if not full_name or not phone or not city:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'ФИО, телефон и город обязательны'}),
+                'isBase64Encoded': False
+            }
+        
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET full_name = %s, phone = %s, city = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (full_name, phone, city, user_id))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Профиль обновлен'}),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'update_vehicle':
         vehicle_type = body_data.get('vehicle_type', 'bike')
         
-        conn = psycopg2.connect(os.environ['DATABASE_URL'])
-        cur = conn.cursor()
-        
-        cur.execute(f"""
+        cur.execute("""
             UPDATE t_p25272970_courier_button_site.users
-            SET vehicle_type = '{vehicle_type}', updated_at = NOW()
-            WHERE id = {user_id}
-        """)
+            SET vehicle_type = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (vehicle_type, user_id))
         
         conn.commit()
         cur.close()
@@ -886,6 +920,9 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             'body': json.dumps({'success': True, 'message': 'Транспорт обновлен'}),
             'isBase64Encoded': False
         }
+    
+    cur.close()
+    conn.close()
     
     return {
         'statusCode': 400,
