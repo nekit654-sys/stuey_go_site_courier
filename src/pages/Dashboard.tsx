@@ -172,6 +172,7 @@ export default function Dashboard() {
           <TabsList>
             <TabsTrigger value="overview">Обзор</TabsTrigger>
             <TabsTrigger value="referrals">Рефералы</TabsTrigger>
+            <TabsTrigger value="payments">Выплаты</TabsTrigger>
             <TabsTrigger value="profile">Профиль</TabsTrigger>
           </TabsList>
 
@@ -248,6 +249,101 @@ export default function Dashboard() {
                   <p>🎁 Неограниченное количество рефералов</p>
                   <p>📊 Отслеживайте статистику в реальном времени</p>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Данные для партнерской программы</CardTitle>
+                <CardDescription>
+                  Эти данные нужны для сверки выплат от партнерской программы
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-medium text-blue-600 uppercase">ФИО</label>
+                      <p className="text-lg font-bold text-blue-900">{user?.full_name}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-blue-600 uppercase">Город</label>
+                      <p className="text-lg font-bold text-blue-900">{user?.city || 'Не указан'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-blue-600 uppercase">Последние 4 цифры телефона</label>
+                      <p className="text-2xl font-mono font-bold text-blue-900">
+                        {user?.phone ? user.phone.slice(-4) : '****'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-blue-600 uppercase">Реферальный код</label>
+                      <p className="text-lg font-mono font-bold text-blue-900">{user?.referral_code}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Icon name="Info" size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-green-800">
+                      <p className="font-medium mb-2">Как получить выплату:</p>
+                      <ol className="space-y-1 list-decimal list-inside">
+                        <li>Администратор получает данные из партнерской программы</li>
+                        <li>Система сопоставляет курьеров по <strong>ФИО + город + 4 цифры телефона</strong></li>
+                        <li>Вы получаете уведомление о готовности выплаты</li>
+                        <li>Средства переводятся на ваш счет</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Icon name="AlertCircle" size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-yellow-800">
+                      <p className="font-medium mb-1">⚠️ Важно для сверки:</p>
+                      <p>Убедитесь, что ваше ФИО и город в партнерской программе совпадают с данными в этой системе.</p>
+                      <p className="mt-2">Если данные не совпадают — свяжитесь с администратором для ручной проверки.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Card className="border-2 border-purple-200 bg-purple-50">
+                  <CardHeader>
+                    <CardTitle className="text-purple-900 flex items-center gap-2">
+                      <Icon name="TrendingUp" size={20} />
+                      Ожидаемый доход от рефералов
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
+                        <div>
+                          <p className="text-sm text-purple-600">Всего рефералов</p>
+                          <p className="text-2xl font-bold text-purple-900">{stats?.total_referrals || 0}</p>
+                        </div>
+                        <Icon name="Users" size={32} className="text-purple-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-200">
+                        <div>
+                          <p className="text-sm text-purple-600">Активных рефералов</p>
+                          <p className="text-2xl font-bold text-purple-900">{stats?.active_referrals || 0}</p>
+                        </div>
+                        <Icon name="UserCheck" size={32} className="text-purple-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                        <div>
+                          <p className="text-sm text-green-600">Заработано от рефералов</p>
+                          <p className="text-3xl font-bold text-green-700">{stats?.referral_earnings || 0} ₽</p>
+                        </div>
+                        <Icon name="Wallet" size={32} className="text-green-400" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>

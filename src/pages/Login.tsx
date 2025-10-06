@@ -11,6 +11,7 @@ import IncomeTab from '@/components/admin/IncomeTab';
 import CouriersTab from '@/components/admin/CouriersTab';
 import AnalyticsTab from '@/components/admin/AnalyticsTab';
 import SettingsModal from '@/components/admin/SettingsModal';
+import PaymentsTab from '@/components/admin/PaymentsTab';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
@@ -460,7 +461,7 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
@@ -468,6 +469,10 @@ const Login: React.FC = () => {
             <TabsTrigger value="couriers" className="flex items-center gap-2">
               <Icon name="Users" size={16} />
               Курьеры
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex items-center gap-2">
+              <Icon name="Wallet" size={16} />
+              Выплаты
             </TabsTrigger>
             <TabsTrigger value="income" className="flex items-center gap-2">
               <Icon name="DollarSign" size={16} />
@@ -500,6 +505,14 @@ const Login: React.FC = () => {
 
           <TabsContent value="couriers" className="space-y-6">
             <CouriersTab
+              couriers={allCouriers}
+              isLoading={isLoadingCouriers}
+              onRefresh={loadAllCouriers}
+            />
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            <PaymentsTab
               couriers={allCouriers}
               isLoading={isLoadingCouriers}
               onRefresh={loadAllCouriers}
