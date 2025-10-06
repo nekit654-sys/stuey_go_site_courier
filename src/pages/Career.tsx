@@ -173,7 +173,7 @@ const Career = () => {
 
       <div className="pt-24 pb-8 md:pt-32 md:pb-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 md:mb-16">
+          <div className="bg-white rounded-xl md:rounded-2xl border-4 border-black p-6 md:p-8 mb-8 md:mb-16 text-center" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
             <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold mb-4 md:mb-6 font-rubik text-yellow-400" style={{textShadow: '3px 3px 0 #000, 6px 6px 0 rgba(0,0,0,0.5)'}}>
               Карьера и доход
             </h1>
