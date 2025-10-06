@@ -113,7 +113,7 @@ const FeedbackTab: React.FC = () => {
         screenshotUrl: formData.screenshot ? formData.screenshot.name : null
       };
 
-      const response = await fetch('https://functions.poehali.dev/832188b4-e931-4e2a-82d1-aff925ea0476', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
