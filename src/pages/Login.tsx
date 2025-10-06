@@ -7,11 +7,10 @@ import LoginForm from '@/components/admin/LoginForm';
 import StatsCards from '@/components/admin/StatsCards';
 import RequestsTable from '@/components/admin/RequestsTable';
 import ControlPanel from '@/components/admin/ControlPanel';
-import SecurityTab from '@/components/admin/SecurityTab';
-import AdminsTab from '@/components/admin/AdminsTab';
 import IncomeTab from '@/components/admin/IncomeTab';
-import ReferralsTab from '@/components/admin/ReferralsTab';
-import StatsTab from '@/components/admin/StatsTab';
+import CouriersTab from '@/components/admin/CouriersTab';
+import AnalyticsTab from '@/components/admin/AnalyticsTab';
+import SettingsModal from '@/components/admin/SettingsModal';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
@@ -54,6 +53,7 @@ const Login: React.FC = () => {
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
   const [allCouriers, setAllCouriers] = useState<any[]>([]);
   const [isLoadingCouriers, setIsLoadingCouriers] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,14 +169,14 @@ const Login: React.FC = () => {
   }, [isAuthenticated, autoRefresh, authToken, requests.length]);
 
   React.useEffect(() => {
-    if (isAuthenticated && (activeTab === 'admins' || activeTab === 'income')) {
-      loadAdmins();
-    }
-    if (isAuthenticated && (activeTab === 'referrals' || activeTab === 'stats')) {
+    if (isAuthenticated && activeTab === 'analytics') {
       loadReferralStats();
     }
     if (isAuthenticated && activeTab === 'couriers') {
       loadAllCouriers();
+    }
+    if (isAuthenticated && activeTab === 'income') {
+      loadAdmins();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -388,19 +388,10 @@ const Login: React.FC = () => {
         const data = await response.json();
         setReferralStats(data);
       } else {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось загрузить статистику рефералов',
-          variant: 'destructive',
-        });
+        console.error('Ошибка загрузки статистики рефералов:', response.status);
       }
     } catch (error) {
       console.error('Ошибка загрузки статистики рефералов:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось подключиться к серверу',
-        variant: 'destructive',
-      });
     } finally {
       setIsLoadingReferrals(false);
     }
@@ -418,19 +409,10 @@ const Login: React.FC = () => {
         const data = await response.json();
         setAllCouriers(data.couriers || []);
       } else {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось загрузить список курьеров',
-          variant: 'destructive',
-        });
+        console.error('Ошибка загрузки курьеров:', response.status);
       }
     } catch (error) {
       console.error('Ошибка загрузки курьеров:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось подключиться к серверу',
-        variant: 'destructive',
-      });
     } finally {
       setIsLoadingCouriers(false);
     }
@@ -455,21 +437,30 @@ const Login: React.FC = () => {
             <Icon name="Settings" size={32} className="text-blue-600" />
             Админ-панель
           </h1>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              localStorage.removeItem('authToken');
-              setIsAuthenticated(false);
-              setAuthToken('');
-            }}
-          >
-            <Icon name="LogOut" size={16} className="mr-2" />
-            Выйти
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <Icon name="Settings" size={16} className="mr-2" />
+              Настройки
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                localStorage.removeItem('authToken');
+                setIsAuthenticated(false);
+                setAuthToken('');
+              }}
+            >
+              <Icon name="LogOut" size={16} className="mr-2" />
+              Выйти
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
@@ -482,17 +473,9 @@ const Login: React.FC = () => {
               <Icon name="DollarSign" size={16} />
               Доходы
             </TabsTrigger>
-            <TabsTrigger value="admins" className="flex items-center gap-2">
-              <Icon name="Shield" size={16} />
-              Админы
-            </TabsTrigger>
-            <TabsTrigger value="referrals" className="flex items-center gap-2">
-              <Icon name="UserPlus" size={16} />
-              Рефералы
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="flex items-center gap-2">
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
               <Icon name="BarChart" size={16} />
-              Статистика
+              Аналитика
             </TabsTrigger>
           </TabsList>
 
@@ -516,112 +499,11 @@ const Login: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="couriers" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Все курьеры</h2>
-                  <p className="text-gray-600 mt-1">Полный список зарегистрированных курьеров</p>
-                </div>
-                <button
-                  onClick={loadAllCouriers}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                  <Icon name="RefreshCw" size={16} />
-                  Обновить
-                </button>
-              </div>
-
-              {isLoadingCouriers ? (
-                <div className="text-center py-12">
-                  <Icon name="Loader2" size={32} className="animate-spin mx-auto text-blue-600" />
-                  <p className="text-gray-600 mt-4">Загрузка...</p>
-                </div>
-              ) : allCouriers.length === 0 ? (
-                <div className="text-center py-12">
-                  <Icon name="Users" size={48} className="mx-auto text-gray-300" />
-                  <p className="text-gray-600 mt-4">Нет зарегистрированных курьеров</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ФИО</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email/Телефон</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Город</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Реф. код</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пригласил</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заказы</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заработано</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Регистрация</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {allCouriers.map((courier) => (
-                        <tr key={courier.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            #{courier.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              {courier.avatar_url && (
-                                <img src={courier.avatar_url} alt="" className="w-8 h-8 rounded-full" />
-                              )}
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">{courier.full_name}</div>
-                                <div className="text-xs text-gray-500">{courier.oauth_provider}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {courier.email || courier.phone || '—'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {courier.city || '—'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <code className="px-2 py-1 bg-gray-100 rounded text-sm font-mono">
-                              {courier.referral_code}
-                            </code>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            {courier.inviter_name ? (
-                              <div className="flex items-center gap-1 text-green-600">
-                                <Icon name="UserCheck" size={14} />
-                                <span>{courier.inviter_name}</span>
-                                <code className="text-xs bg-green-50 px-1 rounded">{courier.inviter_code}</code>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">—</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {courier.total_orders || 0}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {courier.total_earnings || 0} ₽
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                              courier.is_active 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {courier.is_active ? 'Активен' : 'Неактивен'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(courier.created_at).toLocaleDateString('ru-RU')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <CouriersTab
+              couriers={allCouriers}
+              isLoading={isLoadingCouriers}
+              onRefresh={loadAllCouriers}
+            />
           </TabsContent>
 
           <TabsContent value="income" className="space-y-6">
@@ -631,38 +513,31 @@ const Login: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="admins" className="space-y-6">
-            <AdminsTab
-              admins={admins}
-              adminForm={adminForm}
-              onAdminFormChange={setAdminForm}
-              onAddAdmin={addAdmin}
-              onDeleteAdmin={deleteAdmin}
-              onLoadAdmins={loadAdmins}
-              passwordForm={passwordForm}
-              onPasswordFormChange={setPasswordForm}
-              onChangePassword={changePassword}
-            />
-          </TabsContent>
-
-          <TabsContent value="referrals" className="space-y-6">
-            <ReferralsTab
-              referrals={referralStats?.all_referrals || []}
-              isLoading={isLoadingReferrals}
-              onRefresh={loadReferralStats}
-            />
-          </TabsContent>
-
-          <TabsContent value="stats" className="space-y-6">
-            <StatsTab
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsTab
               overallStats={referralStats?.overall_stats || null}
               topReferrers={referralStats?.top_referrers || []}
+              referrals={referralStats?.all_referrals || []}
               isLoading={isLoadingReferrals}
               onRefresh={loadReferralStats}
             />
           </TabsContent>
         </Tabs>
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        admins={admins}
+        adminForm={adminForm}
+        onAdminFormChange={setAdminForm}
+        onAddAdmin={addAdmin}
+        onDeleteAdmin={deleteAdmin}
+        onLoadAdmins={loadAdmins}
+        passwordForm={passwordForm}
+        onPasswordFormChange={setPasswordForm}
+        onChangePassword={changePassword}
+      />
     </div>
   );
 };
