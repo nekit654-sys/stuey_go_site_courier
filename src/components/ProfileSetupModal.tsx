@@ -18,9 +18,10 @@ interface ProfileSetupModalProps {
   user: User;
   token: string;
   onComplete: () => void;
+  onUpdateUser?: (userData: Partial<User>) => void;
 }
 
-export default function ProfileSetupModal({ user, token, onComplete }: ProfileSetupModalProps) {
+export default function ProfileSetupModal({ user, token, onComplete, onUpdateUser }: ProfileSetupModalProps) {
   const [formData, setFormData] = useState({
     full_name: user.full_name || '',
     phone: user.phone || '',
@@ -88,7 +89,18 @@ export default function ProfileSetupModal({ user, token, onComplete }: ProfileSe
 
       if (data.success) {
         toast.success('Профиль успешно заполнен!');
-        window.location.reload();
+        
+        const updatedData = {
+          full_name: formData.full_name.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
+          city: formData.city.trim(),
+        };
+        
+        if (onUpdateUser) {
+          onUpdateUser(updatedData);
+        }
+        
+        onComplete();
       } else {
         toast.error(data.error || 'Ошибка сохранения профиля');
       }

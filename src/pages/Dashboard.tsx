@@ -41,7 +41,7 @@ const vehicleOptions = [
 ];
 
 export default function Dashboard() {
-  const { user, token, logout, isAuthenticated } = useAuth();
+  const { user, token, logout, isAuthenticated, updateUser } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referralProgress, setReferralProgress] = useState<ReferralProgress[]>([]);
@@ -189,6 +189,7 @@ export default function Dashboard() {
         <ProfileSetupModal 
           user={user}
           token={token || ''}
+          onUpdateUser={updateUser}
           onComplete={() => {
             setShowProfileSetup(false);
             fetchStats();
