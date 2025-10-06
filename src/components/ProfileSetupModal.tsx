@@ -90,13 +90,14 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
       if (data.success) {
         toast.success('Профиль успешно заполнен!');
         
-        const updatedData = {
-          full_name: formData.full_name.trim(),
-          phone: formData.phone.replace(/\D/g, ''),
-          city: formData.city.trim(),
-        };
-        
-        if (onUpdateUser) {
+        if (onUpdateUser && data.user) {
+          onUpdateUser(data.user);
+        } else if (onUpdateUser) {
+          const updatedData = {
+            full_name: formData.full_name.trim(),
+            phone: formData.phone.replace(/\D/g, ''),
+            city: formData.city.trim(),
+          };
           onUpdateUser(updatedData);
         }
         

@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.valid && data.user) {
         setUser(data.user);
         localStorage.setItem('user_data', JSON.stringify(data.user));
       } else {

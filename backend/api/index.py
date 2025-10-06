@@ -720,20 +720,51 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         return handle_oauth_login(action, body_data, headers)
     
     elif action == 'verify':
-        auth_token = event.get('headers', {}).get('X-Auth-Token')
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or body_data.get('token')
         if not auth_token:
             return {
                 'statusCode': 401,
                 'headers': headers,
-                'body': json.dumps({'valid': False}),
+                'body': json.dumps({'valid': False, 'error': 'Token required'}),
                 'isBase64Encoded': False
             }
         
         result = verify_token(auth_token)
+        
+        if result['valid']:
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            user_id = result['user_id']
+            cur.execute(f"""
+                SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                       referral_code, invited_by_user_id, total_orders, total_earnings, 
+                       referral_earnings, is_verified, vehicle_type, created_at,
+                       self_orders_count, self_bonus_paid
+                FROM t_p25272970_courier_button_site.users
+                WHERE id = {user_id}
+            """)
+            
+            user = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if user:
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps(convert_decimals({
+                        'success': True,
+                        'valid': True,
+                        'user': dict(user)
+                    })),
+                    'isBase64Encoded': False
+                }
+        
         return {
-            'statusCode': 200 if result['valid'] else 401,
+            'statusCode': 401,
             'headers': headers,
-            'body': json.dumps(result),
+            'body': json.dumps({'valid': False, 'error': result.get('error', 'Invalid token')}),
             'isBase64Encoded': False
         }
     
@@ -808,8 +839,9 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     
     conn.commit()
     cur.execute(f"""
-        SELECT id, oauth_id, oauth_provider, full_name, email, phone, avatar_url, 
-               referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings
+        SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+               referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+               is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
         FROM t_p25272970_courier_button_site.users
         WHERE id = {user_id}
     """)
@@ -864,7 +896,7 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     user_id = int(user_id_header)
     
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     
     query_params = event.get('queryStringParameters') or {}
     action = query_params.get('action', 'update')
@@ -891,13 +923,23 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         """, (full_name, phone, city, user_id))
         
         conn.commit()
+        
+        cur.execute(f"""
+            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = {user_id}
+        """)
+        
+        user = cur.fetchone()
         cur.close()
         conn.close()
         
         return {
             'statusCode': 200,
             'headers': headers,
-            'body': json.dumps({'success': True, 'message': 'Профиль обновлен'}),
+            'body': json.dumps(convert_decimals({'success': True, 'message': 'Профиль обновлен', 'user': dict(user)})),
             'isBase64Encoded': False
         }
     
@@ -911,13 +953,23 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         """, (vehicle_type, user_id))
         
         conn.commit()
+        
+        cur.execute(f"""
+            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = {user_id}
+        """)
+        
+        user = cur.fetchone()
         cur.close()
         conn.close()
         
         return {
             'statusCode': 200,
             'headers': headers,
-            'body': json.dumps({'success': True, 'message': 'Транспорт обновлен'}),
+            'body': json.dumps(convert_decimals({'success': True, 'message': 'Транспорт обновлен', 'user': dict(user)})),
             'isBase64Encoded': False
         }
     

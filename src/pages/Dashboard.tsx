@@ -148,6 +148,11 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success) {
         setSelectedVehicle(vehicle);
+        if (data.user) {
+          updateUser(data.user);
+        } else {
+          updateUser({ vehicle_type: vehicle });
+        }
         toast.success('Транспорт обновлен!');
       }
     } catch (error) {
