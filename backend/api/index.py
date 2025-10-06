@@ -85,6 +85,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_auth(event, headers)
     elif route == 'couriers':
         return handle_couriers(event, headers)
+    elif route == 'csv':
+        return handle_csv_upload(event, headers)
+    elif route == 'profile':
+        return handle_profile(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -112,6 +116,8 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
             return get_user_referral_stats(user_id, headers)
         elif action == 'list':
             return get_user_referrals_list(user_id, headers)
+        elif action == 'progress':
+            return get_user_referral_progress(user_id, headers)
         elif action == 'admin_stats':
             return get_admin_referral_stats(headers)
         else:
@@ -294,6 +300,43 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
         'statusCode': 200,
         'headers': headers,
         'body': json.dumps(convert_decimals(stats_data)),
+        'isBase64Encoded': False
+    }
+
+
+def get_user_referral_progress(user_id: int, headers: Dict[str, str]) -> Dict[str, Any]:
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT 
+            id,
+            referral_phone,
+            referral_name,
+            external_id,
+            orders_count,
+            reward_amount,
+            status,
+            last_updated,
+            created_at
+        FROM t_p25272970_courier_button_site.referral_progress
+        WHERE courier_id = %s
+        ORDER BY created_at DESC
+    """, (user_id,))
+    
+    progress = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    progress_list = [dict(p) for p in progress]
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(convert_decimals({
+            'success': True,
+            'progress': progress_list
+        })),
         'isBase64Encoded': False
     }
 
@@ -792,6 +835,208 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             'token': token,
             'user': dict(user)
         })),
+        'isBase64Encoded': False
+    }
+
+
+def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    body_data = json.loads(event.get('body', '{}'))
+    user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+    
+    if not user_id_header:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    user_id = int(user_id_header)
+    action = body_data.get('action', 'update')
+    
+    if action == 'update_vehicle':
+        vehicle_type = body_data.get('vehicle_type', 'bike')
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute(f"""
+            UPDATE t_p25272970_courier_button_site.users
+            SET vehicle_type = '{vehicle_type}', updated_at = NOW()
+            WHERE id = {user_id}
+        """)
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Транспорт обновлен'}),
+            'isBase64Encoded': False
+        }
+    
+    return {
+        'statusCode': 400,
+        'headers': headers,
+        'body': json.dumps({'error': 'Invalid action'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    body_data = json.loads(event.get('body', '{}'))
+    csv_rows = body_data.get('rows', [])
+    
+    if not csv_rows:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'No data provided'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    processed = 0
+    skipped = 0
+    errors = []
+    
+    for row in csv_rows:
+        external_id = row.get('external_id', '').strip()
+        creator_username = row.get('creator_username', '').strip().upper()
+        phone = row.get('phone', '').strip()
+        first_name = row.get('first_name', '').strip()
+        last_name = row.get('last_name', '').strip()
+        eats_order_number = int(row.get('eats_order_number', 0))
+        reward = float(row.get('reward', 0))
+        status = row.get('status', 'active').strip()
+        
+        if not external_id or not creator_username:
+            skipped += 1
+            continue
+        
+        creator_username_safe = creator_username.replace("'", "''")
+        cur.execute(f"""
+            SELECT id FROM t_p25272970_courier_button_site.users
+            WHERE referral_code = '{creator_username_safe}'
+        """)
+        
+        inviter = cur.fetchone()
+        
+        if not inviter:
+            skipped += 1
+            errors.append(f"Реферальный код {creator_username} не найден")
+            continue
+        
+        inviter_id = inviter['id']
+        
+        referral_name = f"{first_name} {last_name}".strip()
+        external_id_safe = external_id.replace("'", "''")
+        phone_safe = phone.replace("'", "''")
+        referral_name_safe = referral_name.replace("'", "''")
+        
+        final_status = 'completed' if eats_order_number >= 150 else status
+        
+        cur.execute(f"""
+            INSERT INTO t_p25272970_courier_button_site.referral_progress
+            (courier_id, referral_phone, referral_name, external_id, orders_count, reward_amount, status, last_updated)
+            VALUES ({inviter_id}, '{phone_safe}', '{referral_name_safe}', '{external_id_safe}', {eats_order_number}, {reward}, '{final_status}', NOW())
+            ON CONFLICT (external_id) DO UPDATE SET
+                orders_count = {eats_order_number},
+                reward_amount = {reward},
+                status = '{final_status}',
+                last_updated = NOW()
+        """)
+        
+        processed += 1
+    
+    cur.execute("""
+        SELECT 
+            courier_id,
+            COUNT(*) as total_referrals,
+            SUM(CASE WHEN status = 'active' OR status = 'completed' THEN 1 ELSE 0 END) as active_referrals,
+            SUM(reward_amount) as total_earnings
+        FROM t_p25272970_courier_button_site.referral_progress
+        GROUP BY courier_id
+    """)
+    
+    stats_by_courier = cur.fetchall()
+    
+    for stat in stats_by_courier:
+        courier_id = stat['courier_id']
+        total_referrals = stat['total_referrals'] or 0
+        active_referrals = stat['active_referrals'] or 0
+        total_earnings = float(stat['total_earnings'] or 0)
+        
+        cur.execute(f"""
+            UPDATE t_p25272970_courier_button_site.users
+            SET referral_earnings = {total_earnings},
+                updated_at = NOW()
+            WHERE id = {courier_id}
+        """)
+        
+        cur.execute(f"""
+            UPDATE t_p25272970_courier_button_site.referrals
+            SET bonus_amount = {total_earnings},
+                updated_at = NOW()
+            WHERE referrer_id = {courier_id}
+        """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True,
+            'processed': processed,
+            'skipped': skipped,
+            'errors': errors
+        }),
         'isBase64Encoded': False
     }
 
