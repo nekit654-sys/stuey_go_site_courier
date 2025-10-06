@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Maintenance from "./pages/Maintenance";
 
 const queryClient = new QueryClient();
 
@@ -37,10 +38,49 @@ const YandexMetrika = () => {
   return null;
 };
 
+const MaintenanceWrapper = () => {
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    const bypass = localStorage.getItem('maintenance_bypass');
+    if (bypass === 'true') {
+      setIsMaintenanceMode(false);
+    }
+  }, []);
+
+  const isAdminRoute = location.pathname === '/login';
+
+  if (isMaintenanceMode && !isAdminRoute) {
+    return <Maintenance onUnlock={() => setIsMaintenanceMode(false)} />;
+  }
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/career" element={<Career />} />
+        <Route path="/reviews" element={<Reviews />} />
+        <Route path="/contacts" element={<Contacts />} />
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
+      {!isMaintenanceMode && (
+        <>
+          <WhatsAppButton />
+          <FeedbackTab />
+        </>
+      )}
+    </>
+  );
+};
+
 const App = () => {
-
-
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -49,21 +89,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <YandexMetrika />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/career" element={<Career />} />
-              <Route path="/reviews" element={<Reviews />} />
-              <Route path="/contacts" element={<Contacts />} />
-
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-
-            <WhatsAppButton />
-            <FeedbackTab />
+            <MaintenanceWrapper />
           </BrowserRouter>
         </AuthProvider>
       </TooltipProvider>
