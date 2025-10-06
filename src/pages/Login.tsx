@@ -11,8 +11,7 @@ import PaymentsDistributionTab from '@/components/admin/PaymentsDistributionTab'
 import CouriersTab from '@/components/admin/CouriersTab';
 import AnalyticsTab from '@/components/admin/AnalyticsTab';
 import SettingsModal from '@/components/admin/SettingsModal';
-import PaymentsTab from '@/components/admin/PaymentsTab';
-import CsvUploadTab from '@/components/admin/CsvUploadTab';
+import UnifiedPaymentsTab from '@/components/admin/UnifiedPaymentsTab';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
@@ -462,7 +461,7 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
@@ -470,10 +469,6 @@ const Login: React.FC = () => {
             <TabsTrigger value="couriers" className="flex items-center gap-2">
               <Icon name="Users" size={16} />
               Курьеры
-            </TabsTrigger>
-            <TabsTrigger value="csv" className="flex items-center gap-2">
-              <Icon name="Upload" size={16} />
-              CSV
             </TabsTrigger>
             <TabsTrigger value="payments" className="flex items-center gap-2">
               <Icon name="Wallet" size={16} />
@@ -516,15 +511,12 @@ const Login: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="csv" className="space-y-6">
-            <CsvUploadTab authToken={authToken} />
-          </TabsContent>
-
           <TabsContent value="payments" className="space-y-6">
-            <PaymentsTab
+            <UnifiedPaymentsTab
+              authToken={authToken}
               couriers={allCouriers}
-              isLoading={isLoadingCouriers}
-              onRefresh={loadAllCouriers}
+              isLoadingCouriers={isLoadingCouriers}
+              onRefreshCouriers={loadAllCouriers}
             />
           </TabsContent>
 
