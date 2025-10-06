@@ -787,11 +787,11 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
+        'body': json.dumps(convert_decimals({
             'success': True,
             'token': token,
             'user': dict(user)
-        }),
+        })),
         'isBase64Encoded': False
     }
 
