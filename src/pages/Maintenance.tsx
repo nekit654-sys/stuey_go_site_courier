@@ -197,17 +197,35 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
               </div>
             </div>
 
-            {/* Радиоплеер */}
-            <div className="max-w-md mx-auto mb-8">
+            {/* Развлечения */}
+            <div className="max-w-2xl mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Радиоплеер */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">
                 <div className="flex items-center gap-2 mb-4 justify-center">
                   <Icon name="Radio" size={20} className="text-purple-600" />
-                  <h3 className="font-semibold text-gray-800">Послушайте музыку пока ждёте</h3>
+                  <h3 className="font-semibold text-gray-800">Послушайте музыку</h3>
                 </div>
                 <div id="radiobells_container" className="flex justify-center">
                   <a href="https://www.radiobells.com/" id="RP_link" className="text-xs text-gray-400 hover:text-gray-600">
                     Онлайн радио
                   </a>
+                </div>
+              </div>
+
+              {/* Игра */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
+                <div className="flex items-center gap-2 mb-4 justify-center">
+                  <Icon name="Gamepad2" size={20} className="text-green-600" />
+                  <h3 className="font-semibold text-gray-800">Или сыграйте в игру</h3>
+                </div>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => window.open('/game.html', '_blank')}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105"
+                  >
+                    <Icon name="Play" size={18} className="mr-2" />
+                    Играть
+                  </Button>
                 </div>
               </div>
             </div>
