@@ -205,7 +205,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.city,
             u.avatar_url,
             u.referral_code,
-            u.invited_by,
+            u.invited_by_user_id,
             u.total_orders,
             u.total_earnings,
             u.referral_earnings,
@@ -214,7 +214,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             inviter.full_name as inviter_name,
             inviter.referral_code as inviter_code
         FROM t_p25272970_courier_button_site.users u
-        LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by = inviter.id
+        LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
         ORDER BY u.created_at DESC
     """)
     
@@ -478,10 +478,11 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    cur.execute("""
-        SELECT invited_by FROM t_p25272970_courier_button_site.users
-        WHERE id = %s
-    """, (user_id,))
+    inviter_code_safe = inviter_code.replace("'", "''")
+    cur.execute(f"""
+        SELECT invited_by_user_id FROM t_p25272970_courier_button_site.users
+        WHERE id = {user_id}
+    """)
     
     user = cur.fetchone()
     
@@ -495,7 +496,7 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
             'isBase64Encoded': False
         }
     
-    if user['invited_by']:
+    if user['invited_by_user_id']:
         cur.close()
         conn.close()
         return {
@@ -505,10 +506,10 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
             'isBase64Encoded': False
         }
     
-    cur.execute("""
+    cur.execute(f"""
         SELECT id FROM t_p25272970_courier_button_site.users
-        WHERE referral_code = %s
-    """, (inviter_code,))
+        WHERE referral_code = '{inviter_code_safe}'
+    """)
     
     referrer = cur.fetchone()
     
@@ -534,17 +535,17 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
             'isBase64Encoded': False
         }
     
-    cur.execute("""
+    cur.execute(f"""
         UPDATE t_p25272970_courier_button_site.users
-        SET invited_by = %s, updated_at = NOW()
-        WHERE id = %s
-    """, (referrer_id, user_id))
+        SET invited_by_user_id = {referrer_id}, updated_at = NOW()
+        WHERE id = {user_id}
+    """)
     
-    cur.execute("""
+    cur.execute(f"""
         INSERT INTO t_p25272970_courier_button_site.referrals 
         (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-        VALUES (%s, %s, 0, false, 0)
-    """, (referrer_id, user_id))
+        VALUES ({referrer_id}, {user_id}, 0, false, 0)
+    """)
     
     conn.commit()
     cur.close()
@@ -715,7 +716,7 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     referral_code = body_data.get('referral_code')
     
     cur.execute(f"""
-        SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by
+        SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by_user_id
         FROM t_p25272970_courier_button_site.users
         WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}'
     """)
@@ -752,7 +753,7 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             if referrer and referrer['id'] != user_id:
                 cur.execute(f"""
                     UPDATE t_p25272970_courier_button_site.users
-                    SET invited_by = {referrer['id']}
+                    SET invited_by_user_id = {referrer['id']}
                     WHERE id = {user_id}
                 """)
                 
@@ -765,7 +766,7 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     conn.commit()
     cur.execute(f"""
         SELECT id, oauth_id, oauth_provider, full_name, email, phone, avatar_url, 
-               referral_code, invited_by, total_orders, total_earnings, referral_earnings
+               referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings
         FROM t_p25272970_courier_button_site.users
         WHERE id = {user_id}
     """)
