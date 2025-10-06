@@ -7,7 +7,7 @@ import LoginForm from '@/components/admin/LoginForm';
 import StatsCards from '@/components/admin/StatsCards';
 import RequestsTable from '@/components/admin/RequestsTable';
 import ControlPanel from '@/components/admin/ControlPanel';
-import IncomeTab from '@/components/admin/IncomeTab';
+import PaymentsDistributionTab from '@/components/admin/PaymentsDistributionTab';
 import CouriersTab from '@/components/admin/CouriersTab';
 import AnalyticsTab from '@/components/admin/AnalyticsTab';
 import SettingsModal from '@/components/admin/SettingsModal';
@@ -529,10 +529,7 @@ const Login: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="income" className="space-y-6">
-            <IncomeTab
-              admins={admins}
-              onLoadAdmins={loadAdmins}
-            />
+            <PaymentsDistributionTab authToken={authToken} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

@@ -27,6 +27,13 @@ interface CsvRow {
   reward: string;
 }
 
+interface UploadSummary {
+  total_amount: number;
+  courier_self: number;
+  referrers: number;
+  admins: number;
+}
+
 interface CsvUploadTabProps {
   authToken: string;
 }
@@ -34,7 +41,13 @@ interface CsvUploadTabProps {
 export default function CsvUploadTab({ authToken }: CsvUploadTabProps) {
   const [uploading, setUploading] = useState(false);
   const [csvData, setCsvData] = useState<CsvRow[]>([]);
-  const [uploadResult, setUploadResult] = useState<{ processed: number; skipped: number; errors: string[] } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{ 
+    processed: number; 
+    skipped: number;
+    duplicates: number;
+    errors: string[];
+    summary: UploadSummary | null;
+  } | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -78,9 +91,11 @@ export default function CsvUploadTab({ authToken }: CsvUploadTabProps) {
         setUploadResult({
           processed: data.processed,
           skipped: data.skipped,
+          duplicates: data.duplicates || 0,
           errors: data.errors || [],
+          summary: data.summary || null,
         });
-        toast.success(`Обработано ${data.processed} рефералов!`);
+        toast.success(`Обработано ${data.processed} записей, пропущено: ${data.skipped}, дубликатов: ${data.duplicates || 0}`);
       } else {
         toast.error(data.error || 'Ошибка обработки');
       }
@@ -186,7 +201,7 @@ export default function CsvUploadTab({ authToken }: CsvUploadTabProps) {
 
           {uploadResult && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg">
                   <Icon name="CheckCircle" className="h-8 w-8 text-green-600 mb-2" />
                   <p className="text-sm text-green-700">Обработано</p>
@@ -197,12 +212,64 @@ export default function CsvUploadTab({ authToken }: CsvUploadTabProps) {
                   <p className="text-sm text-yellow-700">Пропущено</p>
                   <p className="text-3xl font-bold text-yellow-900">{uploadResult.skipped}</p>
                 </div>
+                <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                  <Icon name="Copy" className="h-8 w-8 text-blue-600 mb-2" />
+                  <p className="text-sm text-blue-700">Дубликатов</p>
+                  <p className="text-3xl font-bold text-blue-900">{uploadResult.duplicates}</p>
+                </div>
                 <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg">
                   <Icon name="XCircle" className="h-8 w-8 text-red-600 mb-2" />
                   <p className="text-sm text-red-700">Ошибок</p>
                   <p className="text-3xl font-bold text-red-900">{uploadResult.errors.length}</p>
                 </div>
               </div>
+
+              {uploadResult.summary && (
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-purple-900 mb-4 flex items-center gap-2">
+                    <Icon name="PieChart" className="h-5 w-5" />
+                    Распределение выплат
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Всего</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {uploadResult.summary.total_amount.toLocaleString('ru-RU')} ₽
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Самобонусы курьеров</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {uploadResult.summary.courier_self.toLocaleString('ru-RU')} ₽
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {uploadResult.summary.total_amount > 0 ? 
+                          ((uploadResult.summary.courier_self / uploadResult.summary.total_amount) * 100).toFixed(1) : 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Рефереры</p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {uploadResult.summary.referrers.toLocaleString('ru-RU')} ₽
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {uploadResult.summary.total_amount > 0 ? 
+                          ((uploadResult.summary.referrers / uploadResult.summary.total_amount) * 100).toFixed(1) : 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Администраторы</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {uploadResult.summary.admins.toLocaleString('ru-RU')} ₽
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {uploadResult.summary.total_amount > 0 ? 
+                          ((uploadResult.summary.admins / uploadResult.summary.total_amount) * 100).toFixed(1) : 0}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {uploadResult.errors.length > 0 && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
@@ -272,11 +339,12 @@ export default function CsvUploadTab({ authToken }: CsvUploadTabProps) {
               Что происходит при обработке?
             </h4>
             <ul className="list-disc list-inside text-sm text-purple-700 space-y-1">
-              <li>Сопоставление рефералов по creator_username (реферальный код)</li>
-              <li>Обновление количества заказов (eats_order_number)</li>
-              <li>Обновление сумм выплат (reward)</li>
-              <li>Автоматическая пометка завершенных (150+ заказов)</li>
-              <li>Пересчет статистики для каждого курьера</li>
+              <li>Сопоставление курьеров по creator_username (реферальный код)</li>
+              <li>Автоматическое определение дубликатов по external_id</li>
+              <li>Расчёт самобонуса курьера (3000₽ за первые 30 заказов)</li>
+              <li>Распределение выплат между курьером, рефером и админами</li>
+              <li>Сохранение полной истории в БД с возможностью аудита</li>
+              <li>Обновление статистики рефералов и доходов курьеров</li>
               <li>Обновление ачивок</li>
             </ul>
           </div>

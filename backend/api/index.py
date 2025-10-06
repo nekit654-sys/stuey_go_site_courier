@@ -89,6 +89,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_csv_upload(event, headers)
     elif route == 'profile':
         return handle_profile(event, headers)
+    elif route == 'payments':
+        return handle_payments(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -984,6 +986,56 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     }
 
 
+def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, admin_count: int) -> list:
+    '''
+    Рассчитывает распределение выплат по правилам:
+    1. Курьер получает первые 3000₽ за 30 заказов (самобонус)
+    2. После самобонуса: рефереру до 60% от суммы, остальное администраторам
+    3. Если нет реферера: все курьеру до завершения самобонуса, потом админам
+    '''
+    distributions = []
+    
+    if not self_bonus_completed:
+        distributions.append({
+            'recipient_type': 'courier_self',
+            'recipient_id': courier_id,
+            'amount': total_amount,
+            'percentage': 100.0,
+            'description': 'Самобонус (первые 3000₽ за 30 заказов)'
+        })
+    elif referrer_id:
+        referrer_share = total_amount * 0.60
+        admin_share = total_amount * 0.40
+        
+        distributions.append({
+            'recipient_type': 'courier_referrer',
+            'recipient_id': referrer_id,
+            'amount': referrer_share,
+            'percentage': 60.0,
+            'description': 'Выплата рефереру (60%)'
+        })
+        
+        if admin_count > 0:
+            admin_share_each = admin_share / admin_count
+            distributions.append({
+                'recipient_type': 'admin',
+                'recipient_id': None,
+                'amount': admin_share,
+                'percentage': 40.0,
+                'description': f'Распределение между {admin_count} админами (40%)'
+            })
+    else:
+        distributions.append({
+            'recipient_type': 'admin',
+            'recipient_id': None,
+            'amount': total_amount,
+            'percentage': 100.0,
+            'description': f'Распределение между {admin_count} админами (нет реферера)'
+        })
+    
+    return distributions
+
+
 def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     method = event.get('httpMethod', 'POST')
     
@@ -1028,104 +1080,423 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    cur.execute("SELECT COUNT(*) as count FROM t_p25272970_courier_button_site.admins")
+    admin_count = cur.fetchone()['count']
+    
     processed = 0
     skipped = 0
+    duplicates = 0
     errors = []
     
     for row in csv_rows:
-        external_id = row.get('external_id', '').strip()
-        creator_username = row.get('creator_username', '').strip().upper()
-        phone = row.get('phone', '').strip()
-        first_name = row.get('first_name', '').strip()
-        last_name = row.get('last_name', '').strip()
-        eats_order_number = int(row.get('eats_order_number', 0))
-        reward = float(row.get('reward', 0))
-        status = row.get('status', 'active').strip()
-        
-        if not external_id or not creator_username:
+        try:
+            external_id = row.get('external_id', '').strip()
+            creator_username = row.get('creator_username', '').strip().upper()
+            phone = row.get('phone', '').strip()
+            first_name = row.get('first_name', '').strip()
+            last_name = row.get('last_name', '').strip()
+            city = row.get('target_city', '').strip()
+            eats_order_number = int(row.get('eats_order_number', 0))
+            reward = float(row.get('reward', 0))
+            status = row.get('status', 'active').strip()
+            
+            if not external_id or not creator_username:
+                skipped += 1
+                continue
+            
+            cur.execute("""
+                SELECT id FROM t_p25272970_courier_button_site.courier_earnings
+                WHERE external_id = %s
+            """, (external_id,))
+            
+            existing_earning = cur.fetchone()
+            
+            if existing_earning:
+                duplicates += 1
+                continue
+            
+            cur.execute("""
+                SELECT id, invited_by_user_id FROM t_p25272970_courier_button_site.users
+                WHERE referral_code = %s
+            """, (creator_username,))
+            
+            courier = cur.fetchone()
+            
+            if not courier:
+                skipped += 1
+                errors.append(f"Курьер с кодом {creator_username} не найден")
+                continue
+            
+            courier_id = courier['id']
+            referrer_id = courier['invited_by_user_id']
+            
+            cur.execute("""
+                SELECT orders_completed, bonus_earned, is_completed
+                FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+                WHERE courier_id = %s
+            """, (courier_id,))
+            
+            self_bonus = cur.fetchone()
+            self_bonus_completed = False
+            
+            if self_bonus:
+                self_bonus_completed = self_bonus['is_completed']
+            else:
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.courier_self_bonus_tracking
+                    (courier_id, orders_completed, bonus_earned, is_completed)
+                    VALUES (%s, 0, 0, FALSE)
+                """, (courier_id,))
+            
+            referral_name = f"{first_name} {last_name}".strip()
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.courier_earnings
+                (courier_id, external_id, referrer_code, full_name, phone, city, 
+                 orders_count, total_amount, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                RETURNING id
+            """, (courier_id, external_id, creator_username, referral_name, phone, city, 
+                  eats_order_number, reward))
+            
+            earning_id = cur.fetchone()['id']
+            
+            distributions = calculate_payment_distribution(
+                reward, courier_id, referrer_id, self_bonus_completed, admin_count
+            )
+            
+            for dist in distributions:
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.payment_distributions
+                    (earning_id, recipient_type, recipient_id, amount, percentage, description, payment_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, 'pending')
+                """, (earning_id, dist['recipient_type'], dist['recipient_id'], 
+                      dist['amount'], dist['percentage'], dist['description']))
+            
+            if not self_bonus_completed:
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.courier_self_bonus_tracking
+                    SET orders_completed = orders_completed + %s,
+                        bonus_earned = bonus_earned + %s,
+                        is_completed = (bonus_earned + %s >= 3000),
+                        updated_at = NOW()
+                    WHERE courier_id = %s
+                """, (eats_order_number, reward, reward, courier_id))
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.referral_progress
+                (courier_id, referral_phone, referral_name, external_id, orders_count, reward_amount, status, last_updated)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                ON CONFLICT (external_id) DO UPDATE SET
+                    orders_count = %s,
+                    reward_amount = %s,
+                    status = %s,
+                    last_updated = NOW()
+            """, (courier_id, phone, referral_name, external_id, eats_order_number, reward, status,
+                  eats_order_number, reward, status))
+            
+            processed += 1
+            
+        except Exception as e:
+            errors.append(f"Ошибка обработки {external_id}: {str(e)}")
             skipped += 1
-            continue
-        
-        creator_username_safe = creator_username.replace("'", "''")
-        cur.execute(f"""
-            SELECT id FROM t_p25272970_courier_button_site.users
-            WHERE referral_code = '{creator_username_safe}'
-        """)
-        
-        inviter = cur.fetchone()
-        
-        if not inviter:
-            skipped += 1
-            errors.append(f"Реферальный код {creator_username} не найден")
-            continue
-        
-        inviter_id = inviter['id']
-        
-        referral_name = f"{first_name} {last_name}".strip()
-        external_id_safe = external_id.replace("'", "''")
-        phone_safe = phone.replace("'", "''")
-        referral_name_safe = referral_name.replace("'", "''")
-        
-        final_status = 'completed' if eats_order_number >= 150 else status
-        
-        cur.execute(f"""
-            INSERT INTO t_p25272970_courier_button_site.referral_progress
-            (courier_id, referral_phone, referral_name, external_id, orders_count, reward_amount, status, last_updated)
-            VALUES ({inviter_id}, '{phone_safe}', '{referral_name_safe}', '{external_id_safe}', {eats_order_number}, {reward}, '{final_status}', NOW())
-            ON CONFLICT (external_id) DO UPDATE SET
-                orders_count = {eats_order_number},
-                reward_amount = {reward},
-                status = '{final_status}',
-                last_updated = NOW()
-        """)
-        
-        processed += 1
+    
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.courier_earnings
+        SET status = 'processed', processed_at = NOW()
+        WHERE status = 'pending'
+    """)
     
     cur.execute("""
         SELECT 
-            courier_id,
-            COUNT(*) as total_referrals,
-            SUM(CASE WHEN status = 'active' OR status = 'completed' THEN 1 ELSE 0 END) as active_referrals,
-            SUM(reward_amount) as total_earnings
-        FROM t_p25272970_courier_button_site.referral_progress
-        GROUP BY courier_id
+            u.id,
+            u.referral_code,
+            COALESCE(SUM(pd.amount), 0) as total_pending_payment,
+            COUNT(DISTINCT ce.id) as total_earnings_records
+        FROM t_p25272970_courier_button_site.users u
+        LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd 
+            ON pd.recipient_id = u.id AND pd.recipient_type = 'courier_referrer' AND pd.payment_status = 'pending'
+        LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce 
+            ON ce.courier_id = u.id
+        GROUP BY u.id, u.referral_code
+        HAVING COUNT(DISTINCT ce.id) > 0
     """)
     
     stats_by_courier = cur.fetchall()
     
     for stat in stats_by_courier:
-        courier_id = stat['courier_id']
-        total_referrals = stat['total_referrals'] or 0
-        active_referrals = stat['active_referrals'] or 0
-        total_earnings = float(stat['total_earnings'] or 0)
+        courier_id = stat['id']
+        total_earnings = float(stat['total_pending_payment'] or 0)
         
-        cur.execute(f"""
+        cur.execute("""
             UPDATE t_p25272970_courier_button_site.users
-            SET referral_earnings = {total_earnings},
-                updated_at = NOW()
-            WHERE id = {courier_id}
-        """)
-        
-        cur.execute(f"""
-            UPDATE t_p25272970_courier_button_site.referrals
-            SET bonus_amount = {total_earnings},
-                updated_at = NOW()
-            WHERE referrer_id = {courier_id}
-        """)
+            SET referral_earnings = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (total_earnings, courier_id))
     
     conn.commit()
+    
+    cur.execute("""
+        SELECT 
+            SUM(total_amount) as total_uploaded,
+            SUM(CASE WHEN recipient_type = 'courier_self' THEN amount ELSE 0 END) as courier_self_total,
+            SUM(CASE WHEN recipient_type = 'courier_referrer' THEN amount ELSE 0 END) as referrer_total,
+            SUM(CASE WHEN recipient_type = 'admin' THEN amount ELSE 0 END) as admin_total
+        FROM t_p25272970_courier_button_site.courier_earnings ce
+        LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd ON pd.earning_id = ce.id
+        WHERE ce.upload_date >= NOW() - INTERVAL '5 minutes'
+    """)
+    
+    summary = cur.fetchone()
+    
     cur.close()
     conn.close()
     
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
+        'body': json.dumps(convert_decimals({
             'success': True,
             'processed': processed,
             'skipped': skipped,
-            'errors': errors
-        }),
+            'duplicates': duplicates,
+            'errors': errors,
+            'summary': {
+                'total_amount': float(summary['total_uploaded'] or 0),
+                'courier_self': float(summary['courier_self_total'] or 0),
+                'referrers': float(summary['referrer_total'] or 0),
+                'admins': float(summary['admin_total'] or 0)
+            }
+        })),
+        'isBase64Encoded': False
+    }
+
+
+def handle_payments(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Управление выплатами и статистикой распределения
+    '''
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'stats')
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    if action == 'stats':
+        cur.execute("""
+            SELECT 
+                COUNT(DISTINCT ce.id) as total_records,
+                COALESCE(SUM(ce.total_amount), 0) as total_amount,
+                COALESCE(SUM(CASE WHEN pd.recipient_type = 'courier_self' THEN pd.amount ELSE 0 END), 0) as courier_self_total,
+                COALESCE(SUM(CASE WHEN pd.recipient_type = 'courier_referrer' THEN pd.amount ELSE 0 END), 0) as referrer_total,
+                COALESCE(SUM(CASE WHEN pd.recipient_type = 'admin' THEN pd.amount ELSE 0 END), 0) as admin_total,
+                COUNT(DISTINCT CASE WHEN pd.payment_status = 'pending' THEN ce.id END) as pending_payments,
+                COUNT(DISTINCT CASE WHEN pd.payment_status = 'paid' THEN ce.id END) as paid_payments
+            FROM t_p25272970_courier_button_site.courier_earnings ce
+            LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd ON pd.earning_id = ce.id
+        """)
+        
+        stats = cur.fetchone()
+        
+        cur.execute("""
+            SELECT 
+                a.id,
+                a.username,
+                COALESCE(SUM(pd.amount) / %s, 0) as share_amount,
+                COUNT(DISTINCT pd.id) as payment_count
+            FROM t_p25272970_courier_button_site.admins a
+            LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd 
+                ON pd.recipient_type = 'admin' AND pd.payment_status = 'pending'
+            GROUP BY a.id, a.username
+        """, ((cur.execute("SELECT COUNT(*) as count FROM t_p25272970_courier_button_site.admins"), cur.fetchone()['count']),))
+        
+        admin_shares = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'stats': dict(stats),
+                'admin_shares': [dict(row) for row in admin_shares]
+            })),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'list':
+        cur.execute("""
+            SELECT 
+                ce.id,
+                ce.courier_id,
+                u.full_name as courier_name,
+                u.referral_code,
+                ce.external_id,
+                ce.orders_count,
+                ce.total_amount,
+                ce.status,
+                ce.upload_date,
+                pd.recipient_type,
+                pd.amount as distribution_amount,
+                pd.payment_status
+            FROM t_p25272970_courier_button_site.courier_earnings ce
+            LEFT JOIN t_p25272970_courier_button_site.users u ON u.id = ce.courier_id
+            LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd ON pd.earning_id = ce.id
+            ORDER BY ce.upload_date DESC
+            LIMIT 100
+        """)
+        
+        payments = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'payments': [dict(row) for row in payments]
+            })),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'courier_payments':
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        
+        if not user_id_header:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'User ID required'}),
+                'isBase64Encoded': False
+            }
+        
+        user_id = int(user_id_header)
+        
+        cur.execute("""
+            SELECT 
+                orders_completed,
+                bonus_earned,
+                bonus_paid,
+                is_completed,
+                completed_at
+            FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+            WHERE courier_id = %s
+        """, (user_id,))
+        
+        self_bonus = cur.fetchone()
+        
+        cur.execute("""
+            SELECT 
+                ce.id,
+                ce.external_id,
+                ce.full_name,
+                ce.orders_count,
+                ce.total_amount,
+                ce.upload_date,
+                pd.recipient_type,
+                pd.amount as payment_amount,
+                pd.payment_status,
+                pd.paid_at
+            FROM t_p25272970_courier_button_site.courier_earnings ce
+            LEFT JOIN t_p25272970_courier_button_site.payment_distributions pd ON pd.earning_id = ce.id
+            WHERE ce.courier_id = %s
+            ORDER BY ce.upload_date DESC
+        """, (user_id,))
+        
+        earnings = cur.fetchall()
+        
+        cur.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN recipient_type = 'courier_self' THEN amount ELSE 0 END), 0) as self_total,
+                COALESCE(SUM(CASE WHEN recipient_type = 'courier_referrer' THEN amount ELSE 0 END), 0) as referrer_total,
+                COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN amount ELSE 0 END), 0) as paid_total,
+                COALESCE(SUM(CASE WHEN payment_status = 'pending' THEN amount ELSE 0 END), 0) as pending_total
+            FROM t_p25272970_courier_button_site.payment_distributions pd
+            JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
+            WHERE ce.courier_id = %s
+        """, (user_id,))
+        
+        summary = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'self_bonus': dict(self_bonus) if self_bonus else None,
+                'earnings': [dict(row) for row in earnings],
+                'summary': dict(summary)
+            })),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'mark_paid' and method == 'POST':
+        body_data = json.loads(event.get('body', '{}'))
+        earning_ids = body_data.get('earning_ids', [])
+        
+        if not earning_ids:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'No earning IDs provided'}),
+                'isBase64Encoded': False
+            }
+        
+        placeholders = ','.join(['%s'] * len(earning_ids))
+        cur.execute(f"""
+            UPDATE t_p25272970_courier_button_site.payment_distributions
+            SET payment_status = 'paid', paid_at = NOW()
+            WHERE earning_id IN ({placeholders})
+        """, earning_ids)
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Payments marked as paid'}),
+            'isBase64Encoded': False
+        }
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 400,
+        'headers': headers,
+        'body': json.dumps({'error': 'Invalid action'}),
         'isBase64Encoded': False
     }
 
