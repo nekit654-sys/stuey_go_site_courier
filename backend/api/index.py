@@ -581,6 +581,9 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 'isBase64Encoded': False
             }
     
+    elif action in ['yandex', 'google', 'vk', 'telegram']:
+        return handle_oauth_login(action, body_data, headers)
+    
     elif action == 'verify':
         auth_token = event.get('headers', {}).get('X-Auth-Token')
         if not auth_token:
@@ -602,7 +605,107 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
     return {
         'statusCode': 400,
         'headers': headers,
-        'body': json.dumps({'error': 'Invalid action'}),
+        'body': json.dumps({'error': 'Invalid action: ' + str(action)}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    import uuid
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    user_data = {
+        'oauth_id': body_data.get('code', str(uuid.uuid4())),
+        'full_name': body_data.get('name', 'Пользователь'),
+        'email': body_data.get('email'),
+        'phone': body_data.get('phone'),
+        'avatar_url': body_data.get('avatar'),
+        'oauth_provider': provider
+    }
+    
+    referral_code = body_data.get('referral_code')
+    
+    cur.execute("""
+        SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by
+        FROM t_p25272970_courier_button_site.users
+        WHERE oauth_id = %s AND oauth_provider = %s
+    """, (user_data['oauth_id'], provider))
+    
+    existing_user = cur.fetchone()
+    
+    if existing_user:
+        user_id = existing_user['id']
+    else:
+        generated_ref_code = str(uuid.uuid4())[:8].upper()
+        
+        cur.execute("""
+            INSERT INTO t_p25272970_courier_button_site.users 
+            (oauth_id, oauth_provider, full_name, email, phone, avatar_url, referral_code)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            user_data['oauth_id'], 
+            user_data['oauth_provider'],
+            user_data['full_name'],
+            user_data['email'],
+            user_data['phone'],
+            user_data['avatar_url'],
+            generated_ref_code
+        ))
+        
+        user_id = cur.fetchone()['id']
+        
+        if referral_code:
+            cur.execute("""
+                SELECT id FROM t_p25272970_courier_button_site.users
+                WHERE referral_code = %s
+            """, (referral_code,))
+            
+            referrer = cur.fetchone()
+            
+            if referrer and referrer['id'] != user_id:
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET invited_by = %s
+                    WHERE id = %s
+                """, (referrer['id'], user_id))
+                
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.referrals
+                    (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
+                    VALUES (%s, %s, 0, false, 0)
+                """, (referrer['id'], user_id))
+    
+    cur.execute("""
+        SELECT id, oauth_id, oauth_provider, full_name, email, phone, avatar_url, 
+               referral_code, invited_by, total_orders, total_earnings, referral_earnings
+        FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (user_id,))
+    
+    user = cur.fetchone()
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    payload = {
+        'user_id': user['id'],
+        'oauth_provider': user['oauth_provider'],
+        'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True,
+            'token': token,
+            'user': dict(user)
+        }),
         'isBase64Encoded': False
     }
 
