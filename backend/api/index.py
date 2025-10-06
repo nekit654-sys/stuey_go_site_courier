@@ -707,22 +707,18 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    user_data = {
-        'oauth_id': body_data.get('code', str(uuid.uuid4())),
-        'full_name': body_data.get('name', 'Пользователь'),
-        'email': body_data.get('email'),
-        'phone': body_data.get('phone'),
-        'avatar_url': body_data.get('avatar'),
-        'oauth_provider': provider
-    }
-    
+    oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
+    full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
+    email = (body_data.get('email') or '').replace("'", "''")
+    phone = (body_data.get('phone') or '').replace("'", "''")
+    avatar_url = (body_data.get('avatar') or '').replace("'", "''")
     referral_code = body_data.get('referral_code')
     
-    cur.execute("""
+    cur.execute(f"""
         SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by
         FROM t_p25272970_courier_button_site.users
-        WHERE oauth_id = %s AND oauth_provider = %s
-    """, (user_data['oauth_id'], provider))
+        WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}'
+    """)
     
     existing_user = cur.fetchone()
     
@@ -731,50 +727,48 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     else:
         generated_ref_code = str(uuid.uuid4())[:8].upper()
         
-        cur.execute("""
+        email_val = f"'{email}'" if email else 'NULL'
+        phone_val = f"'{phone}'" if phone else 'NULL'
+        avatar_val = f"'{avatar_url}'" if avatar_url else 'NULL'
+        
+        cur.execute(f"""
             INSERT INTO t_p25272970_courier_button_site.users 
             (oauth_id, oauth_provider, full_name, email, phone, avatar_url, referral_code)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES ('{oauth_id}', '{provider}', '{full_name}', {email_val}, {phone_val}, {avatar_val}, '{generated_ref_code}')
             RETURNING id
-        """, (
-            user_data['oauth_id'], 
-            user_data['oauth_provider'],
-            user_data['full_name'],
-            user_data['email'],
-            user_data['phone'],
-            user_data['avatar_url'],
-            generated_ref_code
-        ))
+        """)
         
         user_id = cur.fetchone()['id']
         
         if referral_code:
-            cur.execute("""
+            referral_code_safe = referral_code.replace("'", "''")
+            cur.execute(f"""
                 SELECT id FROM t_p25272970_courier_button_site.users
-                WHERE referral_code = %s
-            """, (referral_code,))
+                WHERE referral_code = '{referral_code_safe}'
+            """)
             
             referrer = cur.fetchone()
             
             if referrer and referrer['id'] != user_id:
-                cur.execute("""
+                cur.execute(f"""
                     UPDATE t_p25272970_courier_button_site.users
-                    SET invited_by = %s
-                    WHERE id = %s
-                """, (referrer['id'], user_id))
+                    SET invited_by = {referrer['id']}
+                    WHERE id = {user_id}
+                """)
                 
-                cur.execute("""
+                cur.execute(f"""
                     INSERT INTO t_p25272970_courier_button_site.referrals
                     (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-                    VALUES (%s, %s, 0, false, 0)
-                """, (referrer['id'], user_id))
+                    VALUES ({referrer['id']}, {user_id}, 0, false, 0)
+                """)
     
-    cur.execute("""
+    conn.commit()
+    cur.execute(f"""
         SELECT id, oauth_id, oauth_provider, full_name, email, phone, avatar_url, 
                referral_code, invited_by, total_orders, total_earnings, referral_earnings
         FROM t_p25272970_courier_button_site.users
-        WHERE id = %s
-    """, (user_id,))
+        WHERE id = {user_id}
+    """)
     
     user = cur.fetchone()
     
