@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
+import CourierEarningsCard from '@/components/CourierEarningsCard';
 import { calculateAchievements, groupAchievementsByCategory, getTierColor, getTierBadgeColor } from '@/lib/achievements';
 
 interface ReferralStats {
@@ -407,6 +408,8 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            <CourierEarningsCard userId={user.id} />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
@@ -559,6 +562,8 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-6">
+            <CourierEarningsCard userId={user.id} />
+
             <Card className="border-2 border-blue-200">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
                 <CardTitle>Данные для партнерской программы</CardTitle>
