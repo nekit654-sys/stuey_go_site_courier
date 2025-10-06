@@ -91,6 +91,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_profile(event, headers)
     elif route == 'payments':
         return handle_payments(event, headers)
+    elif route == 'game':
+        return handle_game(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -742,7 +744,8 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                        referral_code, invited_by_user_id, total_orders, total_earnings, 
                        referral_earnings, is_verified, vehicle_type, created_at,
-                       self_orders_count, self_bonus_paid
+                       self_orders_count, self_bonus_paid, nickname, game_high_score, 
+                       game_total_plays, game_achievements, agreed_to_terms
                 FROM t_p25272970_courier_button_site.users
                 WHERE id = {user_id}
             """)
@@ -843,7 +846,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     cur.execute(f"""
         SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-               is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
+               is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+               nickname, game_high_score, game_total_plays, game_achievements, agreed_to_terms
         FROM t_p25272970_courier_button_site.users
         WHERE id = {user_id}
     """)
@@ -929,7 +933,8 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         cur.execute(f"""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+                   nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
             WHERE id = {user_id}
         """)
@@ -959,7 +964,8 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         cur.execute(f"""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+                   nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
             WHERE id = {user_id}
         """)
@@ -972,6 +978,92 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             'statusCode': 200,
             'headers': headers,
             'body': json.dumps(convert_decimals({'success': True, 'message': 'Транспорт обновлен', 'user': dict(user)})),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'update_nickname':
+        nickname = body_data.get('nickname', '').strip()
+        
+        if not nickname or len(nickname) < 3 or len(nickname) > 20:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Никнейм должен быть от 3 до 20 символов'}),
+                'isBase64Encoded': False
+            }
+        
+        cur.execute("""
+            SELECT id FROM t_p25272970_courier_button_site.users
+            WHERE nickname = %s AND id != %s
+        """, (nickname, user_id))
+        
+        existing = cur.fetchone()
+        if existing:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Этот никнейм уже занят'}),
+                'isBase64Encoded': False
+            }
+        
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET nickname = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (nickname, user_id))
+        
+        conn.commit()
+        
+        cur.execute(f"""
+            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+                   nickname, game_high_score, game_total_plays, agreed_to_terms
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = {user_id}
+        """)
+        
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({'success': True, 'message': 'Никнейм обновлен', 'user': dict(user)})),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'agree_terms':
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET agreed_to_terms = TRUE, agreed_terms_at = NOW(), updated_at = NOW()
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        
+        cur.execute(f"""
+            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+                   nickname, game_high_score, game_total_plays, agreed_to_terms
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = {user_id}
+        """)
+        
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({'success': True, 'message': 'Соглашение принято', 'user': dict(user)})),
             'isBase64Encoded': False
         }
     
@@ -2010,5 +2102,200 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         'statusCode': 405,
         'headers': headers,
         'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', '')
+    
+    if action == 'leaderboard':
+        limit = int(query_params.get('limit', '50'))
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT 
+                id,
+                nickname,
+                game_high_score,
+                game_total_plays,
+                game_achievements,
+                full_name,
+                city,
+                created_at
+            FROM t_p25272970_courier_button_site.users
+            WHERE game_high_score > 0 AND nickname IS NOT NULL
+            ORDER BY game_high_score DESC, game_total_plays ASC
+            LIMIT %s
+        """, (limit,))
+        
+        leaderboard = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'leaderboard': [dict(row) for row in leaderboard]
+            }), ensure_ascii=False),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'save_score':
+        if method != 'POST':
+            return {
+                'statusCode': 405,
+                'headers': headers,
+                'body': json.dumps({'error': 'Method not allowed'}),
+                'isBase64Encoded': False
+            }
+        
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        if not user_id_header:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'User ID required'}),
+                'isBase64Encoded': False
+            }
+        
+        body_data = json.loads(event.get('body', '{}'))
+        score = body_data.get('score', 0)
+        new_achievements = body_data.get('achievements', [])
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT game_high_score, game_total_plays, game_achievements
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (user_id_header,))
+        
+        user = cur.fetchone()
+        
+        if not user:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 404,
+                'headers': headers,
+                'body': json.dumps({'error': 'User not found'}),
+                'isBase64Encoded': False
+            }
+        
+        current_high_score = user['game_high_score'] or 0
+        current_plays = user['game_total_plays'] or 0
+        current_achievements = user['game_achievements'] or []
+        
+        is_new_record = score > current_high_score
+        
+        merged_achievements = list(set(current_achievements + new_achievements))
+        
+        if is_new_record:
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET game_high_score = %s, 
+                    game_total_plays = %s,
+                    game_achievements = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+            """, (score, current_plays + 1, json.dumps(merged_achievements), user_id_header))
+        else:
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET game_total_plays = %s,
+                    game_achievements = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+            """, (current_plays + 1, json.dumps(merged_achievements), user_id_header))
+        
+        conn.commit()
+        
+        cur.execute("""
+            SELECT COUNT(*) + 1 as rank
+            FROM t_p25272970_courier_button_site.users
+            WHERE game_high_score > %s
+        """, (score if is_new_record else current_high_score,))
+        
+        rank_result = cur.fetchone()
+        rank = rank_result['rank'] if rank_result else None
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'is_new_record': is_new_record,
+                'high_score': score if is_new_record else current_high_score,
+                'total_plays': current_plays + 1,
+                'rank': rank,
+                'new_achievements': list(set(new_achievements) - set(current_achievements))
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'my_stats':
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        if not user_id_header:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'User ID required'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT 
+                game_high_score,
+                game_total_plays,
+                game_achievements,
+                nickname,
+                (SELECT COUNT(*) + 1 FROM t_p25272970_courier_button_site.users u2 
+                 WHERE u2.game_high_score > u1.game_high_score) as rank
+            FROM t_p25272970_courier_button_site.users u1
+            WHERE id = %s
+        """, (user_id_header,))
+        
+        stats = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        
+        if not stats:
+            return {
+                'statusCode': 404,
+                'headers': headers,
+                'body': json.dumps({'error': 'User not found'}),
+                'isBase64Encoded': False
+            }
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'stats': dict(stats)
+            })),
+            'isBase64Encoded': False
+        }
+    
+    return {
+        'statusCode': 400,
+        'headers': headers,
+        'body': json.dumps({'error': 'Invalid action'}),
         'isBase64Encoded': False
     }
