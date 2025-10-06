@@ -48,6 +48,8 @@ const Login: React.FC = () => {
     top_referrers: any[];
   } | null>(null);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
+  const [allCouriers, setAllCouriers] = useState<any[]>([]);
+  const [isLoadingCouriers, setIsLoadingCouriers] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +162,9 @@ const Login: React.FC = () => {
     }
     if (isAuthenticated && (activeTab === 'referrals' || activeTab === 'stats')) {
       loadReferralStats();
+    }
+    if (isAuthenticated && activeTab === 'couriers') {
+      loadAllCouriers();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -389,6 +394,36 @@ const Login: React.FC = () => {
     }
   };
 
+  const loadAllCouriers = async () => {
+    setIsLoadingCouriers(true);
+    try {
+      const response = await fetch(`${API_URL}?route=couriers&action=list`, {
+        headers: {
+          'X-Auth-Token': authToken
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAllCouriers(data.couriers || []);
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось загрузить список курьеров',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки курьеров:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось подключиться к серверу',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingCouriers(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <LoginForm
@@ -421,18 +456,22 @@ const Login: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Icon name="FileText" size={16} />
               Заявки
+            </TabsTrigger>
+            <TabsTrigger value="couriers" className="flex items-center gap-2">
+              <Icon name="Users" size={16} />
+              Курьеры
             </TabsTrigger>
             <TabsTrigger value="income" className="flex items-center gap-2">
               <Icon name="DollarSign" size={16} />
               Доходы
             </TabsTrigger>
             <TabsTrigger value="admins" className="flex items-center gap-2">
-              <Icon name="Users" size={16} />
-              Администраторы
+              <Icon name="Shield" size={16} />
+              Админы
             </TabsTrigger>
             <TabsTrigger value="referrals" className="flex items-center gap-2">
               <Icon name="UserPlus" size={16} />
@@ -461,6 +500,115 @@ const Login: React.FC = () => {
               onUpdateStatus={updateRequestStatus}
               onDelete={deleteRequest}
             />
+          </TabsContent>
+
+          <TabsContent value="couriers" className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Все курьеры</h2>
+                  <p className="text-gray-600 mt-1">Полный список зарегистрированных курьеров</p>
+                </div>
+                <button
+                  onClick={loadAllCouriers}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Icon name="RefreshCw" size={16} />
+                  Обновить
+                </button>
+              </div>
+
+              {isLoadingCouriers ? (
+                <div className="text-center py-12">
+                  <Icon name="Loader2" size={32} className="animate-spin mx-auto text-blue-600" />
+                  <p className="text-gray-600 mt-4">Загрузка...</p>
+                </div>
+              ) : allCouriers.length === 0 ? (
+                <div className="text-center py-12">
+                  <Icon name="Users" size={48} className="mx-auto text-gray-300" />
+                  <p className="text-gray-600 mt-4">Нет зарегистрированных курьеров</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ФИО</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email/Телефон</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Город</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Реф. код</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пригласил</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заказы</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заработано</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Регистрация</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {allCouriers.map((courier) => (
+                        <tr key={courier.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            #{courier.id}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              {courier.avatar_url && (
+                                <img src={courier.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                              )}
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{courier.full_name}</div>
+                                <div className="text-xs text-gray-500">{courier.oauth_provider}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {courier.email || courier.phone || '—'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {courier.city || '—'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <code className="px-2 py-1 bg-gray-100 rounded text-sm font-mono">
+                              {courier.referral_code}
+                            </code>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {courier.inviter_name ? (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <Icon name="UserCheck" size={14} />
+                                <span>{courier.inviter_name}</span>
+                                <code className="text-xs bg-green-50 px-1 rounded">{courier.inviter_code}</code>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {courier.total_orders || 0}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {courier.total_earnings || 0} ₽
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              courier.is_active 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {courier.is_active ? 'Активен' : 'Неактивен'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(courier.created_at).toLocaleDateString('ru-RU')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="income" className="space-y-6">

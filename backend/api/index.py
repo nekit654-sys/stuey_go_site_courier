@@ -83,6 +83,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_referrals(event, headers)
     elif route == 'auth':
         return handle_auth(event, headers)
+    elif route == 'couriers':
+        return handle_couriers(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -140,6 +142,95 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
         'statusCode': 405,
         'headers': headers,
         'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    if method == 'GET':
+        action = query_params.get('action', 'list')
+        
+        if action == 'list':
+            return get_all_couriers(headers)
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid action'}),
+                'isBase64Encoded': False
+            }
+    
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT 
+            u.id,
+            u.oauth_id,
+            u.oauth_provider,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.city,
+            u.avatar_url,
+            u.referral_code,
+            u.invited_by,
+            u.total_orders,
+            u.total_earnings,
+            u.referral_earnings,
+            u.is_active,
+            u.created_at,
+            inviter.full_name as inviter_name,
+            inviter.referral_code as inviter_code
+        FROM t_p25272970_courier_button_site.users u
+        LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by = inviter.id
+        ORDER BY u.created_at DESC
+    """)
+    
+    couriers = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    couriers_list = [dict(c) for c in couriers]
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(convert_decimals({
+            'success': True,
+            'couriers': couriers_list
+        })),
         'isBase64Encoded': False
     }
 
