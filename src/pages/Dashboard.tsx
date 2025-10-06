@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import ProfileSetupModal from '@/components/ProfileSetupModal';
 
 interface ReferralStats {
   total_referrals: number;
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [inviterCode, setInviterCode] = useState('');
   const [submittingInviter, setSubmittingInviter] = useState(false);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -48,9 +50,12 @@ export default function Dashboard() {
       return;
     }
 
+    const isProfileComplete = user?.phone && user?.city && user?.full_name;
+    setShowProfileSetup(!isProfileComplete);
+
     fetchStats();
     fetchReferrals();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
 
   const fetchStats = async () => {
     try {
@@ -147,6 +152,15 @@ export default function Dashboard() {
   }
 
   return (
+    <>
+      {showProfileSetup && user && token && (
+        <ProfileSetupModal
+          user={user}
+          token={token}
+          onComplete={() => setShowProfileSetup(false)}
+        />
+      )}
+      
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -402,34 +416,111 @@ export default function Dashboard() {
           <TabsContent value="profile" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Мой профиль</CardTitle>
-                <CardDescription>Ваши данные и настройки</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Мой профиль</CardTitle>
+                    <CardDescription>Ваши данные и настройки</CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowProfileSetup(true)}
+                  >
+                    <Icon name="Edit" className="mr-2 h-4 w-4" />
+                    Редактировать
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">ФИО</label>
-                    <p className="mt-1">{user?.full_name}</p>
+                {(!user?.phone || !user?.city) && (
+                  <div className="mb-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Icon name="AlertTriangle" className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-red-800">
+                        <p className="font-bold mb-1">⚠️ Профиль заполнен не полностью!</p>
+                        <p>Заполните <strong>все данные</strong> для корректной работы системы выплат.</p>
+                        <Button
+                          size="sm"
+                          className="mt-2 bg-red-600 hover:bg-red-700"
+                          onClick={() => setShowProfileSetup(true)}
+                        >
+                          <Icon name="Edit" className="mr-2 h-4 w-4" />
+                          Заполнить профиль
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div>
+                )}
+
+                <div className="grid gap-4">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Icon name="Info" className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium mb-1">Данные для партнерской программы</p>
+                        <p>Эти данные должны совпадать с вашим профилем в <strong>Яндекс Про</strong></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-sm font-medium text-gray-500">ФИО</label>
+                        {user?.full_name ? (
+                          <Icon name="CheckCircle" className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Icon name="XCircle" className="h-4 w-4 text-red-600" />
+                        )}
+                      </div>
+                      <p className="text-lg font-semibold">{user?.full_name || 'Не указано'}</p>
+                    </div>
+
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-sm font-medium text-gray-500">Телефон</label>
+                        {user?.phone ? (
+                          <Icon name="CheckCircle" className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Icon name="XCircle" className="h-4 w-4 text-red-600" />
+                        )}
+                      </div>
+                      <p className="text-lg font-semibold font-mono">{user?.phone || 'Не указан'}</p>
+                      {user?.phone && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Последние 4 цифры: <strong className="font-mono">{user.phone.slice(-4)}</strong>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-sm font-medium text-gray-500">Город</label>
+                        {user?.city ? (
+                          <Icon name="CheckCircle" className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Icon name="XCircle" className="h-4 w-4 text-red-600" />
+                        )}
+                      </div>
+                      <p className="text-lg font-semibold">{user?.city || 'Не указан'}</p>
+                    </div>
+
+                    <div className="p-4 border rounded-lg bg-purple-50">
+                      <label className="text-sm font-medium text-purple-600">Реферальный код</label>
+                      <p className="text-2xl font-mono font-bold text-purple-900 mt-1">{user?.referral_code}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg bg-gray-50">
                     <label className="text-sm font-medium text-gray-500">Email</label>
                     <p className="mt-1">{user?.email || 'Не указан'}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Телефон</label>
-                    <p className="mt-1">{user?.phone || 'Не указан'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Город</label>
-                    <p className="mt-1">{user?.city || 'Не указан'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Реферальный код</label>
-                    <p className="mt-1 font-mono">{user?.referral_code}</p>
-                  </div>
-                  <div>
+
+                  <div className="p-4 border rounded-lg bg-gray-50">
                     <label className="text-sm font-medium text-gray-500">Способ входа</label>
-                    <p className="mt-1 capitalize">{user?.oauth_provider}</p>
+                    <p className="mt-1 capitalize flex items-center gap-2">
+                      <Icon name="Shield" className="h-4 w-4 text-blue-600" />
+                      {user?.oauth_provider}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -496,5 +587,6 @@ export default function Dashboard() {
         </Tabs>
       </main>
     </div>
+    </>
   );
 }
