@@ -57,11 +57,13 @@ export default function Dashboard() {
       return;
     }
 
-    const isProfileComplete = user?.phone && user?.city && user?.full_name;
-    setShowProfileSetup(!isProfileComplete);
+    if (user) {
+      const isProfileComplete = user?.phone && user?.city && user?.full_name;
+      setShowProfileSetup(!isProfileComplete);
 
-    fetchStats();
-    fetchReferralProgress();
+      fetchStats();
+      fetchReferralProgress();
+    }
   }, [isAuthenticated, navigate, user]);
 
   const fetchStats = async () => {
@@ -177,16 +179,22 @@ export default function Dashboard() {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <ProfileSetupModal 
-        open={showProfileSetup} 
-        onOpenChange={setShowProfileSetup}
-        onComplete={() => {
-          setShowProfileSetup(false);
-          fetchStats();
-        }}
-      />
+      {showProfileSetup && (
+        <ProfileSetupModal 
+          user={user}
+          token={token || ''}
+          onComplete={() => {
+            setShowProfileSetup(false);
+            fetchStats();
+          }}
+        />
+      )}
 
       <div className="container mx-auto p-6 max-w-7xl">
         <div className="flex justify-between items-center mb-8">

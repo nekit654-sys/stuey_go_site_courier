@@ -14,6 +14,11 @@ interface User {
   total_earnings: number;
   referral_earnings: number;
   is_verified: boolean;
+  vehicle_type?: string;
+  created_at?: string;
+  invited_by_user_id?: number;
+  self_orders_count?: number;
+  self_bonus_paid?: boolean;
 }
 
 interface AuthContextType {
