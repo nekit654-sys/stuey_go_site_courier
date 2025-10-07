@@ -1025,7 +1025,6 @@
     <div class="menu-buttons">
       <button id="playBtn" role="menuitem">🎮 Играть</button>
       <button id="leaderboardBtn" role="menuitem">🏆 Лидерборд</button>
-      <button id="loginBtn" role="menuitem">👤 Войти</button>
       <button id="rulesBtn" role="menuitem">📖 Правила</button>
       <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
       <button id="becomeBtn" role="menuitem">Подать заявку</button>
@@ -1127,9 +1126,14 @@
 <!-- Меню после окончания игры -->
 <div id="gameOverMenu" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" style="display:none;">
   <div id="gameOverTitle" style="margin-bottom: 12px;">Игра окончена!</div>
-  <div>Ваш счёт: <span id="finalScore">0</span></div>
-  <button id="restartBtn">Заново</button>
-  <button id="toMenuBtn">В меню</button>
+  <div id="gameOverStats" style="margin-bottom: 16px;">
+    <div style="font-size: 1.8rem; font-weight: bold; color: #FFD700; margin-bottom: 8px;">Ваш счёт: <span id="finalScore">0</span></div>
+    <div id="gameOverMessage" style="font-size: 1rem; color: #ccc; margin-bottom: 12px;"></div>
+  </div>
+  <button id="restartBtn">🔄 Заново</button>
+  <button id="toMenuBtn">📋 В меню</button>
+  <button id="saveScoreBtn" style="display:none;">💾 Сохранить результат</button>
+  <button id="loginToSaveBtn" style="display:none;">🔐 Войти и сохранить</button>
 </div>
 
 <!-- Экран ПОТРАЧЕНО -->
@@ -1163,11 +1167,12 @@
   const touchControls = document.getElementById('touchControls');
   const playBtn = document.getElementById('playBtn');
   const leaderboardBtn = document.getElementById('leaderboardBtn');
-  const loginBtn = document.getElementById('loginBtn');
   const rulesBtn = document.getElementById('rulesBtn');
   const closeRulesBtn = document.getElementById('closeRulesBtn');
   const restartBtn = document.getElementById('restartBtn');
   const toMenuBtn = document.getElementById('toMenuBtn');
+  const saveScoreBtn = document.getElementById('saveScoreBtn');
+  const loginToSaveBtn = document.getElementById('loginToSaveBtn');
   const becomeBtn = document.getElementById('becomeBtn');
   const toggleMusicBtn = document.getElementById('toggleMusicBtn');
   const game = document.getElementById('game');
@@ -1983,43 +1988,31 @@
       finalScoreElem.textContent = Math.floor(score);
       
       const saveResult = await saveGameResult();
+      const gameOverMessage = document.getElementById('gameOverMessage');
       
-      let message = '';
-      if (saveResult && !saveResult.isGuest) {
+      // Показываем/скрываем кнопки в зависимости от статуса пользователя
+      if (saveResult && saveResult.isGuest) {
+        // Гость - показываем кнопку "Войти и сохранить"
+        loginToSaveBtn.style.display = 'block';
+        saveScoreBtn.style.display = 'none';
+        gameOverMessage.textContent = '🔐 Войдите, чтобы сохранить результат в топ!';
+        gameOverMessage.style.color = '#FFD700';
+      } else if (saveResult) {
+        // Авторизованный пользователь - результат уже сохранён
+        loginToSaveBtn.style.display = 'none';
+        saveScoreBtn.style.display = 'none';
+        
         if (saveResult.is_new_record) {
-          message = `🎉 НОВЫЙ РЕКОРД! Ваше место: #${saveResult.rank}`;
+          gameOverMessage.innerHTML = `🎉 НОВЫЙ РЕКОРД!<br>Ваше место: #${saveResult.rank}`;
+          gameOverMessage.style.color = '#FFD700';
         } else {
-          message = `✅ Результат сохранён! Ваше место: #${saveResult.rank}`;
+          gameOverMessage.innerHTML = `✅ Результат сохранён!<br>Ваше место: #${saveResult.rank}`;
+          gameOverMessage.style.color = '#4ade80';
         }
+        
         if (saveResult.new_achievements && saveResult.new_achievements.length > 0) {
-          message += `\n🏆 Новых ачивок: ${saveResult.new_achievements.length}!`;
+          gameOverMessage.innerHTML += `<br>🏆 Новых ачивок: ${saveResult.new_achievements.length}!`;
         }
-      } else if (saveResult && saveResult.isGuest) {
-        message = '🔐 Войдите через меню, чтобы сохранить результат в топ!\nНажмите "В меню" → "👤 Войти"';
-      }
-      
-      if (message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.textContent = message;
-        messageDiv.style.cssText = `
-          position: absolute;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 15px 30px;
-          border-radius: 12px;
-          border: 3px solid #000;
-          font-size: clamp(12px, 3vw, 16px);
-          font-weight: bold;
-          text-align: center;
-          z-index: 1000;
-          box-shadow: 0 6px 0 0 rgba(0,0,0,0.8);
-          white-space: pre-line;
-        `;
-        gameOverMenu.appendChild(messageDiv);
-        setTimeout(() => messageDiv.remove(), 5000);
       }
       
       gameOverMenu.style.display = 'block';
@@ -2049,16 +2042,7 @@
     }
   });
   
-  loginBtn.addEventListener('click', () => {
-    if (window.parent && typeof window.parent.postMessage === 'function') {
-      window.parent.postMessage({ type: 'closeGame' }, '*');
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
-    } else {
-      window.location.href = '/auth';
-    }
-  });
+  // Кнопка входа убрана из основного меню
   
   rulesBtn.addEventListener('click', () => {
     mainMenu.style.display = 'none';
@@ -2079,6 +2063,18 @@
     gameOverMenu.style.display = 'none';
     mainMenu.style.display = 'block';
     playBackgroundMusic();
+  });
+  
+  // Обработчик кнопки "Войти и сохранить"
+  loginToSaveBtn.addEventListener('click', () => {
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'closeGame' }, '*');
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
+    } else {
+      window.location.href = '/auth';
+    }
   });
   
   becomeBtn.addEventListener('click', () => {

@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface LeaderboardPlayer {
   id: number;
   nickname: string;
+  full_name?: string;
   game_high_score: number;
   game_total_plays: number;
   game_achievements: string[];
@@ -219,17 +220,20 @@ export default function Leaderboard() {
                             {player.avatar_url && (
                               <img
                                 src={player.avatar_url}
-                                alt={player.nickname}
+                                alt={player.full_name || player.nickname}
                                 className="w-10 h-10 rounded-full border-2 border-purple-400"
                               />
                             )}
                             <div>
                               <div className="text-white font-bold flex items-center gap-2">
-                                {player.nickname}
+                                {player.full_name || player.nickname}
                                 {isCurrentUser && (
                                   <Badge className="bg-yellow-500 text-black text-xs">Вы</Badge>
                                 )}
                               </div>
+                              {player.full_name && player.nickname && (
+                                <div className="text-sm text-purple-300">@{player.nickname}</div>
+                              )}
                             </div>
                           </div>
                         </td>

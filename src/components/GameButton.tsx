@@ -3,9 +3,10 @@ import { X, Gamepad2 } from "lucide-react";
 
 interface GameButtonProps {
   onToggle: (isOpen: boolean) => void;
+  onGameClose?: () => void;
 }
 
-const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
+const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -85,7 +86,12 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
     document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
     onToggle(false);
-  }, [onToggle]);
+    
+    // Вызываем коллбэк для обновления данных пользователя
+    if (onGameClose) {
+      onGameClose();
+    }
+  }, [onToggle, onGameClose]);
 
   // Делаем функцию закрытия доступной глобально для iframe
   useEffect(() => {
@@ -104,9 +110,18 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle }) => {
         event.data === "closeGame" || 
         (typeof event.data === 'object' && event.data?.type === 'closeGame');
       
+      const isOpenLeaderboard = 
+        typeof event.data === 'object' && event.data?.type === 'openLeaderboard';
+      
       if (isCloseMessage) {
         console.log('Close message detected - calling closeGame()');
         closeGame();
+      } else if (isOpenLeaderboard) {
+        console.log('Open leaderboard message detected');
+        closeGame();
+        setTimeout(() => {
+          window.location.href = '/leaderboard';
+        }, 100);
       }
     };
 

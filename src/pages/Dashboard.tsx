@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,31 @@ export default function Dashboard() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(user?.vehicle_type || 'bike');
   const [isGameOpen, setIsGameOpen] = useState(false);
+
+  // Функция для обновления данных пользователя из БД
+  const refreshUserData = async () => {
+    if (!token || !user) return;
+    
+    try {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'verify',
+          token: token
+        })
+      });
+
+      const data = await response.json();
+      if (data.success && data.user) {
+        updateUser(data.user);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -167,17 +192,18 @@ export default function Dashboard() {
   const selfOrdersProgress = user?.self_orders_count || 0;
   const selfBonusPaid = user?.self_bonus_paid || false;
 
-  const achievements = calculateAchievements({
+  // Мемоизация достижений для избежания лагов
+  const achievements = useMemo(() => calculateAchievements({
     total_orders: stats?.total_orders,
     total_referrals: stats?.total_referrals,
     referral_earnings: stats?.referral_earnings,
     created_at: user?.created_at,
     vehicle_type: selectedVehicle,
     referral_progress: referralProgress,
-  });
+  }), [stats, user?.created_at, selectedVehicle, referralProgress]);
 
-  const achievementCategories = groupAchievementsByCategory(achievements);
-  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const achievementCategories = useMemo(() => groupAchievementsByCategory(achievements), [achievements]);
+  const unlockedCount = useMemo(() => achievements.filter((a) => a.unlocked).length, [achievements]);
 
   if (loading) {
     return (
@@ -193,7 +219,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <GameButton onToggle={setIsGameOpen} />
+      <GameButton onToggle={setIsGameOpen} onGameClose={refreshUserData} />
       {showProfileSetup && (
         <ProfileSetupModal 
           user={user}
@@ -225,46 +251,46 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-700 shadow-[0_8px_0_0_rgba(37,99,235,0.8)] hover:shadow-[0_4px_0_0_rgba(37,99,235,0.8)] hover:translate-y-[4px] transition-all">
+          <Card className="border-4 border-blue-500 bg-blue-600 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-bold text-white">📦 Всего заказов</CardTitle>
               <Icon name="Package" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.total_orders || 0}</div>
+              <div className="text-5xl font-black text-white">{stats?.total_orders || 0}</div>
               <p className="text-xs text-blue-100 mt-1 font-semibold">Выполнено</p>
             </CardContent>
           </Card>
 
-          <Card className="border-4 border-green-500 bg-gradient-to-br from-green-600 to-green-700 shadow-[0_8px_0_0_rgba(34,197,94,0.8)] hover:shadow-[0_4px_0_0_rgba(34,197,94,0.8)] hover:translate-y-[4px] transition-all">
+          <Card className="border-4 border-green-500 bg-green-600 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-bold text-white">👥 Рефералы</CardTitle>
               <Icon name="Users" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.total_referrals || 0}</div>
+              <div className="text-5xl font-black text-white">{stats?.total_referrals || 0}</div>
               <p className="text-xs text-green-100 mt-1 font-semibold">{stats?.active_referrals || 0} активных</p>
             </CardContent>
           </Card>
 
-          <Card className="border-4 border-purple-500 bg-gradient-to-br from-purple-600 to-purple-700 shadow-[0_8px_0_0_rgba(168,85,247,0.8)] hover:shadow-[0_4px_0_0_rgba(168,85,247,0.8)] hover:translate-y-[4px] transition-all">
+          <Card className="border-4 border-purple-500 bg-purple-600 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-bold text-white">💰 Доход от рефералов</CardTitle>
               <Icon name="TrendingUp" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.referral_earnings || 0} ₽</div>
+              <div className="text-5xl font-black text-white">{stats?.referral_earnings || 0} ₽</div>
               <p className="text-xs text-purple-100 mt-1 font-semibold">Пассивный доход</p>
             </CardContent>
           </Card>
 
-          <Card className="border-4 border-yellow-500 bg-gradient-to-br from-yellow-500 to-orange-500 shadow-[0_8px_0_0_rgba(234,179,8,0.8)] hover:shadow-[0_4px_0_0_rgba(234,179,8,0.8)] hover:translate-y-[4px] transition-all">
+          <Card className="border-4 border-yellow-500 bg-yellow-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-bold text-black">🏆 Достижения</CardTitle>
               <Icon name="Trophy" className="h-8 w-8 text-black" />
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-black text-black drop-shadow-lg">{unlockedCount}</div>
+              <div className="text-5xl font-black text-black">{unlockedCount}</div>
               <p className="text-xs text-black mt-1 font-semibold">из {achievements.length}</p>
             </CardContent>
           </Card>
