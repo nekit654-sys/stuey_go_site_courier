@@ -19,6 +19,11 @@ interface User {
   invited_by_user_id?: number;
   self_orders_count?: number;
   self_bonus_paid?: boolean;
+  nickname?: string;
+  game_high_score?: number;
+  game_total_plays?: number;
+  game_achievements?: string[];
+  agreed_to_terms?: boolean;
 }
 
 interface AuthContextType {

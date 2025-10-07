@@ -58,12 +58,21 @@ const HeroSection = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <Link to="/leaderboard" className="w-full sm:w-auto">
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-extrabold py-4 sm:py-6 px-6 sm:px-12 text-base sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full"
+              >
+                <Icon name="Trophy" size={20} className="mr-2 sm:w-6 sm:h-6" />
+                <span className="whitespace-nowrap">🎮 Лидерборд игры</span>
+              </Button>
+            </Link>
+
             <Button
               onClick={handleBecomeClick}
               className="bg-yellow-400 text-black font-extrabold py-4 sm:py-6 px-6 sm:px-12 text-base sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full sm:w-auto"
             >
               <Icon name="Rocket" size={20} className="mr-2 sm:w-6 sm:h-6" />
-              <span className="whitespace-nowrap">Стать курьером</span>
+              <span className="whitespace-nowrap">Подать заявку</span>
             </Button>
             
             {!isAuthenticated && (

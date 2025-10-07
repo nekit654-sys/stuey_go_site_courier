@@ -29,6 +29,8 @@ def convert_decimals(obj: Any) -> Any:
         return [convert_decimals(item) for item in obj]
     elif isinstance(obj, Decimal):
         return float(obj)
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
     return obj
 
 def verify_token(token: str) -> Dict[str, Any]:

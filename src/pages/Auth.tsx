@@ -177,10 +177,11 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <Icon name="Loader2" className="animate-spin h-8 w-8 mx-auto mb-4" />
-          <p className="text-gray-600">Авторизация...</p>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        <div className="text-center relative z-10">
+          <Icon name="Loader2" className="animate-spin h-12 w-12 mx-auto mb-4 text-yellow-400" />
+          <p className="text-white text-xl font-bold">Авторизация...</p>
         </div>
       </div>
     );
@@ -188,127 +189,136 @@ export default function Auth() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Вход в личный кабинет</CardTitle>
-            <CardDescription>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        
+        <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-blue-400/20 rounded-full blur-2xl animate-pulse delay-500"></div>
+
+        <Card className="w-full max-w-md relative z-10 bg-white/10 backdrop-blur-xl border-4 border-white/20 shadow-[0_12px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[4px] transition-all duration-300">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] transform -rotate-6 hover:rotate-0 transition-transform duration-300">
+              <Icon name="LogIn" className="h-10 w-10 text-black" />
+            </div>
+            <CardTitle className="text-3xl font-black text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.3)]">
+              Вход в кабинет
+            </CardTitle>
+            <CardDescription className="text-lg">
               {referralCode ? (
-                <span className="text-green-600 font-medium">
-                  🎉 Вы приглашены по реферальной программе!
+                <span className="text-yellow-300 font-bold flex items-center justify-center gap-2">
+                  <Icon name="Gift" className="h-5 w-5" />
+                  🎉 Вас пригласили!
                 </span>
               ) : (
-                'Выберите удобный способ входа'
+                <span className="text-purple-200">Выберите способ входа</span>
               )}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             <Button
               onClick={() => openAuthModal('yandex')}
-              className="w-full bg-[#FFCC00] hover:bg-[#FFD633] text-black font-semibold"
-              size="lg"
+              className="w-full bg-[#FFCC00] hover:bg-[#FFD633] text-black font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
             >
-              <Icon name="Circle" className="mr-2 h-5 w-5" />
+              <Icon name="Circle" className="mr-3 h-6 w-6" />
               Войти через Яндекс
             </Button>
 
             <Button
               onClick={() => openAuthModal('vk')}
-              className="w-full bg-[#0077FF] hover:bg-[#0066DD] text-white"
-              size="lg"
+              className="w-full bg-[#0077FF] hover:bg-[#0066DD] text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
             >
-              <Icon name="Globe" className="mr-2 h-5 w-5" />
+              <Icon name="Globe" className="mr-3 h-6 w-6" />
               Войти через ВКонтакте
             </Button>
 
             <Button
               onClick={() => openAuthModal('telegram')}
-              className="w-full bg-[#0088cc] hover:bg-[#0077bb] text-white"
-              size="lg"
+              className="w-full bg-[#0088cc] hover:bg-[#0077bb] text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] opacity-50 cursor-not-allowed"
               disabled
             >
-              <Icon name="Send" className="mr-2 h-5 w-5" />
-              Войти через Telegram (скоро)
+              <Icon name="Send" className="mr-3 h-6 w-6" />
+              Telegram (скоро)
             </Button>
 
             {referralCode && (
-              <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
-                <p className="text-green-800 font-medium mb-1 flex items-center gap-2">
-                  <Icon name="Gift" className="h-4 w-4" />
+              <div className="mt-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border-3 border-green-400/50 rounded-2xl p-5 shadow-[0_4px_0_0_rgba(34,197,94,0.3)]">
+                <p className="text-green-200 font-bold mb-2 flex items-center gap-2 text-lg">
+                  <Icon name="Gift" className="h-5 w-5" />
                   Реферальная программа активна
                 </p>
-                <p className="text-green-600">
-                  После регистрации вы будете привязаны к пригласившему вас курьеру и получите бонусы
+                <p className="text-green-100 text-sm leading-relaxed">
+                  После входа вы получите бонусы от пригласившего вас курьера
                 </p>
-                <div className="mt-2 p-2 bg-white rounded border border-green-300">
-                  <p className="text-xs text-gray-500">Ваш код:</p>
-                  <p className="font-mono font-bold text-green-700">{referralCode}</p>
+                <div className="mt-3 p-3 bg-white/20 backdrop-blur-sm rounded-xl border-2 border-green-300/50">
+                  <p className="text-xs text-green-200 mb-1">Ваш реферальный код:</p>
+                  <p className="font-mono font-black text-green-100 text-xl tracking-wider">{referralCode}</p>
                 </div>
               </div>
             )}
 
-            <div className="pt-2 text-center text-xs text-gray-500">
-              <p>Нажимая кнопку входа, вы получите возможность</p>
-              <p>принять условия использования сервиса</p>
+            <div className="pt-4 text-center text-sm text-purple-200/80">
+              <p>Нажимая кнопку входа, вы соглашаетесь с</p>
+              <p className="font-semibold">условиями использования сервиса</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <Card className="w-full max-w-md bg-white/95 backdrop-blur-xl border-4 border-purple-400 shadow-[0_12px_0_0_rgba(139,92,246,0.6)]">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">Подтверждение входа</CardTitle>
+                <CardTitle className="text-2xl font-black text-purple-900">Подтверждение входа</CardTitle>
                 <button
                   onClick={() => setShowAuthModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="w-10 h-10 rounded-full bg-red-500 border-3 border-black text-white hover:bg-red-600 shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center"
                 >
                   <Icon name="X" size={20} />
                 </button>
               </div>
-              <CardDescription>
+              <CardDescription className="text-lg font-semibold text-purple-700">
                 Вход через {selectedProvider === 'yandex' ? 'Яндекс' : selectedProvider === 'vk' ? 'ВКонтакте' : 'Telegram'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               {!referralCode && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <Icon name="Gift" className="h-4 w-4 text-blue-600" />
-                    Есть реферальный код? (необязательно)
+                <div className="space-y-3">
+                  <label className="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <Icon name="Gift" className="h-5 w-5 text-purple-600" />
+                    Есть реферальный код?
                   </label>
                   <input
                     type="text"
                     value={manualRefCode}
                     onChange={(e) => setManualRefCode(e.target.value.toUpperCase())}
                     placeholder="Введите код от друга"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-3 border-gray-300 rounded-xl font-mono text-lg font-bold focus:ring-4 focus:ring-purple-500 focus:border-purple-500 transition-all shadow-[0_4px_0_0_rgba(0,0,0,0.1)]"
                     maxLength={10}
                   />
-                  <p className="text-xs text-gray-500">
-                    Введите код, который вам дал друг-курьер, чтобы получить бонусы
+                  <p className="text-sm text-gray-600">
+                    Введите код, чтобы получить бонусы от друга-курьера
                   </p>
                 </div>
               )}
 
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="border-t-2 border-gray-200 pt-5">
+                <div className="flex items-start gap-3 p-5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-3 border-blue-300 shadow-[0_4px_0_0_rgba(59,130,246,0.3)]">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="mt-1 h-6 w-6 text-purple-600 border-3 border-gray-400 rounded-lg focus:ring-4 focus:ring-purple-500 cursor-pointer"
                   />
-                  <label htmlFor="terms" className="text-sm text-gray-700 cursor-pointer">
+                  <label htmlFor="terms" className="text-sm text-gray-800 cursor-pointer leading-relaxed">
                     Я принимаю{' '}
-                    <a href="#" className="text-blue-600 hover:underline font-medium">
+                    <a href="/terms.html" target="_blank" className="text-purple-600 hover:text-purple-800 underline font-bold">
                       условия использования
                     </a>
                     {' '}и{' '}
-                    <a href="#" className="text-blue-600 hover:underline font-medium">
+                    <a href="/terms.html" target="_blank" className="text-purple-600 hover:text-purple-800 underline font-bold">
                       политику конфиденциальности
                     </a>
                     {' '}сервиса. Согласен на обработку персональных данных.
@@ -316,27 +326,27 @@ export default function Auth() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-3 pt-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowAuthModal(false)}
-                  className="flex-1"
+                  className="flex-1 py-6 text-lg font-bold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
                 >
                   Отмена
                 </Button>
                 <Button
                   onClick={proceedWithAuth}
                   disabled={!agreedToTerms}
-                  className="flex-1"
+                  className="flex-1 py-6 text-lg font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  <Icon name="CheckCircle" className="mr-2 h-4 w-4" />
+                  <Icon name="CheckCircle" className="mr-2 h-5 w-5" />
                   Продолжить
                 </Button>
               </div>
 
               {!agreedToTerms && (
-                <p className="text-xs text-center text-amber-600 flex items-center justify-center gap-1">
-                  <Icon name="AlertCircle" className="h-3 w-3" />
+                <p className="text-sm text-center text-amber-600 flex items-center justify-center gap-2 font-semibold">
+                  <Icon name="AlertCircle" className="h-4 w-4" />
                   Необходимо принять условия для продолжения
                 </p>
               )}
