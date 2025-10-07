@@ -785,16 +785,77 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
 
 def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     import uuid
+    import requests
+    
+    # Обмениваем code на access_token и получаем реальные данные пользователя от провайдера
+    code = body_data.get('code')
+    redirect_uri = body_data.get('redirect_uri', '')
+    
+    if provider == 'yandex':
+        # Обмен code на access_token
+        token_response = requests.post('https://oauth.yandex.ru/token', data={
+            'grant_type': 'authorization_code',
+            'code': code,
+            'client_id': '97aff4efd9cd4403854397576fed94d5',
+            'client_secret': os.environ.get('YANDEX_CLIENT_SECRET', ''),
+            'redirect_uri': redirect_uri
+        })
+        
+        if token_response.status_code != 200:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Failed to exchange code for token'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = token_response.json()
+        access_token = token_data.get('access_token')
+        
+        # Получаем данные пользователя
+        user_info_response = requests.get('https://login.yandex.ru/info', 
+            headers={'Authorization': f'OAuth {access_token}'}
+        )
+        
+        if user_info_response.status_code != 200:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Failed to get user info'}),
+                'isBase64Encoded': False
+            }
+        
+        user_info = user_info_response.json()
+        
+        # Используем постоянный ID от Яндекса
+        oauth_id = str(user_info.get('id', '')).replace("'", "''")
+        full_name = (user_info.get('display_name') or user_info.get('real_name') or 'Пользователь').replace("'", "''")
+        email = (user_info.get('default_email') or '').replace("'", "''")
+        phone = (user_info.get('default_phone', {}).get('number') if isinstance(user_info.get('default_phone'), dict) else '').replace("'", "''")
+        avatar_url = (user_info.get('default_avatar_id', '')).replace("'", "''")
+        if avatar_url:
+            avatar_url = f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
+    
+    elif provider == 'vk':
+        # Для VK - используем существующую логику (временно)
+        oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
+        full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
+        email = (body_data.get('email') or '').replace("'", "''")
+        phone = (body_data.get('phone') or '').replace("'", "''")
+        avatar_url = (body_data.get('avatar') or '').replace("'", "''")
+    
+    else:
+        # Для других провайдеров - используем существующую логику
+        oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
+        full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
+        email = (body_data.get('email') or '').replace("'", "''")
+        phone = (body_data.get('phone') or '').replace("'", "''")
+        avatar_url = (body_data.get('avatar') or '').replace("'", "''")
+    
+    referral_code = body_data.get('referral_code')
     
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
-    oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
-    full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
-    email = (body_data.get('email') or '').replace("'", "''")
-    phone = (body_data.get('phone') or '').replace("'", "''")
-    avatar_url = (body_data.get('avatar') or '').replace("'", "''")
-    referral_code = body_data.get('referral_code')
     
     cur.execute(f"""
         SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by_user_id
