@@ -827,9 +827,6 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         
         user_info = user_info_response.json()
         
-        # DEBUG: Логируем данные от Яндекса
-        print(f"Yandex user_info: {user_info}")
-        
         # Используем постоянный ID от Яндекса
         oauth_id = str(user_info.get('id', '')).replace("'", "''")
         full_name = (user_info.get('display_name') or user_info.get('real_name') or 'Пользователь').replace("'", "''")
@@ -860,8 +857,9 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Сначала ищем по oauth_id
     cur.execute(f"""
-        SELECT id, full_name, email, phone, avatar_url, oauth_provider, referral_code, invited_by_user_id
+        SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id
         FROM t_p25272970_courier_button_site.users
         WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}'
     """)
@@ -873,14 +871,14 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         
         # Обновляем данные существующего пользователя от провайдера
         update_parts = []
-        if full_name:
+        if full_name and full_name != 'Пользователь':
             update_parts.append(f"full_name = '{full_name}'")
         if email:
             update_parts.append(f"email = '{email}'")
         if avatar_url:
             update_parts.append(f"avatar_url = '{avatar_url}'")
         
-        # Обновляем телефон только если он есть и еще не заполнен
+        # Обновляем телефон только если он есть от провайдера и еще не заполнен
         if phone and not existing_user.get('phone'):
             update_parts.append(f"phone = '{phone}'")
         
@@ -891,6 +889,7 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                 WHERE id = {user_id}
             """
             cur.execute(update_query)
+            conn.commit()
     else:
         generated_ref_code = str(uuid.uuid4())[:8].upper()
         
