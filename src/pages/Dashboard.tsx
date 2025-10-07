@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referralProgress, setReferralProgress] = useState<ReferralProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [inviterCode, setInviterCode] = useState('');
   const [submittingInviter, setSubmittingInviter] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
@@ -58,10 +59,12 @@ export default function Dashboard() {
 
   // Функция для обновления данных пользователя из БД
   const refreshUserData = useCallback(async () => {
-    if (!token || !user) return;
+    if (!token) return;
     
     try {
       const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
         method: 'POST',
         headers: {
@@ -74,6 +77,7 @@ export default function Dashboard() {
         signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
       if (data.success && data.user) {
         updateUser(data.user);
@@ -82,7 +86,7 @@ export default function Dashboard() {
       if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to refresh user data:', error);
     }
-  }, [token, user, updateUser]);
+  }, [token, updateUser]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -90,18 +94,21 @@ export default function Dashboard() {
       return;
     }
 
-    if (user && !stats) {
+    if (user) {
       const isProfileComplete = user?.phone && user?.city && user?.full_name;
       setShowProfileSetup(!isProfileComplete);
 
-      fetchStats();
-      fetchReferralProgress();
+      if (!stats && isProfileComplete) {
+        fetchStats();
+        fetchReferralProgress();
+      }
     }
-  }, [isAuthenticated, navigate, user?.id, stats]);
+  }, [isAuthenticated, navigate, user?.id, stats, fetchStats, fetchReferralProgress]);
 
   const fetchStats = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || statsLoading) return;
     
+    setStatsLoading(true);
     try {
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
@@ -120,28 +127,31 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
-      } else {
-        console.error('Failed to fetch stats:', data.error);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to fetch stats:', error);
     } finally {
       setLoading(false);
+      setStatsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, statsLoading]);
 
   const fetchReferralProgress = useCallback(async () => {
     if (!user?.id) return;
     
     try {
       const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=progress', {
         headers: {
           'X-User-Id': user.id.toString(),
         },
         signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -150,8 +160,6 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success) {
         setReferralProgress(data.progress || []);
-      } else {
-        console.error('Failed to fetch referral progress:', data.error);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
