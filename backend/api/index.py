@@ -827,6 +827,9 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         
         user_info = user_info_response.json()
         
+        # DEBUG: Логируем данные от Яндекса
+        print(f"Yandex user_info: {user_info}")
+        
         # Используем постоянный ID от Яндекса
         oauth_id = str(user_info.get('id', '')).replace("'", "''")
         full_name = (user_info.get('display_name') or user_info.get('real_name') or 'Пользователь').replace("'", "''")
@@ -867,6 +870,27 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     
     if existing_user:
         user_id = existing_user['id']
+        
+        # Обновляем данные существующего пользователя от провайдера
+        update_parts = []
+        if full_name:
+            update_parts.append(f"full_name = '{full_name}'")
+        if email:
+            update_parts.append(f"email = '{email}'")
+        if avatar_url:
+            update_parts.append(f"avatar_url = '{avatar_url}'")
+        
+        # Обновляем телефон только если он есть и еще не заполнен
+        if phone and not existing_user.get('phone'):
+            update_parts.append(f"phone = '{phone}'")
+        
+        if update_parts:
+            update_query = f"""
+                UPDATE t_p25272970_courier_button_site.users
+                SET {', '.join(update_parts)}, updated_at = NOW()
+                WHERE id = {user_id}
+            """
+            cur.execute(update_query)
     else:
         generated_ref_code = str(uuid.uuid4())[:8].upper()
         
