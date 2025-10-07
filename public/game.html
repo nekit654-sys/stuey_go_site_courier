@@ -987,9 +987,47 @@
       font-size: clamp(1.5rem, 8vw, 2.5rem);
     }
   }
+  
+  /* --- Кнопка закрытия игры (для модального окна) --- */
+  #closeGameBtn {
+    display: none;
+    position: fixed;
+    top: clamp(0.5rem, 2vw, 1rem);
+    right: clamp(0.5rem, 2vw, 1rem);
+    z-index: 10000;
+    width: clamp(48px, 12vw, 64px);
+    height: clamp(48px, 12vw, 64px);
+    background: #dc2626;
+    border: 4px solid #000;
+    border-radius: 50%;
+    color: #fff;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 0 0 rgba(0, 0, 0, 1);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #closeGameBtn:hover {
+    background: #b91c1c;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 1);
+    transform: translateY(3px);
+  }
+  #closeGameBtn:active {
+    background: #991b1b;
+    box-shadow: none;
+    transform: translateY(6px);
+  }
 </style>
 </head>
 <body>
+
+<!-- Кнопка закрытия игры (для iframe) -->
+<button id="closeGameBtn" aria-label="Закрыть игру">✕</button>
 
 <!-- Экран приветствия -->
 <div id="welcomeScreen" role="alert" aria-live="assertive" aria-label="Приветственный экран игры">
@@ -1169,6 +1207,7 @@
   const courier = document.getElementById('courier');
   const scoreElem = document.getElementById('score');
   const finalScoreElem = document.getElementById('finalScore');
+  const closeGameBtn = document.getElementById('closeGameBtn');
   const livesElem = document.getElementById('lives');
   const lifeCountElem = document.getElementById('lifeCount');
   const btnUp = document.getElementById('btnUp');
@@ -1965,6 +2004,7 @@
           },
           body: JSON.stringify({
             score: finalScore,
+            game_time: gameTime,
             achievements: achievements,
           }),
         }
@@ -2123,6 +2163,36 @@
     if (e.key === 'ArrowUp' || e.key === 'w') movingUp = false;
     else if (e.key === 'ArrowDown' || e.key === 's') movingDown = false;
   });
+
+  // Обработчик кнопки закрытия игры
+  closeGameBtn.addEventListener('click', () => {
+    console.log('Close button clicked in game');
+    // Попытка 1: Через parent.postMessage (если игра в iframe)
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'closeGame' }, '*');
+    }
+    // Попытка 2: Через window.parentCloseGame (установлено из GameButton)
+    if (typeof window.parentCloseGame === 'function') {
+      window.parentCloseGame();
+    }
+    // Попытка 3: Через глобальную функцию closeGameModal
+    if (window.parent && typeof window.parent.closeGameModal === 'function') {
+      window.parent.closeGameModal();
+    }
+  });
+
+  // Проверяем, открыта ли игра в iframe, и показываем кнопку закрытия
+  const isInIframe = () => {
+    try {
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  };
+  
+  if (isInIframe()) {
+    closeGameBtn.style.display = 'flex';
+  }
 
   // При загрузке страницы показываем приветственный экран 5 секунд, потом меню
   window.addEventListener('load', () => {

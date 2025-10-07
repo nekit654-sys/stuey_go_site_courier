@@ -79,7 +79,7 @@ export default function Leaderboard() {
       );
       const data = await response.json();
       if (data.success) {
-        setMyStats(data);
+        setMyStats(data.stats);
       }
     } catch (error) {
       console.error('Failed to load my stats:', error);
