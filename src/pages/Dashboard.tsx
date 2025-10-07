@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -54,11 +54,14 @@ export default function Dashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState(user?.vehicle_type || 'bike');
   const [isGameOpen, setIsGameOpen] = useState(false);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Функция для обновления данных пользователя из БД
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     if (!token || !user) return;
     
     try {
+      const controller = new AbortController();
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
         method: 'POST',
         headers: {
@@ -67,7 +70,8 @@ export default function Dashboard() {
         body: JSON.stringify({
           action: 'verify',
           token: token
-        })
+        }),
+        signal: controller.signal
       });
 
       const data = await response.json();
@@ -75,9 +79,10 @@ export default function Dashboard() {
         updateUser(data.user);
       }
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to refresh user data:', error);
     }
-  };
+  }, [token, user, updateUser]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -85,21 +90,27 @@ export default function Dashboard() {
       return;
     }
 
-    if (user) {
+    if (user && !stats) {
       const isProfileComplete = user?.phone && user?.city && user?.full_name;
       setShowProfileSetup(!isProfileComplete);
 
       fetchStats();
       fetchReferralProgress();
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [isAuthenticated, navigate, user?.id]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=stats', {
         headers: {
-          'X-User-Id': user?.id.toString() || '',
+          'X-User-Id': user.id.toString(),
         },
+        signal: abortControllerRef.current.signal
       });
 
       const data = await response.json();
@@ -107,18 +118,23 @@ export default function Dashboard() {
         setStats(data.stats);
       }
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to fetch stats:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const fetchReferralProgress = async () => {
+  const fetchReferralProgress = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
+      const controller = new AbortController();
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=progress', {
         headers: {
-          'X-User-Id': user?.id.toString() || '',
+          'X-User-Id': user.id.toString(),
         },
+        signal: controller.signal
       });
 
       const data = await response.json();
@@ -126,9 +142,10 @@ export default function Dashboard() {
         setReferralProgress(data.progress || []);
       }
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to fetch referral progress:', error);
     }
-  };
+  }, [user?.id]);
 
   const copyReferralLink = () => {
     const referralLink = `${window.location.origin}/auth?ref=${user?.referral_code}`;
@@ -188,19 +205,28 @@ export default function Dashboard() {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   const isSelfRegistered = !user?.invited_by_user_id;
   const selfOrdersProgress = user?.self_orders_count || 0;
   const selfBonusPaid = user?.self_bonus_paid || false;
 
   // Мемоизация достижений для избежания лагов
-  const achievements = useMemo(() => calculateAchievements({
-    total_orders: stats?.total_orders,
-    total_referrals: stats?.total_referrals,
-    referral_earnings: stats?.referral_earnings,
-    created_at: user?.created_at,
-    vehicle_type: selectedVehicle,
-    referral_progress: referralProgress,
-  }), [stats, user?.created_at, selectedVehicle, referralProgress]);
+  const achievements = useMemo(() => {
+    if (!stats) return [];
+    return calculateAchievements({
+      total_orders: stats.total_orders,
+      total_referrals: stats.total_referrals,
+      referral_earnings: stats.referral_earnings,
+      created_at: user?.created_at,
+      vehicle_type: selectedVehicle,
+      referral_progress: referralProgress,
+    });
+  }, [stats?.total_orders, stats?.total_referrals, stats?.referral_earnings, user?.created_at, selectedVehicle, referralProgress.length]);
 
   const achievementCategories = useMemo(() => groupAchievementsByCategory(achievements), [achievements]);
   const unlockedCount = useMemo(() => achievements.filter((a) => a.unlocked).length, [achievements]);
