@@ -94,10 +94,20 @@ export default function UnifiedPaymentsTab({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Пожалуйста, выберите CSV файл');
+      event.target.value = '';
+      return;
+    }
+
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
+        if (results.data.length === 0) {
+          toast.error('CSV файл пуст или некорректен');
+          return;
+        }
         setCsvData(results.data as CsvRow[]);
         toast.success(`Загружено ${results.data.length} строк из CSV`);
       },
@@ -105,6 +115,8 @@ export default function UnifiedPaymentsTab({
         toast.error(`Ошибка парсинга CSV: ${error.message}`);
       },
     });
+
+    event.target.value = '';
   };
 
   const handleProcessCsv = async () => {
@@ -126,22 +138,28 @@ export default function UnifiedPaymentsTab({
         body: JSON.stringify({ rows: csvData }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setUploadResult({
-          processed: data.processed,
-          skipped: data.skipped,
+          processed: data.processed || 0,
+          skipped: data.skipped || 0,
           duplicates: data.duplicates || 0,
           errors: data.errors || [],
           summary: data.summary || null,
         });
-        toast.success(`Обработано ${data.processed} записей`);
+        toast.success(`Обработано ${data.processed || 0} записей`);
+        setCsvData([]);
         onRefreshCouriers();
       } else {
         toast.error(data.error || 'Ошибка обработки');
       }
     } catch (error) {
+      console.error('CSV processing error:', error);
       toast.error('Ошибка подключения к серверу');
     } finally {
       setUploading(false);
@@ -156,10 +174,20 @@ export default function UnifiedPaymentsTab({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Пожалуйста, выберите CSV файл');
+      event.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
+        if (!text || text.trim().length === 0) {
+          toast.error('CSV файл пуст');
+          return;
+        }
         const lines = text.split('\n').filter(line => line.trim());
         
         const headers = lines[0].toLowerCase().split(',').map(h => h.trim());

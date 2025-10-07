@@ -82,14 +82,26 @@ const Login: React.FC = () => {
         })
       });
 
+      if (!response.ok) {
+        const data = await response.json();
+        toast({
+          title: 'Ошибка входа',
+          description: data.message || 'Неверный логин или пароль',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const data = await response.json();
       
-      if (response.ok && data.success) {
+      if (data.success && data.token) {
         localStorage.setItem('authToken', data.token);
         setAuthToken(data.token);
         setIsAuthenticated(true);
-        loadRequests(data.token);
-        loadAdmins(data.token);
+        await Promise.all([
+          loadRequests(data.token, true),
+          loadAdmins(data.token)
+        ]);
         toast({
           title: 'Вход выполнен успешно',
           description: 'Добро пожаловать в админ-панель!',
@@ -97,7 +109,7 @@ const Login: React.FC = () => {
       } else {
         toast({
           title: 'Ошибка входа',
-          description: data.message || 'Неверный логин или пароль',
+          description: data.message || 'Неизвестная ошибка',
           variant: 'destructive',
         });
       }
@@ -163,20 +175,20 @@ const Login: React.FC = () => {
     if (!isAuthenticated || !autoRefresh) return;
 
     const interval = setInterval(() => {
-      loadRequests(undefined, true);
+      loadRequests(authToken, true);
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, autoRefresh, authToken, requests.length]);
+  }, [isAuthenticated, autoRefresh, authToken]);
 
   React.useEffect(() => {
-    if (isAuthenticated && activeTab === 'analytics') {
+    if (!isAuthenticated) return;
+
+    if (activeTab === 'analytics') {
       loadReferralStats();
-    }
-    if (isAuthenticated && activeTab === 'couriers') {
+    } else if (activeTab === 'couriers') {
       loadAllCouriers();
-    }
-    if (isAuthenticated && activeTab === 'income') {
+    } else if (activeTab === 'income') {
       loadAdmins();
     }
   }, [activeTab, isAuthenticated]);

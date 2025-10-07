@@ -97,7 +97,7 @@ export default function Dashboard() {
       fetchStats();
       fetchReferralProgress();
     }
-  }, [isAuthenticated, navigate, user?.id]);
+  }, [isAuthenticated, navigate, user?.id, stats]);
 
   const fetchStats = useCallback(async () => {
     if (!user?.id) return;
@@ -113,9 +113,15 @@ export default function Dashboard() {
         signal: abortControllerRef.current.signal
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
+      } else {
+        console.error('Failed to fetch stats:', data.error);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
@@ -137,9 +143,15 @@ export default function Dashboard() {
         signal: controller.signal
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setReferralProgress(data.progress || []);
+      } else {
+        console.error('Failed to fetch referral progress:', data.error);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
@@ -154,13 +166,23 @@ export default function Dashboard() {
   };
 
   const handleSetInviter = async () => {
+    if (!inviterCode.trim()) {
+      toast.error('Введите реферальный код');
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error('Пользователь не найден');
+      return;
+    }
+
     setSubmittingInviter(true);
     try {
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=set_inviter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-Id': user?.id.toString() || '',
+          'X-User-Id': user.id.toString(),
         },
         body: JSON.stringify({ inviter_code: inviterCode }),
       });
@@ -168,12 +190,15 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success) {
         toast.success('Реферальный код применён!');
-        window.location.reload();
+        await refreshUserData();
+        setInviterCode('');
+        fetchStats();
       } else {
-        toast.error(data.error || 'Ошибка');
+        toast.error(data.error || 'Ошибка применения кода');
       }
     } catch (error) {
-      toast.error('Ошибка подключения');
+      console.error('Error setting inviter:', error);
+      toast.error('Ошибка подключения к серверу');
     } finally {
       setSubmittingInviter(false);
     }

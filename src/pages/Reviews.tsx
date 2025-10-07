@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Icon from "@/components/ui/icon";
@@ -471,14 +472,11 @@ const Reviews = () => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=${bg}&color=${color}&size=100&bold=true&font-size=0.4`;
   };
 
-  // Функция для получения случайных отзывов
-  const getRandomReviews = (count: number = 12) => {
+  // Используем useMemo для стабильности отзывов при ререндерах
+  const reviews = useMemo(() => {
     const shuffled = [...allReviews].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count);
-  };
-
-  // Получаем случайные отзывы для отображения
-  const reviews = getRandomReviews(12);
+    return shuffled.slice(0, 12);
+  }, []);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
