@@ -270,7 +270,12 @@
   /* --- Главное меню --- */
   #mainMenu {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     background: black;
     text-align: center;
     z-index: 1000;
@@ -290,6 +295,8 @@
     border: 6px solid #000;
     border-radius: clamp(10px, 2vw, 20px);
     box-shadow: 0 0 0 4px #FFD700, inset 0 0 0 2px #FFD700;
+    transform: none;
+    margin: 0;
   }
   /* Контейнер всего содержимого меню в единой рамке */
   #mainMenu .menu-content {
@@ -528,6 +535,8 @@
     position: fixed;
     top: 50%;
     left: 50%;
+    width: auto;
+    height: auto;
     transform: translate(-50%, -50%);
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(10px);
@@ -540,6 +549,7 @@
     font-size: clamp(1rem, 4vw, 1.4rem);
     font-weight: 900;
     user-select: none;
+    margin: 0;
     color: #FFD700;
     display: none;
     max-width: min(90vw, 400px);
@@ -2055,13 +2065,21 @@
   });
   
   restartBtn.addEventListener('click', () => {
+    gameOverMenu.style.cssText = '';
     gameOverMenu.style.display = 'none';
     startGame();
   });
   
   toMenuBtn.addEventListener('click', () => {
     gameOverMenu.style.display = 'none';
+    
+    // Сброс всех возможных трансформаций и стилей
+    mainMenu.style.cssText = '';
     mainMenu.style.display = 'block';
+    
+    // Принудительный reflow для сброса позиционирования
+    void mainMenu.offsetHeight;
+    
     playBackgroundMusic();
   });
   
