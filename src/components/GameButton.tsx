@@ -177,7 +177,7 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose, external
               className="w-full h-full border-0"
               title="Приключения курьера"
               allow="fullscreen"
-              loading="lazy"
+              sandbox="allow-scripts allow-same-origin"
               ref={(iframe) => {
                 if (iframe) {
                   iframe.onload = () => {
