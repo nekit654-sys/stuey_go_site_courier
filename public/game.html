@@ -1023,8 +1023,10 @@
     
     <!-- Кнопки меню -->
     <div class="menu-buttons">
-      <button id="playBtn" role="menuitem">Играть</button>
-      <button id="rulesBtn" role="menuitem">Правила</button>
+      <button id="playBtn" role="menuitem">🎮 Играть</button>
+      <button id="leaderboardBtn" role="menuitem">🏆 Лидерборд</button>
+      <button id="loginBtn" role="menuitem">👤 Войти</button>
+      <button id="rulesBtn" role="menuitem">📖 Правила</button>
       <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
       <button id="becomeBtn" role="menuitem">Подать заявку</button>
     </div>
@@ -1160,6 +1162,8 @@
   const gtaGameOverScreen = document.getElementById('gtaGameOverScreen');
   const touchControls = document.getElementById('touchControls');
   const playBtn = document.getElementById('playBtn');
+  const leaderboardBtn = document.getElementById('leaderboardBtn');
+  const loginBtn = document.getElementById('loginBtn');
   const rulesBtn = document.getElementById('rulesBtn');
   const closeRulesBtn = document.getElementById('closeRulesBtn');
   const restartBtn = document.getElementById('restartBtn');
@@ -1985,13 +1989,13 @@
         if (saveResult.is_new_record) {
           message = `🎉 НОВЫЙ РЕКОРД! Ваше место: #${saveResult.rank}`;
         } else {
-          message = `Сохранено! Ваше место: #${saveResult.rank}`;
+          message = `✅ Результат сохранён! Ваше место: #${saveResult.rank}`;
         }
         if (saveResult.new_achievements && saveResult.new_achievements.length > 0) {
-          message += `\n🏆 Новые ачивки: ${saveResult.new_achievements.length}!`;
+          message += `\n🏆 Новых ачивок: ${saveResult.new_achievements.length}!`;
         }
       } else if (saveResult && saveResult.isGuest) {
-        message = '👤 Войдите, чтобы сохранить результат и попасть в топ!';
+        message = '🔐 Войдите через меню, чтобы сохранить результат в топ!\nНажмите "В меню" → "👤 Войти"';
       }
       
       if (message) {
@@ -2032,40 +2036,59 @@
 
   // Обработчики меню
   playBtn.addEventListener('click', () => {
-    // Запускаем музыку если ещё не запущена
     playBackgroundMusic();
-    
     mainMenu.style.display = 'none';
-    // Музыка продолжает играть при переходе в игру
     startGame();
   });
+  
+  leaderboardBtn.addEventListener('click', () => {
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'openLeaderboard' }, '*');
+    } else {
+      window.location.href = '/leaderboard';
+    }
+  });
+  
+  loginBtn.addEventListener('click', () => {
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'closeGame' }, '*');
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
+    } else {
+      window.location.href = '/auth';
+    }
+  });
+  
   rulesBtn.addEventListener('click', () => {
     mainMenu.style.display = 'none';
     rulesDialog.style.display = 'block';
   });
+  
   closeRulesBtn.addEventListener('click', () => {
     rulesDialog.style.display = 'none';
     mainMenu.style.display = 'block';
   });
+  
   restartBtn.addEventListener('click', () => {
     gameOverMenu.style.display = 'none';
     startGame();
   });
+  
   toMenuBtn.addEventListener('click', () => {
     gameOverMenu.style.display = 'none';
     mainMenu.style.display = 'block';
-    // Продолжаем музыку в меню
     playBackgroundMusic();
   });
+  
   becomeBtn.addEventListener('click', () => {
     const referralLink = 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank';
-    // Используем _blank с noopener для безопасности и предотвращения проблем с родительским окном
     const newWindow = window.open(referralLink, '_blank', 'noopener,noreferrer');
-    // Фокусируемся обратно на игру если окно не открылось
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
       console.log('Popup blocked or failed to open');
     }
   });
+  
   toggleMusicBtn.addEventListener('click', () => {
     toggleMusic();
   });

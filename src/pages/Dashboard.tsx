@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import CourierEarningsCard from '@/components/CourierEarningsCard';
+import GameButton from '@/components/GameButton';
 import { calculateAchievements, groupAchievementsByCategory, getTierColor, getTierBadgeColor } from '@/lib/achievements';
 
 interface ReferralStats {
@@ -51,6 +52,7 @@ export default function Dashboard() {
   const [submittingInviter, setSubmittingInviter] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(user?.vehicle_type || 'bike');
+  const [isGameOpen, setIsGameOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -190,7 +192,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <GameButton onToggle={setIsGameOpen} />
       {showProfileSetup && (
         <ProfileSetupModal 
           user={user}
@@ -206,145 +209,186 @@ export default function Dashboard() {
       <div className="container mx-auto p-6 max-w-7xl">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Личный кабинет
+            <h1 className="text-4xl font-black text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
+              🚀 Личный кабинет
             </h1>
-            <p className="text-gray-600 mt-1">Добро пожаловать, {user?.full_name?.split(' ')[0] || 'Курьер'}!</p>
+            <p className="text-purple-200 mt-1 font-semibold">Добро пожаловать, {user?.full_name?.split(' ')[0] || 'Курьер'}!</p>
           </div>
-          <Button variant="outline" onClick={logout}>
+          <Button 
+            variant="outline" 
+            onClick={logout}
+            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 font-bold"
+          >
             <Icon name="LogOut" className="mr-2 h-4 w-4" />
             Выход
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-700 shadow-[0_8px_0_0_rgba(37,99,235,0.8)] hover:shadow-[0_4px_0_0_rgba(37,99,235,0.8)] hover:translate-y-[4px] transition-all">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Всего заказов</CardTitle>
-              <Icon name="Package" className="h-8 w-8 text-blue-600" />
+              <CardTitle className="text-sm font-bold text-white">📦 Всего заказов</CardTitle>
+              <Icon name="Package" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-blue-900">{stats?.total_orders || 0}</div>
-              <p className="text-xs text-blue-600 mt-1">Выполнено</p>
+              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.total_orders || 0}</div>
+              <p className="text-xs text-blue-100 mt-1 font-semibold">Выполнено</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+          <Card className="border-4 border-green-500 bg-gradient-to-br from-green-600 to-green-700 shadow-[0_8px_0_0_rgba(34,197,94,0.8)] hover:shadow-[0_4px_0_0_rgba(34,197,94,0.8)] hover:translate-y-[4px] transition-all">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">Рефералы</CardTitle>
-              <Icon name="Users" className="h-8 w-8 text-green-600" />
+              <CardTitle className="text-sm font-bold text-white">👥 Рефералы</CardTitle>
+              <Icon name="Users" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-green-900">{stats?.total_referrals || 0}</div>
-              <p className="text-xs text-green-600 mt-1">{stats?.active_referrals || 0} активных</p>
+              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.total_referrals || 0}</div>
+              <p className="text-xs text-green-100 mt-1 font-semibold">{stats?.active_referrals || 0} активных</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="border-4 border-purple-500 bg-gradient-to-br from-purple-600 to-purple-700 shadow-[0_8px_0_0_rgba(168,85,247,0.8)] hover:shadow-[0_4px_0_0_rgba(168,85,247,0.8)] hover:translate-y-[4px] transition-all">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">Доход от рефералов</CardTitle>
-              <Icon name="TrendingUp" className="h-8 w-8 text-purple-600" />
+              <CardTitle className="text-sm font-bold text-white">💰 Доход от рефералов</CardTitle>
+              <Icon name="TrendingUp" className="h-8 w-8 text-yellow-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-purple-900">{stats?.referral_earnings || 0} ₽</div>
-              <p className="text-xs text-purple-600 mt-1">Пассивный доход</p>
+              <div className="text-5xl font-black text-white drop-shadow-lg">{stats?.referral_earnings || 0} ₽</div>
+              <p className="text-xs text-purple-100 mt-1 font-semibold">Пассивный доход</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100">
+          <Card className="border-4 border-yellow-500 bg-gradient-to-br from-yellow-500 to-orange-500 shadow-[0_8px_0_0_rgba(234,179,8,0.8)] hover:shadow-[0_4px_0_0_rgba(234,179,8,0.8)] hover:translate-y-[4px] transition-all">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-yellow-700">Достижения</CardTitle>
-              <Icon name="Trophy" className="h-8 w-8 text-yellow-600" />
+              <CardTitle className="text-sm font-bold text-black">🏆 Достижения</CardTitle>
+              <Icon name="Trophy" className="h-8 w-8 text-black" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-yellow-900">{unlockedCount}</div>
-              <p className="text-xs text-yellow-600 mt-1">из {achievements.length}</p>
+              <div className="text-5xl font-black text-black drop-shadow-lg">{unlockedCount}</div>
+              <p className="text-xs text-black mt-1 font-semibold">из {achievements.length}</p>
             </CardContent>
           </Card>
         </div>
 
-        {user?.game_achievements && user.game_achievements.length > 0 && (
-          <Card className="border-4 border-purple-400 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 shadow-[0_8px_0_0_rgba(139,92,246,0.4)]">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-2xl">
-                <Icon name="Gamepad2" className="h-7 w-7 text-yellow-400" />
-                🎮 Игровые достижения
-              </CardTitle>
-              <CardDescription className="text-purple-200">
-                Вы открыли {user.game_achievements.length} ачивок в игре! Рекорд: {user.game_high_score || 0} очков
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {user.game_achievements.map((achId) => {
-                  const achievementsMap: Record<string, { name: string; icon: string; desc: string }> = {
-                    first_delivery: { name: 'Первая доставка', icon: '🎯', desc: 'Доставили первый заказ' },
-                    speed_demon: { name: 'Демон скорости', icon: '⚡', desc: '1000+ очков' },
-                    perfect_run: { name: 'Идеальный заезд', icon: '💎', desc: 'Без ошибок' },
-                    survivor: { name: 'Выживший', icon: '🛡️', desc: '60+ секунд' },
-                    combo_master: { name: 'Мастер комбо', icon: '🔥', desc: '10+ комбо' },
-                    high_roller: { name: 'Профи', icon: '👑', desc: '3000+ очков' },
-                  };
-                  const ach = achievementsMap[achId] || { name: achId, icon: '🏆', desc: '' };
-                  return (
-                    <div
-                      key={achId}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.8)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.8)] hover:translate-y-[2px] transition-all"
-                    >
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">{ach.icon}</div>
-                        <div className="text-white font-bold text-sm">{ach.name}</div>
-                        <div className="text-purple-100 text-xs mt-1">{ach.desc}</div>
+        <Card className="border-4 border-yellow-400 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 shadow-[0_8px_0_0_rgba(251,191,36,0.8)] mb-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2 text-2xl font-black">
+              <Icon name="Gamepad2" className="h-7 w-7 text-yellow-400" />
+              🎮 Игра «Приключения курьера»
+            </CardTitle>
+            <CardDescription className="text-purple-200 font-semibold">
+              {user.game_achievements && user.game_achievements.length > 0 
+                ? `Ачивок: ${user.game_achievements.length} | Рекорд: ${user.game_high_score || 0} очков`
+                : 'Играйте и зарабатывайте достижения!'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={() => setIsGameOpen(true)}
+              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-extrabold text-lg border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all py-6"
+            >
+              <Icon name="Play" className="mr-2 h-6 w-6" />
+              🎮 ИГРАТЬ СЕЙЧАС
+            </Button>
+
+            {user?.game_achievements && user.game_achievements.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {user.game_achievements.map((achId) => {
+                    const achievementsMap: Record<string, { name: string; icon: string; desc: string }> = {
+                      first_delivery: { name: 'Первая доставка', icon: '🎯', desc: 'Доставили первый заказ' },
+                      speed_demon: { name: 'Демон скорости', icon: '⚡', desc: '1000+ очков' },
+                      perfect_run: { name: 'Идеальный заезд', icon: '💎', desc: 'Без ошибок' },
+                      survivor: { name: 'Выживший', icon: '🛡️', desc: '60+ секунд' },
+                      combo_master: { name: 'Мастер комбо', icon: '🔥', desc: '10+ комбо' },
+                      high_roller: { name: 'Профи', icon: '👑', desc: '3000+ очков' },
+                    };
+                    const ach = achievementsMap[achId] || { name: achId, icon: '🏆', desc: '' };
+                    return (
+                      <div
+                        key={achId}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 border-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.8)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.8)] hover:translate-y-[2px] transition-all"
+                      >
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">{ach.icon}</div>
+                          <div className="text-white font-bold text-sm">{ach.name}</div>
+                          <div className="text-purple-100 text-xs mt-1">{ach.desc}</div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <Link to="/leaderboard">
-                <Button className="w-full mt-4 bg-yellow-400 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all">
-                  <Icon name="Trophy" className="mr-2 h-5 w-5" />
-                  Посмотреть лидерборд
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        )}
+                    );
+                  })}
+                </div>
+                <Link to="/leaderboard">
+                  <Button className="w-full bg-yellow-400 text-black font-extrabold border-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all">
+                    <Icon name="Trophy" className="mr-2 h-5 w-5" />
+                    Посмотреть лидерборд
+                  </Button>
+                </Link>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm">
-            <TabsTrigger value="overview">Обзор</TabsTrigger>
-            <TabsTrigger value="referrals">Рефералы</TabsTrigger>
-            <TabsTrigger value="achievements">Достижения</TabsTrigger>
-            <TabsTrigger value="profile">Профиль</TabsTrigger>
-            <TabsTrigger value="payments">Выплаты</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-sm border-2 border-white/20 p-1">
+            <TabsTrigger 
+              value="overview"
+              className="data-[state=active]:bg-white data-[state=active]:text-black font-bold"
+            >
+              Обзор
+            </TabsTrigger>
+            <TabsTrigger 
+              value="referrals"
+              className="data-[state=active]:bg-white data-[state=active]:text-black font-bold"
+            >
+              Рефералы
+            </TabsTrigger>
+            <TabsTrigger 
+              value="achievements"
+              className="data-[state=active]:bg-white data-[state=active]:text-black font-bold"
+            >
+              Достижения
+            </TabsTrigger>
+            <TabsTrigger 
+              value="profile"
+              className="data-[state=active]:bg-white data-[state=active]:text-black font-bold"
+            >
+              Профиль
+            </TabsTrigger>
+            <TabsTrigger 
+              value="payments"
+              className="data-[state=active]:bg-white data-[state=active]:text-black font-bold"
+            >
+              Выплаты
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {isSelfRegistered && !selfBonusPaid && (
-              <Card className="border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
+              <Card className="border-4 border-orange-500 bg-gradient-to-r from-orange-600 to-yellow-500 shadow-[0_8px_0_0_rgba(249,115,22,0.8)]">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-orange-800">
+                  <CardTitle className="flex items-center gap-2 text-white font-black text-xl">
                     <Icon name="Gift" className="h-6 w-6" />
-                    Ваш бонус за 30 заказов
+                    🎁 Ваш бонус за 30 заказов
                   </CardTitle>
-                  <CardDescription>Выполните 30 заказов и получите 3000₽</CardDescription>
+                  <CardDescription className="text-orange-100 font-semibold">Выполните 30 заказов и получите 3000₽</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium">Прогресс: {selfOrdersProgress}/30</span>
-                      <span className="font-bold text-orange-600">{Math.round((selfOrdersProgress / 30) * 100)}%</span>
+                      <span className="font-bold text-white">Прогресс: {selfOrdersProgress}/30</span>
+                      <span className="font-black text-white text-lg">{Math.round((selfOrdersProgress / 30) * 100)}%</span>
                     </div>
-                    <Progress value={(selfOrdersProgress / 30) * 100} className="h-3" />
+                    <Progress value={(selfOrdersProgress / 30) * 100} className="h-4 border-2 border-black" />
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-orange-100 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-black/30 rounded-lg border-2 border-black">
                     <div>
-                      <p className="text-sm text-orange-700">Осталось заказов:</p>
-                      <p className="text-2xl font-bold text-orange-900">{Math.max(0, 30 - selfOrdersProgress)}</p>
+                      <p className="text-sm text-white font-semibold">Осталось заказов:</p>
+                      <p className="text-3xl font-black text-white">{Math.max(0, 30 - selfOrdersProgress)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-orange-700">Бонус:</p>
-                      <p className="text-3xl font-bold text-orange-900">3000 ₽</p>
+                      <p className="text-sm text-white font-semibold">Бонус:</p>
+                      <p className="text-4xl font-black text-white">3000 ₽</p>
                     </div>
                   </div>
                 </CardContent>
@@ -352,26 +396,26 @@ export default function Dashboard() {
             )}
 
             {selfBonusPaid && (
-              <Card className="border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
+              <Card className="border-4 border-green-500 bg-gradient-to-r from-green-600 to-emerald-600 shadow-[0_8px_0_0_rgba(34,197,94,0.8)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
-                    <Icon name="CheckCircle2" className="h-8 w-8 text-green-600" />
+                    <Icon name="CheckCircle2" className="h-10 w-10 text-white" />
                     <div>
-                      <p className="font-bold text-green-900">Бонус получен!</p>
-                      <p className="text-sm text-green-700">Вы успешно выполнили 30 заказов и получили 3000₽</p>
+                      <p className="font-black text-white text-xl">✅ Бонус получен!</p>
+                      <p className="text-sm text-green-100 font-semibold">Вы успешно выполнили 30 заказов и получили 3000₽</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            <Card className="border-2 border-purple-200">
-              <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
-                <CardTitle className="flex items-center gap-2 text-purple-800">
+            <Card className="border-4 border-purple-500 bg-white/10 backdrop-blur-sm shadow-[0_8px_0_0_rgba(168,85,247,0.6)]">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 border-b-4 border-black">
+                <CardTitle className="flex items-center gap-2 text-white font-black text-xl">
                   <Icon name="Share2" className="h-6 w-6" />
-                  Реферальная программа
+                  🔗 Реферальная программа
                 </CardTitle>
-                <CardDescription>Приглашайте друзей и зарабатывайте на их заказах (до 150 заказов)</CardDescription>
+                <CardDescription className="text-purple-100 font-semibold">Приглашайте друзей и зарабатывайте на их заказах (до 150 заказов)</CardDescription>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border-2 border-purple-200">
@@ -636,10 +680,10 @@ export default function Dashboard() {
                     <label className="text-xs font-medium text-green-600 uppercase">Город</label>
                     <p className="text-2xl font-bold text-green-900 mt-1">{user?.city || 'Не указан'}</p>
                   </div>
-                  <div className="p-6 border-2 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
-                    <label className="text-xs font-medium text-purple-600 uppercase">Последние 4 цифры</label>
-                    <p className="text-4xl font-mono font-bold text-purple-900 mt-1">
-                      {user?.phone ? user.phone.slice(-4) : '****'}
+                  <div className="p-6 border-4 border-purple-500 rounded-xl bg-gradient-to-br from-purple-600 to-purple-700 shadow-[0_6px_0_0_rgba(168,85,247,0.8)]">
+                    <label className="text-xs font-bold text-purple-100 uppercase">📱 Номер телефона</label>
+                    <p className="text-3xl font-mono font-black text-white mt-1">
+                      {user?.phone || 'Не указан'}
                     </p>
                   </div>
                   <div className="p-6 border-2 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100">
