@@ -4,12 +4,26 @@ import { X, Gamepad2 } from "lucide-react";
 interface GameButtonProps {
   onToggle: (isOpen: boolean) => void;
   onGameClose?: () => void;
+  externalOpen?: boolean;
 }
 
-const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose }) => {
+const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose, externalOpen }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (externalOpen !== undefined && externalOpen !== isGameOpen) {
+      setIsGameOpen(externalOpen);
+      if (externalOpen) {
+        document.body.style.overflow = 'hidden';
+        document.body.classList.add('game-modal-open');
+      } else {
+        document.body.style.overflow = '';
+        document.body.classList.remove('game-modal-open');
+      }
+    }
+  }, [externalOpen]);
 
   useEffect(() => {
     const checkDevice = () => {
