@@ -3,10 +3,8 @@ import Icon from '@/components/ui/icon';
 import StatsCards from './StatsCards';
 import RequestsTable from './RequestsTable';
 import ControlPanel from './ControlPanel';
-import CouriersTab from './CouriersTab';
-import AnalyticsTab from './AnalyticsTab';
-import UnifiedPaymentsTab from './UnifiedPaymentsTab';
-import PaymentsTab from './PaymentsTab';
+import UnifiedCouriersTab from './UnifiedCouriersTab';
+import FinalPaymentsTab from './FinalPaymentsTab';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 interface AdminTabsProps {
@@ -52,7 +50,7 @@ export default function AdminTabs({
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           Заявки
@@ -61,17 +59,9 @@ export default function AdminTabs({
           <Icon name="Users" size={16} />
           Курьеры
         </TabsTrigger>
-        <TabsTrigger value="income" className="flex items-center gap-2">
+        <TabsTrigger value="payments" className="flex items-center gap-2">
           <Icon name="DollarSign" size={16} />
           Выплаты
-        </TabsTrigger>
-        <TabsTrigger value="payments" className="flex items-center gap-2">
-          <Icon name="Wallet" size={16} />
-          Транзакции
-        </TabsTrigger>
-        <TabsTrigger value="analytics" className="flex items-center gap-2">
-          <Icon name="BarChart" size={16} />
-          Аналитика
         </TabsTrigger>
       </TabsList>
 
@@ -95,34 +85,23 @@ export default function AdminTabs({
       </TabsContent>
 
       <TabsContent value="couriers" className="space-y-6">
-        <CouriersTab
+        <UnifiedCouriersTab
           couriers={allCouriers}
           isLoading={isLoadingCouriers}
           onRefresh={onRefreshCouriers}
           onDeleteAllUsers={onDeleteAllUsers}
+          referralStats={referralStats}
+          isLoadingReferrals={isLoadingReferrals}
+          onRefreshReferrals={onRefreshReferrals}
         />
       </TabsContent>
 
-      <TabsContent value="income" className="space-y-6">
-        <PaymentsTab authToken={authToken} />
-      </TabsContent>
-
       <TabsContent value="payments" className="space-y-6">
-        <UnifiedPaymentsTab
+        <FinalPaymentsTab
           authToken={authToken}
           couriers={allCouriers}
           isLoadingCouriers={isLoadingCouriers}
           onRefreshCouriers={onRefreshCouriers}
-        />
-      </TabsContent>
-
-      <TabsContent value="analytics" className="space-y-6">
-        <AnalyticsTab
-          overallStats={referralStats?.overall_stats || null}
-          topReferrers={referralStats?.top_referrers || []}
-          referrals={referralStats?.all_referrals || []}
-          isLoading={isLoadingReferrals}
-          onRefresh={onRefreshReferrals}
         />
       </TabsContent>
     </Tabs>
