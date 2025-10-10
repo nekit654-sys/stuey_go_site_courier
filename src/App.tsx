@@ -50,7 +50,7 @@ const MaintenanceWrapper = () => {
     }
   }, []);
 
-  const isAdminRoute = location.pathname === '/login';
+  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard';
 
   if (isMaintenanceMode && !isAdminRoute) {
     return <Maintenance onUnlock={() => setIsMaintenanceMode(false)} />;
