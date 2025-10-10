@@ -1377,12 +1377,9 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             
             status = row.get('status', 'active').strip()
             
-            if not external_id or not creator_username or reward <= 0:
+            if not external_id or not creator_username:
                 skipped += 1
-                if not external_id or not creator_username:
-                    errors.append(f"Пропущена строка: отсутствует ID или код курьера")
-                elif reward <= 0:
-                    errors.append(f"Пропущена строка {external_id}: сумма reward = 0 или пустая")
+                errors.append(f"Пропущена строка: отсутствует ID или код курьера")
                 continue
             
             cur.execute("""
