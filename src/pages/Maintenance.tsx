@@ -225,12 +225,12 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
               </div>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,0.1)]">
-              Сайт на техобслуживании
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,0.1)] px-2">
+              Готовим что-то крутое! 🚀
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-700 mb-6 font-bold">
-              Мы улучшаем наш сервис для вас! 🚀
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-6 font-bold px-2">
+              Скоро вернёмся с обновлениями
             </p>
 
             <div className="max-w-2xl mx-auto mb-8">
@@ -240,28 +240,27 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
                     <Icon name="Timer" className="text-white" size={24} />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="text-gray-800 font-semibold leading-relaxed mb-4">
-                      Наша команда работает над важными обновлениями системы. 
-                      Скоро мы вернёмся с новыми возможностями!
+                    <p className="text-gray-800 font-semibold leading-relaxed mb-4 text-sm sm:text-base">
+                      Добавляем новые фичи! Совсем скоро всё будет готово 🎉
                     </p>
-                    <div className="bg-white rounded-xl p-4 border-3 border-purple-300 shadow-[0_4px_0_0_rgba(168,85,247,0.2)]">
-                      <div className="text-sm text-gray-700 mb-3 font-bold">До запуска осталось:</div>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div className="bg-gradient-to-br from-yellow-400 to-orange-400 p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-2xl md:text-3xl font-black text-black">{timeLeft.days}</div>
-                          <div className="text-xs font-bold text-black/70">дней</div>
+                    <div className="bg-white rounded-xl p-3 sm:p-4 border-3 border-purple-300 shadow-[0_4px_0_0_rgba(168,85,247,0.2)]">
+                      <div className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 font-bold">Запуск через:</div>
+                      <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                        <div className="bg-gradient-to-br from-yellow-400 to-orange-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.days}</div>
+                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">дн</div>
                         </div>
-                        <div className="bg-gradient-to-br from-orange-400 to-red-400 p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-2xl md:text-3xl font-black text-black">{timeLeft.hours}</div>
-                          <div className="text-xs font-bold text-black/70">часов</div>
+                        <div className="bg-gradient-to-br from-orange-400 to-red-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.hours}</div>
+                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">ч</div>
                         </div>
-                        <div className="bg-gradient-to-br from-red-400 to-pink-400 p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-2xl md:text-3xl font-black text-black">{timeLeft.minutes}</div>
-                          <div className="text-xs font-bold text-black/70">минут</div>
+                        <div className="bg-gradient-to-br from-red-400 to-pink-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.minutes}</div>
+                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">м</div>
                         </div>
-                        <div className="bg-gradient-to-br from-pink-400 to-purple-400 p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-2xl md:text-3xl font-black text-black">{timeLeft.seconds}</div>
-                          <div className="text-xs font-bold text-black/70">секунд</div>
+                        <div className="bg-gradient-to-br from-pink-400 to-purple-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.seconds}</div>
+                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">с</div>
                         </div>
                       </div>
                     </div>
