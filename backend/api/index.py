@@ -2059,13 +2059,13 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                     'isBase64Encoded': False
                 }
             
-            # Проверяем, что телефон содержит минимум 11 цифр
+            # Проверяем, что телефон содержит минимум 10 цифр (без учета +7)
             phone_digits = ''.join(filter(str.isdigit, phone))
-            if len(phone_digits) < 11:
+            if len(phone_digits) < 10:
                 return {
                     'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'error': 'Phone must contain at least 11 digits'}),
+                    'body': json.dumps({'error': 'Phone must contain at least 10 digits'}),
                     'isBase64Encoded': False
                 }
             
