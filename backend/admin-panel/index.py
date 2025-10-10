@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Админ API для просмотра заявок на выплаты
+    Админ API для просмотра заявок на выплаты и управления пользователями
     Args: event - dict с httpMethod, queryStringParameters  
     Returns: HTTP response dict с данными заявок
     '''
@@ -17,7 +17,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
                 'Access-Control-Max-Age': '86400'
             },
@@ -48,7 +48,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
         
-        if method == 'GET':
+        query_params = event.get('queryStringParameters') or {}
+        action = query_params.get('action', 'payouts')
+        
+        if method == 'GET' and action == 'payouts':
             # Получение всех заявок на выплаты
             cursor.execute("""
                 SELECT id, name, phone, city, attachment_data, created_at
@@ -79,6 +82,33 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'success': True,
                     'requests': requests
+                }),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE' and action == 'delete_all_users':
+            # Удаление всех пользователей и связанных данных
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.referrals")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.referral_progress")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_self_bonus_tracking")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.payout_requests")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_achievements")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.users")
+            
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Все пользователи успешно удалены'
                 }),
                 'isBase64Encoded': False
             }
