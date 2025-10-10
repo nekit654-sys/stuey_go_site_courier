@@ -175,7 +175,8 @@ const PayoutForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Ошибка отправки заявки');
+        const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }));
+        throw new Error(errorData.error || 'Ошибка отправки заявки');
       }
 
       toast({
@@ -193,9 +194,10 @@ const PayoutForm = () => {
       setPreviewUrl(null);
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте позже.';
       toast({
         title: 'Ошибка',
-        description: 'Не удалось отправить заявку. Попробуйте позже.',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

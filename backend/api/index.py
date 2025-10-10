@@ -2031,6 +2031,9 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             city = body_data.get('city', '')
             attachment_data = body_data.get('attachment_data', '')
             
+            # Логируем для отладки
+            print(f"Payout request: name='{name}', phone='{phone}', city='{city}', attachment_len={len(attachment_data)}")
+            
             # Валидация: проверяем, что все поля заполнены
             if not name.strip():
                 return {
