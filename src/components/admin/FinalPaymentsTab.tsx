@@ -113,6 +113,8 @@ export default function FinalPaymentsTab({
   }, [authToken]);
 
   const loadData = async () => {
+    if (!authToken) return;
+    
     setLoading(true);
     try {
       const [statsRes, paymentsRes] = await Promise.all([
@@ -189,6 +191,11 @@ export default function FinalPaymentsTab({
   const handleUpload = async () => {
     if (!file) {
       toast.error('Выберите CSV файл');
+      return;
+    }
+
+    if (!authToken) {
+      toast.error('Ошибка авторизации. Перезайдите в систему');
       return;
     }
 
