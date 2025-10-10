@@ -21,18 +21,14 @@ const PayoutForm = () => {
     const { name, value } = e.target;
     
     if (name === 'phone') {
-      // Удаляем все кроме цифр
       let phoneDigits = value.replace(/\D/g, '');
       
-      // Если первая цифра не 7, добавляем 7 в начало
       if (phoneDigits.length > 0 && phoneDigits[0] !== '7') {
         phoneDigits = '7' + phoneDigits;
       }
       
-      // Ограничиваем длину до 11 цифр (7 + 10 цифр номера)
       phoneDigits = phoneDigits.slice(0, 11);
       
-      // Форматируем номер: +7 (XXX) XXX-XX-XX
       let formatted = '+7';
       if (phoneDigits.length > 1) {
         formatted += ' (' + phoneDigits.slice(1, 4);
@@ -62,7 +58,6 @@ const PayoutForm = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Проверка типа файла
       if (!file.type.startsWith('image/')) {
         toast({
           title: 'Ошибка',
@@ -72,7 +67,6 @@ const PayoutForm = () => {
         return;
       }
 
-      // Проверка размера файла (максимум 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: 'Ошибка',
@@ -87,12 +81,10 @@ const PayoutForm = () => {
         screenshot: file
       }));
 
-      // Звуковой эффект успешной загрузки
       const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBi6Gyv==');
       audio.volume = 0.3;
       audio.play().catch(() => {});
 
-      // Создание превью
       const reader = new FileReader();
       reader.onload = (event) => {
         setPreviewUrl(event.target?.result as string);
@@ -113,7 +105,6 @@ const PayoutForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Валидация
     if (!formData.fullName.trim()) {
       toast({
         title: 'Ошибка',
@@ -132,7 +123,6 @@ const PayoutForm = () => {
       return;
     }
 
-    // Проверяем, что телефон полностью заполнен (11 цифр)
     const phoneDigits = formData.phone.replace(/\D/g, '');
     if (!formData.phone.trim() || phoneDigits.length < 11) {
       toast({
@@ -155,7 +145,6 @@ const PayoutForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Конвертируем файл в base64
       const screenshotBase64 = await convertToBase64(formData.screenshot);
 
       const requestData = {
@@ -184,7 +173,6 @@ const PayoutForm = () => {
         description: 'Ваша заявка на выплату отправлена. Мы свяжемся с вами в ближайшее время.',
       });
 
-      // Сброс формы
       setFormData({
         fullName: '',
         city: '',
@@ -282,18 +270,16 @@ const PayoutForm = () => {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <label htmlFor="screenshot" className="cursor-pointer">
-                {formData.screenshot ? (
+              <label htmlFor="screenshot" className="cursor-pointer block">
+                {formData.screenshot && previewUrl ? (
                   <div className="space-y-2">
-                    {previewUrl && (
-                      <img 
-                        src={previewUrl} 
-                        alt="Превью скриншота" 
-                        className="max-w-full h-32 object-contain mx-auto rounded"
-                      />
-                    )}
-                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium animate-in fade-in slide-in-from-top-2 duration-500">
-                      <Icon name="CheckCircle" size={16} className="text-green-600 animate-in zoom-in-50 duration-300" />
+                    <img 
+                      src={previewUrl} 
+                      alt="Превью скриншота" 
+                      className="max-w-full h-32 object-contain mx-auto rounded"
+                    />
+                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
+                      <Icon name="CheckCircle" size={16} className="text-green-600" />
                       {formData.screenshot.name}
                     </div>
                     <p className="text-xs text-gray-500">
