@@ -857,14 +857,37 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Сначала ищем по oauth_id
+    # Сначала ищем по oauth_id (только активных пользователей)
     cur.execute(f"""
-        SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id
+        SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
         FROM t_p25272970_courier_button_site.users
-        WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}'
+        WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}' AND is_active = true
     """)
     
     existing_user = cur.fetchone()
+    
+    # Если не нашли по oauth_id, но есть телефон - ищем по телефону (только активных)
+    if not existing_user and phone:
+        phone_safe = phone.replace("'", "''")
+        cur.execute(f"""
+            SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+            FROM t_p25272970_courier_button_site.users
+            WHERE phone = '{phone_safe}' AND oauth_provider = '{provider}' AND is_active = true
+            ORDER BY created_at ASC
+            LIMIT 1
+        """)
+        
+        phone_user = cur.fetchone()
+        
+        # Если нашли по телефону - обновляем oauth_id для этого пользователя
+        if phone_user:
+            cur.execute(f"""
+                UPDATE t_p25272970_courier_button_site.users
+                SET oauth_id = '{oauth_id}', updated_at = NOW()
+                WHERE id = {phone_user['id']}
+            """)
+            conn.commit()
+            existing_user = phone_user
     
     if existing_user:
         user_id = existing_user['id']
