@@ -7,6 +7,7 @@ import PaymentsDistributionTab from './PaymentsDistributionTab';
 import CouriersTab from './CouriersTab';
 import AnalyticsTab from './AnalyticsTab';
 import UnifiedPaymentsTab from './UnifiedPaymentsTab';
+import CSVUploadTab from './CSVUploadTab';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 interface AdminTabsProps {
@@ -52,7 +53,7 @@ export default function AdminTabs({
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-6">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           Заявки
@@ -60,6 +61,10 @@ export default function AdminTabs({
         <TabsTrigger value="couriers" className="flex items-center gap-2">
           <Icon name="Users" size={16} />
           Курьеры
+        </TabsTrigger>
+        <TabsTrigger value="csv" className="flex items-center gap-2">
+          <Icon name="Upload" size={16} />
+          CSV
         </TabsTrigger>
         <TabsTrigger value="payments" className="flex items-center gap-2">
           <Icon name="Wallet" size={16} />
@@ -101,6 +106,10 @@ export default function AdminTabs({
           onRefresh={onRefreshCouriers}
           onDeleteAllUsers={onDeleteAllUsers}
         />
+      </TabsContent>
+
+      <TabsContent value="csv" className="space-y-6">
+        <CSVUploadTab authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="payments" className="space-y-6">

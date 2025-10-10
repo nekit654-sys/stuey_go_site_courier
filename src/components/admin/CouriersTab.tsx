@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import OnlineIndicator from './OnlineIndicator';
 
 interface Courier {
   id: number;
@@ -31,6 +32,16 @@ interface CouriersTabProps {
 const CouriersTab: React.FC<CouriersTabProps> = ({ couriers, isLoading, onRefresh, onDeleteAllUsers }) => {
   const [filterReferrals, setFilterReferrals] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      onRefresh();
+      setLastUpdate(new Date());
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [onRefresh]);
 
   const filteredCouriers = couriers.filter(courier => {
     const matchesSearch = !searchQuery || 
@@ -51,33 +62,29 @@ const CouriersTab: React.FC<CouriersTabProps> = ({ couriers, isLoading, onRefres
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Icon name="Users" size={28} className="text-blue-600" />
-          Курьеры
-        </h2>
-        <div className="flex gap-2">
-          {onDeleteAllUsers && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={onDeleteAllUsers}
-            >
-              <Icon name="Trash2" size={14} className="mr-1" />
-              Удалить всех
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onRefresh}
-            disabled={isLoading}
-          >
-            <Icon name="RefreshCw" size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-            Обновить
-          </Button>
-        </div>
-      </div>
+      <Card className="border-2 border-blue-200">
+        <CardContent className="py-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Icon name="Users" size={28} className="text-blue-600" />
+              Курьеры
+            </h2>
+            <div className="flex gap-3 items-center">
+              <OnlineIndicator lastUpdate={lastUpdate} autoRefresh={true} />
+              {onDeleteAllUsers && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={onDeleteAllUsers}
+                >
+                  <Icon name="Trash2" size={14} className="mr-1" />
+                  Удалить всех
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>

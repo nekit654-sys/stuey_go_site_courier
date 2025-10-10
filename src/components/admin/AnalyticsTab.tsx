@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import OnlineIndicator from './OnlineIndicator';
 
 interface OverallStats {
   total_referrals: number;
@@ -46,24 +46,30 @@ const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   onRefresh 
 }) => {
   const [activeSubTab, setActiveSubTab] = useState('overview');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      onRefresh();
+      setLastUpdate(new Date());
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [onRefresh]);
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Icon name="BarChart" size={28} className="text-blue-600" />
-          Аналитика и рефералы
-        </h2>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onRefresh}
-          disabled={isLoading}
-        >
-          <Icon name="RefreshCw" size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          Обновить
-        </Button>
-      </div>
+      <Card className="border-2 border-blue-200">
+        <CardContent className="py-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Icon name="BarChart" size={28} className="text-blue-600" />
+              Аналитика и рефералы
+            </h2>
+            <OnlineIndicator lastUpdate={lastUpdate} autoRefresh={true} />
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="grid w-full grid-cols-3">

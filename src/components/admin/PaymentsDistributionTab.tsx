@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import OnlineIndicator from './OnlineIndicator';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
@@ -46,10 +47,19 @@ export default function PaymentsDistributionTab({ authToken }: PaymentsDistribut
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'details'>('overview');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [authToken]);
 
   const loadData = async () => {
     setLoading(true);
@@ -74,6 +84,8 @@ export default function PaymentsDistributionTab({ authToken }: PaymentsDistribut
       if (paymentsData.success) {
         setPayments(paymentsData.payments || []);
       }
+      
+      setLastUpdate(new Date());
     } catch (error) {
       toast.error('Ошибка загрузки данных');
     } finally {
@@ -133,6 +145,18 @@ export default function PaymentsDistributionTab({ authToken }: PaymentsDistribut
 
   return (
     <div className="space-y-6">
+      <Card className="border-2 border-blue-200">
+        <CardContent className="py-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Icon name="DollarSign" size={28} className="text-blue-600" />
+              Распределение доходов
+            </h2>
+            <OnlineIndicator lastUpdate={lastUpdate} autoRefresh={true} />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
