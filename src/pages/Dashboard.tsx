@@ -98,15 +98,17 @@ export default function Dashboard() {
       const isProfileComplete = user?.phone && user?.city && user?.full_name;
       setShowProfileSetup(!isProfileComplete);
 
-      if (!stats && isProfileComplete) {
+      if (!stats && isProfileComplete && !statsLoading) {
         fetchStats();
         fetchReferralProgress();
       }
     }
-  }, [isAuthenticated, navigate, user?.id, stats, fetchStats, fetchReferralProgress]);
+    
+    setLoading(false);
+  }, [isAuthenticated, navigate, user?.id]);
 
   const fetchStats = useCallback(async () => {
-    if (!user?.id || statsLoading) return;
+    if (!user?.id) return;
     
     setStatsLoading(true);
     try {
@@ -132,10 +134,9 @@ export default function Dashboard() {
       if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to fetch stats:', error);
     } finally {
-      setLoading(false);
       setStatsLoading(false);
     }
-  }, [user?.id, statsLoading]);
+  }, [user?.id]);
 
   const fetchReferralProgress = useCallback(async () => {
     if (!user?.id) return;
