@@ -51,7 +51,49 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         query_params = event.get('queryStringParameters') or {}
         action = query_params.get('action', 'payouts')
         
-        if method == 'GET' and action == 'payouts':
+        if method == 'GET' and action == 'get_all_couriers':
+            # Получение всех пользователей (курьеров)
+            cursor.execute("""
+                SELECT 
+                    id, 
+                    full_name, 
+                    phone, 
+                    city, 
+                    vehicle_type,
+                    oauth_provider,
+                    created_at
+                FROM t_p25272970_courier_button_site.users 
+                ORDER BY created_at DESC
+            """)
+            
+            rows = cursor.fetchall()
+            couriers = []
+            
+            for row in rows:
+                couriers.append({
+                    'id': row[0],
+                    'full_name': row[1],
+                    'phone': row[2],
+                    'city': row[3],
+                    'vehicle_type': row[4],
+                    'oauth_provider': row[5],
+                    'created_at': row[6].isoformat() if row[6] else None
+                })
+            
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({
+                    'success': True,
+                    'couriers': couriers
+                }),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'GET' and action == 'payouts':
             # Получение всех заявок на выплаты
             cursor.execute("""
                 SELECT id, name, phone, city, attachment_data, created_at
