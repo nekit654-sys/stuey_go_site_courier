@@ -124,6 +124,8 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
             return get_user_referrals_list(user_id, headers)
         elif action == 'progress':
             return get_user_referral_progress(user_id, headers)
+        elif action == 'dashboard':
+            return get_dashboard_data(user_id, headers)
         elif action == 'admin_stats':
             return get_admin_referral_stats(headers)
         else:
@@ -342,6 +344,84 @@ def get_user_referral_progress(user_id: int, headers: Dict[str, str]) -> Dict[st
         'body': json.dumps(convert_decimals({
             'success': True,
             'progress': progress_list
+        })),
+        'isBase64Encoded': False
+    }
+
+
+def get_dashboard_data(user_id: int, headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Получение всех данных дашборда одним запросом для оптимизации'''
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute(f"""
+        SELECT referral_code, referral_earnings, total_orders, total_earnings
+        FROM t_p25272970_courier_button_site.users
+        WHERE id = {user_id}
+    """)
+    user_data = cur.fetchone()
+    
+    cur.execute("""
+        SELECT 
+            r.id,
+            r.referred_id,
+            r.bonus_amount,
+            r.bonus_paid,
+            r.referred_total_orders,
+            r.created_at,
+            u.full_name,
+            u.avatar_url,
+            u.total_orders,
+            u.is_active
+        FROM t_p25272970_courier_button_site.referrals r
+        JOIN t_p25272970_courier_button_site.users u ON r.referred_id = u.id
+        WHERE r.referrer_id = %s
+        ORDER BY r.created_at DESC
+    """, (user_id,))
+    referrals = cur.fetchall()
+    
+    cur.execute("""
+        SELECT 
+            id,
+            referral_phone,
+            referral_name,
+            external_id,
+            orders_count,
+            reward_amount,
+            status,
+            last_updated,
+            created_at
+        FROM t_p25272970_courier_button_site.referral_progress
+        WHERE courier_id = %s
+        ORDER BY created_at DESC
+    """, (user_id,))
+    progress = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    total_referrals = len(referrals)
+    active_referrals = sum(1 for r in referrals if r['is_active'])
+    total_bonus_earned = sum(float(r['bonus_amount']) for r in referrals)
+    total_bonus_paid = sum(float(r['bonus_amount']) for r in referrals if r['bonus_paid'])
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(convert_decimals({
+            'success': True,
+            'referral_code': user_data['referral_code'],
+            'stats': {
+                'total_referrals': total_referrals,
+                'active_referrals': active_referrals,
+                'total_bonus_earned': total_bonus_earned,
+                'total_bonus_paid': total_bonus_paid,
+                'pending_bonus': total_bonus_earned - total_bonus_paid,
+                'referral_earnings': user_data['referral_earnings'],
+                'total_orders': user_data['total_orders'],
+                'total_earnings': user_data['total_earnings']
+            },
+            'progress': [dict(p) for p in progress]
         })),
         'isBase64Encoded': False
     }
@@ -1401,12 +1481,29 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             courier = cur.fetchone()
             
             if not courier:
-                skipped += 1
-                errors.append(f"Курьер с кодом {creator_username} не найден")
-                continue
+                referral_name = f"{first_name} {last_name}".strip()
+                
+                cur.execute("""
+                    SELECT id, invited_by_user_id, full_name, phone, city 
+                    FROM t_p25272970_courier_button_site.users
+                    WHERE LOWER(full_name) = LOWER(%s)
+                    AND (city = %s OR city IS NULL OR %s = '')
+                    AND (phone = %s OR phone IS NULL OR %s = '')
+                    LIMIT 1
+                """, (referral_name, city, city, phone, phone))
+                
+                courier = cur.fetchone()
+                
+                if courier:
+                    creator_username = f"AUTO_{courier['id']}"
+                else:
+                    skipped += 1
+                    errors.append(f"Курьер не найден: {referral_name}, город: {city}, тел: {phone}")
+                    continue
             
             courier_id = courier['id']
             referrer_id = courier['invited_by_user_id']
+            referral_name = f"{first_name} {last_name}".strip()
             
             cur.execute("""
                 SELECT orders_completed, bonus_earned, is_completed
@@ -1425,8 +1522,6 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     (courier_id, orders_completed, bonus_earned, is_completed)
                     VALUES (%s, 0, 0, FALSE)
                 """, (courier_id,))
-            
-            referral_name = f"{first_name} {last_name}".strip()
             
             cur.execute("""
                 INSERT INTO t_p25272970_courier_button_site.courier_earnings

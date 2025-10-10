@@ -51,7 +51,6 @@ export default function Dashboard() {
 
       if (!stats && isProfileComplete) {
         fetchStats();
-        fetchReferralProgress();
       }
     }
     

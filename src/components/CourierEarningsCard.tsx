@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
@@ -36,7 +37,7 @@ interface CourierEarningsCardProps {
   userId: number;
 }
 
-export default function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
+function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
   const [selfBonus, setSelfBonus] = useState<SelfBonus | null>(null);
   const [earnings, setEarnings] = useState<Earning[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -45,9 +46,12 @@ export default function CourierEarningsCard({ userId }: CourierEarningsCardProps
 
   useEffect(() => {
     const controller = new AbortController();
+    let timeoutId: NodeJS.Timeout;
     
     const loadData = async () => {
       try {
+        timeoutId = setTimeout(() => controller.abort(), 8000);
+        
         const response = await fetch(`${API_URL}?route=payments&action=courier_payments`, {
           headers: {
             'X-User-Id': userId.toString()
@@ -55,6 +59,7 @@ export default function CourierEarningsCard({ userId }: CourierEarningsCardProps
           signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         const data = await response.json();
 
         if (data.success) {
@@ -73,6 +78,7 @@ export default function CourierEarningsCard({ userId }: CourierEarningsCardProps
     loadData();
 
     return () => {
+      clearTimeout(timeoutId);
       controller.abort();
     };
   }, [userId]);
@@ -330,3 +336,5 @@ export default function CourierEarningsCard({ userId }: CourierEarningsCardProps
     </Card>
   );
 }
+
+export default memo(CourierEarningsCard);

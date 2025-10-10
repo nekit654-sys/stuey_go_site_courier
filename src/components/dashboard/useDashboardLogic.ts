@@ -63,43 +63,14 @@ export function useDashboardLogic(
     try {
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
+      const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000);
+      timeoutRefs.current.push(timeoutId);
 
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=stats', {
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=dashboard', {
         headers: {
           'X-User-Id': user.id.toString(),
         },
         signal: abortControllerRef.current.signal
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.stats);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
-      console.error('Failed to fetch stats:', error);
-    } finally {
-      setStatsLoading(false);
-    }
-  }, [user?.id]);
-
-  const fetchReferralProgress = useCallback(async () => {
-    if (!user?.id) return;
-    
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      timeoutRefs.current.push(timeoutId);
-      
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=progress', {
-        headers: {
-          'X-User-Id': user.id.toString(),
-        },
-        signal: controller.signal
       });
 
       clearTimeout(timeoutId);
@@ -110,13 +81,22 @@ export function useDashboardLogic(
 
       const data = await response.json();
       if (data.success) {
+        setStats(data.stats);
         setReferralProgress(data.progress || []);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
-      console.error('Failed to fetch referral progress:', error);
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setStatsLoading(false);
     }
   }, [user?.id]);
+
+  const fetchReferralProgress = useCallback(async () => {
+    if (!stats) {
+      await fetchStats();
+    }
+  }, [stats, fetchStats]);
 
   const copyReferralLink = useCallback(() => {
     const referralLink = `${window.location.origin}/auth?ref=${user?.referral_code}`;
