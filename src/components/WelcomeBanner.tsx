@@ -77,8 +77,10 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
   const handleClose = () => {
     setIsVisible(false);
     setTimeout(() => {
-      onClose?.();
-    }, 500);
+      if (onClose) {
+        onClose();
+      }
+    }, 300);
   };
 
   if (!isVisible) return null;
@@ -162,16 +164,17 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           }`}
         >
           {/* Таймер обратного отсчета */}
-          <div className="absolute top-4 left-4 z-10 bg-yellow-400 text-black px-3 py-1 rounded-full font-extrabold text-sm border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-            {timeLeft} сек
+          <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-yellow-400 text-black px-2 py-1 sm:px-3 sm:py-1 rounded-full font-extrabold text-xs sm:text-sm border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+            <span className="hidden sm:inline">{timeLeft} сек</span>
+            <span className="sm:hidden">{timeLeft}с</span>
           </div>
 
           {/* Кнопка закрытия */}
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 z-10 bg-yellow-400 text-black font-extrabold border-3 border-black rounded-full p-2 shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-yellow-400 text-black font-extrabold border-2 sm:border-3 border-black rounded-full p-1.5 sm:p-2 shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
           >
-            <Icon name="X" size={20} className="text-black" />
+            <Icon name="X" size={16} className="text-black sm:w-5 sm:h-5" />
           </button>
 
           {/* Фон баннера */}
@@ -234,12 +237,12 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <p className="text-xs sm:text-sm md:text-base font-extrabold text-black whitespace-nowrap">
-                    Даем <span className="text-yellow-600 font-extrabold">3000₽</span> за первые <span className="text-yellow-600 font-extrabold">30 заказов!</span>
+                  <p className="text-xs sm:text-sm md:text-base font-extrabold text-black">
+                    <span className="text-yellow-600">3000₽</span> за первые<br className="sm:hidden" /> <span className="text-yellow-600">30 заказов!</span>
                   </p>
-                  <div className="mt-2 flex items-center gap-1">
-                    <Icon name="FileText" size={16} className="text-yellow-400 flex-shrink-0" />
-                    <span className="text-xs sm:text-sm text-gray-700 font-medium whitespace-nowrap">Нужно заполнить форму обратной связи!</span>
+                  <div className="mt-2 flex items-start gap-1">
+                    <Icon name="ArrowDown" size={16} className="text-yellow-400 flex-shrink-0 animate-bounce" />
+                    <span className="text-xs sm:text-sm text-gray-700 font-medium">Заполни форму<br className="sm:hidden" /> ниже!</span>
                   </div>
                 </div>
               </div>
@@ -247,10 +250,10 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           </div>
           
           {/* Мини-баннер регистрации */}
-          <div className="text-black px-4 py-3 text-center border-t-3 border-black bg-yellow-400">
-            <div className="font-extrabold text-sm md:text-base flex items-center justify-center gap-2 whitespace-nowrap">
-              <Icon name="FileText" size={20} className="text-black flex-shrink-0" />
-              <span>Нужно заполнить форму обратной связи!</span>
+          <div className="text-black px-2 py-2 sm:px-4 sm:py-3 text-center border-t-3 border-black bg-yellow-400">
+            <div className="font-extrabold text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2">
+              <Icon name="Gift" size={18} className="text-black flex-shrink-0 sm:w-5 sm:h-5" />
+              <span>Получи 3000₽ прямо сейчас!</span>
             </div>
           </div>
         </div>
