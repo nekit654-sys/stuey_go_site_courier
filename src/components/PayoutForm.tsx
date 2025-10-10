@@ -7,142 +7,78 @@ import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 
 const PayoutForm = () => {
-  const [fullName, setFullName] = useState('');
+  const [name, setName] = useState('');
   const [city, setCity] = useState('');
-  const [phone, setPhone] = useState('+7');
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [image, setImage] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    let formatted = '+7';
-    
-    if (digits.length > 1) {
-      const phone = digits.slice(1, 11);
-      if (phone.length > 0) formatted += ' (' + phone.slice(0, 3);
-      if (phone.length >= 4) formatted += ') ' + phone.slice(3, 6);
-      if (phone.length >= 7) formatted += '-' + phone.slice(6, 8);
-      if (phone.length >= 9) formatted += '-' + phone.slice(8, 10);
-    }
-    
-    return formatted;
-  };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(formatPhone(e.target.value));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-
-    if (!selectedFile.type.startsWith('image/')) {
-      toast({
-        title: 'Ошибка',
-        description: 'Можно загружать только изображения',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      toast({
-        title: 'Ошибка',
-        description: 'Файл слишком большой (макс. 10MB)',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setFile(selectedFile);
-    
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreview(reader.result as string);
+      const result = reader.result as string;
+      setImage(result);
+      setImagePreview(result);
     };
-    reader.readAsDataURL(selectedFile);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!fullName.trim()) {
-      toast({ title: 'Ошибка', description: 'Укажите ФИО', variant: 'destructive' });
-      return;
-    }
-    
-    if (!city.trim()) {
-      toast({ title: 'Ошибка', description: 'Укажите город', variant: 'destructive' });
-      return;
-    }
-    
-    const phoneDigits = phone.replace(/\D/g, '');
-    if (phoneDigits.length < 11) {
-      toast({ title: 'Ошибка', description: 'Введите полный номер телефона', variant: 'destructive' });
-      return;
-    }
-    
-    if (!file) {
-      toast({ title: 'Ошибка', description: 'Загрузите скриншот', variant: 'destructive' });
+
+    if (!name || !city || !phone || !image) {
+      toast({
+        title: 'Ошибка',
+        description: 'Заполните все поля и загрузите скриншот',
+        variant: 'destructive'
+      });
       return;
     }
 
-    setLoading(true);
+    setSending(true);
 
     try {
-      const reader = new FileReader();
-      
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'payout',
-          name: fullName.trim(),
+          name: name,
           phone: phone,
-          city: city.trim(),
-          attachment_data: base64
+          city: city,
+          attachment_data: image
         })
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Ошибка сервера');
+      if (response.ok && data.success) {
+        toast({
+          title: '✅ Успешно!',
+          description: 'Ваша заявка отправлена'
+        });
+        setName('');
+        setCity('');
+        setPhone('');
+        setImage('');
+        setImagePreview('');
+      } else {
+        throw new Error(data.error || 'Ошибка сервера');
       }
-
-      toast({
-        title: '✅ Заявка отправлена!',
-        description: 'Мы свяжемся с вами в ближайшее время',
-      });
-
-      setFullName('');
-      setCity('');
-      setPhone('+7');
-      setFile(null);
-      setPreview('');
-      
-      const fileInput = document.getElementById('screenshot') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-
-    } catch (error) {
-      console.error('Ошибка:', error);
+    } catch (err) {
       toast({
         title: '❌ Ошибка',
-        description: error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте ещё раз',
+        description: 'Не удалось отправить заявку. Попробуйте ещё раз',
         variant: 'destructive'
       });
+      console.error(err);
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
@@ -160,18 +96,18 @@ const PayoutForm = () => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+            <Label htmlFor="name" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <Icon name="User" size={18} className="text-yellow-400" />
               ФИО *
             </Label>
             <Input
-              id="fullName"
+              id="name"
               type="text"
               placeholder="Иванов Иван Иванович"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
-              disabled={loading}
+              disabled={sending}
             />
           </div>
 
@@ -187,63 +123,58 @@ const PayoutForm = () => {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
-              disabled={loading}
+              disabled={sending}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <Icon name="Phone" size={18} className="text-yellow-400" />
-              Номер телефона *
+              Телефон *
             </Label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+7 (999) 123-45-67"
+              placeholder="+7 999 123 45 67"
               value={phone}
-              onChange={handlePhoneChange}
+              onChange={(e) => setPhone(e.target.value)}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
-              disabled={loading}
+              disabled={sending}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="screenshot" className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <Icon name="Image" size={18} className="text-yellow-400" />
-              Скриншот подтверждения *
+              Скриншот *
             </Label>
             <div className="border-3 border-black border-dashed rounded-xl p-6 text-center shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all duration-150 bg-yellow-50">
               <input
                 id="screenshot"
                 type="file"
                 accept="image/*"
-                onChange={handleFileChange}
+                onChange={handleImageChange}
                 className="hidden"
-                disabled={loading}
+                disabled={sending}
               />
-              <label htmlFor="screenshot" className={`cursor-pointer block ${loading ? 'opacity-50' : ''}`}>
-                {preview ? (
+              <label htmlFor="screenshot" className="cursor-pointer block">
+                {imagePreview ? (
                   <div className="space-y-2">
                     <img 
-                      src={preview} 
-                      alt="Превью скриншота" 
+                      src={imagePreview} 
+                      alt="Превью" 
                       className="max-w-full h-40 object-contain mx-auto rounded-lg border-2 border-green-500"
                     />
                     <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-bold">
                       <Icon name="CheckCircle" size={16} />
-                      Файл загружен
+                      Загружено
                     </div>
-                    <p className="text-xs text-gray-500">Нажмите, чтобы изменить</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Icon name="Upload" className="w-12 h-12 mx-auto text-yellow-400" />
-                    <p className="text-base font-bold text-gray-800">
-                      Нажмите для загрузки
-                    </p>
-                    <p className="text-sm text-gray-600 font-medium">
-                      JPG, PNG, GIF (до 10MB)
-                    </p>
+                    <p className="text-base font-bold text-gray-800">Нажмите для загрузки</p>
+                    <p className="text-sm text-gray-600 font-medium">JPG, PNG, GIF</p>
                   </div>
                 )}
               </label>
@@ -252,10 +183,10 @@ const PayoutForm = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-green-500 text-white font-extrabold py-3 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
+            className="w-full bg-green-500 text-white font-extrabold py-3 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 disabled:opacity-50"
+            disabled={sending}
           >
-            {loading ? (
+            {sending ? (
               <>
                 <Icon name="Loader2" className="w-4 h-4 mr-2 animate-spin" />
                 Отправляем...
@@ -269,7 +200,7 @@ const PayoutForm = () => {
           </Button>
 
           <p className="text-sm text-gray-600 text-center font-bold">
-            * Все поля обязательны для заполнения
+            * Все поля обязательны
           </p>
         </form>
       </CardContent>
