@@ -271,14 +271,20 @@ const PayoutForm = () => {
                 className="hidden"
               />
               <label htmlFor="screenshot" className="cursor-pointer block">
-                {formData.screenshot && previewUrl ? (
+                {formData.screenshot ? (
                   <div className="space-y-2">
-                    <img 
-                      src={previewUrl} 
-                      alt="Превью скриншота" 
-                      className="max-w-full h-32 object-contain mx-auto rounded"
-                    />
-                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
+                    {previewUrl ? (
+                      <img 
+                        src={previewUrl} 
+                        alt="Превью скриншота" 
+                        className="max-w-full h-32 object-contain mx-auto rounded border-2 border-green-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-32">
+                        <Icon name="Loader2" className="w-8 h-8 animate-spin text-yellow-400" />
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-bold">
                       <Icon name="CheckCircle" size={16} className="text-green-600" />
                       {formData.screenshot.name}
                     </div>
