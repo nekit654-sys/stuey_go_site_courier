@@ -44,6 +44,7 @@ const Login: React.FC = () => {
     deleteRequest,
     loadReferralStats,
     loadAllCouriers,
+    deleteAllUsers,
   } = useAdminData(authToken, isAuthenticated);
 
   useEffect(() => {
@@ -102,6 +103,7 @@ const Login: React.FC = () => {
           referralStats={referralStats}
           isLoadingReferrals={isLoadingReferrals}
           onRefreshReferrals={loadReferralStats}
+          onDeleteAllUsers={deleteAllUsers}
         />
       </div>
 

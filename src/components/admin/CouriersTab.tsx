@@ -25,9 +25,10 @@ interface CouriersTabProps {
   couriers: Courier[];
   isLoading: boolean;
   onRefresh: () => void;
+  onDeleteAllUsers?: () => void;
 }
 
-const CouriersTab: React.FC<CouriersTabProps> = ({ couriers, isLoading, onRefresh }) => {
+const CouriersTab: React.FC<CouriersTabProps> = ({ couriers, isLoading, onRefresh, onDeleteAllUsers }) => {
   const [filterReferrals, setFilterReferrals] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -55,15 +56,27 @@ const CouriersTab: React.FC<CouriersTabProps> = ({ couriers, isLoading, onRefres
           <Icon name="Users" size={28} className="text-blue-600" />
           Курьеры
         </h2>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onRefresh}
-          disabled={isLoading}
-        >
-          <Icon name="RefreshCw" size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          Обновить
-        </Button>
+        <div className="flex gap-2">
+          {onDeleteAllUsers && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onDeleteAllUsers}
+            >
+              <Icon name="Trash2" size={14} className="mr-1" />
+              Удалить всех
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onRefresh}
+            disabled={isLoading}
+          >
+            <Icon name="RefreshCw" size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            Обновить
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

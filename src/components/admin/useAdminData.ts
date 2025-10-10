@@ -152,6 +152,43 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }
   };
 
+  const deleteAllUsers = async () => {
+    if (!confirm('⚠️ ВНИМАНИЕ! Вы уверены что хотите удалить ВСЕХ пользователей? Это действие необратимо!')) {
+      return;
+    }
+    
+    try {
+      const ADMIN_PANEL_URL = 'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559';
+      const response = await fetch(`${ADMIN_PANEL_URL}?action=delete_all_users`, {
+        method: 'DELETE',
+        headers: {
+          'X-Auth-Token': authToken
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: '✅ Успешно',
+          description: data.message || 'Все пользователи удалены',
+        });
+        loadAllCouriers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось удалить пользователей',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось выполнить запрос',
+        variant: 'destructive',
+      });
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated && authToken) {
       loadRequests(authToken, true);
@@ -183,5 +220,6 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     deleteRequest,
     loadReferralStats,
     loadAllCouriers,
+    deleteAllUsers,
   };
 }
