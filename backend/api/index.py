@@ -2031,11 +2031,38 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             city = body_data.get('city', '')
             attachment_data = body_data.get('attachment_data', '')
             
-            if not name or not phone or not city:
+            # Валидация: проверяем, что все поля заполнены
+            if not name.strip():
                 return {
                     'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'error': 'Name, phone and city are required'}),
+                    'body': json.dumps({'error': 'Name is required'}),
+                    'isBase64Encoded': False
+                }
+            
+            if not city.strip():
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'City is required'}),
+                    'isBase64Encoded': False
+                }
+            
+            if not phone.strip():
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Phone is required'}),
+                    'isBase64Encoded': False
+                }
+            
+            # Проверяем, что телефон содержит минимум 11 цифр
+            phone_digits = ''.join(filter(str.isdigit, phone))
+            if len(phone_digits) < 11:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Phone must contain at least 11 digits'}),
                     'isBase64Encoded': False
                 }
             

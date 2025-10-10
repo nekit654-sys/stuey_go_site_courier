@@ -132,10 +132,12 @@ const PayoutForm = () => {
       return;
     }
 
-    if (!formData.phone.trim()) {
+    // Проверяем, что телефон полностью заполнен (11 цифр)
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (!formData.phone.trim() || phoneDigits.length < 11) {
       toast({
         title: 'Ошибка',
-        description: 'Пожалуйста, укажите номер телефона',
+        description: 'Пожалуйста, укажите полный номер телефона (11 цифр)',
         variant: 'destructive'
       });
       return;
