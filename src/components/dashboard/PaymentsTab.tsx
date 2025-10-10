@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import CourierEarningsCard from '@/components/CourierEarningsCard';
+import NextPayoutProgress from './NextPayoutProgress';
 
 interface User {
   id: number;
@@ -8,6 +9,7 @@ interface User {
   phone?: string;
   city?: string;
   referral_code: string;
+  referral_earnings?: number;
 }
 
 interface PaymentsTabProps {
@@ -15,8 +17,19 @@ interface PaymentsTabProps {
 }
 
 export default function PaymentsTab({ user }: PaymentsTabProps) {
+  const PAYOUT_THRESHOLD = 5000;
+  const currentEarnings = user.referral_earnings || 0;
+  const avgDailyEarnings = 150;
+  const daysToNextPayout = Math.ceil((PAYOUT_THRESHOLD - currentEarnings) / avgDailyEarnings);
+
   return (
     <div className="space-y-6">
+      <NextPayoutProgress
+        currentEarnings={currentEarnings}
+        nextPayoutThreshold={PAYOUT_THRESHOLD}
+        estimatedDays={daysToNextPayout > 0 ? daysToNextPayout : 0}
+      />
+      
       <CourierEarningsCard userId={user.id} />
 
       <Card className="border-2 border-blue-200">

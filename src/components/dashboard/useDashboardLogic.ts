@@ -21,9 +21,12 @@ export function useDashboardLogic(
   const [inviterCode, setInviterCode] = useState('');
   const [submittingInviter, setSubmittingInviter] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(user?.vehicle_type || 'bike');
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
+  const autoRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const refreshUserData = useCallback(async () => {
     if (!token) return;
@@ -56,10 +59,11 @@ export function useDashboardLogic(
     }
   }, [token, updateUser]);
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async (silent = false) => {
     if (!user?.id) return;
     
-    setStatsLoading(true);
+    if (!silent) setStatsLoading(true);
+    
     try {
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
@@ -83,14 +87,28 @@ export function useDashboardLogic(
       if (data.success) {
         setStats(data.stats);
         setReferralProgress(data.progress || []);
+        setError(null);
+        setRetryCount(0);
+      } else {
+        throw new Error(data.error || 'Unknown error');
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
+      
       console.error('Failed to fetch dashboard data:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка загрузки');
+      
+      if (retryCount < 3) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchStats(silent);
+        }, delay);
+      }
     } finally {
-      setStatsLoading(false);
+      if (!silent) setStatsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, retryCount]);
 
   const fetchReferralProgress = useCallback(async () => {
     if (!stats) {
@@ -170,10 +188,27 @@ export function useDashboardLogic(
   }, [user?.id, updateUser]);
 
   useEffect(() => {
+    if (user?.id && stats) {
+      autoRefreshIntervalRef.current = setInterval(() => {
+        fetchStats(true);
+      }, 30000);
+    }
+
+    return () => {
+      if (autoRefreshIntervalRef.current) {
+        clearInterval(autoRefreshIntervalRef.current);
+      }
+    };
+  }, [user?.id, stats, fetchStats]);
+
+  useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
       timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
       timeoutRefs.current = [];
+      if (autoRefreshIntervalRef.current) {
+        clearInterval(autoRefreshIntervalRef.current);
+      }
     };
   }, []);
 
@@ -184,6 +219,7 @@ export function useDashboardLogic(
     inviterCode,
     submittingInviter,
     selectedVehicle,
+    error,
     setInviterCode,
     refreshUserData,
     fetchStats,
