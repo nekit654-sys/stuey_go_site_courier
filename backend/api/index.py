@@ -1362,12 +1362,27 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             first_name = row.get('first_name', '').strip()
             last_name = row.get('last_name', '').strip()
             city = row.get('target_city', '').strip()
-            eats_order_number = int(row.get('eats_order_number', 0))
-            reward = float(row.get('reward', 0))
+            
+            # Безопасная конвертация чисел
+            try:
+                eats_order_number = int(row.get('eats_order_number', 0) or 0)
+            except (ValueError, TypeError):
+                eats_order_number = 0
+            
+            try:
+                reward_str = row.get('reward', '').strip()
+                reward = float(reward_str) if reward_str else 0.0
+            except (ValueError, TypeError):
+                reward = 0.0
+            
             status = row.get('status', 'active').strip()
             
-            if not external_id or not creator_username:
+            if not external_id or not creator_username or reward <= 0:
                 skipped += 1
+                if not external_id or not creator_username:
+                    errors.append(f"Пропущена строка: отсутствует ID или код курьера")
+                elif reward <= 0:
+                    errors.append(f"Пропущена строка {external_id}: сумма reward = 0 или пустая")
                 continue
             
             cur.execute("""
