@@ -7,171 +7,142 @@ import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 
 const PayoutForm = () => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    city: '',
-    phone: '',
-  });
-  const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [city, setCity] = useState('');
+  const [phone, setPhone] = useState('+7');
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState('');
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    let formatted = '+7';
     
-    if (name === 'phone') {
-      let phoneDigits = value.replace(/\D/g, '');
-      
-      if (phoneDigits.length > 0 && phoneDigits[0] !== '7') {
-        phoneDigits = '7' + phoneDigits;
-      }
-      
-      phoneDigits = phoneDigits.slice(0, 11);
-      
-      let formatted = '+7';
-      if (phoneDigits.length > 1) {
-        formatted += ' (' + phoneDigits.slice(1, 4);
-      }
-      if (phoneDigits.length >= 5) {
-        formatted += ') ' + phoneDigits.slice(4, 7);
-      }
-      if (phoneDigits.length >= 8) {
-        formatted += '-' + phoneDigits.slice(7, 9);
-      }
-      if (phoneDigits.length >= 10) {
-        formatted += '-' + phoneDigits.slice(9, 11);
-      }
-      
-      setFormData(prev => ({ ...prev, [name]: formatted }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+    if (digits.length > 1) {
+      const phone = digits.slice(1, 11);
+      if (phone.length > 0) formatted += ' (' + phone.slice(0, 3);
+      if (phone.length >= 4) formatted += ') ' + phone.slice(3, 6);
+      if (phone.length >= 7) formatted += '-' + phone.slice(6, 8);
+      if (phone.length >= 9) formatted += '-' + phone.slice(8, 10);
     }
+    
+    return formatted;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(formatPhone(e.target.value));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!selectedFile.type.startsWith('image/')) {
       toast({
         title: 'Ошибка',
-        description: 'Пожалуйста, загрузите изображение',
+        description: 'Можно загружать только изображения',
         variant: 'destructive'
       });
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (selectedFile.size > 10 * 1024 * 1024) {
       toast({
         title: 'Ошибка',
-        description: 'Размер файла не должен превышать 5MB',
+        description: 'Файл слишком большой (макс. 10MB)',
         variant: 'destructive'
       });
       return;
     }
 
-    setScreenshot(file);
-
+    setFile(selectedFile);
+    
     const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setPreviewUrl(event.target.result as string);
-      }
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(selectedFile);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName.trim()) {
-      toast({
-        title: 'Ошибка',
-        description: 'Пожалуйста, укажите ФИО',
-        variant: 'destructive'
-      });
+    if (!fullName.trim()) {
+      toast({ title: 'Ошибка', description: 'Укажите ФИО', variant: 'destructive' });
       return;
     }
-
-    if (!formData.city.trim()) {
-      toast({
-        title: 'Ошибка',
-        description: 'Пожалуйста, укажите город',
-        variant: 'destructive'
-      });
+    
+    if (!city.trim()) {
+      toast({ title: 'Ошибка', description: 'Укажите город', variant: 'destructive' });
       return;
     }
-
-    const phoneDigits = formData.phone.replace(/\D/g, '');
+    
+    const phoneDigits = phone.replace(/\D/g, '');
     if (phoneDigits.length < 11) {
-      toast({
-        title: 'Ошибка',
-        description: 'Пожалуйста, укажите полный номер телефона',
-        variant: 'destructive'
-      });
+      toast({ title: 'Ошибка', description: 'Введите полный номер телефона', variant: 'destructive' });
+      return;
+    }
+    
+    if (!file) {
+      toast({ title: 'Ошибка', description: 'Загрузите скриншот', variant: 'destructive' });
       return;
     }
 
-    if (!screenshot) {
-      toast({
-        title: 'Ошибка',
-        description: 'Пожалуйста, загрузите скриншот',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
+    setLoading(true);
 
     try {
       const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
+      
+      const base64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
-        reader.readAsDataURL(screenshot);
+        reader.readAsDataURL(file);
       });
-
-      const screenshotBase64 = await base64Promise;
 
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action: 'payout',
-          name: formData.fullName,
-          phone: formData.phone,
-          city: formData.city,
-          attachment_data: screenshotBase64
+          name: fullName.trim(),
+          phone: phone,
+          city: city.trim(),
+          attachment_data: base64
         })
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка отправки');
+        throw new Error(result.error || 'Ошибка сервера');
       }
 
       toast({
-        title: 'Успешно!',
-        description: 'Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.',
+        title: '✅ Заявка отправлена!',
+        description: 'Мы свяжемся с вами в ближайшее время',
       });
 
-      setFormData({ fullName: '', city: '', phone: '' });
-      setScreenshot(null);
-      setPreviewUrl('');
+      setFullName('');
+      setCity('');
+      setPhone('+7');
+      setFile(null);
+      setPreview('');
+      
+      const fileInput = document.getElementById('screenshot') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
 
     } catch (error) {
-      console.error('Ошибка отправки:', error);
+      console.error('Ошибка:', error);
       toast({
-        title: 'Ошибка',
-        description: error instanceof Error ? error.message : 'Не удалось отправить заявку',
+        title: '❌ Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте ещё раз',
         variant: 'destructive'
       });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -195,12 +166,12 @@ const PayoutForm = () => {
             </Label>
             <Input
               id="fullName"
-              name="fullName"
               type="text"
               placeholder="Иванов Иван Иванович"
-              value={formData.fullName}
-              onChange={handleInputChange}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
+              disabled={loading}
             />
           </div>
 
@@ -211,12 +182,12 @@ const PayoutForm = () => {
             </Label>
             <Input
               id="city"
-              name="city"
               type="text"
               placeholder="Москва"
-              value={formData.city}
-              onChange={handleInputChange}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
+              disabled={loading}
             />
           </div>
 
@@ -227,12 +198,12 @@ const PayoutForm = () => {
             </Label>
             <Input
               id="phone"
-              name="phone"
               type="tel"
               placeholder="+7 (999) 123-45-67"
-              value={formData.phone || '+7'}
-              onChange={handleInputChange}
+              value={phone}
+              onChange={handlePhoneChange}
               className="border-3 border-black rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,1)] focus:shadow-[0_2px_0_0_rgba(251,191,36,1)] focus:translate-y-[2px] focus:border-yellow-400 transition-all duration-150 font-medium"
+              disabled={loading}
             />
           </div>
 
@@ -248,14 +219,15 @@ const PayoutForm = () => {
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
+                disabled={loading}
               />
-              <label htmlFor="screenshot" className="cursor-pointer block">
-                {previewUrl ? (
+              <label htmlFor="screenshot" className={`cursor-pointer block ${loading ? 'opacity-50' : ''}`}>
+                {preview ? (
                   <div className="space-y-2">
                     <img 
-                      src={previewUrl} 
-                      alt="Превью" 
-                      className="max-w-full h-32 object-contain mx-auto rounded border-2 border-green-500"
+                      src={preview} 
+                      alt="Превью скриншота" 
+                      className="max-w-full h-40 object-contain mx-auto rounded-lg border-2 border-green-500"
                     />
                     <div className="flex items-center justify-center gap-1 text-sm text-green-600 font-bold">
                       <Icon name="CheckCircle" size={16} />
@@ -267,10 +239,10 @@ const PayoutForm = () => {
                   <div className="space-y-2">
                     <Icon name="Upload" className="w-12 h-12 mx-auto text-yellow-400" />
                     <p className="text-base font-bold text-gray-800">
-                      Нажмите для загрузки скриншота
+                      Нажмите для загрузки
                     </p>
                     <p className="text-sm text-gray-600 font-medium">
-                      Поддерживаются: JPG, PNG, GIF (до 5MB)
+                      JPG, PNG, GIF (до 10MB)
                     </p>
                   </div>
                 )}
@@ -280,10 +252,10 @@ const PayoutForm = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-green-500 text-white font-extrabold py-3 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
-            disabled={isSubmitting}
+            className="w-full bg-green-500 text-white font-extrabold py-3 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            {isSubmitting ? (
+            {loading ? (
               <>
                 <Icon name="Loader2" className="w-4 h-4 mr-2 animate-spin" />
                 Отправляем...
@@ -296,9 +268,9 @@ const PayoutForm = () => {
             )}
           </Button>
 
-          <div className="text-sm text-gray-600 text-center font-bold">
+          <p className="text-sm text-gray-600 text-center font-bold">
             * Все поля обязательны для заполнения
-          </div>
+          </p>
         </form>
       </CardContent>
     </Card>
