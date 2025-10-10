@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 type AuthProvider = 'yandex' | 'vk' | 'telegram';
 
@@ -58,7 +59,7 @@ export default function Auth() {
     try {
       const redirectUri = `${window.location.origin}/auth`;
       
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
+      const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export default function Auth() {
   const handleTelegramAuth = (telegramData: any) => {
     setLoading(true);
     
-    fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
+    fetch(`${API_URL}?route=auth`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

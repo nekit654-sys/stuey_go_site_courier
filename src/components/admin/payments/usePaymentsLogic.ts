@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { CsvRow, UploadResult, PartnerData, MatchedCourier, Courier } from './types';
-
-const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
+import { API_URL } from '@/config/api';
 
 export function usePaymentsLogic(authToken: string, couriers: Courier[], onRefreshCouriers: () => void) {
   const [uploading, setUploading] = useState(false);

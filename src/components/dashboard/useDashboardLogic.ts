@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { ReferralStats, ReferralProgress } from './types';
+import { API_URL } from '@/config/api';
 
 interface User {
   id: number;
@@ -36,7 +37,7 @@ export function useDashboardLogic(
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       timeoutRefs.current.push(timeoutId);
       
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
+      const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ export function useDashboardLogic(
       const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000);
       timeoutRefs.current.push(timeoutId);
 
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=dashboard', {
+      const response = await fetch(`${API_URL}?route=referrals&action=dashboard`, {
         headers: {
           'X-User-Id': user.id.toString(),
         },
@@ -135,7 +136,7 @@ export function useDashboardLogic(
 
     setSubmittingInviter(true);
     try {
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=set_inviter', {
+      const response = await fetch(`${API_URL}?route=referrals&action=set_inviter`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ export function useDashboardLogic(
 
   const handleVehicleChange = useCallback(async (vehicle: string) => {
     try {
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=profile', {
+      const response = await fetch(`${API_URL}?route=profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

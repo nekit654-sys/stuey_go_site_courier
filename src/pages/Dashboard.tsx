@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import { useEffect, useState, useMemo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -88,10 +88,19 @@ export default function Dashboard() {
     return null;
   }
 
+  const handleProfileComplete = useCallback(() => {
+    setShowProfileSetup(false);
+    fetchStats();
+  }, [fetchStats]);
+
+  const handleGameToggle = useCallback((isOpen: boolean) => {
+    setIsGameOpen(isOpen);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 md:bg-gradient-to-br md:from-purple-900 md:via-blue-900 md:to-indigo-900 bg-purple-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <GameButton 
-        onToggle={setIsGameOpen} 
+        onToggle={handleGameToggle} 
         onGameClose={refreshUserData} 
         externalOpen={isGameOpen}
       />
@@ -100,10 +109,7 @@ export default function Dashboard() {
           user={user}
           token={token || ''}
           onUpdateUser={updateUser}
-          onComplete={() => {
-            setShowProfileSetup(false);
-            fetchStats();
-          }}
+          onComplete={handleProfileComplete}
         />
       )}
 

@@ -261,6 +261,16 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     
     user_data = cur.fetchone()
     
+    if not user_data:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'User not found'}),
+            'isBase64Encoded': False
+        }
+    
     cur.execute("""
         SELECT 
             r.id,
@@ -354,11 +364,11 @@ def get_dashboard_data(user_id: int, headers: Dict[str, str]) -> Dict[str, Any]:
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    cur.execute(f"""
+    cur.execute("""
         SELECT referral_code, referral_earnings, total_orders, total_earnings
         FROM t_p25272970_courier_button_site.users
-        WHERE id = {user_id}
-    """)
+        WHERE id = %s
+    """, (user_id,))
     user_data = cur.fetchone()
     
     cur.execute("""
@@ -607,11 +617,10 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    inviter_code_safe = inviter_code.replace("'", "''")
-    cur.execute(f"""
+    cur.execute("""
         SELECT invited_by_user_id FROM t_p25272970_courier_button_site.users
-        WHERE id = {user_id}
-    """)
+        WHERE id = %s
+    """, (user_id,))
     
     user = cur.fetchone()
     
@@ -635,10 +644,10 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
             'isBase64Encoded': False
         }
     
-    cur.execute(f"""
+    cur.execute("""
         SELECT id FROM t_p25272970_courier_button_site.users
-        WHERE referral_code = '{inviter_code_safe}'
-    """)
+        WHERE referral_code = %s
+    """, (inviter_code,))
     
     referrer = cur.fetchone()
     
@@ -664,17 +673,17 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
             'isBase64Encoded': False
         }
     
-    cur.execute(f"""
+    cur.execute("""
         UPDATE t_p25272970_courier_button_site.users
-        SET invited_by_user_id = {referrer_id}, updated_at = NOW()
-        WHERE id = {user_id}
-    """)
+        SET invited_by_user_id = %s, updated_at = NOW()
+        WHERE id = %s
+    """, (referrer_id, user_id))
     
-    cur.execute(f"""
+    cur.execute("""
         INSERT INTO t_p25272970_courier_button_site.referrals 
         (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-        VALUES ({referrer_id}, {user_id}, 0, false, 0)
-    """)
+        VALUES (%s, %s, 0, false, 0)
+    """, (referrer_id, user_id))
     
     conn.commit()
     cur.close()
@@ -822,15 +831,15 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
             user_id = result['user_id']
-            cur.execute(f"""
+            cur.execute("""
                 SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                        referral_code, invited_by_user_id, total_orders, total_earnings, 
                        referral_earnings, is_verified, vehicle_type, created_at,
                        self_orders_count, self_bonus_paid, nickname, game_high_score, 
                        game_total_plays, game_achievements, agreed_to_terms
                 FROM t_p25272970_courier_button_site.users
-                WHERE id = {user_id}
-            """)
+                WHERE id = %s
+            """, (user_id,))
             
             user = cur.fetchone()
             cur.close()
@@ -945,57 +954,55 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     existing_user = None
     
     # Шаг 1: Ищем по oauth_id
-    cur.execute(f"""
+    cur.execute("""
         SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
         FROM t_p25272970_courier_button_site.users
-        WHERE oauth_id = '{oauth_id}' AND oauth_provider = '{provider}' AND is_active = true
-    """)
+        WHERE oauth_id = %s AND oauth_provider = %s AND is_active = true
+    """, (oauth_id, provider))
     
     existing_user = cur.fetchone()
     
     # Шаг 2: Если не нашли по oauth_id, но есть email - ищем по email
     if not existing_user and email:
-        email_safe = email.replace("'", "''")
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
             FROM t_p25272970_courier_button_site.users
-            WHERE email = '{email_safe}' AND oauth_provider = '{provider}' AND is_active = true
+            WHERE email = %s AND oauth_provider = %s AND is_active = true
             ORDER BY created_at ASC
             LIMIT 1
-        """)
+        """, (email, provider))
         
         email_user = cur.fetchone()
         
         # Если нашли по email - обновляем oauth_id для этого пользователя
         if email_user:
-            cur.execute(f"""
+            cur.execute("""
                 UPDATE t_p25272970_courier_button_site.users
-                SET oauth_id = '{oauth_id}', updated_at = NOW()
-                WHERE id = {email_user['id']}
-            """)
+                SET oauth_id = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (oauth_id, email_user['id']))
             conn.commit()
             existing_user = email_user
     
     # Шаг 3: Если не нашли по email, но есть телефон - ищем по телефону
     if not existing_user and phone:
-        phone_safe = phone.replace("'", "''")
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
             FROM t_p25272970_courier_button_site.users
-            WHERE phone = '{phone_safe}' AND oauth_provider = '{provider}' AND is_active = true
+            WHERE phone = %s AND oauth_provider = %s AND is_active = true
             ORDER BY created_at ASC
             LIMIT 1
-        """)
+        """, (phone, provider))
         
         phone_user = cur.fetchone()
         
         # Если нашли по телефону - обновляем oauth_id для этого пользователя
         if phone_user:
-            cur.execute(f"""
+            cur.execute("""
                 UPDATE t_p25272970_courier_button_site.users
-                SET oauth_id = '{oauth_id}', updated_at = NOW()
-                WHERE id = {phone_user['id']}
-            """)
+                SET oauth_id = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (oauth_id, phone_user['id']))
             conn.commit()
             existing_user = phone_user
     
@@ -1003,73 +1010,75 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         user_id = existing_user['id']
         
         # Обновляем данные существующего пользователя от провайдера
-        update_parts = []
+        update_fields = []
+        update_values = []
+        
         if full_name and full_name != 'Пользователь':
-            update_parts.append(f"full_name = '{full_name}'")
+            update_fields.append("full_name = %s")
+            update_values.append(full_name)
         if email:
-            update_parts.append(f"email = '{email}'")
+            update_fields.append("email = %s")
+            update_values.append(email)
         if avatar_url:
-            update_parts.append(f"avatar_url = '{avatar_url}'")
+            update_fields.append("avatar_url = %s")
+            update_values.append(avatar_url)
         
         # Обновляем телефон только если он есть от провайдера и еще не заполнен
         if phone and not existing_user.get('phone'):
-            update_parts.append(f"phone = '{phone}'")
+            update_fields.append("phone = %s")
+            update_values.append(phone)
         
-        if update_parts:
+        if update_fields:
+            update_values.append(user_id)
             update_query = f"""
                 UPDATE t_p25272970_courier_button_site.users
-                SET {', '.join(update_parts)}, updated_at = NOW()
-                WHERE id = {user_id}
+                SET {', '.join(update_fields)}, updated_at = NOW()
+                WHERE id = %s
             """
-            cur.execute(update_query)
+            cur.execute(update_query, tuple(update_values))
             conn.commit()
     else:
         generated_ref_code = str(uuid.uuid4())[:8].upper()
         
-        email_val = f"'{email}'" if email else 'NULL'
-        phone_val = f"'{phone}'" if phone else 'NULL'
-        avatar_val = f"'{avatar_url}'" if avatar_url else 'NULL'
-        
-        cur.execute(f"""
+        cur.execute("""
             INSERT INTO t_p25272970_courier_button_site.users 
             (oauth_id, oauth_provider, full_name, email, phone, avatar_url, referral_code)
-            VALUES ('{oauth_id}', '{provider}', '{full_name}', {email_val}, {phone_val}, {avatar_val}, '{generated_ref_code}')
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id
-        """)
+        """, (oauth_id, provider, full_name, email, phone, avatar_url, generated_ref_code))
         
         user_id = cur.fetchone()['id']
         
         if referral_code:
-            referral_code_safe = referral_code.replace("'", "''")
-            cur.execute(f"""
+            cur.execute("""
                 SELECT id FROM t_p25272970_courier_button_site.users
-                WHERE referral_code = '{referral_code_safe}'
-            """)
+                WHERE referral_code = %s
+            """, (referral_code,))
             
             referrer = cur.fetchone()
             
             if referrer and referrer['id'] != user_id:
-                cur.execute(f"""
+                cur.execute("""
                     UPDATE t_p25272970_courier_button_site.users
-                    SET invited_by_user_id = {referrer['id']}
-                    WHERE id = {user_id}
-                """)
+                    SET invited_by_user_id = %s
+                    WHERE id = %s
+                """, (referrer['id'], user_id))
                 
-                cur.execute(f"""
+                cur.execute("""
                     INSERT INTO t_p25272970_courier_button_site.referrals
                     (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-                    VALUES ({referrer['id']}, {user_id}, 0, false, 0)
-                """)
+                    VALUES (%s, %s, 0, false, 0)
+                """, (referrer['id'], user_id))
     
     conn.commit()
-    cur.execute(f"""
+    cur.execute("""
         SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
                is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
                nickname, game_high_score, game_total_plays, game_achievements, agreed_to_terms
         FROM t_p25272970_courier_button_site.users
-        WHERE id = {user_id}
-    """)
+        WHERE id = %s
+    """, (user_id,))
     
     user = cur.fetchone()
     
@@ -1184,14 +1193,14 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         
         conn.commit()
         
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
                    is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
                    nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
-            WHERE id = {user_id}
-        """)
+            WHERE id = %s
+        """, (user_id,))
         
         user = cur.fetchone()
         cur.close()
@@ -1215,14 +1224,14 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         
         conn.commit()
         
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
                    is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
                    nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
-            WHERE id = {user_id}
-        """)
+            WHERE id = %s
+        """, (user_id,))
         
         user = cur.fetchone()
         cur.close()
@@ -1272,14 +1281,14 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         
         conn.commit()
         
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
                    is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
                    nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
-            WHERE id = {user_id}
-        """)
+            WHERE id = %s
+        """, (user_id,))
         
         user = cur.fetchone()
         cur.close()
@@ -1301,14 +1310,14 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         
         conn.commit()
         
-        cur.execute(f"""
+        cur.execute("""
             SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
                    referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
                    is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
                    nickname, game_high_score, game_total_plays, agreed_to_terms
             FROM t_p25272970_courier_button_site.users
-            WHERE id = {user_id}
-        """)
+            WHERE id = %s
+        """, (user_id,))
         
         user = cur.fetchone()
         cur.close()
@@ -1846,11 +1855,12 @@ def handle_payments(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
             }
         
         placeholders = ','.join(['%s'] * len(earning_ids))
-        cur.execute(f"""
+        query = f"""
             UPDATE t_p25272970_courier_button_site.payment_distributions
             SET payment_status = 'paid', paid_at = NOW()
             WHERE earning_id IN ({placeholders})
-        """, earning_ids)
+        """
+        cur.execute(query, tuple(earning_ids))
         
         conn.commit()
         cur.close()

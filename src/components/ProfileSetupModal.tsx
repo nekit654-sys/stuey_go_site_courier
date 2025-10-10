@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 interface User {
   id: number;
@@ -72,7 +73,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=profile&action=update', {
+      const response = await fetch(`${API_URL}?route=profile&action=update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +114,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     }
   };
 
-  const formatPhoneInput = (value: string) => {
+  const formatPhoneInput = useCallback((value: string) => {
     const digits = value.replace(/\D/g, '');
     
     if (digits.length === 0) return '';
@@ -122,22 +123,32 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}`;
     if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}`;
     return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
-  };
+  }, []);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneInput(e.target.value);
-    setFormData({ ...formData, phone: formatted });
-    if (errors.phone) setErrors({ ...errors, phone: '' });
-  };
+    setFormData(prev => ({ ...prev, phone: formatted }));
+    if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+  }, [errors.phone, formatPhoneInput]);
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, full_name: e.target.value }));
+    if (errors.full_name) setErrors(prev => ({ ...prev, full_name: '' }));
+  }, [errors.full_name]);
+
+  const handleCityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, city: e.target.value }));
+    if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
+  }, [errors.city]);
 
   if (isProfileComplete) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <CardHeader className="bg-blue-600 text-white">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-white/20 rounded-full">
               <Icon name="UserCog" size={32} />
@@ -179,10 +190,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
                 id="full_name"
                 type="text"
                 value={formData.full_name}
-                onChange={(e) => {
-                  setFormData({ ...formData, full_name: e.target.value });
-                  if (errors.full_name) setErrors({ ...errors, full_name: '' });
-                }}
+                onChange={handleNameChange}
                 placeholder="Иванов Иван Иванович"
                 className={`mt-2 text-lg ${errors.full_name ? 'border-red-500' : ''}`}
                 disabled={isSubmitting}
@@ -236,10 +244,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
                 id="city"
                 type="text"
                 value={formData.city}
-                onChange={(e) => {
-                  setFormData({ ...formData, city: e.target.value });
-                  if (errors.city) setErrors({ ...errors, city: '' });
-                }}
+                onChange={handleCityChange}
                 placeholder="Москва"
                 className={`mt-2 text-lg ${errors.city ? 'border-red-500' : ''}`}
                 disabled={isSubmitting}

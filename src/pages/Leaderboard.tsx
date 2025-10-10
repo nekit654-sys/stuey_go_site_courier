@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/config/api';
 
 interface LeaderboardPlayer {
   id: number;
@@ -51,7 +52,7 @@ export default function Leaderboard() {
   const loadLeaderboard = async () => {
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=game&action=leaderboard&limit=50'
+        `${API_URL}?route=game&action=leaderboard&limit=50`
       );
       const data = await response.json();
       if (data.success) {
@@ -70,7 +71,7 @@ export default function Leaderboard() {
     
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=game&action=my_stats',
+        `${API_URL}?route=game&action=my_stats`,
         {
           headers: {
             'X-User-Id': user.id.toString(),

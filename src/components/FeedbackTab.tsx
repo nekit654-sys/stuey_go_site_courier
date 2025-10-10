@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
+import { API_URL } from '@/config/api';
 
 interface FormData {
   fullName: string;
@@ -113,7 +114,7 @@ const FeedbackTab: React.FC = () => {
         screenshotUrl: formData.screenshot ? formData.screenshot.name : null
       };
 
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

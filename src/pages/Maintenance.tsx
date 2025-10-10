@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 interface MaintenanceProps {
   onUnlock: () => void;
@@ -101,7 +102,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
     setIsChecking(true);
     
     try {
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
+      const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

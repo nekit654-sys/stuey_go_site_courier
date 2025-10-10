@@ -5,14 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 import OnlineIndicator from './OnlineIndicator';
 import { Courier } from './payments/types';
 import { usePaymentsLogic } from './payments/usePaymentsLogic';
 import CsvUploadCard from './payments/CsvUploadCard';
 import UploadResultDisplay from './payments/UploadResultDisplay';
 import PartnerMatchingCard from './payments/PartnerMatchingCard';
-
-const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
 interface PaymentStats {
   total_records: number;

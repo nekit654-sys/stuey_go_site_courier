@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import { API_URL } from '@/config/api';
 
 const PayoutForm = () => {
   const [name, setName] = useState('');
@@ -43,7 +44,7 @@ const PayoutForm = () => {
     setSending(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
