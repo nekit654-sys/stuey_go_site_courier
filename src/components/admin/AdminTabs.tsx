@@ -3,11 +3,10 @@ import Icon from '@/components/ui/icon';
 import StatsCards from './StatsCards';
 import RequestsTable from './RequestsTable';
 import ControlPanel from './ControlPanel';
-import PaymentsDistributionTab from './PaymentsDistributionTab';
 import CouriersTab from './CouriersTab';
 import AnalyticsTab from './AnalyticsTab';
 import UnifiedPaymentsTab from './UnifiedPaymentsTab';
-import CSVUploadTab from './CSVUploadTab';
+import PaymentsTab from './PaymentsTab';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 interface AdminTabsProps {
@@ -53,7 +52,7 @@ export default function AdminTabs({
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           Заявки
@@ -62,17 +61,13 @@ export default function AdminTabs({
           <Icon name="Users" size={16} />
           Курьеры
         </TabsTrigger>
-        <TabsTrigger value="csv" className="flex items-center gap-2">
-          <Icon name="Upload" size={16} />
-          CSV
+        <TabsTrigger value="income" className="flex items-center gap-2">
+          <Icon name="DollarSign" size={16} />
+          Выплаты
         </TabsTrigger>
         <TabsTrigger value="payments" className="flex items-center gap-2">
           <Icon name="Wallet" size={16} />
-          Выплаты
-        </TabsTrigger>
-        <TabsTrigger value="income" className="flex items-center gap-2">
-          <Icon name="DollarSign" size={16} />
-          Доходы
+          Транзакции
         </TabsTrigger>
         <TabsTrigger value="analytics" className="flex items-center gap-2">
           <Icon name="BarChart" size={16} />
@@ -108,8 +103,8 @@ export default function AdminTabs({
         />
       </TabsContent>
 
-      <TabsContent value="csv" className="space-y-6">
-        <CSVUploadTab authToken={authToken} />
+      <TabsContent value="income" className="space-y-6">
+        <PaymentsTab authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="payments" className="space-y-6">
@@ -119,10 +114,6 @@ export default function AdminTabs({
           isLoadingCouriers={isLoadingCouriers}
           onRefreshCouriers={onRefreshCouriers}
         />
-      </TabsContent>
-
-      <TabsContent value="income" className="space-y-6">
-        <PaymentsDistributionTab authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="analytics" className="space-y-6">
