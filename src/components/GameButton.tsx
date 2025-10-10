@@ -36,7 +36,6 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose, external
       
       ticking = true;
       requestAnimationFrame(() => {
-        // Показываем кнопку только на мобильных и планшетах когда прокрутили до середины страницы
         if (window.innerWidth > 1024) {
           setIsVisible(false);
           ticking = false;
@@ -48,24 +47,25 @@ const GameButton: React.FC<GameButtonProps> = ({ onToggle, onGameClose, external
         const windowHeight = window.innerHeight;
         const scrollPercentage = scrollTop / (documentHeight - windowHeight);
         
-        // Показываем кнопку когда прокрутили до середины страницы (50%)
         setIsVisible(scrollPercentage >= 0.5);
         ticking = false;
       });
+    };
+
+    const handleResize = () => {
+      checkDevice();
+      handleScroll();
     };
 
     checkDevice();
     handleScroll();
     
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", () => {
-      checkDevice();
-      handleScroll();
-    }, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
     
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", checkDevice);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -15,7 +16,7 @@ interface OverviewTabProps {
   onCopyReferralLink: () => void;
 }
 
-export default function OverviewTab({ user, onCopyReferralLink }: OverviewTabProps) {
+function OverviewTab({ user, onCopyReferralLink }: OverviewTabProps) {
   const isSelfRegistered = !user?.invited_by_user_id;
   const selfOrdersProgress = user?.self_orders_count || 0;
   const selfBonusPaid = user?.self_bonus_paid || false;
@@ -106,3 +107,5 @@ export default function OverviewTab({ user, onCopyReferralLink }: OverviewTabPro
     </div>
   );
 }
+
+export default memo(OverviewTab);

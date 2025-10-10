@@ -23,6 +23,7 @@ export function useDashboardLogic(
   const [selectedVehicle, setSelectedVehicle] = useState(user?.vehicle_type || 'bike');
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
 
   const refreshUserData = useCallback(async () => {
     if (!token) return;
@@ -30,6 +31,7 @@ export function useDashboardLogic(
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
+      timeoutRefs.current.push(timeoutId);
       
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth', {
         method: 'POST',
@@ -91,6 +93,7 @@ export function useDashboardLogic(
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
+      timeoutRefs.current.push(timeoutId);
       
       const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=progress', {
         headers: {
@@ -189,6 +192,8 @@ export function useDashboardLogic(
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
+      timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
+      timeoutRefs.current = [];
     };
   }, []);
 

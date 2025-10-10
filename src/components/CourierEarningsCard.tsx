@@ -44,30 +44,38 @@ export default function CourierEarningsCard({ userId }: CourierEarningsCardProps
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    loadData();
-  }, [userId]);
+    const controller = new AbortController();
+    
+    const loadData = async () => {
+      try {
+        const response = await fetch(`${API_URL}?route=payments&action=courier_payments`, {
+          headers: {
+            'X-User-Id': userId.toString()
+          },
+          signal: controller.signal
+        });
 
-  const loadData = async () => {
-    try {
-      const response = await fetch(`${API_URL}?route=payments&action=courier_payments`, {
-        headers: {
-          'X-User-Id': userId.toString()
+        const data = await response.json();
+
+        if (data.success) {
+          setSelfBonus(data.self_bonus);
+          setEarnings(data.earnings || []);
+          setSummary(data.summary);
         }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSelfBonus(data.self_bonus);
-        setEarnings(data.earnings || []);
-        setSummary(data.summary);
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        console.error('Failed to load earnings:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to load earnings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [userId]);
 
   if (loading) {
     return (
