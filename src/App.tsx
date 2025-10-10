@@ -40,7 +40,7 @@ const YandexMetrika = () => {
 };
 
 const MaintenanceWrapper = () => {
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
