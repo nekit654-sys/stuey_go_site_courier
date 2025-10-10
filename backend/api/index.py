@@ -857,7 +857,14 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Сначала ищем по oauth_id (только активных пользователей)
+    # Стратегия поиска существующего пользователя:
+    # 1. По oauth_id (самый надежный идентификатор)
+    # 2. По email (если Яндекс вернул email)
+    # 3. По телефону (если есть)
+    
+    existing_user = None
+    
+    # Шаг 1: Ищем по oauth_id
     cur.execute(f"""
         SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
         FROM t_p25272970_courier_button_site.users
@@ -866,7 +873,30 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     
     existing_user = cur.fetchone()
     
-    # Если не нашли по oauth_id, но есть телефон - ищем по телефону (только активных)
+    # Шаг 2: Если не нашли по oauth_id, но есть email - ищем по email
+    if not existing_user and email:
+        email_safe = email.replace("'", "''")
+        cur.execute(f"""
+            SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+            FROM t_p25272970_courier_button_site.users
+            WHERE email = '{email_safe}' AND oauth_provider = '{provider}' AND is_active = true
+            ORDER BY created_at ASC
+            LIMIT 1
+        """)
+        
+        email_user = cur.fetchone()
+        
+        # Если нашли по email - обновляем oauth_id для этого пользователя
+        if email_user:
+            cur.execute(f"""
+                UPDATE t_p25272970_courier_button_site.users
+                SET oauth_id = '{oauth_id}', updated_at = NOW()
+                WHERE id = {email_user['id']}
+            """)
+            conn.commit()
+            existing_user = email_user
+    
+    # Шаг 3: Если не нашли по email, но есть телефон - ищем по телефону
     if not existing_user and phone:
         phone_safe = phone.replace("'", "''")
         cur.execute(f"""
