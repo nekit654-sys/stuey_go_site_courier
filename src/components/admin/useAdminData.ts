@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { API_URL } from './constants';
+import { API_URL, ADMIN_PANEL_URL } from './constants';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 export function useAdminData(authToken: string, isAuthenticated: boolean) {
@@ -134,7 +134,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const loadAllCouriers = async () => {
     setIsLoadingCouriers(true);
     try {
-      const response = await fetch(`${API_URL}?route=couriers&action=list`, {
+      const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
         headers: {
           'X-Auth-Token': authToken
         }
@@ -158,7 +158,6 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }
     
     try {
-      const ADMIN_PANEL_URL = 'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559';
       const response = await fetch(`${ADMIN_PANEL_URL}?action=delete_all_users`, {
         method: 'DELETE',
         headers: {
