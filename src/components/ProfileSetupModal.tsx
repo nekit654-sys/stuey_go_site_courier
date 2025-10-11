@@ -73,6 +73,12 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
 
     setIsSubmitting(true);
     try {
+      console.log('Отправка данных профиля:', {
+        full_name: formData.full_name.trim(),
+        phone: formData.phone.replace(/\D/g, ''),
+        city: formData.city.trim(),
+      });
+
       const response = await fetch(`${API_URL}?route=profile&action=update`, {
         method: 'POST',
         headers: {
@@ -86,7 +92,9 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
         }),
       });
 
+      console.log('Статус ответа:', response.status);
       const data = await response.json();
+      console.log('Данные ответа:', data);
 
       if (data.success) {
         toast.success('Профиль успешно заполнен!');
