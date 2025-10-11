@@ -110,7 +110,10 @@ export function useAdminAuth() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Ответ от API get_admins:', data);
         setAdmins(data.admins || []);
+      } else {
+        console.error('Ошибка загрузки админов, статус:', response.status);
       }
     } catch (error) {
       console.error('Ошибка загрузки админов:', error);

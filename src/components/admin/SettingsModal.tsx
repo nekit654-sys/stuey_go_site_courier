@@ -41,6 +41,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [activeTab, setActiveTab] = useState('security');
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
+  // Загрузка админов при открытии вкладки
+  useEffect(() => {
+    if (isOpen && activeTab === 'admins') {
+      onLoadAdmins();
+    }
+  }, [isOpen, activeTab]);
+
   // Автообновление списка администраторов каждые 10 секунд
   useEffect(() => {
     if (!isOpen || activeTab !== 'admins') return;
