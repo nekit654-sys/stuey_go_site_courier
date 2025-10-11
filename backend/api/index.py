@@ -80,6 +80,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     query_params = event.get('queryStringParameters') or {}
     route = query_params.get('route', '')
+    print(f'>>> Handler вызван: method={method}, route={route}, action={query_params.get("action", "")}')
     
     if route == 'referrals':
         return handle_referrals(event, headers)
@@ -206,6 +207,7 @@ def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
 
 
 def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
+    print('>>> get_all_couriers вызвана')
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
@@ -235,10 +237,12 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
     """)
     
     couriers = cur.fetchall()
+    print(f'>>> Найдено курьеров: {len(couriers)}')
     cur.close()
     conn.close()
     
     couriers_list = [dict(c) for c in couriers]
+    print(f'>>> Преобразовано в список: {len(couriers_list)}')
     
     return {
         'statusCode': 200,
