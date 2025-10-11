@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { API_URL } from '@/config/api';
+import { useGame } from '@/contexts/GameContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GameStats {
   game_high_score: number;
@@ -25,6 +27,8 @@ interface GameTabProps {
 
 export default function GameTab({ userId }: GameTabProps) {
   const navigate = useNavigate();
+  const { openGame } = useGame();
+  const { user } = useAuth();
   const [stats, setStats] = useState<GameStats | null>(null);
   const [topPlayers, setTopPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +37,16 @@ export default function GameTab({ userId }: GameTabProps) {
     fetchStats();
     fetchTopPlayers();
   }, [userId]);
+
+  useEffect(() => {
+    if (user?.game_high_score !== undefined) {
+      setStats(prev => prev ? {
+        ...prev,
+        game_high_score: user.game_high_score || 0,
+        game_total_plays: user.game_total_plays || 0
+      } : null);
+    }
+  }, [user?.game_high_score, user?.game_total_plays]);
 
   const fetchStats = async () => {
     try {
@@ -84,7 +98,7 @@ export default function GameTab({ userId }: GameTabProps) {
           </p>
         </div>
         <Button
-          onClick={() => navigate('/')}
+          onClick={openGame}
           size="lg"
           className="bg-white text-purple-600 hover:bg-gray-100 font-bold text-xl px-8 py-6 h-auto"
         >

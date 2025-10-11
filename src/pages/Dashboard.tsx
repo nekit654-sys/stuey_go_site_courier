@@ -68,11 +68,27 @@ export default function Dashboard() {
         fetchStats();
         fetchReferrals();
         fetchWithdrawalRequests();
+
+        const statsInterval = setInterval(() => {
+          fetchStats();
+          fetchReferrals();
+        }, 30000);
+
+        const withdrawalsInterval = setInterval(() => {
+          if (activeTab === 'withdrawals') {
+            fetchWithdrawalRequests();
+          }
+        }, 15000);
+
+        return () => {
+          clearInterval(statsInterval);
+          clearInterval(withdrawalsInterval);
+        };
       }
     }
 
     setLoading(false);
-  }, [isAuthenticated, navigate, user?.id]);
+  }, [isAuthenticated, navigate, user?.id, activeTab]);
 
   const fetchStats = async () => {
     if (!user?.id) return;

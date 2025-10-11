@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { GameProvider } from "@/contexts/GameContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FeedbackTab from "@/components/FeedbackTab";
 
@@ -89,12 +90,14 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <YandexMetrika />
-            <MaintenanceWrapper />
-          </BrowserRouter>
+          <GameProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <YandexMetrika />
+              <MaintenanceWrapper />
+            </BrowserRouter>
+          </GameProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
