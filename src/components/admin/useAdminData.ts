@@ -15,17 +15,18 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const { toast } = useToast();
 
   const loadRequests = async (token?: string, silent = false) => {
-    const tokenToUse = token || authToken;
     try {
-      const response = await fetch(API_URL, {
-        headers: {
-          'X-Auth-Token': tokenToUse
-        }
-      });
+      const response = await fetch(API_URL);
       if (response.ok) {
         const data = await response.json();
         const newRequests = data.requests || [];
-        const newStats = data.stats || { total: 0, new: 0, approved: 0, rejected: 0 };
+        
+        const newStats = {
+          total: newRequests.length,
+          new: newRequests.filter((r: any) => r.status === 'new').length,
+          approved: newRequests.filter((r: any) => r.status === 'approved').length,
+          rejected: newRequests.filter((r: any) => r.status === 'rejected').length
+        };
         
         if (!silent && requests.length > 0 && newRequests.length > requests.length) {
           const newCount = newRequests.length - requests.length;
@@ -59,8 +60,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
       const response = await fetch(API_URL, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Auth-Token': authToken
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ id, status })
       });
@@ -69,7 +69,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
         loadRequests();
         toast({
           title: 'Статус обновлен',
-          description: `Заявка ${status === 'approved' ? 'одобрена' : 'отклонена'}`,
+          description: `Заявка ${status === 'approved' ? 'одобрена' : status === 'paid' ? 'выплачена' : 'отклонена'}`,
         });
       }
     } catch (error) {
@@ -82,32 +82,11 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   };
 
   const deleteRequest = async (id: number) => {
-    if (confirm('Удалить заявку?')) {
-      try {
-        const response = await fetch(API_URL, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Auth-Token': authToken
-          },
-          body: JSON.stringify({ id })
-        });
-
-        if (response.ok) {
-          loadRequests();
-          toast({
-            title: 'Заявка удалена',
-            description: 'Заявка успешно удалена из системы',
-          });
-        }
-      } catch (error) {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось удалить заявку',
-          variant: 'destructive',
-        });
-      }
-    }
+    toast({
+      title: 'Недоступно',
+      description: 'Удаление заявок отключено',
+      variant: 'destructive',
+    });
   };
 
   const loadReferralStats = async () => {
