@@ -15,7 +15,6 @@ import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
@@ -53,7 +52,7 @@ const MaintenanceWrapper = () => {
     }
   }, []);
 
-  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard' || location.pathname === '/admin';
+  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard';
 
   if (isMaintenanceMode && !isAdminRoute) {
     return <Maintenance onUnlock={() => setIsMaintenanceMode(false)} />;
@@ -70,7 +69,6 @@ const MaintenanceWrapper = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<AdminPanel />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

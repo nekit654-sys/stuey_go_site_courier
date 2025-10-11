@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 
 interface AdminRequest {
@@ -23,6 +22,7 @@ interface RequestsTableProps {
   autoRefresh: boolean;
   onUpdateStatus: (id: number, status: string) => void;
   onDelete: (id: number) => void;
+  onViewImage?: (url: string) => void;
 }
 
 const RequestsTable: React.FC<RequestsTableProps> = ({
@@ -30,10 +30,9 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   stats,
   autoRefresh,
   onUpdateStatus,
-  onDelete
+  onDelete,
+  onViewImage
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string>('');
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved': return 'text-green-600 bg-green-100';
@@ -106,31 +105,15 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
                     <td className="py-3 px-4">{request.city}</td>
                     <td className="py-3 px-4">
                       {request.screenshot_url ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedImage(request.screenshot_url)}
-                              className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                            >
-                              <Icon name="Eye" size={14} className="mr-1" />
-                              Просмотр
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
-                            <DialogHeader>
-                              <DialogTitle>Скриншот от {request.name}</DialogTitle>
-                            </DialogHeader>
-                            <div className="flex justify-center">
-                              <img
-                                src={request.screenshot_url}
-                                alt="Скриншот заявки"
-                                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
-                              />
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onViewImage?.(request.screenshot_url)}
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                        >
+                          <Icon name="Eye" size={14} className="mr-1" />
+                          Просмотр
+                        </Button>
                       ) : (
                         <span className="text-gray-400 text-sm">Нет</span>
                       )}

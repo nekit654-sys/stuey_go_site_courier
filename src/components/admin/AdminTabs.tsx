@@ -26,6 +26,7 @@ interface AdminTabsProps {
   isLoadingReferrals: boolean;
   onRefreshReferrals: () => void;
   onDeleteAllUsers?: () => void;
+  onViewImage?: (url: string) => void;
 }
 
 export default function AdminTabs({
@@ -47,6 +48,7 @@ export default function AdminTabs({
   isLoadingReferrals,
   onRefreshReferrals,
   onDeleteAllUsers,
+  onViewImage,
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
@@ -81,6 +83,7 @@ export default function AdminTabs({
           autoRefresh={autoRefresh}
           onUpdateStatus={onUpdateStatus}
           onDelete={onDelete}
+          onViewImage={onViewImage}
         />
       </TabsContent>
 

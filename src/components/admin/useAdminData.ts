@@ -19,7 +19,10 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
       const response = await fetch(API_URL);
       if (response.ok) {
         const data = await response.json();
-        const newRequests = data.requests || [];
+        const newRequests = (data.requests || []).map((req: any) => ({
+          ...req,
+          screenshot_url: req.attachment_data || req.screenshot_url
+        }));
         
         const newStats = {
           total: newRequests.length,
