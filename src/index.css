@@ -411,14 +411,6 @@ svg {
 
 /* Упрощаем все анимации на мобилках */
 @media (max-width: 768px) {
-  * {
-    animation-duration: 0.3s !important;
-  }
-
-  [class*="transition-"] {
-    transition-duration: 0.2s !important;
-  }
-
   /* Отключаем will-change после завершения анимации для экономии памяти */
   [class*="animate-"]:not(:hover):not(:focus):not(:active) {
     will-change: auto;
