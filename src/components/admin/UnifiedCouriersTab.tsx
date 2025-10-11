@@ -162,16 +162,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             </h2>
             <div className="flex gap-3 items-center">
               <OnlineIndicator lastUpdate={lastUpdate} autoRefresh={true} />
-              {onDeleteAllUsers && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={onDeleteAllUsers}
-                >
-                  <Icon name="Trash2" size={14} className="mr-1" />
-                  Удалить всех
-                </Button>
-              )}
             </div>
           </div>
         </CardContent>

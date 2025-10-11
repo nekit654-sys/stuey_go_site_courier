@@ -30,6 +30,7 @@ interface AdminsTabProps {
   };
   onPasswordFormChange: (form: any) => void;
   onChangePassword: (e: React.FormEvent) => void;
+  lastUpdate?: Date;
 }
 
 const AdminsTab: React.FC<AdminsTabProps> = ({
@@ -38,10 +39,23 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
   onAdminFormChange,
   onAddAdmin,
   onDeleteAdmin,
+  onLoadAdmins,
   passwordForm,
   onPasswordFormChange,
   onChangePassword,
+  lastUpdate,
 }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Автообновление списка администраторов каждые 10 секунд
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      onLoadAdmins();
+      setCurrentTime(new Date());
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [onLoadAdmins]);
   const [adminSubTab, setAdminSubTab] = useState('list');
   const getLastSeenText = (lastLogin?: string) => {
     if (!lastLogin) return 'Никогда не входил';
@@ -147,8 +161,14 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
               <Icon name="Users" size={20} />
               Активные администраторы
             </div>
-            <div className="text-sm font-normal text-gray-500">
-              Всего: {admins.length}
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-normal text-gray-500">
+                Всего: {admins.length}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Авто-обновление
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
@@ -184,14 +204,16 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
                       </div>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onDeleteAdmin(admin.id)}
-                    className="text-red-600 border-red-600 hover:bg-red-50 ml-4"
-                  >
-                    <Icon name="Trash2" size={14} />
-                  </Button>
+                  <div className="ml-4">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onDeleteAdmin(admin.id)}
+                      className="text-red-600 border-red-600 hover:bg-red-50"
+                    >
+                      <Icon name="Trash2" size={14} />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

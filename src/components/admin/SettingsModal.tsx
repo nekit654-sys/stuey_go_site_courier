@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +8,7 @@ interface Admin {
   id: number;
   username: string;
   created_at: string;
+  last_login?: string;
 }
 
 interface SettingsModalProps {
@@ -38,6 +39,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onChangePassword,
 }) => {
   const [activeTab, setActiveTab] = useState('security');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  // Автообновление списка администраторов каждые 10 секунд
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'admins') return;
+    
+    const interval = setInterval(() => {
+      onLoadAdmins();
+      setLastUpdate(new Date());
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen, activeTab, onLoadAdmins]);
 
   if (!isOpen) return null;
 
@@ -194,14 +208,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Список администраторов ({admins.length})</CardTitle>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={onLoadAdmins}
-                    >
-                      <Icon name="RefreshCw" size={14} className="mr-1" />
-                      Обновить
-                    </Button>
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      Авто-обновление
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -226,6 +236,30 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                               <div className="text-sm text-gray-500">
                                 Создан: {new Date(admin.created_at).toLocaleDateString('ru-RU')}
                               </div>
+                              {admin.last_login && (
+                                <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                  <Icon name="Clock" size={12} />
+                                  {(() => {
+                                    const loginDate = new Date(admin.last_login);
+                                    const now = new Date();
+                                    const diffMs = now.getTime() - loginDate.getTime();
+                                    const diffMinutes = Math.floor(diffMs / 60000);
+                                    const diffHours = Math.floor(diffMs / 3600000);
+                                    const diffDays = Math.floor(diffMs / 86400000);
+                                    
+                                    if (diffMinutes < 5) return 'Онлайн';
+                                    if (diffMinutes < 60) return `${diffMinutes} мин. назад`;
+                                    if (diffHours < 24) return `${diffHours} ч. назад`;
+                                    if (diffDays < 7) return `${diffDays} дн. назад`;
+                                    
+                                    return loginDate.toLocaleDateString('ru-RU', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric'
+                                    });
+                                  })()}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <Button
