@@ -13,6 +13,7 @@ interface User {
   email?: string;
   phone?: string;
   city?: string;
+  invited_by_user_id?: number;
 }
 
 interface ProfileSetupModalProps {
@@ -44,6 +45,8 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [referralCodeStatus, setReferralCodeStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [referrerName, setReferrerName] = useState<string>('');
 
   const isProfileComplete = user.phone && user.city && user.full_name;
 
@@ -82,6 +85,12 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
 
     if (!validateForm()) {
       toast.error('Исправьте ошибки в форме');
+      return;
+    }
+
+    // Проверяем реферальный код, если он введён
+    if (formData.referral_code_input && referralCodeStatus === 'invalid') {
+      toast.error('Реферальный код не существует. Проверьте правильность ввода или оставьте поле пустым.');
       return;
     }
 
@@ -178,9 +187,47 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
   }, [errors.city]);
 
-  const handleReferralCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, referral_code_input: e.target.value.toUpperCase() }));
+  const checkReferralCode = useCallback(async (code: string) => {
+    if (!code || code.length < 3) {
+      setReferralCodeStatus('idle');
+      setReferrerName('');
+      return;
+    }
+
+    setReferralCodeStatus('checking');
+
+    try {
+      const response = await fetch(`${API_URL}?route=referrals&action=check_code&code=${encodeURIComponent(code)}`);
+      const data = await response.json();
+
+      if (data.success && data.exists) {
+        setReferralCodeStatus('valid');
+        setReferrerName(data.referrer_name || '');
+      } else {
+        setReferralCodeStatus('invalid');
+        setReferrerName('');
+      }
+    } catch (error) {
+      console.error('Error checking referral code:', error);
+      setReferralCodeStatus('idle');
+      setReferrerName('');
+    }
   }, []);
+
+  const handleReferralCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const code = e.target.value.toUpperCase();
+    setFormData(prev => ({ ...prev, referral_code_input: code }));
+    
+    // Проверяем код с задержкой
+    if (code.length >= 3) {
+      const timeoutId = setTimeout(() => {
+        checkReferralCode(code);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setReferralCodeStatus('idle');
+    }
+  }, [checkReferralCode]);
 
   if (isProfileComplete && !forceOpen) {
     return null;
@@ -316,24 +363,79 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
 
             {allowReferralCode && (
               <div className="pt-4 border-t">
-                <Label htmlFor="referral_code_input" className="text-base font-semibold flex items-center gap-2">
-                  <Icon name="Gift" size={18} className="text-orange-600" />
-                  Реферальный код (необязательно)
-                </Label>
-                <Input
-                  id="referral_code_input"
-                  type="text"
-                  value={formData.referral_code_input}
-                  onChange={handleReferralCodeChange}
-                  placeholder="ABC123"
-                  className="mt-2 text-lg font-mono uppercase"
-                  disabled={isSubmitting}
-                  maxLength={10}
-                />
-                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                  <Icon name="Info" size={12} />
-                  Если вас пригласил другой курьер, введите его реферальный код
-                </p>
+                {user.invited_by_user_id ? (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Icon name="Info" size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium mb-1">У вас уже есть пригласивший</p>
+                        <p className="text-xs">Вы уже привязаны к реферальной программе другого курьера</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Label htmlFor="referral_code_input" className="text-base font-semibold flex items-center gap-2">
+                      <Icon name="Gift" size={18} className="text-orange-600" />
+                      Реферальный код (необязательно)
+                    </Label>
+                    <div className="relative">
+                  <Input
+                    id="referral_code_input"
+                    type="text"
+                    value={formData.referral_code_input}
+                    onChange={handleReferralCodeChange}
+                    placeholder="ABC123"
+                    className={`mt-2 text-lg font-mono uppercase pr-10 ${
+                      referralCodeStatus === 'valid' ? 'border-green-500' :
+                      referralCodeStatus === 'invalid' ? 'border-red-500' : ''
+                    }`}
+                    disabled={isSubmitting}
+                    maxLength={10}
+                  />
+                  {referralCodeStatus === 'checking' && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Icon name="Loader2" size={18} className="animate-spin text-gray-400" />
+                    </div>
+                  )}
+                  {referralCodeStatus === 'valid' && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Icon name="CheckCircle" size={18} className="text-green-600" />
+                    </div>
+                  )}
+                  {referralCodeStatus === 'invalid' && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Icon name="XCircle" size={18} className="text-red-600" />
+                    </div>
+                  )}
+                </div>
+                {referralCodeStatus === 'valid' && (
+                  <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-green-700 text-sm font-medium flex items-center gap-1">
+                      <Icon name="CheckCircle" size={14} />
+                      Реферальный код действителен!
+                    </p>
+                    {referrerName && (
+                      <p className="text-green-600 text-xs mt-1">
+                        Вас пригласил: <strong>{referrerName}</strong>
+                      </p>
+                    )}
+                  </div>
+                )}
+                {referralCodeStatus === 'invalid' && (
+                  <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                    <Icon name="XCircle" size={14} />
+                    Такого реферального кода не существует
+                  </p>
+                )}
+                    {referralCodeStatus === 'idle' && (
+                      <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <Icon name="Info" size={12} />
+                        Если вас пригласил другой курьер, введите его реферальный код
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             )}
 

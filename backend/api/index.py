@@ -109,6 +109,10 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
     method = event.get('httpMethod', 'GET')
     query_params = event.get('queryStringParameters') or {}
     
+    # Для проверки реферального кода не требуется авторизация
+    if method == 'GET' and query_params.get('action') == 'check_code':
+        return check_referral_code(query_params.get('code', ''), headers)
+    
     user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
     
     if not user_id_header:
@@ -702,6 +706,48 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
         'body': json.dumps({'success': True, 'message': 'Реферальный код применён'}),
         'isBase64Encoded': False
     }
+
+
+def check_referral_code(code: str, headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Проверяет существование реферального кода'''
+    if not code or len(code) < 3:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'exists': False, 'error': 'Код слишком короткий'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT id, full_name FROM t_p25272970_courier_button_site.users
+        WHERE referral_code = %s
+    """, (code.upper(),))
+    
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if user:
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True, 
+                'exists': True,
+                'referrer_name': user['full_name'] if user['full_name'] else 'Курьер'
+            }),
+            'isBase64Encoded': False
+        }
+    else:
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'exists': False}),
+            'isBase64Encoded': False
+        }
 
 
 def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
