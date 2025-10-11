@@ -7,6 +7,7 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
+import PayoutForm from '@/components/PayoutForm';
 
 interface Stats {
   total_referrals: number;
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [showPayoutForm, setShowPayoutForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'profile'>('stats');
 
   useEffect(() => {
@@ -112,6 +114,10 @@ export default function Dashboard() {
     fetchStats();
     fetchReferrals();
   };
+
+  if (showPayoutForm) {
+    return <PayoutForm />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -251,6 +257,14 @@ export default function Dashboard() {
                 </li>
               </ul>
             </Card>
+
+            <Button
+              onClick={() => setShowPayoutForm(true)}
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white shadow-xl"
+            >
+              <Icon name="DollarSign" className="mr-2 h-5 w-5" />
+              Заявка на выплату
+            </Button>
           </div>
         )}
 
