@@ -119,17 +119,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
       
       {isGameOpen && (
-        <div className="fixed inset-0 z-[999999] bg-black bg-opacity-90 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative w-full max-w-7xl h-[90vh] flex gap-4">
-            <div className="flex-1 bg-white rounded-lg shadow-2xl overflow-hidden relative">
+            <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden relative">
+              {/* Кнопка закрытия */}
               <button
                 onClick={() => {
                   playSound('click');
                   closeGame();
                 }}
                 onMouseEnter={() => playSound('hover')}
-                className="absolute top-3 right-3 md:top-4 md:right-4 z-[1000000] 
-                           w-12 h-12 md:w-14 md:h-14
+                className="absolute top-4 right-4 z-[100] 
+                           w-12 h-12
                            bg-red-500 hover:bg-red-600 active:bg-red-700
                            text-white rounded-xl 
                            flex items-center justify-center 
@@ -137,17 +138,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                            shadow-lg hover:shadow-xl
                            border-2 border-red-400"
               >
-                <Icon name="X" size={24} className="md:w-7 md:h-7" />
+                <Icon name="X" size={24} />
               </button>
 
+              {/* Кнопка лидерборда */}
               <button
                 onClick={() => {
                   playSound('click');
                   setShowLeaderboard(!showLeaderboard);
                 }}
                 onMouseEnter={() => playSound('hover')}
-                className="absolute top-3 left-3 md:top-4 md:left-4 z-[1000000] 
-                           px-4 py-2 md:px-6 md:py-3
+                className="absolute top-4 left-4 z-[100] 
+                           px-4 py-2
                            bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600
                            text-black font-bold rounded-xl 
                            flex items-center gap-2
@@ -156,7 +158,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                            border-3 border-black"
               >
                 <Icon name="Trophy" size={20} />
-                <span className="hidden md:inline">Лидеры</span>
+                <span className="hidden sm:inline">Лидеры</span>
               </button>
 
               {isGameLoading && (
@@ -205,11 +207,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             </div>
 
             {showLeaderboard && (
-              <div className="w-80 bg-white rounded-lg shadow-2xl p-6 overflow-y-auto">
-                <h3 className="text-xl font-black mb-4 flex items-center gap-2 text-yellow-600">
-                  <Icon name="Trophy" />
-                  Таблица лидеров
-                </h3>
+              <div className="hidden md:block w-80 bg-white rounded-2xl shadow-2xl p-6 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-black flex items-center gap-2 text-yellow-600">
+                    <Icon name="Trophy" />
+                    Лидеры
+                  </h3>
+                  <button
+                    onClick={() => {
+                      playSound('click');
+                      setShowLeaderboard(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <Icon name="X" size={20} />
+                  </button>
+                </div>
                 {leaderboard.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">Пока нет результатов</p>
                 ) : (
