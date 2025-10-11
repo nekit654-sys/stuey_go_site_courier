@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { API_URL } from '@/config/api';
+
+const PAYOUT_API_URL = 'https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a';
 
 interface FormData {
   fullName: string;
@@ -104,31 +105,43 @@ const FeedbackTab: React.FC = () => {
       return;
     }
 
+    if (!formData.screenshot) {
+      alert('Пожалуйста, загрузите скриншот 30 заказов');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const jsonData = {
-        fullName: formData.fullName,
-        city: formData.city,
-        phone: formData.phone,
-        screenshotUrl: formData.screenshot ? formData.screenshot.name : null
-      };
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(formData.screenshot!);
+      });
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(PAYOUT_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(jsonData)
+        body: JSON.stringify({
+          name: formData.fullName.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
+          city: formData.city.trim(),
+          attachment_data: base64Image,
+        })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setIsSuccess(true);
         setTimeout(() => {
           handleCloseModal();
         }, 2000);
       } else {
-        throw new Error('Ошибка отправки');
+        throw new Error(data.error || 'Ошибка отправки');
       }
     } catch (error) {
       console.error('Ошибка:', error);
@@ -255,7 +268,7 @@ const FeedbackTab: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-extrabold text-black mb-2">
-                      Скриншот 30 выполненных заказов
+                      Скриншот 30 выполненных заказов <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-3 border-dashed border-gray-400 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
                       <div className="space-y-2 text-center">
