@@ -107,18 +107,18 @@
   }
 }
 
-/* Оптимизированная анимация подпрыгивания */
+/* Оптимизированная анимация подпрыгивания с GPU-ускорением */
 @keyframes bounce-hint {
   0%,
   94%,
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) translateZ(0);
   }
   2% {
-    transform: translate3d(0, -8px, 0);
+    transform: translate3d(0, -8px, 0) translateZ(0);
   }
   4% {
-    transform: translate3d(0, -4px, 0);
+    transform: translate3d(0, -4px, 0) translateZ(0);
   }
 }
 
@@ -226,13 +226,13 @@
   0%,
   96%,
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) translateZ(0);
   }
   3% {
-    transform: translate3d(0, -12px, 0);
+    transform: translate3d(0, -12px, 0) translateZ(0);
   }
   6% {
-    transform: translate3d(0, -6px, 0);
+    transform: translate3d(0, -6px, 0) translateZ(0);
   }
 }
 
@@ -313,10 +313,10 @@
 @keyframes gentle-bounce {
   0%,
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) translateZ(0);
   }
   50% {
-    transform: translate3d(0, -10px, 0);
+    transform: translate3d(0, -10px, 0) translateZ(0);
   }
 }
 
@@ -389,14 +389,40 @@ body.game-modal-open .whatsapp-button {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  will-change: transform;
 }
 
 /* Принудительное GPU ускорение для критичных элементов */
 button,
 a,
-input[type="range"] {
+input[type="range"],
+img,
+svg {
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* GPU-ускорение для всех анимированных элементов */
+[class*="animate-"],
+[class*="transition-"] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Упрощаем все анимации на мобилках */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.3s !important;
+  }
+
+  [class*="transition-"] {
+    transition-duration: 0.2s !important;
+  }
+
+  /* Отключаем will-change после завершения анимации для экономии памяти */
+  [class*="animate-"]:not(:hover):not(:focus):not(:active) {
+    will-change: auto;
+  }
 }
 
 /* Плавная анимация мобильного меню */
