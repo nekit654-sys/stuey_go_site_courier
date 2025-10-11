@@ -3182,9 +3182,10 @@ def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 game_achievements,
                 full_name,
                 city,
-                created_at
+                created_at,
+                ROW_NUMBER() OVER (ORDER BY game_high_score DESC, game_total_plays ASC) as rank
             FROM t_p25272970_courier_button_site.users
-            WHERE game_high_score > 0 AND nickname IS NOT NULL
+            WHERE game_high_score > 0 AND full_name IS NOT NULL
             ORDER BY game_high_score DESC, game_total_plays ASC
             LIMIT %s
         """, (limit,))
