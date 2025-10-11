@@ -89,16 +89,16 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <GameProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <GameProvider>
+              <Toaster />
+              <Sonner />
               <YandexMetrika />
               <MaintenanceWrapper />
-            </BrowserRouter>
-          </GameProvider>
-        </AuthProvider>
+            </GameProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );

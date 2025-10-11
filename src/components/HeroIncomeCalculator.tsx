@@ -225,7 +225,7 @@ const HeroIncomeCalculator = () => {
         * Доход зависит от количества отработанных часов и региона работы
       </p>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -277,7 +277,7 @@ const HeroIncomeCalculator = () => {
           transform: translateY(2px);
           box-shadow: 0 2px 0 0 rgba(0, 0, 0, 1);
         }
-      `}</style>
+      ` }} />
     </div>
   );
 };
