@@ -433,33 +433,54 @@ export default function UnifiedCsvUploadTab({ authToken, couriers, onRefreshCour
                       {unmatched.suggested_couriers.length > 0 ? (
                         <div className="space-y-2">
                           <div className="text-sm font-medium text-gray-700">Похожие курьеры:</div>
-                          {unmatched.suggested_couriers.map((courier) => (
-                            <div key={courier.id} className="flex items-center justify-between p-3 border rounded bg-gray-50">
-                              <div>
-                                <div className="font-medium">{courier.full_name}</div>
-                                <div className="text-xs text-gray-600">
-                                  {courier.phone} • {courier.city} • Код: {courier.referral_code}
+                          {unmatched.suggested_couriers.map((courier) => {
+                            const matchScore = courier.match_score || 0;
+                            const scoreColor = matchScore >= 80 ? 'text-green-600 bg-green-50' : matchScore >= 50 ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50';
+                            const scoreBorder = matchScore >= 80 ? 'border-green-200' : matchScore >= 50 ? 'border-yellow-200' : 'border-red-200';
+                            
+                            return (
+                              <div key={courier.id} className={`flex items-center justify-between p-3 border-2 rounded ${scoreBorder} bg-gray-50`}>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="font-medium">{courier.full_name}</div>
+                                    <Badge className={`${scoreColor} border-0 text-xs`}>
+                                      {matchScore}% совпадение
+                                    </Badge>
+                                  </div>
+                                  <div className="text-xs text-gray-600 mb-1">
+                                    {courier.phone} • {courier.city} • Код: {courier.referral_code}
+                                  </div>
+                                  {courier.matches && courier.matches.length > 0 && (
+                                    <div className="flex gap-1 flex-wrap">
+                                      {courier.matches.map((match: string, idx: number) => (
+                                        <span key={idx} className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                                          ✓ {match}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleLinkCourier(unmatched.external_id, courier.id)}
+                                  disabled={linkingCourier?.external_id === unmatched.external_id && linkingCourier?.courier_id === courier.id}
+                                  className="ml-3"
+                                >
+                                  {linkingCourier?.external_id === unmatched.external_id && linkingCourier?.courier_id === courier.id ? (
+                                    <>
+                                      <Icon name="Loader2" className="mr-1 h-3 w-3 animate-spin" />
+                                      Связываем...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Icon name="Link" className="mr-1 h-3 w-3" />
+                                      Связать
+                                    </>
+                                  )}
+                                </Button>
                               </div>
-                              <Button
-                                size="sm"
-                                onClick={() => handleLinkCourier(unmatched.external_id, courier.id)}
-                                disabled={linkingCourier?.external_id === unmatched.external_id && linkingCourier?.courier_id === courier.id}
-                              >
-                                {linkingCourier?.external_id === unmatched.external_id && linkingCourier?.courier_id === courier.id ? (
-                                  <>
-                                    <Icon name="Loader2" className="mr-1 h-3 w-3 animate-spin" />
-                                    Связываем...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Icon name="Link" className="mr-1 h-3 w-3" />
-                                    Связать
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="text-sm text-gray-500 italic">

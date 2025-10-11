@@ -95,6 +95,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_profile(event, headers)
     elif route == 'payments':
         return handle_payments(event, headers)
+    elif route == 'withdrawal':
+        return handle_withdrawal(event, headers)
     elif route == 'game':
         return handle_game(event, headers)
     else:
@@ -1558,13 +1560,51 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                         
                         suggested_couriers = cur.fetchall()
                     
+                    # Добавляем степень совпадения для каждого предложенного курьера
+                    suggestions_with_score = []
+                    for c in suggested_couriers:
+                        score = 0
+                        matches = []
+                        
+                        # ФИО совпадение (до 50%)
+                        db_name_lower = c['full_name'].lower()
+                        csv_name_lower = referral_name.lower()
+                        if db_name_lower == csv_name_lower:
+                            score += 50
+                            matches.append('ФИО (100%)')
+                        else:
+                            name_words_match = sum(1 for word in csv_name_lower.split() if word in db_name_lower)
+                            if name_words_match > 0:
+                                name_score = (name_words_match / len(csv_name_lower.split())) * 50
+                                score += name_score
+                                matches.append(f'ФИО ({int(name_score * 2)}%)')
+                        
+                        # Город совпадение (25%)
+                        if c['city'] and c['city'].lower() == city.lower():
+                            score += 25
+                            matches.append('Город')
+                        
+                        # Телефон совпадение (25%)
+                        if c['phone'] and c['phone'].endswith(last_4_digits):
+                            score += 25
+                            matches.append('Телефон (4 цифры)')
+                        
+                        suggestions_with_score.append({
+                            **dict(c),
+                            'match_score': int(score),
+                            'matches': matches
+                        })
+                    
+                    # Сортируем по степени совпадения
+                    suggestions_with_score.sort(key=lambda x: x['match_score'], reverse=True)
+                    
                     unmatched.append({
                         'external_id': external_id,
                         'full_name': referral_name,
                         'phone': phone,
                         'city': city,
                         'last_4_digits': last_4_digits,
-                        'suggested_couriers': [dict(c) for c in suggested_couriers]
+                        'suggested_couriers': suggestions_with_score
                     })
                     
                     skipped += 1
@@ -1584,6 +1624,43 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 WHERE id = %s AND (external_id IS NULL OR external_id = '')
             """, (external_id, courier_id))
             
+            # ВАРИАНТ А: Вычисляем дельту (разницу с предыдущей загрузкой)
+            cur.execute("""
+                SELECT last_known_amount, last_known_orders
+                FROM t_p25272970_courier_button_site.courier_earnings_snapshot
+                WHERE courier_id = %s AND external_id = %s
+            """, (courier_id, external_id))
+            
+            snapshot = cur.fetchone()
+            
+            if snapshot:
+                # Вычисляем дельту
+                delta_amount = reward - float(snapshot['last_known_amount'])
+                delta_orders = eats_order_number - snapshot['last_known_orders']
+                
+                # Если дельта <= 0, значит это не новые данные или ошибка
+                if delta_amount <= 0:
+                    duplicates += 1
+                    continue
+                    
+                actual_reward = delta_amount
+                actual_orders = delta_orders if delta_orders > 0 else 0
+            else:
+                # Первая загрузка для этого курьера
+                actual_reward = reward
+                actual_orders = eats_order_number
+            
+            # Обновляем snapshot
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.courier_earnings_snapshot
+                (courier_id, external_id, last_known_amount, last_known_orders, last_updated)
+                VALUES (%s, %s, %s, %s, NOW())
+                ON CONFLICT (courier_id, external_id) DO UPDATE SET
+                    last_known_amount = %s,
+                    last_known_orders = %s,
+                    last_updated = NOW()
+            """, (courier_id, external_id, reward, eats_order_number, reward, eats_order_number))
+            
             cur.execute("""
                 SELECT orders_completed, bonus_earned, is_completed
                 FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
@@ -1602,6 +1679,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     VALUES (%s, 0, 0, FALSE)
                 """, (courier_id,))
             
+            # Создаём запись только с дельтой (новой суммой)
             cur.execute("""
                 INSERT INTO t_p25272970_courier_button_site.courier_earnings
                 (courier_id, external_id, referrer_code, full_name, phone, city, 
@@ -1609,12 +1687,12 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
                 RETURNING id
             """, (courier_id, external_id, creator_username, referral_name, phone, city, 
-                  eats_order_number, reward))
+                  actual_orders, actual_reward))
             
             earning_id = cur.fetchone()['id']
             
             distributions = calculate_payment_distribution(
-                reward, courier_id, referrer_id, self_bonus_completed, admin_count
+                actual_reward, courier_id, referrer_id, self_bonus_completed, admin_count
             )
             
             for dist in distributions:
@@ -2034,6 +2112,277 @@ def handle_payments(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
         'statusCode': 400,
         'headers': headers,
         'body': json.dumps({'error': 'Invalid action'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Обработка заявок на вывод средств
+    '''
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'list')
+    
+    if method == 'POST':
+        # Создание новой заявки на вывод (для курьера)
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        
+        if not user_id_header:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        user_id = int(user_id_header)
+        body_data = json.loads(event.get('body', '{}'))
+        
+        amount = float(body_data.get('amount', 0))
+        sbp_phone = body_data.get('sbp_phone', '').strip()
+        sbp_bank_name = body_data.get('sbp_bank_name', '').strip()
+        
+        if amount < 1000:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Минимальная сумма для вывода — 1000₽'}),
+                'isBase64Encoded': False
+            }
+        
+        if not sbp_phone or not sbp_bank_name:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Укажите номер телефона и банк для СБП'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Проверяем доступный баланс
+        cur.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') THEN pd.amount ELSE 0 END), 0) as available
+            FROM t_p25272970_courier_button_site.payment_distributions pd
+            JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
+            WHERE (ce.courier_id = %s OR pd.recipient_id = %s)
+        """, (user_id, user_id))
+        
+        balance = cur.fetchone()
+        available = float(balance['available'])
+        
+        if amount > available:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': f'Недостаточно средств. Доступно: {available:.2f}₽'}),
+                'isBase64Encoded': False
+            }
+        
+        # Сохраняем реквизиты СБП в профиль
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET sbp_phone = %s, sbp_bank_name = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (sbp_phone, sbp_bank_name, user_id))
+        
+        # Создаём заявку
+        cur.execute("""
+            INSERT INTO t_p25272970_courier_button_site.withdrawal_requests
+            (courier_id, amount, sbp_phone, sbp_bank_name, status, created_at)
+            VALUES (%s, %s, %s, %s, 'pending', NOW())
+            RETURNING id
+        """, (user_id, amount, sbp_phone, sbp_bank_name))
+        
+        request_id = cur.fetchone()['id']
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Заявка на вывод создана',
+                'request_id': request_id
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif method == 'GET':
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid token'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        if action == 'list':
+            # Список всех заявок для админа
+            cur.execute("""
+                SELECT 
+                    wr.id,
+                    wr.courier_id,
+                    u.full_name as courier_name,
+                    u.phone as courier_phone,
+                    wr.amount,
+                    wr.sbp_phone,
+                    wr.sbp_bank_name,
+                    wr.status,
+                    wr.admin_comment,
+                    wr.created_at,
+                    wr.processed_at,
+                    a.username as processed_by_admin
+                FROM t_p25272970_courier_button_site.withdrawal_requests wr
+                JOIN t_p25272970_courier_button_site.users u ON u.id = wr.courier_id
+                LEFT JOIN t_p25272970_courier_button_site.admins a ON a.id = wr.processed_by
+                ORDER BY 
+                    CASE 
+                        WHEN wr.status = 'pending' THEN 1
+                        ELSE 2
+                    END,
+                    wr.created_at DESC
+            """)
+            
+            requests = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps(convert_decimals({
+                    'success': True,
+                    'requests': [dict(r) for r in requests]
+                })),
+                'isBase64Encoded': False
+            }
+        
+        elif action == 'my_requests':
+            # Заявки конкретного курьера
+            user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+            
+            if not user_id_header:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'User ID required'}),
+                    'isBase64Encoded': False
+                }
+            
+            user_id = int(user_id_header)
+            
+            cur.execute("""
+                SELECT 
+                    id,
+                    amount,
+                    sbp_phone,
+                    sbp_bank_name,
+                    status,
+                    admin_comment,
+                    created_at,
+                    processed_at
+                FROM t_p25272970_courier_button_site.withdrawal_requests
+                WHERE courier_id = %s
+                ORDER BY created_at DESC
+            """, (user_id,))
+            
+            requests = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps(convert_decimals({
+                    'success': True,
+                    'requests': [dict(r) for r in requests]
+                })),
+                'isBase64Encoded': False
+            }
+    
+    elif method == 'PUT':
+        # Обновление статуса заявки (только для админа)
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid token'}),
+                'isBase64Encoded': False
+            }
+        
+        body_data = json.loads(event.get('body', '{}'))
+        request_id = body_data.get('request_id')
+        new_status = body_data.get('status')
+        admin_comment = body_data.get('admin_comment', '')
+        
+        if new_status not in ['approved', 'rejected', 'paid']:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid status'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.withdrawal_requests
+            SET status = %s, admin_comment = %s, processed_at = NOW(), processed_by = %s
+            WHERE id = %s
+        """, (new_status, admin_comment, token_data['user_id'], request_id))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Статус заявки обновлён'}),
+            'isBase64Encoded': False
+        }
+    
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'error': 'Method not allowed'}),
         'isBase64Encoded': False
     }
 
