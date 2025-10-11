@@ -155,11 +155,20 @@ const PayoutForm = () => {
         reader.readAsDataURL(imageFile);
       });
 
-      console.log('Отправка заявки на выплату:', {
+      const requestData = {
+        action: 'payout',
         name: formData.name.trim(),
         phone: formData.phone.replace(/\D/g, ''),
         city: formData.city.trim(),
-        hasImage: !!base64Image,
+        attachment_data: base64Image,
+      };
+
+      console.log('Отправка заявки на выплату:', {
+        action: requestData.action,
+        name: requestData.name,
+        phone: requestData.phone,
+        city: requestData.city,
+        imageSize: base64Image.length,
       });
 
       const response = await fetch(API_URL, {
@@ -167,19 +176,19 @@ const PayoutForm = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          action: 'payout',
-          name: formData.name.trim(),
-          phone: formData.phone.replace(/\D/g, ''),
-          city: formData.city.trim(),
-          attachment_data: base64Image,
-        }),
+        body: JSON.stringify(requestData),
       });
 
-      console.log('Ответ сервера:', response.status);
+      console.log('HTTP статус:', response.status, response.statusText);
 
-      const data = await response.json();
-      console.log('Данные ответа:', data);
+      let data;
+      try {
+        data = await response.json();
+        console.log('Ответ от сервера:', data);
+      } catch (parseError) {
+        console.error('Ошибка парсинга ответа:', parseError);
+        throw new Error('Сервер вернул некорректный ответ');
+      }
 
       if (response.ok && data.success) {
         toast.success('✅ Заявка отправлена!', {
