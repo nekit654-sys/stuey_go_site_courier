@@ -1,16 +1,50 @@
 {
-  "tests": [{
-    "name": "Test admin get payout requests",
-    "method": "GET",
-    "path": "/",
-    "headers": {
-      "X-Auth-Token": "fake.{\"admin\":true,\"exp\":9999999999}"
+  "tests": [
+    {
+      "name": "Test admin login",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "login",
+        "username": "admin",
+        "password": "wrongpassword"
+      },
+      "expectedStatus": 401,
+      "expectedBody": {
+        "success": false
+      },
+      "bodyMatcher": "partial"
     },
-    "expectedStatus": 200,
-    "expectedBody": {
-      "success": true,
-      "requests": "array"
+    {
+      "name": "Test get admins list",
+      "method": "POST",
+      "path": "/",
+      "headers": {
+        "X-Auth-Token": "test-token-123"
+      },
+      "body": {
+        "action": "get_admins"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "admins": "array"
+      },
+      "bodyMatcher": "partial"
     },
-    "bodyMatcher": "partial"
-  }]
+    {
+      "name": "Test get payout requests",
+      "method": "GET",
+      "path": "/",
+      "headers": {
+        "X-Auth-Token": "test-token"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "requests": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
 }

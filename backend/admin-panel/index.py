@@ -1,6 +1,8 @@
 import json
 import os
 import psycopg2
+import hashlib
+import secrets
 from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -25,10 +27,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    # Простая проверка авторизации
+    # Проверка авторизации (пропускаем для login)
     headers = event.get('headers', {})
     auth_token = headers.get('X-Auth-Token') or headers.get('x-auth-token')
-    if not auth_token:
+    
+    body_data = {}
+    if method == 'POST':
+        body_data = json.loads(event.get('body', '{}'))
+    
+    if not auth_token and not (method == 'POST' and body_data.get('action') == 'login'):
         return {
             'statusCode': 401,
             'headers': {
@@ -50,6 +57,166 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         query_params = event.get('queryStringParameters') or {}
         action = query_params.get('action', 'payouts')
+        
+        if method == 'POST':
+            body_data = json.loads(event.get('body', '{}'))
+            action = body_data.get('action', '')
+            
+            if action == 'login':
+                username = body_data.get('username', '').strip()
+                password = body_data.get('password', '').strip()
+                
+                if not username or not password:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'message': 'Логин и пароль обязательны'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute(
+                    "SELECT id, password_hash FROM t_p25272970_courier_button_site.admins WHERE username = %s",
+                    (username,)
+                )
+                admin = cursor.fetchone()
+                
+                if not admin:
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'message': 'Неверный логин или пароль'}),
+                        'isBase64Encoded': False
+                    }
+                
+                password_hash = hashlib.sha256(password.encode()).hexdigest()
+                
+                if admin[1] != password_hash:
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'message': 'Неверный логин или пароль'}),
+                        'isBase64Encoded': False
+                    }
+                
+                token = secrets.token_urlsafe(32)
+                
+                cursor.execute(
+                    "UPDATE t_p25272970_courier_button_site.admins SET last_login = NOW() WHERE id = %s",
+                    (admin[0],)
+                )
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'token': token}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'get_admins':
+                cursor.execute("""
+                    SELECT id, username, created_at, last_login 
+                    FROM t_p25272970_courier_button_site.admins 
+                    ORDER BY created_at DESC
+                """)
+                rows = cursor.fetchall()
+                admins = []
+                for row in rows:
+                    admins.append({
+                        'id': row[0],
+                        'username': row[1],
+                        'created_at': row[2].isoformat() if row[2] else None,
+                        'last_login': row[3].isoformat() if row[3] else None
+                    })
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'admins': admins}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'add_admin':
+                username = body_data.get('username', '').strip()
+                password = body_data.get('password', '').strip()
+                
+                if not username or not password:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Логин и пароль обязательны'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute(
+                    "SELECT id FROM t_p25272970_courier_button_site.admins WHERE username = %s",
+                    (username,)
+                )
+                if cursor.fetchone():
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Админ с таким логином уже существует'}),
+                        'isBase64Encoded': False
+                    }
+                
+                password_hash = hashlib.sha256(password.encode()).hexdigest()
+                
+                cursor.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
+                    VALUES (%s, %s, NOW(), NOW())
+                """, (username, password_hash))
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Админ успешно добавлен'}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'delete_admin':
+                admin_id = body_data.get('adminId')
+                
+                if not admin_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'ID админа обязателен'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute(
+                    "DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s",
+                    (admin_id,)
+                )
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Админ успешно удален'}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'change_password':
+                current_password = body_data.get('currentPassword', '').strip()
+                new_password = body_data.get('newPassword', '').strip()
+                
+                if not current_password or not new_password:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Текущий и новый пароль обязательны'}),
+                        'isBase64Encoded': False
+                    }
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Пароль успешно изменен'}),
+                    'isBase64Encoded': False
+                }
         
         if method == 'GET' and action == 'get_all_couriers':
             # Получение всех пользователей (курьеров)

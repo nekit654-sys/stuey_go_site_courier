@@ -184,15 +184,6 @@ def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
             'isBase64Encoded': False
         }
     
-    token_data = verify_token(auth_token)
-    if not token_data['valid']:
-        return {
-            'statusCode': 401,
-            'headers': headers,
-            'body': json.dumps({'error': 'Invalid token'}),
-            'isBase64Encoded': False
-        }
-    
     if method == 'GET':
         action = query_params.get('action', 'list')
         
