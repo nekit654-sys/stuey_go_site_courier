@@ -76,6 +76,15 @@ export default function Dashboard() {
   const achievementCategories = useMemo(() => groupAchievementsByCategory(achievements), [achievements]);
   const unlockedCount = useMemo(() => achievements.filter((a) => a.unlocked).length, [achievements]);
 
+  const handleProfileComplete = useCallback(() => {
+    setShowProfileSetup(false);
+    fetchStats();
+  }, [fetchStats]);
+
+  const handleGameToggle = useCallback((isOpen: boolean) => {
+    setIsGameOpen(isOpen);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -87,15 +96,6 @@ export default function Dashboard() {
   if (!user) {
     return null;
   }
-
-  const handleProfileComplete = useCallback(() => {
-    setShowProfileSetup(false);
-    fetchStats();
-  }, [fetchStats]);
-
-  const handleGameToggle = useCallback((isOpen: boolean) => {
-    setIsGameOpen(isOpen);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
