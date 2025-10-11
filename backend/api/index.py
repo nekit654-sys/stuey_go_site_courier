@@ -1492,26 +1492,19 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             
             courier = cur.fetchone()
             
-            # Если не нашли по external_id, ищем по referral_code
-            if not courier:
-                cur.execute("""
-                    SELECT id, invited_by_user_id FROM t_p25272970_courier_button_site.users
-                    WHERE referral_code = %s
-                """, (creator_username,))
-                
-                courier = cur.fetchone()
-            
+            # Если не нашли по external_id, ищем по ФИО, городу и последним 4 цифрам телефона
             if not courier:
                 referral_name = f"{first_name} {last_name}".strip()
+                last_4_digits = phone[-4:] if len(phone) >= 4 else phone
                 
                 cur.execute("""
                     SELECT id, invited_by_user_id, full_name, phone, city 
                     FROM t_p25272970_courier_button_site.users
                     WHERE LOWER(full_name) = LOWER(%s)
-                    AND (city = %s OR city IS NULL OR %s = '')
-                    AND (phone = %s OR phone IS NULL OR %s = '')
+                    AND LOWER(city) = LOWER(%s)
+                    AND phone LIKE %s
                     LIMIT 1
-                """, (referral_name, city, city, phone, phone))
+                """, (referral_name, city, f'%{last_4_digits}'))
                 
                 courier = cur.fetchone()
                 
@@ -1519,7 +1512,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     creator_username = f"AUTO_{courier['id']}"
                 else:
                     skipped += 1
-                    errors.append(f"Курьер не найден: {referral_name}, город: {city}, тел: {phone}")
+                    errors.append(f"Курьер не найден: {referral_name}, город: {city}, последние 4 цифры: {last_4_digits}")
                     continue
             
             courier_id = courier['id']
