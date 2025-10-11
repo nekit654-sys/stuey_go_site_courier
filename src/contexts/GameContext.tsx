@@ -144,6 +144,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="relative w-full max-w-7xl h-[90vh] flex gap-4">
             <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden relative">
               {/* Кнопка закрытия */}
+              {/* 3D кнопка закрытия игры */}
               <button
                 onClick={() => {
                   playSound('click');
@@ -155,11 +156,40 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                            bg-red-500 hover:bg-red-600 active:bg-red-700
                            text-white rounded-xl 
                            flex items-center justify-center 
-                           transition-all duration-200 hover:scale-105 active:scale-95
-                           shadow-lg hover:shadow-xl
-                           border-2 border-red-400"
+                           transition-all duration-150
+                           border-3 border-black
+                           shadow-[0_4px_0_0_rgba(0,0,0,1)] 
+                           hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
+                           hover:translate-y-[2px] 
+                           active:translate-y-[4px] 
+                           active:shadow-none"
               >
                 <Icon name="X" size={24} />
+              </button>
+              
+              {/* Кнопка лидерборда внутри игры */}
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setShowLeaderboard(!showLeaderboard);
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className="absolute top-4 right-20 z-[100] 
+                           h-12 px-4
+                           bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600
+                           text-black rounded-xl 
+                           flex items-center gap-2
+                           font-bold
+                           transition-all duration-150
+                           border-3 border-black
+                           shadow-[0_4px_0_0_rgba(0,0,0,1)] 
+                           hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
+                           hover:translate-y-[2px] 
+                           active:translate-y-[4px] 
+                           active:shadow-none"
+              >
+                <Icon name="Trophy" size={20} />
+                <span className="hidden sm:inline">Лидерборд</span>
               </button>
 
               {isGameLoading && (
