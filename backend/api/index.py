@@ -1444,6 +1444,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
     skipped = 0
     duplicates = 0
     errors = []
+    unmatched = []
     
     for row in csv_rows:
         try:
@@ -1508,12 +1509,42 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 
                 courier = cur.fetchone()
                 
-                if courier:
-                    creator_username = f"AUTO_{courier['id']}"
-                else:
+                if not courier:
+                    # Ищем похожих курьеров для предложения
+                    cur.execute("""
+                        SELECT id, full_name, phone, city, referral_code
+                        FROM t_p25272970_courier_button_site.users
+                        WHERE (
+                            LOWER(full_name) LIKE LOWER(%s)
+                            OR LOWER(city) = LOWER(%s)
+                            OR phone LIKE %s
+                        )
+                        AND is_active = true
+                        ORDER BY 
+                            CASE 
+                                WHEN LOWER(city) = LOWER(%s) THEN 1
+                                WHEN phone LIKE %s THEN 2
+                                ELSE 3
+                            END
+                        LIMIT 5
+                    """, (f'%{referral_name.split()[0]}%', city, f'%{last_4_digits}', city, f'%{last_4_digits}'))
+                    
+                    suggested_couriers = cur.fetchall()
+                    
+                    unmatched.append({
+                        'external_id': external_id,
+                        'full_name': referral_name,
+                        'phone': phone,
+                        'city': city,
+                        'last_4_digits': last_4_digits,
+                        'suggested_couriers': [dict(c) for c in suggested_couriers]
+                    })
+                    
                     skipped += 1
                     errors.append(f"Курьер не найден: {referral_name}, город: {city}, последние 4 цифры: {last_4_digits}")
                     continue
+                else:
+                    creator_username = f"AUTO_{courier['id']}"
             
             courier_id = courier['id']
             referrer_id = courier['invited_by_user_id']
@@ -1655,6 +1686,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             'skipped': skipped,
             'duplicates': duplicates,
             'errors': errors,
+            'unmatched': unmatched if unmatched else None,
             'summary': {
                 'total_amount': float(summary['total_uploaded'] or 0),
                 'courier_self': float(summary['courier_self_total'] or 0),
