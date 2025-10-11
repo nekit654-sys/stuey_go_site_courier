@@ -45,7 +45,9 @@ const MaintenanceWrapper = () => {
 
   useEffect(() => {
     const bypass = localStorage.getItem('maintenance_bypass');
-    if (bypass === 'true') {
+    const authToken = localStorage.getItem('auth_token');
+    
+    if (bypass === 'true' || authToken) {
       setIsMaintenanceMode(false);
     }
   }, []);
