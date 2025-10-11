@@ -140,54 +140,68 @@ const PayoutForm = () => {
       return;
     }
 
+    if (!imageFile) {
+      toast.error('Загрузите скриншот');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Image = reader.result as string;
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+        reader.readAsDataURL(imageFile);
+      });
 
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'payout',
-            name: formData.name.trim(),
-            phone: formData.phone.replace(/\D/g, ''),
-            city: formData.city.trim(),
-            attachment_data: base64Image,
-          }),
+      console.log('Отправка заявки на выплату:', {
+        name: formData.name.trim(),
+        phone: formData.phone.replace(/\D/g, ''),
+        city: formData.city.trim(),
+        hasImage: !!base64Image,
+      });
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'payout',
+          name: formData.name.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
+          city: formData.city.trim(),
+          attachment_data: base64Image,
+        }),
+      });
+
+      console.log('Ответ сервера:', response.status);
+
+      const data = await response.json();
+      console.log('Данные ответа:', data);
+
+      if (response.ok && data.success) {
+        toast.success('✅ Заявка отправлена!', {
+          description: 'Мы проверим данные и свяжемся с вами в ближайшее время',
         });
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          toast.success('✅ Заявка отправлена!', {
-            description: 'Мы проверим данные и свяжемся с вами в ближайшее время',
-          });
-
-          setFormData({ name: '', city: '', phone: '' });
-          setImageFile(null);
-          setImagePreview('');
-          setErrors({});
-        } else {
-          throw new Error(data.error || 'Ошибка отправки заявки');
-        }
-      };
-
-      reader.onerror = () => {
-        throw new Error('Ошибка чтения файла');
-      };
-
-      if (imageFile) {
-        reader.readAsDataURL(imageFile);
+        setFormData({ name: '', city: '', phone: '' });
+        setImageFile(null);
+        setImagePreview('');
+        setErrors({});
+      } else {
+        const errorMessage = data.error || data.message || 'Ошибка отправки заявки';
+        console.error('Ошибка от сервера:', errorMessage);
+        toast.error('❌ Ошибка отправки', {
+          description: errorMessage,
+        });
       }
     } catch (error) {
-      console.error('Payout form error:', error);
+      console.error('Ошибка при отправке формы:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Неизвестная ошибка';
       toast.error('❌ Не удалось отправить заявку', {
-        description: 'Проверьте интернет-соединение и попробуйте снова',
+        description: errorMsg,
       });
     } finally {
       setIsSubmitting(false);
