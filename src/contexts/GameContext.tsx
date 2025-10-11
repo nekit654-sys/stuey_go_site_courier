@@ -47,6 +47,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === 'GAME_OVER') {
           handleGameOver(event.data.score);
+        } else if (event.data.type === 'openLeaderboard') {
+          setShowLeaderboard(true);
         }
       };
       
