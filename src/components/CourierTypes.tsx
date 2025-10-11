@@ -4,11 +4,19 @@ import Icon from "@/components/ui/icon";
 import { useMagicEffect } from "@/hooks/useMagicEffect";
 import { useSound } from "@/hooks/useSound";
 import PromoMarquee from "@/components/PromoMarquee";
+import { useState, useEffect } from "react";
+import LoadingSection from "@/components/LoadingSection";
 
 const CourierTypes = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const referralLink =
     "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
   const { playSound } = useSound();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const courierTypes = [
     {
@@ -53,6 +61,10 @@ const CourierTypes = () => {
       window.open(referralLink, "_blank");
     });
   };
+
+  if (isLoading) {
+    return <LoadingSection height="h-96" className="bg-gradient-to-b from-yellow-50 to-white" />;
+  }
 
   return (
     <section className="bg-gradient-to-b from-yellow-50 to-white">

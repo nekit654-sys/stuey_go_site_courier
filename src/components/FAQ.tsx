@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import LoadingSection from "@/components/LoadingSection";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const faqs = [
     {
@@ -36,6 +43,10 @@ const FAQ = () => {
       icon: "Headphones"
     }
   ];
+
+  if (isLoading) {
+    return <LoadingSection height="h-96" className="bg-gradient-to-b from-white to-yellow-50" />;
+  }
 
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-white to-yellow-50">

@@ -1,6 +1,15 @@
 import Icon from "@/components/ui/icon";
+import { useState, useEffect } from "react";
+import LoadingSection from "@/components/LoadingSection";
 
 const Benefits = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
   const benefits = [
     {
       icon: "Calendar",
@@ -39,6 +48,10 @@ const Benefits = () => {
         "Встречайте новых людей, помогайте клиентам и получайте благодарность каждый день.",
     },
   ];
+
+  if (isLoading) {
+    return <LoadingSection height="h-96" className="bg-gradient-to-b from-white to-yellow-50" />;
+  }
 
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-white to-yellow-50">
