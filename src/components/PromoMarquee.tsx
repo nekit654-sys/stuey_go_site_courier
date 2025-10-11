@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import Icon from '@/components/ui/icon';
+import PayoutModal from '@/components/PayoutModal';
 
 const PromoMarquee = () => {
-  const scrollToForm = () => {
-    const formSection = document.querySelector('[data-payout-form]');
-    if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleClick = () => {
+    setIsModalOpen(true);
   };
 
   const messages = (
@@ -30,21 +31,25 @@ const PromoMarquee = () => {
   );
 
   return (
-    <div 
-      className="w-full bg-yellow-400 border-y-4 border-black cursor-pointer hover:bg-yellow-500 transition-colors duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)]"
-      onClick={scrollToForm}
-    >
-      <div className="relative overflow-hidden py-5">
-        <div className="flex items-center">
-          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-extrabold text-black shrink-0" style={{ backfaceVisibility: 'hidden' }}>
-            {messages}
-          </div>
-          <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-extrabold text-black shrink-0" style={{ backfaceVisibility: 'hidden' }}>
-            {messages}
+    <>
+      <div 
+        className="w-full bg-yellow-400 border-y-4 border-black cursor-pointer hover:bg-yellow-500 transition-colors duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)]"
+        onClick={handleClick}
+      >
+        <div className="relative overflow-hidden py-5">
+          <div className="flex items-center">
+            <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-extrabold text-black shrink-0" style={{ backfaceVisibility: 'hidden' }}>
+              {messages}
+            </div>
+            <div className="animate-marquee whitespace-nowrap flex items-center text-xl md:text-2xl font-rubik font-extrabold text-black shrink-0" style={{ backfaceVisibility: 'hidden' }}>
+              {messages}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <PayoutModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 };
 
