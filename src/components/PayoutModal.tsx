@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Icon from '@/components/ui/icon';
 
-const API_URL = 'https://functions.yandexcloud.net/d4e57hodi216da3qccnn';
+const API_URL = 'https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a';
 
 interface PayoutModalProps {
   isOpen: boolean;
@@ -67,45 +67,20 @@ export default function PayoutModal({ isOpen, onClose }: PayoutModalProps) {
         reader.readAsDataURL(imageFile);
       });
 
-      console.log('Отправка данных на сервер...');
-      
-      const requestBody = {
-        action: 'payout',
-        name: formData.name.trim(),
-        phone: formData.phone.replace(/\D/g, ''),
-        city: formData.city.trim(),
-        attachment_data: base64Image,
-      };
-      
-      console.log('Данные запроса:', {
-        action: requestBody.action,
-        name: requestBody.name,
-        phone: requestBody.phone,
-        city: requestBody.city,
-        imageSize: base64Image.length,
-      });
-
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
+          city: formData.city.trim(),
+          attachment_data: base64Image,
+        }),
       });
 
-      console.log('Статус ответа:', response.status, response.statusText);
-
-      const responseText = await response.text();
-      console.log('Ответ сервера (raw):', responseText);
-
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('Ответ сервера (parsed):', data);
-      } catch (parseError) {
-        console.error('Ошибка парсинга JSON:', parseError);
-        throw new Error('Сервер вернул некорректный ответ');
-      }
+      const data = await response.json();
 
       if (response.ok && data.success) {
         setMessage({ type: 'success', text: 'Заявка успешно отправлена! Мы свяжемся с вами.' });

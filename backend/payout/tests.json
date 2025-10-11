@@ -1,0 +1,43 @@
+{
+  "tests": [
+    {
+      "name": "POST payout request success",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Иванов Иван Иванович",
+        "phone": "79991234567",
+        "city": "Москва",
+        "attachment_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST payout missing name",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "phone": "79991234567",
+        "city": "Москва",
+        "attachment_data": "data:image/png;base64,test"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string",
+        "success": false
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "OPTIONS request for CORS",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}
