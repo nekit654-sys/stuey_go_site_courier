@@ -15,7 +15,7 @@ import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import DashboardOld from "./pages/DashboardOld";
+import DashboardNew from "./pages/DashboardNew";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
