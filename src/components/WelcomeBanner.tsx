@@ -241,8 +241,8 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                     <span className="text-yellow-600">3000₽</span> за первые<br className="sm:hidden" /> <span className="text-yellow-600">30 заказов!</span>
                   </p>
                   <div className="mt-2 flex items-start gap-1">
-                    <Icon name="ArrowDown" size={16} className="text-yellow-400 flex-shrink-0 animate-bounce" />
-                    <span className="text-xs sm:text-sm text-gray-700 font-medium">Заполни форму<br className="sm:hidden" /> ниже!</span>
+                    <Icon name="MousePointer" size={16} className="text-yellow-400 flex-shrink-0 animate-pulse" />
+                    <span className="text-xs sm:text-sm text-gray-700 font-medium">Нажми на зелёную<br className="sm:hidden" /> кнопку сверху!</span>
                   </div>
                 </div>
               </div>
