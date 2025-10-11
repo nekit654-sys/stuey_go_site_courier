@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 interface Courier {
   id: number;
@@ -18,6 +21,7 @@ interface Courier {
   avatar_url?: string;
   created_at: string;
   invited_by_user_id?: number;
+  external_id?: string;
 }
 
 interface CouriersListProps {
@@ -27,6 +31,7 @@ interface CouriersListProps {
   filterReferrals: boolean;
   onSearchChange: (query: string) => void;
   onFilterToggle: () => void;
+  onUpdateExternalId?: (courierId: number, externalId: string) => Promise<void>;
 }
 
 export default function CouriersList({
@@ -35,8 +40,37 @@ export default function CouriersList({
   searchQuery,
   filterReferrals,
   onSearchChange,
-  onFilterToggle
+  onFilterToggle,
+  onUpdateExternalId
 }: CouriersListProps) {
+  const [editingExternalId, setEditingExternalId] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [savingExternalId, setSavingExternalId] = useState<number | null>(null);
+
+  const handleEditExternalId = (courierId: number, currentValue: string) => {
+    setEditingExternalId(courierId);
+    setEditValue(currentValue || '');
+  };
+
+  const handleSaveExternalId = async (courierId: number) => {
+    if (!onUpdateExternalId) return;
+    
+    setSavingExternalId(courierId);
+    try {
+      await onUpdateExternalId(courierId, editValue.trim());
+      setEditingExternalId(null);
+      setEditValue('');
+    } catch (error) {
+      console.error('Error updating external_id:', error);
+    } finally {
+      setSavingExternalId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingExternalId(null);
+    setEditValue('');
+  };
   return (
     <Card>
       <CardHeader>
@@ -87,6 +121,7 @@ export default function CouriersList({
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Контакты</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Город</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Реф. код</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">External ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пригласил</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заказы</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заработано</th>
@@ -127,6 +162,60 @@ export default function CouriersList({
                       <code className="px-2 py-1 bg-gray-100 rounded text-sm font-mono">
                         {courier.referral_code}
                       </code>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {editingExternalId === courier.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            placeholder="External ID"
+                            className="w-32 h-8 text-sm"
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveExternalId(courier.id)}
+                            disabled={savingExternalId === courier.id}
+                            className="h-8 px-2"
+                          >
+                            {savingExternalId === courier.id ? (
+                              <Icon name="Loader2" size={14} className="animate-spin" />
+                            ) : (
+                              <Icon name="Check" size={14} />
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                            className="h-8 px-2"
+                          >
+                            <Icon name="X" size={14} />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {courier.external_id ? (
+                            <Badge variant="outline" className="font-mono text-xs">
+                              {courier.external_id}
+                            </Badge>
+                          ) : (
+                            <span className="text-gray-400 text-sm">—</span>
+                          )}
+                          {onUpdateExternalId && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEditExternalId(courier.id, courier.external_id || '')}
+                              className="h-7 px-2"
+                            >
+                              <Icon name="Edit" size={12} />
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {courier.inviter_name ? (

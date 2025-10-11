@@ -26,6 +26,7 @@ interface Courier {
   avatar_url?: string;
   created_at: string;
   invited_by_user_id?: number;
+  external_id?: string;
 }
 
 interface OverallStats {
@@ -81,6 +82,43 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const [filterReferrals, setFilterReferrals] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  const handleUpdateExternalId = async (courierId: number, externalId: string) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      alert('Необходима авторизация');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=update-external-id',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': token,
+          },
+          body: JSON.stringify({
+            courier_id: courierId,
+            external_id: externalId,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Ошибка обновления External ID');
+      }
+
+      alert(data.message || 'External ID успешно обновлён');
+      onRefresh(); // Обновляем список курьеров
+    } catch (error: any) {
+      alert(error.message || 'Ошибка при обновлении External ID');
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -174,6 +212,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             filterReferrals={filterReferrals}
             onSearchChange={setSearchQuery}
             onFilterToggle={() => setFilterReferrals(!filterReferrals)}
+            onUpdateExternalId={handleUpdateExternalId}
           />
         </TabsContent>
 

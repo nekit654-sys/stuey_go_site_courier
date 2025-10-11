@@ -91,6 +91,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_csv_upload(event, headers)
     elif route == 'link-courier':
         return handle_link_courier(event, headers)
+    elif route == 'update-external-id':
+        return handle_update_external_id(event, headers)
     elif route == 'profile':
         return handle_profile(event, headers)
     elif route == 'payments':
@@ -229,6 +231,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.referral_earnings,
             u.is_active,
             u.created_at,
+            u.external_id,
             inviter.full_name as inviter_name,
             inviter.referral_code as inviter_code
         FROM t_p25272970_courier_button_site.users u
@@ -1910,6 +1913,126 @@ def handle_link_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[
         'statusCode': 200,
         'headers': headers,
         'body': json.dumps({'success': True, 'message': 'Курьер успешно связан с external_id'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_update_external_id(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Ручное обновление external_id курьера админом (с возможностью перезаписи)
+    '''
+    method = event.get('httpMethod', 'PUT')
+    
+    if method != 'PUT':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    body_data = json.loads(event.get('body', '{}'))
+    courier_id = body_data.get('courier_id')
+    new_external_id = body_data.get('external_id', '').strip()
+    
+    if not courier_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'courier_id is required'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Если new_external_id пустой, то просто очищаем
+    if not new_external_id:
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET external_id = NULL, updated_at = NOW()
+            WHERE id = %s
+        """, (courier_id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'External ID очищен'}),
+            'isBase64Encoded': False
+        }
+    
+    # Проверяем, не занят ли этот external_id другим курьером
+    cur.execute("""
+        SELECT id, full_name FROM t_p25272970_courier_button_site.users
+        WHERE external_id = %s AND id != %s
+    """, (new_external_id, courier_id))
+    
+    existing = cur.fetchone()
+    
+    if existing:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False, 
+                'error': f'Этот external_id уже используется курьером: {existing["full_name"]} (ID: {existing["id"]})'
+            }),
+            'isBase64Encoded': False
+        }
+    
+    # Обновляем external_id (перезаписываем старый, если был)
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.users
+        SET external_id = %s, updated_at = NOW()
+        WHERE id = %s
+        RETURNING full_name
+    """, (new_external_id, courier_id))
+    
+    updated = cur.fetchone()
+    
+    if not updated:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Курьер не найден'}),
+            'isBase64Encoded': False
+        }
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': f'External ID обновлён для {updated["full_name"]}'}),
         'isBase64Encoded': False
     }
 
