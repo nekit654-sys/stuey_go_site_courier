@@ -7,6 +7,8 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
+import WithdrawalRequestForm from '@/components/WithdrawalRequestForm';
+import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
 
 interface Stats {
   total_referrals: number;
@@ -29,6 +31,17 @@ interface Referral {
   city: string;
 }
 
+interface WithdrawalRequest {
+  id: number;
+  amount: number;
+  sbp_phone: string;
+  sbp_bank_name: string;
+  status: 'pending' | 'approved' | 'rejected' | 'paid';
+  admin_comment?: string;
+  created_at: string;
+  processed_at?: string;
+}
+
 export default function Dashboard() {
   const { user, token, logout, isAuthenticated, updateUser } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +49,9 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'profile'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'profile'>('stats');
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,6 +66,7 @@ export default function Dashboard() {
       if (isProfileComplete) {
         fetchStats();
         fetchReferrals();
+        fetchWithdrawalRequests();
       }
     }
 
@@ -93,6 +109,34 @@ export default function Dashboard() {
     const link = `${window.location.origin}/?ref=${user.referral_code}`;
     navigator.clipboard.writeText(link);
     toast.success('Реферальная ссылка скопирована!');
+  };
+
+  const fetchWithdrawalRequests = async () => {
+    if (!user?.id || !token) return;
+
+    setLoadingWithdrawals(true);
+    try {
+      const response = await fetch(`${API_URL}?route=withdrawal&action=my_requests`, {
+        headers: {
+          'X-User-Id': user.id.toString(),
+          'X-Auth-Token': token,
+        },
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setWithdrawalRequests(data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error fetching withdrawal requests:', error);
+    } finally {
+      setLoadingWithdrawals(false);
+    }
+  };
+
+  const handleWithdrawalSuccess = () => {
+    fetchWithdrawalRequests();
+    fetchStats();
   };
 
   if (loading) {
@@ -172,7 +216,7 @@ export default function Dashboard() {
           Скопировать реферальную ссылку
         </Button>
 
-        <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-2 mb-6">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
             onClick={() => setActiveTab('stats')}
@@ -188,6 +232,14 @@ export default function Dashboard() {
           >
             <Icon name="Users" className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Рефералы</span>
+          </Button>
+          <Button
+            variant={activeTab === 'withdrawals' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('withdrawals')}
+            className={activeTab === 'withdrawals' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
+          >
+            <Icon name="Wallet" className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Выплаты</span>
           </Button>
           <Button
             variant={activeTab === 'profile' ? 'default' : 'outline'}
@@ -293,6 +345,23 @@ export default function Dashboard() {
                 </Card>
               ))
             )}
+          </div>
+        )}
+
+        {activeTab === 'withdrawals' && (
+          <div className="space-y-6">
+            <WithdrawalRequestForm
+              userId={user.id}
+              availableBalance={stats?.referral_earnings || 0}
+              userPhone={user.phone}
+              userBankName={user.sbp_bank_name}
+              onSuccess={handleWithdrawalSuccess}
+            />
+
+            <WithdrawalRequestsList
+              requests={withdrawalRequests}
+              loading={loadingWithdrawals}
+            />
           </div>
         )}
 
