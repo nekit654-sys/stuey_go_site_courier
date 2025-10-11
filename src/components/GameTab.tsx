@@ -84,7 +84,7 @@ export default function GameTab({ userId }: GameTabProps) {
           </p>
         </div>
         <Button
-          onClick={() => navigate('/game')}
+          onClick={() => navigate('/')}
           size="lg"
           className="bg-white text-purple-600 hover:bg-gray-100 font-bold text-xl px-8 py-6 h-auto"
         >
@@ -142,7 +142,7 @@ export default function GameTab({ userId }: GameTabProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/game')}
+            onClick={() => navigate('/leaderboard')}
             className="text-blue-600 hover:text-blue-700"
           >
             Смотреть все
