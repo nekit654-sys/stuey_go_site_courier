@@ -166,31 +166,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               >
                 <Icon name="X" size={24} />
               </button>
-              
-              {/* Кнопка лидерборда внутри игры */}
-              <button
-                onClick={() => {
-                  playSound('click');
-                  setShowLeaderboard(!showLeaderboard);
-                }}
-                onMouseEnter={() => playSound('hover')}
-                className="absolute top-4 right-20 z-[100] 
-                           h-12 px-4
-                           bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600
-                           text-black rounded-xl 
-                           flex items-center gap-2
-                           font-bold
-                           transition-all duration-150
-                           border-3 border-black
-                           shadow-[0_4px_0_0_rgba(0,0,0,1)] 
-                           hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
-                           hover:translate-y-[2px] 
-                           active:translate-y-[4px] 
-                           active:shadow-none"
-              >
-                <Icon name="Trophy" size={20} />
-                <span className="hidden sm:inline">Лидерборд</span>
-              </button>
 
               {isGameLoading && (
                 <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
