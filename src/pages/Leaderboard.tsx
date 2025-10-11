@@ -117,10 +117,10 @@ export default function Leaderboard() {
             </h1>
             <p className="text-purple-200 mt-2">Лучшие курьеры России</p>
           </div>
-          <Link to="/">
+          <Link to={user ? "/dashboard" : "/"}>
             <Button variant="outline" className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20">
-              <Icon name="Home" className="mr-2 h-4 w-4" />
-              На главную
+              <Icon name={user ? "ArrowLeft" : "Home"} className="mr-2 h-4 w-4" />
+              {user ? "Назад в кабинет" : "На главную"}
             </Button>
           </Link>
         </div>
