@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -26,7 +25,6 @@ interface GameTabProps {
 }
 
 export default function GameTab({ userId }: GameTabProps) {
-  const navigate = useNavigate();
   const { openGame } = useGame();
   const { user } = useAuth();
   const [stats, setStats] = useState<GameStats | null>(null);
@@ -148,21 +146,10 @@ export default function GameTab({ userId }: GameTabProps) {
 
       {/* Топ-5 игроков */}
       <Card className="bg-white/95 backdrop-blur-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Icon name="Crown" className="text-yellow-600" />
-            Топ игроков
-          </h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/leaderboard')}
-            className="text-blue-600 hover:text-blue-700"
-          >
-            Смотреть все
-            <Icon name="ArrowRight" className="ml-1 h-4 w-4" />
-          </Button>
-        </div>
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Icon name="Crown" className="text-yellow-600" />
+          Топ игроков
+        </h3>
 
         {topPlayers.length === 0 ? (
           <p className="text-center text-gray-500 py-8">
