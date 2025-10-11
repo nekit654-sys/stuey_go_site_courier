@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { useSound } from "@/hooks/useSound";
 import { useState } from "react";
-import PayoutForm from "@/components/PayoutForm";
 
 const Career = () => {
   const { playSound } = useSound();
