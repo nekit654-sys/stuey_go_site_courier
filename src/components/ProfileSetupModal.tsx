@@ -20,9 +20,11 @@ interface ProfileSetupModalProps {
   token: string;
   onComplete: () => void;
   onUpdateUser?: (userData: Partial<User>) => void;
+  forceOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function ProfileSetupModal({ user, token, onComplete, onUpdateUser }: ProfileSetupModalProps) {
+export default function ProfileSetupModal({ user, token, onComplete, onUpdateUser, forceOpen = false, onClose }: ProfileSetupModalProps) {
   const [formData, setFormData] = useState({
     full_name: user.full_name || '',
     phone: user.phone || '',
@@ -34,10 +36,10 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
   const isProfileComplete = user.phone && user.city && user.full_name;
 
   useEffect(() => {
-    if (isProfileComplete) {
+    if (isProfileComplete && !forceOpen) {
       onComplete();
     }
-  }, [isProfileComplete]);
+  }, [isProfileComplete, forceOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -149,7 +151,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
   }, [errors.city]);
 
-  if (isProfileComplete) {
+  if (isProfileComplete && !forceOpen) {
     return null;
   }
 
@@ -157,16 +159,28 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
         <CardHeader className="bg-blue-600 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/20 rounded-full">
-              <Icon name="UserCog" size={32} />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/20 rounded-full">
+                <Icon name="UserCog" size={32} />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Заполните профиль</CardTitle>
+                <CardDescription className="text-blue-100">
+                  Это необходимо для корректной работы системы выплат
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-2xl">Заполните профиль</CardTitle>
-              <CardDescription className="text-blue-100">
-                Это необходимо для корректной работы системы выплат
-              </CardDescription>
-            </div>
+            {forceOpen && onClose && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="text-white hover:bg-white/20"
+              >
+                <Icon name="X" size={24} />
+              </Button>
+            )}
           </div>
         </CardHeader>
 

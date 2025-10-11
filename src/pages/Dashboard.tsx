@@ -121,6 +121,8 @@ export default function Dashboard() {
           token={token || ''}
           onUpdateUser={updateUser}
           onComplete={handleProfileComplete}
+          forceOpen={true}
+          onClose={() => setShowProfileSetup(false)}
         />
       )}
 
