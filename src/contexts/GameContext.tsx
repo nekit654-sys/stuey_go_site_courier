@@ -145,29 +145,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <div className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative w-full max-w-7xl h-[90vh] flex gap-4">
             <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden relative">
-              {/* Кнопка закрытия */}
               {/* 3D кнопка закрытия игры */}
-              <button
-                onClick={() => {
-                  playSound('click');
-                  closeGame();
-                }}
-                onMouseEnter={() => playSound('hover')}
-                className="absolute top-4 right-4 z-[100] 
-                           w-12 h-12
-                           bg-red-500 hover:bg-red-600 active:bg-red-700
-                           text-white rounded-xl 
-                           flex items-center justify-center 
-                           transition-all duration-150
-                           border-3 border-black
-                           shadow-[0_4px_0_0_rgba(0,0,0,1)] 
-                           hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
-                           hover:translate-y-[2px] 
-                           active:translate-y-[4px] 
-                           active:shadow-none"
-              >
-                <Icon name="X" size={24} />
-              </button>
+              {!showLeaderboard && (
+                <button
+                  onClick={() => {
+                    playSound('click');
+                    closeGame();
+                  }}
+                  onMouseEnter={() => playSound('hover')}
+                  className="absolute top-4 right-4 z-[100] 
+                             w-12 h-12
+                             bg-red-500 hover:bg-red-600 active:bg-red-700
+                             text-white rounded-xl 
+                             flex items-center justify-center 
+                             transition-all duration-150
+                             border-3 border-black
+                             shadow-[0_4px_0_0_rgba(0,0,0,1)] 
+                             hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
+                             hover:translate-y-[2px] 
+                             active:translate-y-[4px] 
+                             active:shadow-none"
+                >
+                  <Icon name="X" size={24} />
+                </button>
+              )}
 
               {isGameLoading && (
                 <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
