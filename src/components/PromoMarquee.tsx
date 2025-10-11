@@ -1,13 +1,6 @@
-import { useState } from 'react';
 import Icon from '@/components/ui/icon';
-import PayoutModal from '@/components/PayoutModal';
 
 const PromoMarquee = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleClick = () => {
-    setIsModalOpen(true);
-  };
 
   const messages = (
     <>
@@ -33,8 +26,7 @@ const PromoMarquee = () => {
   return (
     <>
       <div 
-        className="w-full bg-yellow-400 border-y-4 border-black cursor-pointer hover:bg-yellow-500 transition-colors duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)]"
-        onClick={handleClick}
+        className="w-full bg-yellow-400 border-y-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)]"
       >
         <div className="relative overflow-hidden py-5">
           <div className="flex items-center">
@@ -47,8 +39,6 @@ const PromoMarquee = () => {
           </div>
         </div>
       </div>
-
-      <PayoutModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 };
