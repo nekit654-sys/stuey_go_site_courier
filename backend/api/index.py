@@ -1146,6 +1146,7 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         full_name = body_data.get('full_name')
         phone = body_data.get('phone')
         city = body_data.get('city')
+        referral_code_input = body_data.get('referral_code_input', '').strip()
         
         if not full_name or not phone or not city:
             cur.close()
@@ -1156,6 +1157,40 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
                 'body': json.dumps({'error': 'ФИО, телефон и город обязательны'}),
                 'isBase64Encoded': False
             }
+        
+        # Проверяем текущего пользователя
+        cur.execute("""
+            SELECT invited_by_user_id FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (user_id,))
+        
+        current_user = cur.fetchone()
+        
+        # Если введён реферальный код и у пользователя нет реферера
+        if referral_code_input and not current_user['invited_by_user_id']:
+            # Проверяем, существует ли пользователь с таким реферальным кодом
+            cur.execute("""
+                SELECT id FROM t_p25272970_courier_button_site.users
+                WHERE referral_code = %s AND id != %s
+            """, (referral_code_input.upper(), user_id))
+            
+            referrer = cur.fetchone()
+            
+            if referrer:
+                # Устанавливаем реферера
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET invited_by_user_id = %s, updated_at = NOW()
+                    WHERE id = %s
+                """, (referrer['id'], user_id))
+                
+                # Создаём запись в таблице referrals
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.referrals 
+                    (referrer_id, referee_id, full_name, city, bonus_amount, bonus_paid, created_at)
+                    VALUES (%s, %s, %s, %s, 0, FALSE, NOW())
+                    ON CONFLICT (referrer_id, referee_id) DO NOTHING
+                """, (referrer['id'], user_id, full_name, city))
         
         # Проверяем, нет ли уже пользователя с таким телефоном
         cur.execute("""

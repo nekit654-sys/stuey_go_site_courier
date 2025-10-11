@@ -139,6 +139,19 @@ export default function Dashboard() {
     fetchStats();
   };
 
+  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'profile') => {
+    setActiveTab(tab);
+    // Обновляем данные при переключении вкладок
+    if (tab === 'stats' || tab === 'referrals') {
+      fetchStats();
+      fetchReferrals();
+    }
+    if (tab === 'withdrawals') {
+      fetchWithdrawalRequests();
+      fetchStats();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -167,6 +180,7 @@ export default function Dashboard() {
           onComplete={handleProfileComplete}
           forceOpen={true}
           onClose={() => setShowProfileSetup(false)}
+          allowReferralCode={true}
         />
       )}
 
@@ -219,7 +233,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-4 gap-2 mb-6">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('stats')}
+            onClick={() => handleTabChange('stats')}
             className={activeTab === 'stats' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
           >
             <Icon name="BarChart3" className="h-4 w-4 md:mr-2" />
@@ -227,7 +241,7 @@ export default function Dashboard() {
           </Button>
           <Button
             variant={activeTab === 'referrals' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('referrals')}
+            onClick={() => handleTabChange('referrals')}
             className={activeTab === 'referrals' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
           >
             <Icon name="Users" className="h-4 w-4 md:mr-2" />
@@ -235,7 +249,7 @@ export default function Dashboard() {
           </Button>
           <Button
             variant={activeTab === 'withdrawals' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('withdrawals')}
+            onClick={() => handleTabChange('withdrawals')}
             className={activeTab === 'withdrawals' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
           >
             <Icon name="Wallet" className="h-4 w-4 md:mr-2" />
@@ -243,7 +257,7 @@ export default function Dashboard() {
           </Button>
           <Button
             variant={activeTab === 'profile' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleTabChange('profile')}
             className={activeTab === 'profile' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
           >
             <Icon name="User" className="h-4 w-4 md:mr-2" />
@@ -384,7 +398,13 @@ export default function Dashboard() {
                   <Icon name="Phone" className="text-gray-600" />
                   <div>
                     <div className="text-xs text-gray-500">Телефон</div>
-                    <div className="font-medium">{user.phone || 'Не указан'}</div>
+                    <div className="font-medium font-mono">
+                      {user.phone ? (
+                        user.phone.startsWith('+') ? user.phone : 
+                        user.phone.length === 11 ? `+7 (${user.phone.slice(1, 4)}) ${user.phone.slice(4, 7)}-${user.phone.slice(7, 9)}-${user.phone.slice(9, 11)}` :
+                        user.phone
+                      ) : 'Не указан'}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -415,12 +435,23 @@ export default function Dashboard() {
             <Card className="bg-white/95 backdrop-blur-sm p-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Icon name="HelpCircle" className="text-blue-600" />
-                Помощь
+                Помощь и поддержка
               </h3>
-              <div className="space-y-2 text-sm text-gray-700">
-                <p>📞 <strong>Поддержка:</strong> support@example.com</p>
-                <p>💬 <strong>Telegram:</strong> @support_bot</p>
-                <p>⏰ <strong>Режим работы:</strong> Пн-Пт 9:00-18:00</p>
+              <div className="space-y-3 text-sm text-gray-700">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="font-semibold text-blue-900 mb-1">📞 Связь с поддержкой:</p>
+                  <p className="text-blue-800">Telegram: <a href="https://t.me/gromov0" className="underline font-medium" target="_blank" rel="noopener noreferrer">@gromov0</a></p>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <p className="font-semibold text-purple-900 mb-1">👥 Наше сообщество:</p>
+                  <p className="text-purple-800">Telegram: <a href="https://t.me/+QgiLIa1gFRY4Y2Iy" className="underline font-medium" target="_blank" rel="noopener noreferrer">Присоединиться</a></p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-xs text-green-800">
+                    <Icon name="Info" className="inline h-3 w-3 mr-1" />
+                    Ответим на все вопросы по реферальной программе и выплатам
+                  </p>
+                </div>
               </div>
             </Card>
           </div>

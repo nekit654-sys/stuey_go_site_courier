@@ -22,13 +22,25 @@ interface ProfileSetupModalProps {
   onUpdateUser?: (userData: Partial<User>) => void;
   forceOpen?: boolean;
   onClose?: () => void;
+  allowReferralCode?: boolean;
 }
 
-export default function ProfileSetupModal({ user, token, onComplete, onUpdateUser, forceOpen = false, onClose }: ProfileSetupModalProps) {
+export default function ProfileSetupModal({ user, token, onComplete, onUpdateUser, forceOpen = false, onClose, allowReferralCode = false }: ProfileSetupModalProps) {
+  // Форматируем телефон при инициализации
+  const formatInitialPhone = (phone: string) => {
+    if (!phone) return '+7';
+    if (phone.startsWith('+')) return phone;
+    if (phone.length === 11 && phone.startsWith('7')) {
+      return `+7 (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
+    }
+    return '+7';
+  };
+
   const [formData, setFormData] = useState({
     full_name: user.full_name || '',
-    phone: user.phone || '',
+    phone: formatInitialPhone(user.phone || ''),
     city: user.city || '',
+    referral_code_input: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -91,6 +103,7 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
           full_name: formData.full_name.trim(),
           phone: formData.phone.replace(/\D/g, ''),
           city: formData.city.trim(),
+          referral_code_input: formData.referral_code_input.trim() || undefined,
         }),
       });
 
@@ -125,14 +138,28 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
   };
 
   const formatPhoneInput = useCallback((value: string) => {
-    const digits = value.replace(/\D/g, '');
+    let digits = value.replace(/\D/g, '');
     
-    if (digits.length === 0) return '';
-    if (digits.length <= 1) return `+7 (${digits}`;
-    if (digits.length <= 4) return `+7 (${digits.slice(1, 4)}`;
-    if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}`;
-    if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}`;
-    return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
+    // Если начинается с 8, заменяем на 7
+    if (digits.startsWith('8')) {
+      digits = '7' + digits.slice(1);
+    }
+    
+    // Если начинается с 7, форматируем
+    if (digits.startsWith('7')) {
+      if (digits.length <= 1) return '+7';
+      if (digits.length <= 4) return `+7 (${digits.slice(1)}`;
+      if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4)}`;
+      if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+      return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
+    }
+    
+    // Если начинается не с 7, автоматически добавляем +7
+    if (digits.length === 0) return '+7';
+    if (digits.length <= 3) return `+7 (${digits}`;
+    if (digits.length <= 6) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    if (digits.length <= 8) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
   }, []);
 
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +177,10 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
     setFormData(prev => ({ ...prev, city: e.target.value }));
     if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
   }, [errors.city]);
+
+  const handleReferralCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, referral_code_input: e.target.value.toUpperCase() }));
+  }, []);
 
   if (isProfileComplete && !forceOpen) {
     return null;
@@ -282,6 +313,29 @@ export default function ProfileSetupModal({ user, token, onComplete, onUpdateUse
                 Проверьте в Яндекс Про → Профиль → Город работы
               </p>
             </div>
+
+            {allowReferralCode && (
+              <div className="pt-4 border-t">
+                <Label htmlFor="referral_code_input" className="text-base font-semibold flex items-center gap-2">
+                  <Icon name="Gift" size={18} className="text-orange-600" />
+                  Реферальный код (необязательно)
+                </Label>
+                <Input
+                  id="referral_code_input"
+                  type="text"
+                  value={formData.referral_code_input}
+                  onChange={handleReferralCodeChange}
+                  placeholder="ABC123"
+                  className="mt-2 text-lg font-mono uppercase"
+                  disabled={isSubmitting}
+                  maxLength={10}
+                />
+                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                  <Icon name="Info" size={12} />
+                  Если вас пригласил другой курьер, введите его реферальный код
+                </p>
+              </div>
+            )}
 
             <div className="pt-4 border-t">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">

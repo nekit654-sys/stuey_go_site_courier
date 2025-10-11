@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,10 +22,50 @@ export default function WithdrawalRequestForm({
   userBankName = '',
   onSuccess
 }: WithdrawalRequestFormProps) {
+  // Форматируем телефон при инициализации
+  const formatInitialPhone = (phone: string) => {
+    if (!phone) return '+7';
+    if (phone.startsWith('+')) return phone;
+    if (phone.length === 11 && phone.startsWith('7')) {
+      return `+7 (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
+    }
+    if (phone.length === 11) {
+      return `+7 (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
+    }
+    return '+7';
+  };
+
   const [amount, setAmount] = useState('');
-  const [sbpPhone, setSbpPhone] = useState(userPhone);
+  const [sbpPhone, setSbpPhone] = useState(formatInitialPhone(userPhone));
   const [sbpBankName, setSbpBankName] = useState(userBankName);
   const [loading, setLoading] = useState(false);
+
+  const formatPhoneInput = useCallback((value: string) => {
+    let digits = value.replace(/\D/g, '');
+    
+    if (digits.startsWith('8')) {
+      digits = '7' + digits.slice(1);
+    }
+    
+    if (digits.startsWith('7')) {
+      if (digits.length <= 1) return '+7';
+      if (digits.length <= 4) return `+7 (${digits.slice(1)}`;
+      if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4)}`;
+      if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+      return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
+    }
+    
+    if (digits.length === 0) return '+7';
+    if (digits.length <= 3) return `+7 (${digits}`;
+    if (digits.length <= 6) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    if (digits.length <= 8) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }, []);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneInput(e.target.value);
+    setSbpPhone(formatted);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +82,14 @@ export default function WithdrawalRequestForm({
       return;
     }
 
-    if (!sbpPhone.trim() || !sbpBankName.trim()) {
-      toast.error('Укажите номер телефона и банк для СБП');
+    const phoneDigits = sbpPhone.replace(/\D/g, '');
+    if (!phoneDigits || phoneDigits.length < 11) {
+      toast.error('Укажите корректный номер телефона (11 цифр)');
+      return;
+    }
+
+    if (!sbpBankName.trim()) {
+      toast.error('Укажите название банка для СБП');
       return;
     }
 
@@ -58,7 +104,7 @@ export default function WithdrawalRequestForm({
         },
         body: JSON.stringify({
           amount: withdrawAmount,
-          sbp_phone: sbpPhone.trim(),
+          sbp_phone: phoneDigits,
           sbp_bank_name: sbpBankName.trim(),
         }),
       });
@@ -116,11 +162,12 @@ export default function WithdrawalRequestForm({
             id="sbp_phone"
             type="tel"
             value={sbpPhone}
-            onChange={(e) => setSbpPhone(e.target.value)}
-            placeholder="+7 900 123-45-67"
+            onChange={handlePhoneChange}
+            placeholder="+7 (XXX) XXX-XX-XX"
+            className="font-mono"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Номер, привязанный к системе быстрых платежей</p>
+          <p className="text-xs text-gray-500 mt-1">Номер, привязанный к системе быстрых платежей (начинается с +7)</p>
         </div>
 
         <div>
