@@ -144,7 +144,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const loadAllCouriers = async () => {
     setIsLoadingCouriers(true);
     try {
-      const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
+      const response = await fetch(`${API_URL}?route=couriers&action=list`, {
         headers: {
           'X-Auth-Token': authToken
         }
