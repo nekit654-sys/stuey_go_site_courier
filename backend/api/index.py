@@ -89,6 +89,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_couriers(event, headers)
     elif route == 'csv':
         return handle_csv_upload(event, headers)
+    elif route == 'link-courier':
+        return handle_link_courier(event, headers)
     elif route == 'profile':
         return handle_profile(event, headers)
     elif route == 'payments':
@@ -1482,12 +1484,22 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 duplicates += 1
                 continue
             
+            # Сначала ищем по external_id (если курьер уже был связан вручную)
             cur.execute("""
                 SELECT id, invited_by_user_id FROM t_p25272970_courier_button_site.users
-                WHERE referral_code = %s
-            """, (creator_username,))
+                WHERE external_id = %s
+            """, (external_id,))
             
             courier = cur.fetchone()
+            
+            # Если не нашли по external_id, ищем по referral_code
+            if not courier:
+                cur.execute("""
+                    SELECT id, invited_by_user_id FROM t_p25272970_courier_button_site.users
+                    WHERE referral_code = %s
+                """, (creator_username,))
+                
+                courier = cur.fetchone()
             
             if not courier:
                 referral_name = f"{first_name} {last_name}".strip()
@@ -1513,6 +1525,13 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             courier_id = courier['id']
             referrer_id = courier['invited_by_user_id']
             referral_name = f"{first_name} {last_name}".strip()
+            
+            # Автоматически сохраняем external_id если ещё не сохранён
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET external_id = %s, updated_at = NOW()
+                WHERE id = %s AND (external_id IS NULL OR external_id = '')
+            """, (external_id, courier_id))
             
             cur.execute("""
                 SELECT orders_completed, bonus_earned, is_completed
@@ -1650,6 +1669,89 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 'admins': float(summary['admin_total'] or 0)
             }
         })),
+        'isBase64Encoded': False
+    }
+
+
+def handle_link_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Связывание курьера с external_id из партнёрской программы
+    '''
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    body_data = json.loads(event.get('body', '{}'))
+    courier_id = body_data.get('courier_id')
+    external_id = body_data.get('external_id', '').strip()
+    
+    if not courier_id or not external_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'courier_id and external_id are required'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT id FROM t_p25272970_courier_button_site.users
+        WHERE external_id = %s AND id != %s
+    """, (external_id, courier_id))
+    
+    existing = cur.fetchone()
+    
+    if existing:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Этот external_id уже привязан к другому курьеру'}),
+            'isBase64Encoded': False
+        }
+    
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.users
+        SET external_id = %s, updated_at = NOW()
+        WHERE id = %s
+    """, (external_id, courier_id))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': 'Курьер успешно связан с external_id'}),
         'isBase64Encoded': False
     }
 

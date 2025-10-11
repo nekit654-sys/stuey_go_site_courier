@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -8,10 +7,7 @@ import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import OnlineIndicator from './OnlineIndicator';
 import { Courier } from './payments/types';
-import { usePaymentsLogic } from './payments/usePaymentsLogic';
-import CsvUploadCard from './payments/CsvUploadCard';
-import UploadResultDisplay from './payments/UploadResultDisplay';
-import PartnerMatchingCard from './payments/PartnerMatchingCard';
+import UnifiedCsvUploadTab from './UnifiedCsvUploadTab';
 
 interface PaymentStats {
   total_records: number;
@@ -69,35 +65,12 @@ export default function FinalPaymentsTab({
   isLoadingCouriers,
   onRefreshCouriers
 }: FinalPaymentsTabProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'upload' | 'transactions' | 'distribution' | 'details'>('upload');
+  const [activeSubTab, setActiveSubTab] = useState<'upload' | 'distribution' | 'details'>('upload');
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [adminShares, setAdminShares] = useState<AdminShare[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-
-  // CSV Partner Upload state
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
-  const [preview, setPreview] = useState<any[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Transactions logic
-  const {
-    uploading: transactionsUploading,
-    csvData,
-    uploadResult: transactionsUploadResult,
-    partnerData,
-    matchedCouriers,
-    filterUnmatched,
-    setFilterUnmatched,
-    handleFileUpload,
-    handleProcessCsv,
-    handlePartnerImport,
-    exportPaymentReport,
-    exportCouriersForPartner,
-  } = usePaymentsLogic(authToken, couriers, onRefreshCouriers);
 
   useEffect(() => {
     loadData();
@@ -145,109 +118,6 @@ export default function FinalPaymentsTab({
     }
   };
 
-  const parseCSV = (text: string): any[] => {
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) return [];
-
-    const headers = lines[0].split(',').map(h => h.trim());
-    const rows = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
-      const row: any = {};
-      
-      headers.forEach((header, index) => {
-        row[header] = values[index] || '';
-      });
-      
-      rows.push(row);
-    }
-
-    return rows;
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-
-    if (!selectedFile.name.endsWith('.csv')) {
-      toast.error('Можно загружать только CSV файлы');
-      return;
-    }
-
-    setFile(selectedFile);
-    setUploadResult(null);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      const parsed = parseCSV(text);
-      setPreview(parsed.slice(0, 5));
-    };
-    reader.readAsText(selectedFile);
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      toast.error('Выберите CSV файл');
-      return;
-    }
-
-    if (!authToken) {
-      toast.error('Ошибка авторизации. Перезайдите в систему');
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      const reader = new FileReader();
-      
-      reader.onload = async (event) => {
-        const text = event.target?.result as string;
-        const rows = parseCSV(text);
-
-        if (rows.length === 0) {
-          toast.error('CSV файл пустой или некорректный');
-          setUploading(false);
-          return;
-        }
-
-        const response = await fetch(`${API_URL}?route=csv`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Auth-Token': authToken
-          },
-          body: JSON.stringify({ rows })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          setUploadResult(data);
-          toast.success(`Загружено ${data.processed} записей`);
-          setFile(null);
-          setPreview([]);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-          loadData();
-        } else {
-          toast.error(data.error || 'Ошибка загрузки');
-        }
-
-        setUploading(false);
-      };
-
-      reader.readAsText(file);
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Ошибка загрузки файла');
-      setUploading(false);
-    }
-  };
-
   const getRecipientTypeLabel = (type: string) => {
     switch (type) {
       case 'courier_self': return 'Самобонус курьера';
@@ -281,14 +151,10 @@ export default function FinalPaymentsTab({
       </Card>
 
       <Tabs value={activeSubTab} onValueChange={(v: any) => setActiveSubTab(v)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upload">
             <Icon name="Upload" size={16} className="mr-2" />
-            Партнёрка CSV
-          </TabsTrigger>
-          <TabsTrigger value="transactions">
-            <Icon name="Wallet" size={16} className="mr-2" />
-            Транзакции
+            Загрузка CSV
           </TabsTrigger>
           <TabsTrigger value="distribution">
             <Icon name="BarChart3" size={16} className="mr-2" />
@@ -301,16 +167,17 @@ export default function FinalPaymentsTab({
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6 mt-6">
-          <Card className="border-2 border-blue-200">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="Upload" className="h-6 w-6 text-blue-600" />
-                Загрузка CSV из партнёрской программы
-              </CardTitle>
-              <CardDescription>
-                Загрузите CSV файл с данными о доходах курьеров для автоматического распределения выплат
-              </CardDescription>
-            </CardHeader>
+          <UnifiedCsvUploadTab
+            authToken={authToken}
+            couriers={couriers}
+            onRefreshCouriers={() => {
+              onRefreshCouriers();
+              loadData();
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="distribution" className="space-y-6 mt-6">
             <CardContent className="pt-6 space-y-6">
               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                 <div className="flex items-start gap-2">
@@ -520,28 +387,6 @@ export default function FinalPaymentsTab({
                 </ul>
               </div>
             </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="transactions" className="space-y-6 mt-6">
-          <CsvUploadCard
-            csvData={csvData}
-            uploading={transactionsUploading}
-            onFileUpload={handleFileUpload}
-            onProcessCsv={handleProcessCsv}
-          />
-
-          {transactionsUploadResult && <UploadResultDisplay uploadResult={transactionsUploadResult} />}
-
-          <PartnerMatchingCard
-            partnerData={partnerData}
-            matchedCouriers={matchedCouriers}
-            filterUnmatched={filterUnmatched}
-            onPartnerImport={handlePartnerImport}
-            onExportCouriers={exportCouriersForPartner}
-            onExportReport={exportPaymentReport}
-            onToggleFilter={() => setFilterUnmatched(!filterUnmatched)}
-          />
         </TabsContent>
 
         <TabsContent value="distribution" className="space-y-6 mt-6">
