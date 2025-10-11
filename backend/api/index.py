@@ -1518,12 +1518,14 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     last_name_csv = name_parts[1] if len(name_parts) > 1 else ''
                     
                     # Получаем всех курьеров из того же города с похожими последними 4 цифрами
+                    # НО исключаем тех, кто уже привязан к другому external_id
                     cur.execute("""
                         SELECT id, full_name, phone, city, referral_code
                         FROM t_p25272970_courier_button_site.users
                         WHERE LOWER(city) = LOWER(%s)
                         AND phone LIKE %s
                         AND is_active = true
+                        AND (external_id IS NULL OR external_id = '')
                     """, (city, f'%{last_4_digits}'))
                     
                     city_phone_matches = cur.fetchall()
@@ -1555,6 +1557,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                                 OR LOWER(full_name) LIKE LOWER(%s)
                             )
                             AND is_active = true
+                            AND (external_id IS NULL OR external_id = '')
                             LIMIT 3
                         """, (f'%{first_name_csv}%', f'%{last_name_csv}%'))
                         
@@ -1851,20 +1854,45 @@ def handle_link_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Проверка 1: не занят ли этот external_id другим курьером
     cur.execute("""
-        SELECT id FROM t_p25272970_courier_button_site.users
+        SELECT id, full_name FROM t_p25272970_courier_button_site.users
         WHERE external_id = %s AND id != %s
     """, (external_id, courier_id))
     
-    existing = cur.fetchone()
+    existing_external = cur.fetchone()
     
-    if existing:
+    if existing_external:
         cur.close()
         conn.close()
         return {
             'statusCode': 400,
             'headers': headers,
-            'body': json.dumps({'success': False, 'error': 'Этот external_id уже привязан к другому курьеру'}),
+            'body': json.dumps({
+                'success': False, 
+                'error': f'Этот external_id уже привязан к курьеру: {existing_external["full_name"]}'
+            }),
+            'isBase64Encoded': False
+        }
+    
+    # Проверка 2: не привязан ли уже этот курьер к другому external_id
+    cur.execute("""
+        SELECT external_id FROM t_p25272970_courier_button_site.users
+        WHERE id = %s AND external_id IS NOT NULL AND external_id != %s
+    """, (courier_id, external_id))
+    
+    existing_courier = cur.fetchone()
+    
+    if existing_courier:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False, 
+                'error': f'Этот курьер уже привязан к external_id: {existing_courier["external_id"]}'
+            }),
             'isBase64Encoded': False
         }
     
