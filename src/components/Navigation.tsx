@@ -13,7 +13,7 @@ const Navigation = () => {
   const isMobile = useIsMobile();
   const { playSound } = useSound();
   const { isAuthenticated } = useAuth();
-  const { openGame } = useGame();
+  const { openGame, toggleLeaderboard } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
@@ -21,7 +21,6 @@ const Navigation = () => {
     { path: "/", label: "Главная", icon: "Home" },
     { path: "/career", label: "Карьера и доход", icon: "Briefcase" },
     { path: "/reviews", label: "Отзывы курьеров", icon: "MessageSquare" },
-    { path: "/leaderboard", label: "Лидерборд", icon: "Trophy" },
   ];
 
   const handleMenuItemClick = () => {
@@ -92,6 +91,27 @@ const Navigation = () => {
             >
               <Icon name="Gamepad2" size={18} />
               <span className="hidden lg:inline">Игра</span>
+            </Button>
+
+            {/* Leaderboard Button */}
+            <Button
+              onClick={() => {
+                playSound('click');
+                toggleLeaderboard();
+              }}
+              onMouseEnter={() => playSound('hover')}
+              className="
+                bg-gradient-to-b from-yellow-300 to-yellow-400
+                text-black font-extrabold px-5 py-2.5 rounded-xl
+                shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                transition-all duration-150
+                border-3 border-black
+                flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
+              "
+            >
+              <Icon name="Trophy" size={18} />
+              <span className="hidden lg:inline">Лидерборд</span>
             </Button>
             
             {/* Login/Profile Button */}
@@ -191,6 +211,26 @@ const Navigation = () => {
             >
               <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
               Игра
+            </Button>
+
+            {/* Mobile Leaderboard Button */}
+            <Button
+              onClick={() => {
+                playSound('click');
+                toggleLeaderboard();
+                handleMenuItemClick();
+              }}
+              onMouseEnter={() => playSound('hover')}
+              className="
+                w-full justify-start bg-gradient-to-b from-yellow-300 to-yellow-400
+                text-black font-extrabold transition-all duration-150
+                shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                py-6 text-base rounded-xl border-3 border-black
+                hover:from-yellow-400 hover:to-yellow-500
+              "
+            >
+              <Icon name="Trophy" size={20} className="mr-3 text-black" />
+              Лидерборд
             </Button>
             
             {/* Mobile Login/Profile Button */}
