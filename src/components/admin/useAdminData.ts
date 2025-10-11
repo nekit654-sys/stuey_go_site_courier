@@ -19,14 +19,10 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
       const response = await fetch(API_URL);
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 API Response:', data);
-        const newRequests = (data.requests || []).map((req: any) => {
-          console.log(`📸 Request #${req.id}: attachment_data length =`, req.attachment_data?.length || 0);
-          return {
-            ...req,
-            screenshot_url: req.attachment_data || req.screenshot_url
-          };
-        });
+        const newRequests = (data.requests || []).map((req: any) => ({
+          ...req,
+          screenshot_url: req.attachment_data || req.screenshot_url
+        }));
         
         const newStats = {
           total: newRequests.length,
@@ -89,11 +85,39 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   };
 
   const deleteRequest = async (id: number) => {
-    toast({
-      title: 'Недоступно',
-      description: 'Удаление заявок отключено',
-      variant: 'destructive',
-    });
+    if (!confirm('Вы уверены, что хотите удалить эту заявку?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id })
+      });
+
+      if (response.ok) {
+        loadRequests();
+        toast({
+          title: 'Удалено',
+          description: 'Заявка успешно удалена',
+        });
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось удалить заявку',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить заявку',
+        variant: 'destructive',
+      });
+    }
   };
 
   const loadReferralStats = async () => {

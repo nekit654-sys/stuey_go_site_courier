@@ -14,7 +14,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400',
         'Content-Type': 'application/json'
@@ -120,6 +120,51 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'success': False,
                     'error': f'Error updating status: {str(e)}'
+                }),
+                'isBase64Encoded': False
+            }
+    
+    if method == 'DELETE':
+        try:
+            body_data = json.loads(event.get('body', '{}'))
+            request_id = body_data.get('id')
+            
+            if not request_id:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'ID is required', 'success': False}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor()
+            
+            cur.execute("""
+                DELETE FROM t_p25272970_courier_button_site.payout_requests
+                WHERE id = %s
+            """, (request_id,))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Request deleted successfully'
+                }),
+                'isBase64Encoded': False
+            }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'error': f'Error deleting request: {str(e)}'
                 }),
                 'isBase64Encoded': False
             }
