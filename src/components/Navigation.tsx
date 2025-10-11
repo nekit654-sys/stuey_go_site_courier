@@ -21,6 +21,7 @@ const Navigation = () => {
     { path: "/", label: "Главная", icon: "Home" },
     { path: "/career", label: "Карьера и доход", icon: "Briefcase" },
     { path: "/reviews", label: "Отзывы курьеров", icon: "MessageSquare" },
+    { path: "/leaderboard", label: "Лидерборд", icon: "Trophy" },
   ];
 
   const handleMenuItemClick = () => {

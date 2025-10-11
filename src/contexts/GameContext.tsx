@@ -7,13 +7,6 @@ import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import { useSound } from '@/hooks/useSound';
 
-interface LeaderboardEntry {
-  id: number;
-  full_name: string;
-  game_high_score: number;
-  game_total_plays: number;
-}
-
 interface GameContextType {
   openGame: () => void;
   closeGame: () => void;
@@ -28,15 +21,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { playSound } = useSound();
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isGameLoading, setIsGameLoading] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [lastScore, setLastScore] = useState<number>(0);
   const [showRegisterPrompt, setShowRegisterPrompt] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (isGameOpen) {
-      fetchLeaderboard();
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === 'GAME_OVER') {
           handleGameOver(event.data.score);
@@ -46,18 +36,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return () => window.removeEventListener('message', handleMessage);
     }
   }, [isGameOpen, isAuthenticated, user?.id]);
-
-  const fetchLeaderboard = async () => {
-    try {
-      const response = await fetch(`${API_URL}?route=game&action=leaderboard&limit=5`);
-      const data = await response.json();
-      if (data.success) {
-        setLeaderboard(data.leaderboard || []);
-      }
-    } catch (error) {
-      console.error('Error fetching leaderboard:', error);
-    }
-  };
 
   const handleGameOver = async (score: number) => {
     setLastScore(score);
@@ -86,8 +64,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             game_high_score: data.high_score,
             game_total_plays: data.total_plays
           });
-          
-          fetchLeaderboard();
         }
       } catch (error) {
         console.error('Error saving score:', error);
@@ -109,7 +85,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsGameOpen(false);
     setIsGameLoading(false);
     setShowRegisterPrompt(false);
-    setShowLeaderboard(false);
     document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
   };
@@ -139,26 +114,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                            border-2 border-red-400"
               >
                 <Icon name="X" size={24} />
-              </button>
-
-              {/* Кнопка лидерборда */}
-              <button
-                onClick={() => {
-                  playSound('click');
-                  setShowLeaderboard(!showLeaderboard);
-                }}
-                onMouseEnter={() => playSound('hover')}
-                className="absolute top-4 left-4 z-[100] 
-                           px-4 py-2
-                           bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600
-                           text-black font-bold rounded-xl 
-                           flex items-center gap-2
-                           transition-all duration-200 hover:scale-105 active:scale-95
-                           shadow-lg hover:shadow-xl
-                           border-3 border-black"
-              >
-                <Icon name="Trophy" size={20} />
-                <span className="hidden sm:inline">Лидеры</span>
               </button>
 
               {isGameLoading && (
@@ -206,70 +161,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               )}
             </div>
 
-            {showLeaderboard && (
-              <div className="hidden md:block w-80 bg-white rounded-2xl shadow-2xl p-6 overflow-y-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-black flex items-center gap-2 text-yellow-600">
-                    <Icon name="Trophy" />
-                    Лидеры
-                  </h3>
-                  <button
-                    onClick={() => {
-                      playSound('click');
-                      setShowLeaderboard(false);
-                    }}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <Icon name="X" size={20} />
-                  </button>
-                </div>
-                {leaderboard.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">Пока нет результатов</p>
-                ) : (
-                  <div className="space-y-2">
-                    {leaderboard.map((entry, index) => (
-                      <div
-                        key={entry.id}
-                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${
-                          entry.id === user?.id
-                            ? 'bg-yellow-100 border-yellow-500'
-                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                        }`}
-                      >
-                        <div className="text-2xl font-bold w-8 text-center">
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold truncate text-sm">
-                            {entry.full_name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {entry.game_total_plays} игр
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-orange-600">
-                            {entry.game_high_score}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {isAuthenticated && (
-                  <Button
-                    onClick={() => {
-                      playSound('click');
-                      navigate('/dashboard');
-                      closeGame();
-                    }}
-                    className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold border-3 border-black"
-                  >
-                    Мой профиль
-                  </Button>
-                )}
-              </div>
-            )}
+
           </div>
         </div>
       )}
