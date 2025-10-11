@@ -1510,26 +1510,53 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 courier = cur.fetchone()
                 
                 if not courier:
-                    # Ищем похожих курьеров для предложения
+                    # Ищем похожих курьеров: ФИО должно быть похоже + город + последние 4 цифры
+                    name_parts = referral_name.split()
+                    first_name_csv = name_parts[0] if len(name_parts) > 0 else ''
+                    last_name_csv = name_parts[1] if len(name_parts) > 1 else ''
+                    
+                    # Получаем всех курьеров из того же города с похожими последними 4 цифрами
                     cur.execute("""
                         SELECT id, full_name, phone, city, referral_code
                         FROM t_p25272970_courier_button_site.users
-                        WHERE (
-                            LOWER(full_name) LIKE LOWER(%s)
-                            OR LOWER(city) = LOWER(%s)
-                            OR phone LIKE %s
-                        )
+                        WHERE LOWER(city) = LOWER(%s)
+                        AND phone LIKE %s
                         AND is_active = true
-                        ORDER BY 
-                            CASE 
-                                WHEN LOWER(city) = LOWER(%s) THEN 1
-                                WHEN phone LIKE %s THEN 2
-                                ELSE 3
-                            END
-                        LIMIT 5
-                    """, (f'%{referral_name.split()[0]}%', city, f'%{last_4_digits}', city, f'%{last_4_digits}'))
+                    """, (city, f'%{last_4_digits}'))
                     
-                    suggested_couriers = cur.fetchall()
+                    city_phone_matches = cur.fetchall()
+                    
+                    # Фильтруем по схожести имени (хотя бы одно слово должно совпадать)
+                    suggested_couriers = []
+                    for c in city_phone_matches:
+                        db_name_parts = c['full_name'].lower().split()
+                        csv_name_parts = [first_name_csv.lower(), last_name_csv.lower()]
+                        
+                        # Проверяем есть ли хотя бы одно совпадение в словах имени
+                        has_name_match = any(
+                            csv_part in db_part or db_part in csv_part 
+                            for csv_part in csv_name_parts 
+                            for db_part in db_name_parts
+                            if len(csv_part) >= 3 and len(db_part) >= 3
+                        )
+                        
+                        if has_name_match:
+                            suggested_couriers.append(c)
+                    
+                    # Если нет совпадений по городу+телефону+имени, ищем только по имени в любом городе
+                    if not suggested_couriers and (first_name_csv or last_name_csv):
+                        cur.execute("""
+                            SELECT id, full_name, phone, city, referral_code
+                            FROM t_p25272970_courier_button_site.users
+                            WHERE (
+                                LOWER(full_name) LIKE LOWER(%s)
+                                OR LOWER(full_name) LIKE LOWER(%s)
+                            )
+                            AND is_active = true
+                            LIMIT 3
+                        """, (f'%{first_name_csv}%', f'%{last_name_csv}%'))
+                        
+                        suggested_couriers = cur.fetchall()
                     
                     unmatched.append({
                         'external_id': external_id,
