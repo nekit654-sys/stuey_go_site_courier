@@ -60,14 +60,6 @@ export default function Auth() {
       const isProd = window.location.hostname === 'stuey-go.ru';
       const redirectUri = isProd ? 'https://stuey-go.ru/auth' : `${window.location.origin}/auth`;
       
-      console.log('[Auth] Начинаю OAuth callback:', {
-        provider,
-        code: code.substring(0, 10) + '...',
-        redirectUri,
-        referralCode,
-        apiUrl: API_URL
-      });
-      
       const requestBody = {
         action: provider,
         code,
@@ -75,7 +67,7 @@ export default function Auth() {
         referral_code: referralCode,
       };
       
-      console.log('[Auth] Отправляю запрос:', requestBody);
+      console.log('[Auth] OAuth запрос:', { provider, redirectUri, hasCode: !!code, hasRef: !!referralCode });
       
       const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
@@ -85,24 +77,25 @@ export default function Auth() {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('[Auth] Получен ответ, status:', response.status);
+      console.log('[Auth] Статус ответа:', response.status);
       
       const data = await response.json();
-      console.log('[Auth] Данные ответа:', data);
+      console.log('[Auth] Данные:', data);
 
       if (data.success) {
-        console.log('[Auth] Успешная авторизация, токен получен');
         login(data.token, data.user);
         localStorage.removeItem('referral_code');
         toast.success('Успешный вход!');
         navigate('/dashboard');
       } else {
-        console.error('[Auth] Ошибка от сервера:', data.error);
-        toast.error(data.error || 'Ошибка авторизации');
+        const errorMsg = data.error || 'Ошибка авторизации';
+        console.error('[Auth] Ошибка:', errorMsg);
+        toast.error(errorMsg, { duration: 5000 });
       }
-    } catch (error) {
-      console.error('[Auth] Критическая ошибка OAuth callback:', error);
-      toast.error('Произошла ошибка при авторизации');
+    } catch (error: any) {
+      const errorMsg = error?.message || String(error);
+      console.error('[Auth] Exception:', errorMsg);
+      toast.error(`Ошибка: ${errorMsg}`, { duration: 5000 });
     } finally {
       setLoading(false);
     }
