@@ -44,7 +44,7 @@ interface WithdrawalRequest {
 }
 
 export default function Dashboard() {
-  const { user, token, logout, isAuthenticated, updateUser } = useAuth();
+  const { user, token, logout, isAuthenticated, updateUser, refreshUserData } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
@@ -96,6 +96,12 @@ export default function Dashboard() {
       clearInterval(withdrawalsInterval);
     };
   }, [isAuthenticated, user?.id, activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'profile' && isAuthenticated) {
+      refreshUserData();
+    }
+  }, [activeTab, isAuthenticated]);
 
   const fetchStats = async () => {
     if (!user?.id) return;
