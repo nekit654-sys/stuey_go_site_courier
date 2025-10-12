@@ -60,31 +60,48 @@ export default function Auth() {
       const isProd = window.location.hostname === 'stuey-go.ru';
       const redirectUri = isProd ? 'https://stuey-go.ru/auth' : `${window.location.origin}/auth`;
       
+      console.log('[Auth] Начинаю OAuth callback:', {
+        provider,
+        code: code.substring(0, 10) + '...',
+        redirectUri,
+        referralCode,
+        apiUrl: API_URL
+      });
+      
+      const requestBody = {
+        action: provider,
+        code,
+        redirect_uri: redirectUri,
+        referral_code: referralCode,
+      };
+      
+      console.log('[Auth] Отправляю запрос:', requestBody);
+      
       const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          action: provider,
-          code,
-          redirect_uri: redirectUri,
-          referral_code: referralCode,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('[Auth] Получен ответ, status:', response.status);
+      
       const data = await response.json();
+      console.log('[Auth] Данные ответа:', data);
 
       if (data.success) {
+        console.log('[Auth] Успешная авторизация, токен получен');
         login(data.token, data.user);
         localStorage.removeItem('referral_code');
         toast.success('Успешный вход!');
         navigate('/dashboard');
       } else {
+        console.error('[Auth] Ошибка от сервера:', data.error);
         toast.error(data.error || 'Ошибка авторизации');
       }
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      console.error('[Auth] Критическая ошибка OAuth callback:', error);
       toast.error('Произошла ошибка при авторизации');
     } finally {
       setLoading(false);
