@@ -862,6 +862,7 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             }
     
     elif action in ['yandex', 'google', 'vk', 'telegram']:
+        print(f'>>> OAuth action detected: {action}')
         return handle_oauth_login(action, body_data, headers)
     
     elif action == 'verify':
@@ -930,6 +931,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     code = body_data.get('code')
     redirect_uri = body_data.get('redirect_uri', '')
     
+    print(f'>>> OAuth Login: provider={provider}, code={code[:20] if code else None}..., redirect_uri={redirect_uri}')
+    
     if provider == 'yandex':
         # Обмен code на access_token
         token_response = requests.post('https://oauth.yandex.ru/token', data={
@@ -940,11 +943,15 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             'redirect_uri': redirect_uri
         })
         
+        print(f'>>> Yandex token response: status={token_response.status_code}')
+        
         if token_response.status_code != 200:
+            error_detail = token_response.text
+            print(f'>>> Yandex token error: {error_detail}')
             return {
                 'statusCode': 400,
                 'headers': headers,
-                'body': json.dumps({'success': False, 'error': 'Failed to exchange code for token'}),
+                'body': json.dumps({'success': False, 'error': f'Failed to exchange code for token: {error_detail}'}),
                 'isBase64Encoded': False
             }
         
@@ -965,6 +972,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             }
         
         user_info = user_info_response.json()
+        
+        print(f'>>> Yandex user info: {user_info}')
         
         # Используем постоянный ID от Яндекса
         oauth_id = str(user_info.get('id', '')).replace("'", "''")
