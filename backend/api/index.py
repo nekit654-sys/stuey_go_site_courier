@@ -107,6 +107,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_game(event, headers)
     elif route == 'admin':
         return handle_admin(event, headers)
+    elif route == 'reset-admin-password':
+        return handle_reset_admin_password(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -3709,5 +3711,48 @@ def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         'statusCode': 400,
         'headers': headers,
         'body': json.dumps({'error': 'Invalid action'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    body = json.loads(event.get('body', '{}'))
+    new_password = body.get('password', 'admin654654')
+    
+    new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.admins 
+        SET password_hash = %s, updated_at = NOW()
+        WHERE username IN ('nekit654', 'danil654')
+    """, (new_hash,))
+    
+    conn.commit()
+    affected_rows = cur.rowcount
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True,
+            'message': f'Passwords updated for {affected_rows} admins',
+            'new_hash': new_hash
+        }),
         'isBase64Encoded': False
     }
