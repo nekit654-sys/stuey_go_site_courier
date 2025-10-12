@@ -60,26 +60,29 @@ def record_login_attempt(username: str):
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
     
-    headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+    cors_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token, x-auth-token, X-User-Id',
+        'Access-Control-Max-Age': '86400'
     }
     
     if method == 'OPTIONS':
         return {
             'statusCode': 200,
-            'headers': {
-                **headers,
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token, x-auth-token, X-User-Id',
-                'Access-Control-Max-Age': '86400'
-            },
+            'headers': cors_headers,
             'body': '',
             'isBase64Encoded': False
         }
     
     query_params = event.get('queryStringParameters') or {}
     route = query_params.get('route', '')
+    
+    headers = {
+        'Content-Type': 'application/json',
+        **cors_headers
+    }
+    
     print(f'>>> Handler вызван: method={method}, route={route}, action={query_params.get("action", "")}')
     
     if route == 'referrals':
@@ -104,6 +107,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_game(event, headers)
     elif route == 'admin':
         return handle_admin(event, headers)
+    elif route == 'reset-admin-password':
+        return handle_reset_admin_password(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -758,8 +763,11 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             'isBase64Encoded': False
         }
     
-    body_data = json.loads(event.get('body', '{}'))
+    body_str = event.get('body', '{}')
+    print(f'>>> handle_auth body: {body_str[:200]}...')
+    body_data = json.loads(body_str)
     action = body_data.get('action', 'login')
+    print(f'>>> handle_auth action: "{action}"')
     
     if action == 'login':
         username = body_data.get('username', '')
@@ -804,13 +812,16 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         
         if user:
             password_hash = user[2]
+            print(f'>>> Found user: username={user[1]}, hash_prefix={password_hash[:10] if password_hash else "NONE"}')
             
             if password_hash.startswith('$2b$') or password_hash.startswith('$2a$'):
                 password_valid = bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+                print(f'>>> Bcrypt check result: {password_valid}')
             else:
                 md5_hash = hashlib.md5(password.encode()).hexdigest()
                 password_valid = (password_hash == md5_hash)
                 needs_migration = True
+                print(f'>>> MD5 check result: {password_valid}, needs_migration: {needs_migration}')
         
         if user and password_valid:
             if needs_migration:
@@ -851,17 +862,19 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 'isBase64Encoded': False
             }
         else:
+            print(f'>>> Login failed: user_exists={user is not None}, password_valid={password_valid}')
             cur.close()
             conn.close()
             
             return {
                 'statusCode': 401,
                 'headers': headers,
-                'body': json.dumps({'error': 'Неверный логин или пароль'}),
+                'body': json.dumps({'success': False, 'message': 'Неверный логин или пароль', 'error': 'Неверный логин или пароль'}),
                 'isBase64Encoded': False
             }
     
     elif action in ['yandex', 'google', 'vk', 'telegram']:
+        print(f'>>> OAuth action detected: {action}')
         return handle_oauth_login(action, body_data, headers)
     
     elif action == 'verify':
@@ -926,233 +939,254 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
     import uuid
     import requests
     
-    # Обмениваем code на access_token и получаем реальные данные пользователя от провайдера
-    code = body_data.get('code')
-    redirect_uri = body_data.get('redirect_uri', '')
-    
-    if provider == 'yandex':
-        # Обмен code на access_token
-        token_response = requests.post('https://oauth.yandex.ru/token', data={
-            'grant_type': 'authorization_code',
-            'code': code,
-            'client_id': '97aff4efd9cd4403854397576fed94d5',
-            'client_secret': os.environ.get('YANDEX_CLIENT_SECRET', ''),
-            'redirect_uri': redirect_uri
-        })
+    try:
+        # Обмениваем code на access_token и получаем реальные данные пользователя от провайдера
+        code = body_data.get('code')
+        redirect_uri = body_data.get('redirect_uri', '')
         
-        if token_response.status_code != 200:
-            return {
-                'statusCode': 400,
-                'headers': headers,
-                'body': json.dumps({'success': False, 'error': 'Failed to exchange code for token'}),
-                'isBase64Encoded': False
-            }
+        print(f'>>> OAuth Login: provider={provider}, code={code[:20] if code else None}..., redirect_uri={redirect_uri}')
         
-        token_data = token_response.json()
-        access_token = token_data.get('access_token')
+        if provider == 'yandex':
+            # Обмен code на access_token
+            token_response = requests.post('https://oauth.yandex.ru/token', data={
+                'grant_type': 'authorization_code',
+                'code': code,
+                'client_id': '97aff4efd9cd4403854397576fed94d5',
+                'client_secret': os.environ.get('YANDEX_CLIENT_SECRET', ''),
+                'redirect_uri': redirect_uri
+            })
+            
+            print(f'>>> Yandex token response: status={token_response.status_code}')
+            
+            if token_response.status_code != 200:
+                error_detail = token_response.text
+                print(f'>>> Yandex token error: {error_detail}')
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': f'Failed to exchange code for token: {error_detail}'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = token_response.json()
+            access_token = token_data.get('access_token')
+            
+            # Получаем данные пользователя
+            user_info_response = requests.get('https://login.yandex.ru/info', 
+                headers={'Authorization': f'OAuth {access_token}'}
+            )
+            
+            if user_info_response.status_code != 200:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Failed to get user info'}),
+                    'isBase64Encoded': False
+                }
+            
+            user_info = user_info_response.json()
+            
+            print(f'>>> Yandex user info: {user_info}')
+            
+            # Используем постоянный ID от Яндекса
+            oauth_id = str(user_info.get('id', '')).replace("'", "''")
+            full_name = (user_info.get('display_name') or user_info.get('real_name') or 'Пользователь').replace("'", "''")
+            email = (user_info.get('default_email') or '').replace("'", "''")
+            phone = (user_info.get('default_phone', {}).get('number') if isinstance(user_info.get('default_phone'), dict) else '').replace("'", "''")
+            avatar_url = (user_info.get('default_avatar_id', '')).replace("'", "''")
+            if avatar_url:
+                avatar_url = f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
         
-        # Получаем данные пользователя
-        user_info_response = requests.get('https://login.yandex.ru/info', 
-            headers={'Authorization': f'OAuth {access_token}'}
-        )
+        elif provider == 'vk':
+            # Для VK - используем существующую логику (временно)
+            oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
+            full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
+            email = (body_data.get('email') or '').replace("'", "''")
+            phone = (body_data.get('phone') or '').replace("'", "''")
+            avatar_url = (body_data.get('avatar') or '').replace("'", "''")
         
-        if user_info_response.status_code != 200:
-            return {
-                'statusCode': 400,
-                'headers': headers,
-                'body': json.dumps({'success': False, 'error': 'Failed to get user info'}),
-                'isBase64Encoded': False
-            }
+        else:
+            # Для других провайдеров - используем существующую логику
+            oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
+            full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
+            email = (body_data.get('email') or '').replace("'", "''")
+            phone = (body_data.get('phone') or '').replace("'", "''")
+            avatar_url = (body_data.get('avatar') or '').replace("'", "''")
         
-        user_info = user_info_response.json()
+        referral_code = body_data.get('referral_code')
         
-        # Используем постоянный ID от Яндекса
-        oauth_id = str(user_info.get('id', '')).replace("'", "''")
-        full_name = (user_info.get('display_name') or user_info.get('real_name') or 'Пользователь').replace("'", "''")
-        email = (user_info.get('default_email') or '').replace("'", "''")
-        phone = (user_info.get('default_phone', {}).get('number') if isinstance(user_info.get('default_phone'), dict) else '').replace("'", "''")
-        avatar_url = (user_info.get('default_avatar_id', '')).replace("'", "''")
-        if avatar_url:
-            avatar_url = f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    elif provider == 'vk':
-        # Для VK - используем существующую логику (временно)
-        oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
-        full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
-        email = (body_data.get('email') or '').replace("'", "''")
-        phone = (body_data.get('phone') or '').replace("'", "''")
-        avatar_url = (body_data.get('avatar') or '').replace("'", "''")
-    
-    else:
-        # Для других провайдеров - используем существующую логику
-        oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
-        full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
-        email = (body_data.get('email') or '').replace("'", "''")
-        phone = (body_data.get('phone') or '').replace("'", "''")
-        avatar_url = (body_data.get('avatar') or '').replace("'", "''")
-    
-    referral_code = body_data.get('referral_code')
-    
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    
-    # Стратегия поиска существующего пользователя:
-    # 1. По oauth_id (самый надежный идентификатор)
-    # 2. По email (если Яндекс вернул email)
-    # 3. По телефону (если есть)
-    
-    existing_user = None
-    
-    # Шаг 1: Ищем по oauth_id
-    cur.execute("""
-        SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
-        FROM t_p25272970_courier_button_site.users
-        WHERE oauth_id = %s AND oauth_provider = %s AND is_active = true
-    """, (oauth_id, provider))
-    
-    existing_user = cur.fetchone()
-    
-    # Шаг 2: Если не нашли по oauth_id, но есть email - ищем по email
-    if not existing_user and email:
+        # Стратегия поиска существующего пользователя:
+        # 1. По oauth_id (самый надежный идентификатор)
+        # 2. По email (если Яндекс вернул email)
+        # 3. По телефону (если есть)
+        
+        existing_user = None
+        
+        # Шаг 1: Ищем по oauth_id
         cur.execute("""
             SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
             FROM t_p25272970_courier_button_site.users
-            WHERE email = %s AND oauth_provider = %s AND is_active = true
-            ORDER BY created_at ASC
-            LIMIT 1
-        """, (email, provider))
+            WHERE oauth_id = %s AND oauth_provider = %s AND is_active = true
+        """, (oauth_id, provider))
         
-        email_user = cur.fetchone()
+        existing_user = cur.fetchone()
         
-        # Если нашли по email - обновляем oauth_id для этого пользователя
-        if email_user:
+        # Шаг 2: Если не нашли по oauth_id, но есть email - ищем по email
+        if not existing_user and email:
             cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET oauth_id = %s, updated_at = NOW()
-                WHERE id = %s
-            """, (oauth_id, email_user['id']))
-            conn.commit()
-            existing_user = email_user
-    
-    # Шаг 3: Если не нашли по email, но есть телефон - ищем по телефону
-    if not existing_user and phone:
-        cur.execute("""
-            SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
-            FROM t_p25272970_courier_button_site.users
-            WHERE phone = %s AND oauth_provider = %s AND is_active = true
-            ORDER BY created_at ASC
-            LIMIT 1
-        """, (phone, provider))
-        
-        phone_user = cur.fetchone()
-        
-        # Если нашли по телефону - обновляем oauth_id для этого пользователя
-        if phone_user:
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET oauth_id = %s, updated_at = NOW()
-                WHERE id = %s
-            """, (oauth_id, phone_user['id']))
-            conn.commit()
-            existing_user = phone_user
-    
-    if existing_user:
-        user_id = existing_user['id']
-        
-        # Обновляем данные существующего пользователя от провайдера
-        update_fields = []
-        update_values = []
-        
-        if full_name and full_name != 'Пользователь':
-            update_fields.append("full_name = %s")
-            update_values.append(full_name)
-        if email:
-            update_fields.append("email = %s")
-            update_values.append(email)
-        if avatar_url:
-            update_fields.append("avatar_url = %s")
-            update_values.append(avatar_url)
-        
-        # Обновляем телефон только если он есть от провайдера и еще не заполнен
-        if phone and not existing_user.get('phone'):
-            update_fields.append("phone = %s")
-            update_values.append(phone)
-        
-        if update_fields:
-            update_values.append(user_id)
-            update_query = f"""
-                UPDATE t_p25272970_courier_button_site.users
-                SET {', '.join(update_fields)}, updated_at = NOW()
-                WHERE id = %s
-            """
-            cur.execute(update_query, tuple(update_values))
-            conn.commit()
-    else:
-        generated_ref_code = str(uuid.uuid4())[:8].upper()
-        
-        cur.execute("""
-            INSERT INTO t_p25272970_courier_button_site.users 
-            (oauth_id, oauth_provider, full_name, email, phone, avatar_url, referral_code)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (oauth_id, provider, full_name, email, phone, avatar_url, generated_ref_code))
-        
-        user_id = cur.fetchone()['id']
-        
-        if referral_code:
-            cur.execute("""
-                SELECT id FROM t_p25272970_courier_button_site.users
-                WHERE referral_code = %s
-            """, (referral_code,))
+                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+                FROM t_p25272970_courier_button_site.users
+                WHERE email = %s AND oauth_provider = %s AND is_active = true
+                ORDER BY created_at ASC
+                LIMIT 1
+            """, (email, provider))
             
-            referrer = cur.fetchone()
+            email_user = cur.fetchone()
             
-            if referrer and referrer['id'] != user_id:
+            # Если нашли по email - обновляем oauth_id для этого пользователя
+            if email_user:
                 cur.execute("""
                     UPDATE t_p25272970_courier_button_site.users
-                    SET invited_by_user_id = %s
+                    SET oauth_id = %s, updated_at = NOW()
                     WHERE id = %s
-                """, (referrer['id'], user_id))
-                
+                """, (oauth_id, email_user['id']))
+                conn.commit()
+                existing_user = email_user
+        
+        # Шаг 3: Если не нашли по email, но есть телефон - ищем по телефону
+        if not existing_user and phone:
+            cur.execute("""
+                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+                FROM t_p25272970_courier_button_site.users
+                WHERE phone = %s AND oauth_provider = %s AND is_active = true
+                ORDER BY created_at ASC
+                LIMIT 1
+            """, (phone, provider))
+            
+            phone_user = cur.fetchone()
+            
+            # Если нашли по телефону - обновляем oauth_id для этого пользователя
+            if phone_user:
                 cur.execute("""
-                    INSERT INTO t_p25272970_courier_button_site.referrals
-                    (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-                    VALUES (%s, %s, 0, false, 0)
-                """, (referrer['id'], user_id))
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET oauth_id = %s, updated_at = NOW()
+                    WHERE id = %s
+                """, (oauth_id, phone_user['id']))
+                conn.commit()
+                existing_user = phone_user
     
-    conn.commit()
-    cur.execute("""
-        SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
-               referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-               is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
-               nickname, game_high_score, game_total_plays, game_achievements, agreed_to_terms
-        FROM t_p25272970_courier_button_site.users
-        WHERE id = %s
-    """, (user_id,))
+        if existing_user:
+            user_id = existing_user['id']
+            
+            # Обновляем данные существующего пользователя от провайдера
+            update_fields = []
+            update_values = []
+            
+            if full_name and full_name != 'Пользователь':
+                update_fields.append("full_name = %s")
+                update_values.append(full_name)
+            if email:
+                update_fields.append("email = %s")
+                update_values.append(email)
+            if avatar_url:
+                update_fields.append("avatar_url = %s")
+                update_values.append(avatar_url)
+            
+            # Обновляем телефон только если он есть от провайдера и еще не заполнен
+            if phone and not existing_user.get('phone'):
+                update_fields.append("phone = %s")
+                update_values.append(phone)
+            
+            if update_fields:
+                update_values.append(user_id)
+                update_query = f"""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET {', '.join(update_fields)}, updated_at = NOW()
+                    WHERE id = %s
+                """
+                cur.execute(update_query, tuple(update_values))
+                conn.commit()
+        else:
+            generated_ref_code = str(uuid.uuid4())[:8].upper()
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.users 
+                (oauth_id, oauth_provider, full_name, email, phone, avatar_url, referral_code)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (oauth_id, provider, full_name, email, phone, avatar_url, generated_ref_code))
+            
+            user_id = cur.fetchone()['id']
+            
+            if referral_code:
+                cur.execute("""
+                    SELECT id FROM t_p25272970_courier_button_site.users
+                    WHERE referral_code = %s
+                """, (referral_code,))
+                
+                referrer = cur.fetchone()
+                
+                if referrer and referrer['id'] != user_id:
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET invited_by_user_id = %s
+                        WHERE id = %s
+                    """, (referrer['id'], user_id))
+                    
+                    cur.execute("""
+                        INSERT INTO t_p25272970_courier_button_site.referrals
+                        (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
+                        VALUES (%s, %s, 0, false, 0)
+                    """, (referrer['id'], user_id))
+        
+        conn.commit()
+        cur.execute("""
+            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
+                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
+                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
+                   nickname, game_high_score, game_total_plays, game_achievements, agreed_to_terms
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
     
-    user = cur.fetchone()
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    payload = {
-        'user_id': user['id'],
-        'oauth_provider': user['oauth_provider'],
-        'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
-    }
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    
-    return {
-        'statusCode': 200,
-        'headers': headers,
-        'body': json.dumps(convert_decimals({
-            'success': True,
-            'token': token,
-            'user': dict(user)
-        })),
-        'isBase64Encoded': False
-    }
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        payload = {
+            'user_id': user['id'],
+            'oauth_provider': user['oauth_provider'],
+            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+        }
+        token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        print(f'>>> OAuth success: user_id={user["id"]}, provider={provider}, token generated')
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'token': token,
+                'user': dict(user)
+            })),
+            'isBase64Encoded': False
+        }
+    except Exception as e:
+        print(f'>>> OAuth ERROR: {str(e)}')
+        import traceback
+        print(f'>>> Traceback: {traceback.format_exc()}')
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': f'OAuth error: {str(e)}'}),
+            'isBase64Encoded': False
+        }
 
 
 def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
@@ -3677,5 +3711,51 @@ def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         'statusCode': 400,
         'headers': headers,
         'body': json.dumps({'error': 'Invalid action'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    body = json.loads(event.get('body', '{}'))
+    username = body.get('username', 'admin')
+    new_password = body.get('password', 'admin123456')
+    
+    new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    
+    cur.execute("""
+        INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
+        VALUES (%s, %s, NOW(), NOW())
+        ON CONFLICT (username) 
+        DO UPDATE SET password_hash = %s, updated_at = NOW()
+    """, (username, new_hash, new_hash))
+    
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True,
+            'message': f'Admin "{username}" created/updated successfully',
+            'username': username,
+            'password': new_password,
+            'new_hash': new_hash
+        }),
         'isBase64Encoded': False
     }
