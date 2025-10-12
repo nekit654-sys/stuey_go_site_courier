@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PAYOUT_API_URL = 'https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a';
 
@@ -14,6 +15,8 @@ interface FormData {
 
 const FeedbackTab: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -23,6 +26,17 @@ const FeedbackTab: React.FC = () => {
     phone: '',
     screenshot: null
   });
+
+  useEffect(() => {
+    if (isAuthenticated && user && isModalOpen) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.full_name || '',
+        city: user.city || '',
+        phone: user.phone || ''
+      }));
+    }
+  }, [isAuthenticated, user, isModalOpen]);
 
   const handleTabClick = () => {
     // Воспроизводим звук клика с уменьшенной громкостью
@@ -100,6 +114,13 @@ const FeedbackTab: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isAuthenticated || !user) {
+      alert('Необходимо войти в систему для подачи заявки');
+      navigate('/auth');
+      handleCloseModal();
+      return;
+    }
+    
     if (!formData.fullName || !formData.city || !formData.phone) {
       alert('Пожалуйста, заполните все обязательные поля');
       return;
@@ -120,12 +141,16 @@ const FeedbackTab: React.FC = () => {
         reader.readAsDataURL(formData.screenshot!);
       });
 
+      const token = localStorage.getItem('auth_token');
+
       const response = await fetch(PAYOUT_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Auth-Token': token || '',
         },
         body: JSON.stringify({
+          courier_id: user.id,
           name: formData.fullName.trim(),
           phone: formData.phone.replace(/\D/g, ''),
           city: formData.city.trim(),
@@ -214,6 +239,29 @@ const FeedbackTab: React.FC = () => {
 
             {/* Содержимое */}
             <div className="p-6">
+              {!isAuthenticated && (
+                <div className="mb-4 bg-yellow-50 border-3 border-yellow-400 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <Icon name="AlertCircle" size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-black mb-2">Требуется авторизация</p>
+                      <p className="text-sm text-gray-700 mb-3">Для подачи заявки необходимо войти в систему через Яндекс</p>
+                      <button
+                        onClick={() => {
+                          navigate('/auth');
+                          handleCloseModal();
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg border-2 border-black transition-all"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Icon name="LogIn" size={16} />
+                          <span>Войти</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {isSuccess ? (
                 <div className="text-center py-8 animate-in zoom-in-50 duration-300">
                   <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black" style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}>
