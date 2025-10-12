@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Proxy</title>
+</head>
+<body>
+<script>
+// Простой прокси для обхода CORS
+const targetUrl = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
+
+// Получаем параметры из URL
+const params = new URLSearchParams(window.location.search);
+const route = params.get('route') || '';
+const method = params.get('_method') || 'GET';
+const bodyData = params.get('_body');
+
+// Отправляем запрос
+fetch(`${targetUrl}?route=${route}`, {
+    method: method,
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: bodyData ? decodeURIComponent(bodyData) : undefined
+})
+.then(res => res.json())
+.then(data => {
+    // Отправляем результат обратно в родительское окно
+    if (window.opener) {
+        window.opener.postMessage({ type: 'API_RESPONSE', data }, '*');
+        window.close();
+    } else {
+        document.body.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+    }
+})
+.catch(error => {
+    const errorData = { success: false, error: error.message };
+    if (window.opener) {
+        window.opener.postMessage({ type: 'API_RESPONSE', data: errorData }, '*');
+        window.close();
+    } else {
+        document.body.innerHTML = '<pre>Error: ' + error.message + '</pre>';
+    }
+});
+</script>
+</body>
+</html>

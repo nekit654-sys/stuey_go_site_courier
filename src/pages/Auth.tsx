@@ -71,6 +71,8 @@ export default function Auth() {
       
       const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
         },
