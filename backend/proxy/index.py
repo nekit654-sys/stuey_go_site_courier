@@ -39,6 +39,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         body_data = json.loads(event.get('body', '{}'))
         
+        print(f'>>> Proxy получил запрос: action={body_data.get("action")}, hasCode={bool(body_data.get("code"))}')
+        
         api_url = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth'
         
         response = requests.post(
@@ -46,6 +48,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             json=body_data,
             timeout=30
         )
+        
+        print(f'>>> API ответил: status={response.status_code}')
         
         return {
             'statusCode': response.status_code,
