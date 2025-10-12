@@ -3727,7 +3727,8 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
         }
     
     body = json.loads(event.get('body', '{}'))
-    new_password = body.get('password', 'admin654654')
+    username = body.get('username', 'admin')
+    new_password = body.get('password', 'admin123456')
     
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
@@ -3735,13 +3736,13 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
     cur = conn.cursor()
     
     cur.execute("""
-        UPDATE t_p25272970_courier_button_site.admins 
-        SET password_hash = %s, updated_at = NOW()
-        WHERE username IN ('nekit654', 'danil654')
-    """, (new_hash,))
+        INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
+        VALUES (%s, %s, NOW(), NOW())
+        ON CONFLICT (username) 
+        DO UPDATE SET password_hash = %s, updated_at = NOW()
+    """, (username, new_hash, new_hash))
     
     conn.commit()
-    affected_rows = cur.rowcount
     
     cur.close()
     conn.close()
@@ -3751,7 +3752,9 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
         'headers': headers,
         'body': json.dumps({
             'success': True,
-            'message': f'Passwords updated for {affected_rows} admins',
+            'message': f'Admin "{username}" created/updated successfully',
+            'username': username,
+            'password': new_password,
             'new_hash': new_hash
         }),
         'isBase64Encoded': False
