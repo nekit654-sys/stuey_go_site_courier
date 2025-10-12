@@ -758,8 +758,11 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             'isBase64Encoded': False
         }
     
-    body_data = json.loads(event.get('body', '{}'))
+    body_str = event.get('body', '{}')
+    print(f'>>> handle_auth body: {body_str[:200]}...')
+    body_data = json.loads(body_str)
     action = body_data.get('action', 'login')
+    print(f'>>> handle_auth action: "{action}"')
     
     if action == 'login':
         username = body_data.get('username', '')
