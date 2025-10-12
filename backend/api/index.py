@@ -810,13 +810,16 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         
         if user:
             password_hash = user[2]
+            print(f'>>> Found user: username={user[1]}, hash_prefix={password_hash[:10] if password_hash else "NONE"}')
             
             if password_hash.startswith('$2b$') or password_hash.startswith('$2a$'):
                 password_valid = bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+                print(f'>>> Bcrypt check result: {password_valid}')
             else:
                 md5_hash = hashlib.md5(password.encode()).hexdigest()
                 password_valid = (password_hash == md5_hash)
                 needs_migration = True
+                print(f'>>> MD5 check result: {password_valid}, needs_migration: {needs_migration}')
         
         if user and password_valid:
             if needs_migration:
@@ -857,13 +860,14 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 'isBase64Encoded': False
             }
         else:
+            print(f'>>> Login failed: user_exists={user is not None}, password_valid={password_valid}')
             cur.close()
             conn.close()
             
             return {
                 'statusCode': 401,
                 'headers': headers,
-                'body': json.dumps({'error': 'Неверный логин или пароль'}),
+                'body': json.dumps({'success': False, 'message': 'Неверный логин или пароль', 'error': 'Неверный логин или пароль'}),
                 'isBase64Encoded': False
             }
     
