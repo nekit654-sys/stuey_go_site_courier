@@ -59,6 +59,8 @@ def record_login_attempt(username: str):
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    route = query_params.get('route', '')
     
     headers = {
         'Content-Type': 'application/json',
@@ -80,8 +82,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    query_params = event.get('queryStringParameters') or {}
-    route = query_params.get('route', '')
     print(f'>>> Handler вызван: method={method}, route={route}, action={query_params.get("action", "")}')
     
     if route == 'referrals':
