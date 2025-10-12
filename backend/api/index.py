@@ -3176,10 +3176,11 @@ def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
         
         admin_id, admin_username, password_hash = admin
         
-        # Проверяем пароль через SHA256
-        password_sha256 = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        # Проверяем пароль через bcrypt
+        password_bytes = password.encode('utf-8')
+        password_hash_bytes = password_hash.encode('utf-8')
         
-        if password_hash != password_sha256:
+        if not bcrypt.checkpw(password_bytes, password_hash_bytes):
             cur.close()
             conn.close()
             return {
@@ -3335,8 +3336,10 @@ def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
                 'isBase64Encoded': False
             }
         
-        # Хешируем пароль через SHA256
-        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        # Хешируем пароль через bcrypt
+        password_bytes = password.encode('utf-8')
+        salt = bcrypt.gensalt()
+        password_hash = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
         
         # Добавляем нового админа
         cur.execute("""
