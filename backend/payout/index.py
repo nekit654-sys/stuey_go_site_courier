@@ -1,12 +1,23 @@
 import json
 import os
 import psycopg2
-from typing import Dict, Any
+import jwt
+from typing import Dict, Any, Optional
+
+def verify_token(token: str) -> Optional[Dict[str, Any]]:
+    try:
+        jwt_secret = os.environ.get('JWT_SECRET', 'your-secret-key-here')
+        payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Handle payout requests from couriers (save, list, update status)
-    Args: event - dict with httpMethod, body (name, phone, city, attachment_data)
+    Args: event - dict with httpMethod, body (name, phone, city, attachment_data, courier_id)
           context - object with attributes: request_id, function_name
     Returns: HTTP response dict with success status
     '''
@@ -178,7 +189,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     try:
+        token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        
+        user_payload = None
+        if token:
+            user_payload = verify_token(token)
+        
         body_data = json.loads(event.get('body', '{}'))
+        
+        courier_id = body_data.get('courier_id')
+        if user_payload:
+            courier_id = user_payload.get('user_id')
         
         name = body_data.get('name', '').strip()
         phone = body_data.get('phone', '').strip()
@@ -229,11 +250,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor()
         
-        cur.execute("""
-            INSERT INTO t_p25272970_courier_button_site.payout_requests 
-            (name, phone, city, attachment_data, status, created_at, updated_at) 
-            VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
-        """, (name, phone, city, attachment_data))
+        if courier_id:
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.payout_requests 
+                (name, phone, city, attachment_data, status, user_id, created_at, updated_at) 
+                VALUES (%s, %s, %s, %s, 'new', %s, NOW(), NOW())
+            """, (name, phone, city, attachment_data, courier_id))
+        else:
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.payout_requests 
+                (name, phone, city, attachment_data, status, created_at, updated_at) 
+                VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
+            """, (name, phone, city, attachment_data))
         
         conn.commit()
         cur.close()
