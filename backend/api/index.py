@@ -102,6 +102,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_withdrawal(event, headers)
     elif route == 'game':
         return handle_game(event, headers)
+    elif route == 'admin':
+        return handle_admin(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -3155,6 +3157,364 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         'body': json.dumps({'error': 'Method not allowed'}),
         'isBase64Encoded': False
     }
+
+
+def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Обработка маршрута admin для управления администраторами
+    '''
+    method = event.get('httpMethod', 'POST')
+    
+    if method != 'POST':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    body_data = json.loads(event.get('body', '{}'))
+    action = body_data.get('action', '')
+    
+    if action == 'login':
+        # Авторизация админа
+        username = body_data.get('username', '')
+        password = body_data.get('password', '')
+        
+        if not username or not password:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Логин и пароль обязательны'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        if not check_rate_limit(username):
+            return {
+                'statusCode': 429,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Слишком много попыток входа. Попробуйте через 15 минут'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        record_login_attempt(username)
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, username, password_hash FROM t_p25272970_courier_button_site.admins 
+            WHERE username = %s
+        """, (username,))
+        
+        admin = cur.fetchone()
+        
+        if not admin:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Неверный логин или пароль'}),
+                'isBase64Encoded': False
+            }
+        
+        admin_id, admin_username, password_hash = admin
+        
+        # Проверяем пароль через SHA256
+        password_sha256 = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+        if password_hash != password_sha256:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Неверный логин или пароль'}),
+                'isBase64Encoded': False
+            }
+        
+        # Создаём токен
+        payload = {
+            'user_id': admin_id,
+            'username': admin_username,
+            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+        }
+        token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        # Обновляем время последнего входа
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.admins 
+            SET last_login = NOW() 
+            WHERE id = %s
+        """, (admin_id,))
+        conn.commit()
+        
+        cur.close()
+        conn.close()
+        
+        # Очищаем историю попыток входа
+        login_attempts[username] = []
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'token': token,
+                'username': admin_username
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'get_admins':
+        # Получение списка всех администраторов
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, username, created_at, last_login 
+            FROM t_p25272970_courier_button_site.admins 
+            ORDER BY created_at DESC
+        """)
+        
+        admins_data = cur.fetchall()
+        
+        admins = []
+        for admin in admins_data:
+            admins.append({
+                'id': admin[0],
+                'username': admin[1],
+                'created_at': admin[2].isoformat() if admin[2] else None,
+                'last_login': admin[3].isoformat() if admin[3] else None
+            })
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'admins': admins
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'add_admin':
+        # Добавление нового администратора
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                'isBase64Encoded': False
+            }
+        
+        username = body_data.get('username', '').strip()
+        password = body_data.get('password', '')
+        
+        if not username or not password:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Логин и пароль обязательны'}),
+                'isBase64Encoded': False
+            }
+        
+        if len(password) < 8:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Пароль должен быть минимум 8 символов'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        # Проверяем, не существует ли уже такой пользователь
+        cur.execute("""
+            SELECT id FROM t_p25272970_courier_button_site.admins 
+            WHERE username = %s
+        """, (username,))
+        
+        existing = cur.fetchone()
+        
+        if existing:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Пользователь с таким логином уже существует'}),
+                'isBase64Encoded': False
+            }
+        
+        # Хешируем пароль через SHA256
+        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+        # Добавляем нового админа
+        cur.execute("""
+            INSERT INTO t_p25272970_courier_button_site.admins 
+            (username, password_hash, created_at, updated_at) 
+            VALUES (%s, %s, NOW(), NOW())
+        """, (username, password_hash))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Администратор успешно добавлен'
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'delete_admin':
+        # Удаление администратора
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                'isBase64Encoded': False
+            }
+        
+        admin_id = body_data.get('adminId')
+        
+        if not admin_id:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'ID админа обязателен'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        # Проверяем количество администраторов
+        cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
+        admin_count = cur.fetchone()[0]
+        
+        if admin_count <= 1:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Нельзя удалить единственного администратора'}),
+                'isBase64Encoded': False
+            }
+        
+        # Удаляем администратора
+        cur.execute("""
+            DELETE FROM t_p25272970_courier_button_site.admins 
+            WHERE id = %s
+        """, (admin_id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Администратор успешно удалён'
+            }),
+            'isBase64Encoded': False
+        }
+    
+    elif action == 'change_password':
+        # Изменение пароля (заглушка)
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        token_data = verify_token(auth_token)
+        if not token_data['valid']:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                'isBase64Encoded': False
+            }
+        
+        # Заглушка - просто возвращаем успех
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Функция смены пароля будет реализована позже'
+            }),
+            'isBase64Encoded': False
+        }
+    
+    else:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid action: ' + str(action)}),
+            'isBase64Encoded': False
+        }
 
 
 def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:

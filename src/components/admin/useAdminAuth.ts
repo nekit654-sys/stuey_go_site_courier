@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ADMIN_PANEL_URL } from './constants';
+import { API_URL } from './constants';
 import { LoginCredentials, PasswordForm, AdminForm, AdminUser } from './types';
 
 export function useAdminAuth() {
@@ -40,7 +40,7 @@ export function useAdminAuth() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(ADMIN_PANEL_URL, {
+      const response = await fetch(`${API_URL}?route=admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export function useAdminAuth() {
   const loadAdmins = async (token?: string) => {
     const tokenToUse = token || authToken;
     try {
-      const response = await fetch(ADMIN_PANEL_URL, {
+      const response = await fetch(`${API_URL}?route=admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ export function useAdminAuth() {
     }
 
     try {
-      const response = await fetch(ADMIN_PANEL_URL, {
+      const response = await fetch(`${API_URL}?route=admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ export function useAdminAuth() {
   const addAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(ADMIN_PANEL_URL, {
+      const response = await fetch(`${API_URL}?route=admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ export function useAdminAuth() {
   const deleteAdmin = async (adminId: number) => {
     if (confirm('Удалить администратора?')) {
       try {
-        const response = await fetch(ADMIN_PANEL_URL, {
+        const response = await fetch(`${API_URL}?route=admin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
