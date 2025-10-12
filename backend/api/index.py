@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 from decimal import Decimal
 
-JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
@@ -109,6 +109,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_admin(event, headers)
     elif route == 'reset-admin-password':
         return handle_reset_admin_password(event, headers)
+    elif route == 'startup-payout':
+        return handle_startup_payout(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -3726,9 +3728,44 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
             'isBase64Encoded': False
         }
     
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Требуется авторизация администратора'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+            'isBase64Encoded': False
+        }
+    
     body = json.loads(event.get('body', '{}'))
-    username = body.get('username', 'admin')
-    new_password = body.get('password', 'admin123456')
+    username = body.get('username')
+    new_password = body.get('password')
+    
+    if not username or not new_password:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'Логин и пароль обязательны'}),
+            'isBase64Encoded': False
+        }
+    
+    if len(new_password) < 8:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'Пароль должен быть минимум 8 символов'}),
+            'isBase64Encoded': False
+        }
     
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
@@ -3736,14 +3773,22 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
     cur = conn.cursor()
     
     cur.execute("""
-        INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
-        VALUES (%s, %s, NOW(), NOW())
-        ON CONFLICT (username) 
-        DO UPDATE SET password_hash = %s, updated_at = NOW()
-    """, (username, new_hash, new_hash))
+        UPDATE t_p25272970_courier_button_site.admins
+        SET password_hash = %s, updated_at = NOW()
+        WHERE username = %s
+    """, (new_hash, username))
+    
+    if cur.rowcount == 0:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'error': 'Администратор не найден'}),
+            'isBase64Encoded': False
+        }
     
     conn.commit()
-    
     cur.close()
     conn.close()
     
@@ -3752,10 +3797,276 @@ def handle_reset_admin_password(event: Dict[str, Any], headers: Dict[str, str]) 
         'headers': headers,
         'body': json.dumps({
             'success': True,
-            'message': f'Admin "{username}" created/updated successfully',
-            'username': username,
-            'password': new_password,
-            'new_hash': new_hash
+            'message': f'Пароль администратора "{username}" успешно изменён'
         }),
+        'isBase64Encoded': False
+    }
+
+
+def handle_startup_payout(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', '')
+    
+    if method == 'POST':
+        body = json.loads(event.get('body', '{}'))
+        
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        
+        courier_id = int(user_id_header) if user_id_header else None
+        
+        if action == 'create':
+            name = body.get('name', '')
+            phone = body.get('phone', '')
+            city = body.get('city', '')
+            attachment_data = body.get('attachment_data', '')
+            
+            if not name.strip() or not phone.strip() or not city.strip():
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Все поля обязательны для заполнения'}),
+                    'isBase64Encoded': False
+                }
+            
+            phone_digits = ''.join(filter(str.isdigit, phone))
+            if len(phone_digits) < 10:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Неверный формат телефона'}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            if courier_id:
+                cur.execute("""
+                    SELECT COUNT(*) as count 
+                    FROM t_p25272970_courier_button_site.startup_payout_requests 
+                    WHERE courier_id = %s AND status IN ('pending', 'approved')
+                """, (courier_id,))
+                existing = cur.fetchone()
+                
+                if existing['count'] > 0:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 400,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'У вас уже есть активная заявка на стартовую выплату'}),
+                        'isBase64Encoded': False
+                    }
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.startup_payout_requests 
+                (courier_id, name, phone, city, attachment_data, status, created_at, updated_at) 
+                VALUES (%s, %s, %s, %s, %s, 'pending', NOW(), NOW())
+                RETURNING id
+            """, (courier_id, name, phone, city, attachment_data))
+            
+            result = cur.fetchone()
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Заявка на стартовую выплату успешно отправлена',
+                    'request_id': result['id']
+                }),
+                'isBase64Encoded': False
+            }
+        
+        elif action == 'update_status':
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация администратора'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                    'isBase64Encoded': False
+                }
+            
+            request_id = body.get('request_id')
+            new_status = body.get('status')
+            admin_comment = body.get('admin_comment', '')
+            
+            if not request_id or not new_status:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'request_id и status обязательны'}),
+                    'isBase64Encoded': False
+                }
+            
+            if new_status not in ['pending', 'approved', 'rejected', 'paid']:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Неверный статус'}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cur.execute("""
+                SELECT courier_id, amount, status
+                FROM t_p25272970_courier_button_site.startup_payout_requests
+                WHERE id = %s
+            """, (request_id,))
+            
+            request_data = cur.fetchone()
+            
+            if not request_data:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 404,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Заявка не найдена'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.startup_payout_requests
+                SET status = %s, admin_comment = %s, processed_at = NOW(), updated_at = NOW()
+                WHERE id = %s
+            """, (new_status, admin_comment, request_id))
+            
+            if new_status == 'paid' and request_data['courier_id']:
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET startup_bonus_paid = TRUE, 
+                        startup_bonus_amount = startup_bonus_amount + %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                """, (request_data['amount'], request_data['courier_id']))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Статус заявки обновлён'}),
+                'isBase64Encoded': False
+            }
+    
+    elif method == 'GET':
+        if action == 'my_requests':
+            user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+            
+            if not user_id_header:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Unauthorized'}),
+                    'isBase64Encoded': False
+                }
+            
+            courier_id = int(user_id_header)
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cur.execute("""
+                SELECT id, name, phone, city, amount, status, admin_comment, created_at, processed_at
+                FROM t_p25272970_courier_button_site.startup_payout_requests
+                WHERE courier_id = %s
+                ORDER BY created_at DESC
+            """, (courier_id,))
+            
+            requests = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'requests': convert_decimals(requests)}),
+                'isBase64Encoded': False
+            }
+        
+        elif action == 'list':
+            auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+            
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Требуется авторизация администратора'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cur.execute("""
+                SELECT 
+                    spr.id,
+                    spr.courier_id,
+                    spr.name,
+                    spr.phone,
+                    spr.city,
+                    spr.attachment_data,
+                    spr.amount,
+                    spr.status,
+                    spr.admin_comment,
+                    spr.created_at,
+                    spr.processed_at,
+                    u.email as courier_email,
+                    u.referral_code as courier_referral_code
+                FROM t_p25272970_courier_button_site.startup_payout_requests spr
+                LEFT JOIN t_p25272970_courier_button_site.users u ON spr.courier_id = u.id
+                ORDER BY 
+                    CASE 
+                        WHEN spr.status = 'pending' THEN 1
+                        WHEN spr.status = 'approved' THEN 2
+                        WHEN spr.status = 'paid' THEN 3
+                        WHEN spr.status = 'rejected' THEN 4
+                    END,
+                    spr.created_at DESC
+            """)
+            
+            requests = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'requests': convert_decimals(requests)}),
+                'isBase64Encoded': False
+            }
+    
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'error': 'Method not allowed'}),
         'isBase64Encoded': False
     }

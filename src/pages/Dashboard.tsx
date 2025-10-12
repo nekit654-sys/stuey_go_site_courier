@@ -10,6 +10,7 @@ import ProfileSetupModal from '@/components/ProfileSetupModal';
 import WithdrawalRequestForm from '@/components/WithdrawalRequestForm';
 import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
 import GameTab from '@/components/GameTab';
+import StartupPayoutRequests from '@/components/StartupPayoutRequests';
 
 interface Stats {
   total_referrals: number;
@@ -50,7 +51,7 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'startup' | 'game' | 'profile'>('stats');
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
 
@@ -169,7 +170,7 @@ export default function Dashboard() {
     fetchStats();
   };
 
-  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile') => {
+  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'startup' | 'game' | 'profile') => {
     setActiveTab(tab);
     // Обновляем данные при переключении вкладок
     if (tab === 'stats' || tab === 'referrals') {
@@ -260,7 +261,7 @@ export default function Dashboard() {
           Скопировать реферальную ссылку
         </Button>
 
-        <div className="grid grid-cols-5 gap-2 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
             onClick={() => handleTabChange('stats')}
@@ -284,6 +285,14 @@ export default function Dashboard() {
           >
             <Icon name="Wallet" className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Выплаты</span>
+          </Button>
+          <Button
+            variant={activeTab === 'startup' ? 'default' : 'outline'}
+            onClick={() => handleTabChange('startup')}
+            className={activeTab === 'startup' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
+          >
+            <Icon name="Gift" className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">3000₽</span>
           </Button>
           <Button
             variant={activeTab === 'game' ? 'default' : 'outline'}
@@ -415,6 +424,10 @@ export default function Dashboard() {
               loading={loadingWithdrawals}
             />
           </div>
+        )}
+
+        {activeTab === 'startup' && (
+          <StartupPayoutRequests />
         )}
 
         {activeTab === 'game' && (

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://functions.yandexcloud.net/d4e57hodi216da3qccnn';
+const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
 interface PayoutFormData {
   name: string;
@@ -11,6 +13,9 @@ interface PayoutFormData {
 }
 
 export default function PayoutForm() {
+  const { isAuthenticated, user, token } = useAuth();
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState<PayoutFormData>({
     name: '',
     phone: '',
@@ -19,6 +24,26 @@ export default function PayoutForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setMessage({ 
+        type: 'error', 
+        text: 'Для подачи заявки необходимо авторизоваться. Перенаправляем...' 
+      });
+      setTimeout(() => navigate('/auth'), 2000);
+      return;
+    }
+    
+    if (user) {
+      setFormData({
+        name: user.full_name || '',
+        phone: user.phone || '',
+        city: user.city || '',
+        image: null,
+      });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,13 +86,14 @@ export default function PayoutForm() {
         reader.readAsDataURL(formData.image!);
       });
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}?route=startup-payout&action=create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-Id': user?.id?.toString() || '',
+          'X-Auth-Token': token || '',
         },
         body: JSON.stringify({
-          action: 'payout',
           name: formData.name.trim(),
           phone: formData.phone.replace(/\D/g, ''),
           city: formData.city.trim(),
@@ -78,8 +104,9 @@ export default function PayoutForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setMessage({ type: 'success', text: 'Заявка успешно отправлена!' });
-        setFormData({ name: '', phone: '', city: '', image: null });
+        setMessage({ type: 'success', text: 'Заявка на стартовую выплату 3000₽ успешно отправлена! Ожидайте рассмотрения.' });
+        setFormData({ ...formData, image: null });
+        setTimeout(() => navigate('/dashboard'), 3000);
       } else {
         setMessage({ type: 'error', text: data.error || 'Ошибка при отправке заявки' });
       }
@@ -91,10 +118,29 @@ export default function PayoutForm() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 flex items-center justify-center">
+        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Требуется авторизация</h2>
+          <p className="text-gray-600 text-center mb-6">
+            Для подачи заявки на стартовую выплату необходимо войти в систему
+          </p>
+          {message && (
+            <div className="p-4 rounded-lg bg-yellow-50 text-yellow-800 border border-yellow-200 mb-4 text-center">
+              {message.text}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Заявка на выплату</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Заявка на стартовую выплату</h2>
+        <p className="text-center text-gray-600 mb-6">Получите <span className="font-bold text-green-600">3000₽</span> за первые 30 заказов!</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
