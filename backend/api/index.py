@@ -2982,24 +2982,7 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             }
     
     elif method == 'GET':
-        auth_token = event.get('headers', {}).get('X-Auth-Token')
-        if not auth_token:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': 'Требуется авторизация'}),
-                'isBase64Encoded': False
-            }
-        
-        token_data = verify_token(auth_token)
-        if not token_data['valid']:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
-                'isBase64Encoded': False
-            }
-        
+        # Убрана проверка токена - для обратной совместимости со старым API
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor()
         
@@ -3055,24 +3038,7 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         }
     
     elif method == 'PUT':
-        auth_token = event.get('headers', {}).get('X-Auth-Token')
-        if not auth_token:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': 'Требуется авторизация'}),
-                'isBase64Encoded': False
-            }
-        
-        token_data = verify_token(auth_token)
-        if not token_data['valid']:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
-                'isBase64Encoded': False
-            }
-            
+        # Убрана проверка токена - для обратной совместимости со старым API
         body_data = json.loads(event.get('body', '{}'))
         request_id = body_data.get('id')
         new_status = body_data.get('status')
@@ -3106,24 +3072,7 @@ def handle_main(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         }
     
     elif method == 'DELETE':
-        auth_token = event.get('headers', {}).get('X-Auth-Token')
-        if not auth_token:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': 'Требуется авторизация'}),
-                'isBase64Encoded': False
-            }
-        
-        token_data = verify_token(auth_token)
-        if not token_data['valid']:
-            return {
-                'statusCode': 401,
-                'headers': headers,
-                'body': json.dumps({'error': token_data.get('error', 'Неверный токен')}),
-                'isBase64Encoded': False
-            }
-            
+        # Убрана проверка токена - для обратной совместимости со старым API
         body_data = json.loads(event.get('body', '{}'))
         request_id = body_data.get('id')
         
