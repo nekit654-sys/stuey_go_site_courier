@@ -60,29 +60,20 @@ export default function Auth() {
       const isProd = window.location.hostname === 'stuey-go.ru';
       const redirectUri = isProd ? 'https://stuey-go.ru/auth' : `${window.location.origin}/auth`;
       
-      const requestBody = {
-        action: provider,
-        code,
-        redirect_uri: redirectUri,
-        referral_code: referralCode,
-      };
-      
-      console.log('[Auth] OAuth запрос:', { provider, redirectUri, hasCode: !!code, hasRef: !!referralCode });
-      
-      const apiUrl = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth';
-      
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${API_URL}?route=auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          action: provider,
+          code,
+          redirect_uri: redirectUri,
+          referral_code: referralCode,
+        }),
       });
 
-      console.log('[Auth] Статус ответа:', response.status);
-      
       const data = await response.json();
-      console.log('[Auth] Данные:', data);
 
       if (data.success) {
         login(data.token, data.user);
@@ -90,14 +81,11 @@ export default function Auth() {
         toast.success('Успешный вход!');
         navigate('/dashboard');
       } else {
-        const errorMsg = data.error || 'Ошибка авторизации';
-        console.error('[Auth] Ошибка:', errorMsg);
-        toast.error(errorMsg, { duration: 5000 });
+        toast.error(data.error || 'Ошибка авторизации');
       }
-    } catch (error: any) {
-      const errorMsg = error?.message || String(error);
-      console.error('[Auth] Exception:', errorMsg);
-      toast.error(`Ошибка: ${errorMsg}`, { duration: 5000 });
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      toast.error('Произошла ошибка при авторизации');
     } finally {
       setLoading(false);
     }

@@ -19,7 +19,6 @@ import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
-import ResetAdminPassword from "./pages/ResetAdminPassword";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +53,7 @@ const MaintenanceWrapper = () => {
     }
   }, []);
 
-  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard' || location.pathname === '/reset-admin-password';
+  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard';
 
   if (isMaintenanceMode && !isAdminRoute) {
     return <Maintenance onUnlock={() => setIsMaintenanceMode(false)} />;
@@ -72,7 +71,6 @@ const MaintenanceWrapper = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
