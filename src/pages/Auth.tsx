@@ -69,9 +69,9 @@ export default function Auth() {
       
       console.log('[Auth] OAuth запрос:', { provider, redirectUri, hasCode: !!code, hasRef: !!referralCode });
       
-      const proxyUrl = 'https://functions.poehali.dev/81ff3563-33bf-443d-ad8e-e4ac8b1a59b1';
+      const apiUrl = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth';
       
-      const response = await fetch(proxyUrl, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
