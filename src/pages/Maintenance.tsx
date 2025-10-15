@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
@@ -17,7 +16,15 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   const [isChecking, setIsChecking] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showSupportMenu, setShowSupportMenu] = useState(false);
-  const [isPulsing, setIsPulsing] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -43,15 +50,6 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
     return () => clearInterval(timer);
   }, [onUnlock]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsPulsing(true);
-      setTimeout(() => setIsPulsing(false), 2000);
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -154,32 +152,166 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"></div>
-      
-      <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-300/30 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-10 right-10 w-40 h-40 bg-pink-400/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-orange-300/30 rounded-full blur-2xl animate-pulse delay-500"></div>
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] flex items-center justify-center p-4 relative overflow-hidden">
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2), 0 0 60px rgba(168, 85, 247, 0.1); }
+          50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6), 0 0 80px rgba(168, 85, 247, 0.4), 0 0 120px rgba(168, 85, 247, 0.2); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        .glow-card {
+          animation: glow 3s ease-in-out infinite;
+        }
+        .float-element {
+          animation: float 6s ease-in-out infinite;
+        }
+        .shimmer {
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+          background-size: 1000px 100%;
+          animation: shimmer 3s infinite;
+        }
+        .gradient-text {
+          background: linear-gradient(90deg, #a855f7, #ec4899, #f59e0b, #a855f7);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shimmer 3s linear infinite;
+        }
+      `}</style>
 
-      <div className="fixed bottom-6 right-6 z-50">
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(168, 85, 247, 0.3), transparent 50%)`
+        }}
+      />
+
+      <div className="absolute top-20 left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-2 h-2 bg-white rounded-full opacity-20"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animation: `float ${5 + Math.random() * 10}s ease-in-out infinite`,
+            animationDelay: `${Math.random() * 5}s`
+          }}
+        />
+      ))}
+
+      <div className="relative z-10 w-full max-w-4xl">
+        <div className="text-center mb-12 float-element">
+          <h1 className="text-7xl md:text-8xl font-black mb-4 gradient-text">
+            ПОЕХАЛИ! 🚀
+          </h1>
+          <p className="text-2xl text-purple-200 font-light tracking-wide">
+            Запускаем что-то невероятное
+          </p>
+        </div>
+
+        <div className="glow-card bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 mb-8 relative overflow-hidden">
+          <div className="absolute inset-0 shimmer pointer-events-none"></div>
+          
+          <div className="relative z-10">
+            <div className="flex justify-center gap-4 mb-8">
+              {Object.entries(timeLeft).map(([unit, value], index) => (
+                <div key={unit} className="flex-1 max-w-[120px]" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:scale-105 transition-transform duration-300">
+                    <div className="text-5xl md:text-6xl font-black text-white mb-2 font-mono tracking-tight">
+                      {String(value).padStart(2, '0')}
+                    </div>
+                    <div className="text-sm text-purple-200 uppercase tracking-widest">
+                      {unit === 'days' ? 'Дней' : unit === 'hours' ? 'Часов' : unit === 'minutes' ? 'Минут' : 'Секунд'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center space-y-4">
+              <p className="text-xl text-white/90">
+                <span className="inline-block mr-2">⚡</span>
+                <span className="font-semibold">Готовим для вас лучший сервис доставки</span>
+              </p>
+              <p className="text-purple-200/80">
+                Скоро здесь будет что-то грандиозное
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mb-8">
+          <button
+            onClick={() => setShowPasswordInput(!showPasswordInput)}
+            className="text-purple-300 hover:text-purple-100 transition-colors text-sm tracking-wider hover:scale-105 transform duration-200"
+          >
+            {showPasswordInput ? '▲ Скрыть доступ' : '▼ Служебный вход'}
+          </button>
+        </div>
+
+        {showPasswordInput && (
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 space-y-4 float-element">
+            <Input
+              type="text"
+              placeholder="Логин"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:ring-purple-500 focus:border-purple-500"
+            />
+            <Input
+              type="password"
+              placeholder="Пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:ring-purple-500 focus:border-purple-500"
+            />
+            <Button
+              onClick={checkPassword}
+              disabled={isChecking}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
+            >
+              {isChecking ? 'Проверка...' : 'Войти'}
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-8 text-center">
+          <div id="rad_upd" className="inline-block rounded-2xl overflow-hidden border border-white/10 shadow-2xl"></div>
+        </div>
+      </div>
+
+      <div className="fixed bottom-8 right-8 z-50">
         {showSupportMenu && (
           <div className="absolute bottom-20 right-0 flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
             <button
               onClick={handleTelegramClick}
-              className="w-14 h-14 bg-blue-500 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] flex items-center justify-center transition-all duration-150 group"
+              className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-2 border-white/30 shadow-[0_8px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[4px] flex items-center justify-center transition-all duration-200 group"
               title="Написать в Telegram"
             >
-              <svg viewBox="0 0 24 24" width="26" height="26" className="text-white group-hover:scale-110 transition-transform duration-200" fill="currentColor">
+              <svg viewBox="0 0 24 24" width="28" height="28" className="text-white group-hover:scale-110 transition-transform duration-200" fill="currentColor">
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
               </svg>
             </button>
 
             <button
               onClick={handleWhatsAppClick}
-              className="w-14 h-14 bg-green-500 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] flex items-center justify-center transition-all duration-150 group"
+              className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full border-2 border-white/30 shadow-[0_8px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[4px] flex items-center justify-center transition-all duration-200 group"
               title="Написать в WhatsApp"
             >
-              <svg viewBox="0 0 24 24" width="26" height="26" className="text-white group-hover:scale-110 transition-transform duration-200" fill="currentColor">
+              <svg viewBox="0 0 24 24" width="28" height="28" className="text-white group-hover:scale-110 transition-transform duration-200" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
               </svg>
             </button>
@@ -188,191 +320,12 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
         <button
           onClick={() => setShowSupportMenu(!showSupportMenu)}
-          className={`w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] flex items-center justify-center transition-all duration-150 group ${
-            isPulsing ? 'animate-pulse scale-110' : 'scale-100'
+          className={`w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full border-2 border-white/30 shadow-[0_10px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_6px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[4px] flex items-center justify-center transition-all duration-200 group ${
+            showSupportMenu ? 'rotate-45' : ''
           }`}
-          title="Поддержка"
         >
-          <div className={`absolute inset-0 rounded-full border-4 border-purple-300 ${
-            isPulsing ? 'animate-ping opacity-75' : 'opacity-0'
-          }`} />
-          <div className={`absolute inset-0 rounded-full border-2 border-pink-200 ${
-            isPulsing ? 'animate-ping opacity-50' : 'opacity-0'
-          } animation-delay-150`} />
-          
-          <Icon 
-            name={showSupportMenu ? "X" : "HeadphonesIcon"} 
-            size={28} 
-            className="text-white group-hover:scale-110 transition-transform duration-200"
-          />
+          <Icon name={showSupportMenu ? "X" : "MessageCircle"} size={32} className="text-white group-hover:scale-110 transition-transform duration-200" />
         </button>
-      </div>
-
-      <div className="max-w-4xl w-full relative z-10">
-        <Card className="bg-white/95 backdrop-blur-xl border-4 border-black shadow-[0_16px_0_0_rgba(0,0,0,0.8)] hover:shadow-[0_12px_0_0_rgba(0,0,0,0.8)] hover:translate-y-[4px] transition-all duration-300 overflow-hidden">
-          <div className="relative h-80 md:h-96 overflow-hidden bg-gradient-to-b from-blue-100 to-blue-50 border-b-4 border-black">
-            <img 
-              src="https://cdn.poehali.dev/files/b3334dd7-7607-4394-bb8a-e9c9a53eb67d.jpg" 
-              alt="Курьер корги на велосипеде"
-              className="w-full h-full object-cover object-top"
-            />
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
-          </div>
-
-          <div className="p-8 md:p-12 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-2xl border-4 border-black shadow-[0_8px_0_0_rgba(0,0,0,1)] transform -rotate-6 hover:rotate-0 transition-transform duration-300">
-                <Icon name="Wrench" size={48} className="text-black" />
-              </div>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,0.1)] px-2">
-              Готовим что-то крутое! 🚀
-            </h1>
-
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-6 font-bold px-2">
-              Скоро вернёмся с обновлениями
-            </p>
-
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-4 border-purple-400 shadow-[0_6px_0_0_rgba(168,85,247,0.4)]">
-                <div className="flex items-start gap-4">
-                  <div className="bg-purple-500 p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                    <Icon name="Timer" className="text-white" size={24} />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="text-gray-800 font-semibold leading-relaxed mb-4 text-sm sm:text-base">
-                      Добавляем новые фичи! Совсем скоро всё будет готово 🎉
-                    </p>
-                    <div className="bg-white rounded-xl p-3 sm:p-4 border-3 border-purple-300 shadow-[0_4px_0_0_rgba(168,85,247,0.2)]">
-                      <div className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 font-bold">Запуск через:</div>
-                      <div className="grid grid-cols-4 gap-1 sm:gap-2">
-                        <div className="bg-gradient-to-br from-yellow-400 to-orange-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.days}</div>
-                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">дн</div>
-                        </div>
-                        <div className="bg-gradient-to-br from-orange-400 to-red-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.hours}</div>
-                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">ч</div>
-                        </div>
-                        <div className="bg-gradient-to-br from-red-400 to-pink-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.minutes}</div>
-                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">м</div>
-                        </div>
-                        <div className="bg-gradient-to-br from-pink-400 to-purple-400 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-                          <div className="text-lg sm:text-2xl md:text-3xl font-black text-black leading-none">{timeLeft.seconds}</div>
-                          <div className="text-[8px] sm:text-xs font-bold text-black/70 mt-0.5">с</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="max-w-2xl mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-4 border-purple-400 shadow-[0_6px_0_0_rgba(168,85,247,0.4)]">
-                <div className="flex items-center gap-2 mb-4 justify-center">
-                  <div className="bg-purple-500 p-2 rounded-lg border-3 border-black">
-                    <Icon name="Radio" size={20} className="text-white" />
-                  </div>
-                  <h3 className="font-black text-gray-900 text-lg">Послушайте музыку</h3>
-                </div>
-                <div id="radiobells_container" className="flex justify-center">
-                  <a href="https://www.radiobells.com/" id="RP_link" className="text-xs text-gray-500 hover:text-gray-700 font-semibold">
-                    Онлайн радио
-                  </a>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-6 border-4 border-green-400 shadow-[0_6px_0_0_rgba(34,197,94,0.4)]">
-                <div className="flex items-center gap-2 mb-4 justify-center">
-                  <div className="bg-green-500 p-2 rounded-lg border-3 border-black">
-                    <Icon name="Gamepad2" size={20} className="text-white" />
-                  </div>
-                  <h3 className="font-black text-gray-900 text-lg">Или сыграйте в игру</h3>
-                </div>
-                <div className="flex justify-center">
-                  <Button
-                    onClick={() => window.open('/game.html', '_blank')}
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-black text-lg border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all"
-                  >
-                    <Icon name="Play" size={18} className="mr-2" />
-                    Играть
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-
-
-            {!showPasswordInput ? (
-              <button
-                onClick={() => setShowPasswordInput(true)}
-                className="text-sm text-gray-500 hover:text-gray-700 font-bold transition-colors px-4 py-2 rounded-lg hover:bg-gray-100"
-              >
-                Вход для администратора
-              </button>
-            ) : (
-              <div className="max-w-md mx-auto mt-6">
-                <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 border-4 border-gray-400 shadow-[0_6px_0_0_rgba(0,0,0,0.3)]">
-                  <div className="flex items-center gap-2 mb-4 justify-center">
-                    <div className="bg-gray-700 p-2 rounded-lg border-3 border-black">
-                      <Icon name="Lock" size={18} className="text-white" />
-                    </div>
-                    <p className="text-sm font-black text-gray-900">Вход для администратора</p>
-                  </div>
-                  <div className="space-y-3">
-                    <Input
-                      type="text"
-                      placeholder="Логин"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="w-full border-3 border-gray-400 rounded-xl font-bold shadow-[0_4px_0_0_rgba(0,0,0,0.1)] focus:ring-4 focus:ring-blue-500"
-                      disabled={isChecking}
-                    />
-                    <div className="flex gap-2">
-                      <Input
-                        type="password"
-                        placeholder="Пароль"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="flex-1 border-3 border-gray-400 rounded-xl font-bold shadow-[0_4px_0_0_rgba(0,0,0,0.1)] focus:ring-4 focus:ring-blue-500"
-                        disabled={isChecking}
-                      />
-                      <Button 
-                        onClick={checkPassword}
-                        disabled={isChecking}
-                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all px-6"
-                      >
-                        {isChecking ? (
-                          <Icon name="Loader2" className="animate-spin" size={20} />
-                        ) : (
-                          <Icon name="ArrowRight" size={20} />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 py-6 px-6 border-t-4 border-black">
-            <p className="text-center text-black font-black text-lg flex items-center justify-center gap-2">
-              <Icon name="Heart" size={20} className="fill-black" />
-              Спасибо за ваше терпение!
-            </p>
-          </div>
-        </Card>
-
-        <div className="mt-6 text-center">
-          <p className="text-white font-bold text-lg drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]">
-            Есть вопросы? Напишите нам через кнопку поддержки! 👉
-          </p>
-        </div>
       </div>
     </div>
   );
