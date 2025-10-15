@@ -1,4 +1,5 @@
 {
+  "admin-finances": "https://functions.poehali.dev/034c46b8-1c81-490b-95eb-6348433770a8",
   "generate-hash": "https://functions.poehali.dev/367a9d53-4bd8-4e2c-94b2-0b1d114df77a",
   "proxy": "https://functions.poehali.dev/81ff3563-33bf-443d-ad8e-e4ac8b1a59b1",
   "payout": "https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a",

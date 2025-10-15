@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Get admin finances stats",
+      "method": "GET",
+      "path": "/?action=stats",
+      "headers": {
+        "X-Auth-Token": "test-token"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "admins": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get CSV periods",
+      "method": "GET",
+      "path": "/?action=periods",
+      "headers": {
+        "X-Auth-Token": "test-token"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "periods": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

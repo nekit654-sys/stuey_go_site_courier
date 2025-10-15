@@ -1462,11 +1462,11 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     }
 
 
-def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, admin_count: int) -> list:
+def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, cur) -> list:
     '''
     Рассчитывает распределение выплат по правилам:
     1. Курьер получает первые 3000₽ за 30 заказов (самобонус)
-    2. После самобонуса: рефереру до 60% от суммы, остальное администраторам
+    2. После самобонуса: рефереру 60%, админам 40% пропорционально рекламным расходам
     3. Если нет реферера: все курьеру до завершения самобонуса, потом админам
     '''
     distributions = []
@@ -1481,7 +1481,7 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
         })
     elif referrer_id:
         referrer_share = total_amount * 0.60
-        admin_share = total_amount * 0.40
+        admin_share_total = total_amount * 0.40
         
         distributions.append({
             'recipient_type': 'courier_referrer',
@@ -1491,23 +1491,89 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
             'description': 'Выплата рефереру (60%)'
         })
         
-        if admin_count > 0:
-            admin_share_each = admin_share / admin_count
-            distributions.append({
-                'recipient_type': 'admin',
-                'recipient_id': None,
-                'amount': admin_share,
-                'percentage': 40.0,
-                'description': f'Распределение между {admin_count} админами (40%)'
-            })
+        # Получаем админов с рекламными расходами
+        cur.execute("""
+            SELECT id, username, ad_spend_current 
+            FROM t_p25272970_courier_button_site.admins 
+            WHERE ad_spend_current > 0
+            ORDER BY ad_spend_current DESC
+        """)
+        
+        admins_with_spend = cur.fetchall()
+        
+        if admins_with_spend:
+            total_ad_spend = sum([float(a[2] or 0) for a in admins_with_spend])
+            
+            # Распределяем пропорционально расходам
+            for admin in admins_with_spend:
+                admin_id = admin[0]
+                admin_username = admin[1]
+                admin_ad_spend = float(admin[2] or 0)
+                
+                admin_percentage = (admin_ad_spend / total_ad_spend) * 40.0
+                admin_amount = (admin_ad_spend / total_ad_spend) * admin_share_total
+                
+                distributions.append({
+                    'recipient_type': 'admin',
+                    'recipient_id': admin_id,
+                    'amount': admin_amount,
+                    'percentage': admin_percentage,
+                    'description': f'Админ {admin_username} ({admin_percentage:.1f}% от расходов)'
+                })
+        else:
+            # Если нет расходов, делим поровну
+            cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
+            admin_count = cur.fetchone()[0]
+            
+            if admin_count > 0:
+                admin_share_each = admin_share_total / admin_count
+                distributions.append({
+                    'recipient_type': 'admin',
+                    'recipient_id': None,
+                    'amount': admin_share_total,
+                    'percentage': 40.0,
+                    'description': f'Распределение поровну между {admin_count} админами'
+                })
     else:
-        distributions.append({
-            'recipient_type': 'admin',
-            'recipient_id': None,
-            'amount': total_amount,
-            'percentage': 100.0,
-            'description': f'Распределение между {admin_count} админами (нет реферера)'
-        })
+        # Нет реферера - все админам
+        cur.execute("""
+            SELECT id, username, ad_spend_current 
+            FROM t_p25272970_courier_button_site.admins 
+            WHERE ad_spend_current > 0
+        """)
+        
+        admins_with_spend = cur.fetchall()
+        
+        if admins_with_spend:
+            total_ad_spend = sum([float(a[2] or 0) for a in admins_with_spend])
+            
+            for admin in admins_with_spend:
+                admin_id = admin[0]
+                admin_username = admin[1]
+                admin_ad_spend = float(admin[2] or 0)
+                
+                admin_percentage = (admin_ad_spend / total_ad_spend) * 100.0
+                admin_amount = (admin_ad_spend / total_ad_spend) * total_amount
+                
+                distributions.append({
+                    'recipient_type': 'admin',
+                    'recipient_id': admin_id,
+                    'amount': admin_amount,
+                    'percentage': admin_percentage,
+                    'description': f'Админ {admin_username} ({admin_percentage:.1f}% от расходов)'
+                })
+        else:
+            cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
+            admin_count = cur.fetchone()[0]
+            
+            if admin_count > 0:
+                distributions.append({
+                    'recipient_type': 'admin',
+                    'recipient_id': None,
+                    'amount': total_amount,
+                    'percentage': 100.0,
+                    'description': f'Распределение поровну между {admin_count} админами (нет реферера)'
+                })
     
     return distributions
 
@@ -1544,6 +1610,7 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
     
     body_data = json.loads(event.get('body', '{}'))
     csv_rows = body_data.get('rows', [])
+    csv_filename = body_data.get('filename', '')
     
     if not csv_rows:
         return {
@@ -1553,11 +1620,19 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             'isBase64Encoded': False
         }
     
+    # Парсим даты из имени файла (формат: Leads_2025-08-11-2025-10-10.csv)
+    import re
+    csv_period_start = None
+    csv_period_end = None
+    
+    if csv_filename:
+        match = re.search(r'Leads_(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})', csv_filename)
+        if match:
+            csv_period_start = match.group(1)
+            csv_period_end = match.group(2)
+    
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
-    cur.execute("SELECT COUNT(*) as count FROM t_p25272970_courier_button_site.admins")
-    admin_count = cur.fetchone()['count']
     
     processed = 0
     skipped = 0
@@ -1803,16 +1878,16 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             cur.execute("""
                 INSERT INTO t_p25272970_courier_button_site.courier_earnings
                 (courier_id, external_id, referrer_code, full_name, phone, city, 
-                 orders_count, total_amount, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                 orders_count, total_amount, status, csv_period_start, csv_period_end, csv_filename)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)
                 RETURNING id
             """, (courier_id, external_id, creator_username, referral_name, phone, city, 
-                  actual_orders, actual_reward))
+                  actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename))
             
             earning_id = cur.fetchone()['id']
             
             distributions = calculate_payment_distribution(
-                actual_reward, courier_id, referrer_id, self_bonus_completed, admin_count
+                actual_reward, courier_id, referrer_id, self_bonus_completed, cur
             )
             
             for dist in distributions:

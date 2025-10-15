@@ -6,6 +6,7 @@ import ControlPanel from './ControlPanel';
 import UnifiedCouriersTab from './UnifiedCouriersTab';
 import FinalPaymentsTab from './FinalPaymentsTab';
 import WithdrawalRequestsTab from './WithdrawalRequestsTab';
+import AdminFinances from './AdminFinances';
 
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
@@ -54,7 +55,7 @@ export default function AdminTabs({
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           Заявки
@@ -70,6 +71,10 @@ export default function AdminTabs({
         <TabsTrigger value="withdrawals" className="flex items-center gap-2">
           <Icon name="Wallet" size={16} />
           Все выплаты
+        </TabsTrigger>
+        <TabsTrigger value="finances" className="flex items-center gap-2">
+          <Icon name="TrendingUp" size={16} />
+          Финансы
         </TabsTrigger>
       </TabsList>
 
@@ -116,6 +121,10 @@ export default function AdminTabs({
 
       <TabsContent value="withdrawals" className="space-y-6">
         <WithdrawalRequestsTab authToken={authToken} />
+      </TabsContent>
+
+      <TabsContent value="finances" className="space-y-6">
+        <AdminFinances authToken={authToken} />
       </TabsContent>
     </Tabs>
   );
