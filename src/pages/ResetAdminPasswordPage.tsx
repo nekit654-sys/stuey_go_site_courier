@@ -38,7 +38,7 @@ export default function ResetAdminPasswordPage() {
 
       const { hash } = await hashResponse.json();
 
-      const resetResponse = await fetch(`${ADMIN_PANEL_URL}?action=reset_password`, {
+      const resetResponse = await fetch(ADMIN_PANEL_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
