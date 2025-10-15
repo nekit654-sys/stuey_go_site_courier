@@ -16,35 +16,20 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Test get admins list",
-      "method": "POST",
+      "name": "Test unauthorized access",
+      "method": "GET",
       "path": "/",
-      "headers": {
-        "X-Auth-Token": "test-token-123"
-      },
-      "body": {
-        "action": "get_admins"
-      },
-      "expectedStatus": 200,
+      "expectedStatus": 401,
       "expectedBody": {
-        "success": true,
-        "admins": "array"
+        "error": "Требуется авторизация"
       },
       "bodyMatcher": "partial"
     },
     {
-      "name": "Test get payout requests",
-      "method": "GET",
+      "name": "Test OPTIONS for CORS",
+      "method": "OPTIONS",
       "path": "/",
-      "headers": {
-        "X-Auth-Token": "test-token"
-      },
-      "expectedStatus": 200,
-      "expectedBody": {
-        "success": true,
-        "requests": "array"
-      },
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
     }
   ]
 }

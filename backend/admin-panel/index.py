@@ -1,7 +1,7 @@
 import json
 import os
 import psycopg2
-import hashlib
+import bcrypt
 import secrets
 from typing import Dict, Any
 
@@ -88,9 +88,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
+                stored_hash = admin[1].encode('utf-8')
+                password_bytes = password.encode('utf-8')
                 
-                if admin[1] != password_hash:
+                if not bcrypt.checkpw(password_bytes, stored_hash):
                     return {
                         'statusCode': 401,
                         'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -160,7 +161,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
+                password_bytes = password.encode('utf-8')
+                password_hash = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
                 
                 cursor.execute("""
                     INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
