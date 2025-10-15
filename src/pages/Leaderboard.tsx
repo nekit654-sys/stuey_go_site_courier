@@ -47,6 +47,16 @@ export default function Leaderboard() {
     if (user && token) {
       loadMyStats();
     }
+    
+    // Автообновление каждые 15 секунд
+    const interval = setInterval(() => {
+      loadLeaderboard();
+      if (user && token) {
+        loadMyStats();
+      }
+    }, 15000);
+    
+    return () => clearInterval(interval);
   }, [user, token]);
 
   const loadLeaderboard = async () => {

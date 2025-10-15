@@ -34,6 +34,14 @@ export default function GameTab({ userId }: GameTabProps) {
   useEffect(() => {
     fetchStats();
     fetchTopPlayers();
+    
+    // Автообновление каждые 10 секунд пока вкладка активна
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchTopPlayers();
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, [userId]);
 
   useEffect(() => {

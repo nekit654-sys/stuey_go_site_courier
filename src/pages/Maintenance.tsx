@@ -60,7 +60,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
       var rad_backcolor="#ffff00"; 
       var rad_logo = "black"; 
       var rad_autoplay = false; 
-      var rad_width = "responsive"; 
+      var rad_width = "fixed"; 
       var rad_width_px = 330;
       var rad_stations =[
         ['https://ep256.hostingradio.ru:8052/europaplus256.mp3','Европа плюс','europaplus'],
@@ -176,16 +176,16 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
       <div className="relative z-10 w-full max-w-4xl px-4">
         <div className="text-center mb-8 md:mb-12">
-          <div className="flex items-center justify-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-white rounded-2xl border-3 border-black shadow-lg flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-4 md:mb-6 flex-wrap">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white rounded-2xl border-3 border-black shadow-lg flex items-center justify-center flex-shrink-0">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png"
                 alt="Stuey.Go"
-                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+                className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 object-contain"
               />
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black gradient-text">
-              Stuey.Go
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black gradient-text">
+              Stuey.Go | Яндекс Еда
             </h1>
           </div>
           <p className="text-lg sm:text-xl md:text-2xl text-orange-800 font-medium tracking-wide">

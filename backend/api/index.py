@@ -3660,85 +3660,107 @@ def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             }
         
         body_data = json.loads(event.get('body', '{}'))
-        score = body_data.get('score', 0)
-        game_time = body_data.get('game_time', 0)
+        score = int(body_data.get('score', 0))
+        game_time = int(body_data.get('game_time', 0))
         new_achievements = body_data.get('achievements', [])
         
-        conn = psycopg2.connect(os.environ['DATABASE_URL'])
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        cur.execute("""
-            SELECT game_high_score, game_total_plays, game_achievements
-            FROM t_p25272970_courier_button_site.users
-            WHERE id = %s
-        """, (user_id_header,))
-        
-        user = cur.fetchone()
-        
-        if not user:
-            cur.close()
-            conn.close()
+        if score < 0 or score > 1000000:
             return {
-                'statusCode': 404,
+                'statusCode': 400,
                 'headers': headers,
-                'body': json.dumps({'error': 'User not found'}),
+                'body': json.dumps({'error': 'Invalid score'}),
                 'isBase64Encoded': False
             }
         
-        current_high_score = user['game_high_score'] or 0
-        current_plays = user['game_total_plays'] or 0
-        current_achievements = user['game_achievements'] or []
+        conn = None
+        cur = None
         
-        is_new_record = score > current_high_score
-        
-        merged_achievements = list(set(current_achievements + new_achievements))
-        
-        # Сохраняем запись игры в game_scores
-        cur.execute("""
-            INSERT INTO t_p25272970_courier_button_site.game_scores (user_id, score, game_time)
-            VALUES (%s, %s, %s)
-        """, (user_id_header, score, game_time))
-        
-        # Сохраняем новые достижения в game_achievements
-        newly_unlocked = list(set(new_achievements) - set(current_achievements))
-        for achievement_id in newly_unlocked:
+        try:
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
             cur.execute("""
-                INSERT INTO t_p25272970_courier_button_site.game_achievements (user_id, achievement_id)
-                VALUES (%s, %s)
-                ON CONFLICT (user_id, achievement_id) DO NOTHING
-            """, (user_id_header, achievement_id))
-        
-        if is_new_record:
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET game_high_score = %s, 
-                    game_total_plays = %s,
-                    game_achievements = %s,
-                    updated_at = NOW()
+                SELECT game_high_score, game_total_plays, game_achievements
+                FROM t_p25272970_courier_button_site.users
                 WHERE id = %s
-            """, (score, current_plays + 1, merged_achievements, user_id_header))
-        else:
+            """, (user_id_header,))
+            
+            user = cur.fetchone()
+            
+            if not user:
+                return {
+                    'statusCode': 404,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'User not found'}),
+                    'isBase64Encoded': False
+                }
+            
+            current_high_score = user['game_high_score'] or 0
+            current_plays = user['game_total_plays'] or 0
+            current_achievements = user['game_achievements'] or []
+            
+            is_new_record = score > current_high_score
+            
+            merged_achievements = list(set(current_achievements + new_achievements))
+            
             cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET game_total_plays = %s,
-                    game_achievements = %s,
-                    updated_at = NOW()
-                WHERE id = %s
-            """, (current_plays + 1, merged_achievements, user_id_header))
-        
-        conn.commit()
-        
-        cur.execute("""
-            SELECT COUNT(*) + 1 as rank
-            FROM t_p25272970_courier_button_site.users
-            WHERE game_high_score > %s
-        """, (score if is_new_record else current_high_score,))
-        
-        rank_result = cur.fetchone()
-        rank = rank_result['rank'] if rank_result else None
-        
-        cur.close()
-        conn.close()
+                INSERT INTO t_p25272970_courier_button_site.game_scores (user_id, score, game_time)
+                VALUES (%s, %s, %s)
+            """, (user_id_header, score, game_time))
+            
+            newly_unlocked = list(set(new_achievements) - set(current_achievements))
+            for achievement_id in newly_unlocked:
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.game_achievements (user_id, achievement_id)
+                    VALUES (%s, %s)
+                    ON CONFLICT (user_id, achievement_id) DO NOTHING
+                """, (user_id_header, achievement_id))
+            
+            if is_new_record:
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET game_high_score = %s, 
+                        game_total_plays = %s,
+                        game_achievements = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                """, (score, current_plays + 1, merged_achievements, user_id_header))
+            else:
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET game_total_plays = %s,
+                        game_achievements = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                """, (current_plays + 1, merged_achievements, user_id_header))
+            
+            conn.commit()
+            
+            final_high_score = score if is_new_record else current_high_score
+            
+            cur.execute("""
+                SELECT COUNT(*) + 1 as rank
+                FROM t_p25272970_courier_button_site.users
+                WHERE game_high_score > %s
+            """, (final_high_score,))
+            
+            rank_result = cur.fetchone()
+            rank = rank_result['rank'] if rank_result else None
+            
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({'error': f'Database error: {str(e)}'}),
+                'isBase64Encoded': False
+            }
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
         
         return {
             'statusCode': 200,
@@ -3746,7 +3768,7 @@ def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             'body': json.dumps({
                 'success': True,
                 'is_new_record': is_new_record,
-                'high_score': score if is_new_record else current_high_score,
+                'high_score': final_high_score,
                 'total_plays': current_plays + 1,
                 'rank': rank,
                 'new_achievements': newly_unlocked

@@ -2038,6 +2038,12 @@
     stopGame();
 
     showGameOverAnimation();
+    
+    // Отправляем событие родительскому окну с финальным счётом
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'GAME_OVER', score: score }, '*');
+      console.log('📤 Sent GAME_OVER to parent:', { score });
+    }
   }
 
   // Обработчики меню

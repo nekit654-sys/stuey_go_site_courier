@@ -76,10 +76,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleGameOver = async (score: number) => {
+    console.log('🎮 Game Over! Score:', score, 'User ID:', user?.id, 'Authenticated:', isAuthenticated);
     setLastScore(score);
 
     if (isAuthenticated && user?.id) {
       try {
+        console.log('📤 Sending score to API...', { score, userId: user.id });
         const response = await fetch(`${API_URL}?route=game&action=save_score`, {
           method: 'POST',
           headers: {
@@ -89,7 +91,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           body: JSON.stringify({ score }),
         });
 
+        console.log('📥 Response status:', response.status);
         const data = await response.json();
+        console.log('📥 Response data:', data);
 
         if (data.success) {
           if (data.is_new_record) {
@@ -98,18 +102,27 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             toast.success(`Игра окончена! Счёт: ${score}`);
           }
           
+          console.log('✅ Updating user data:', {
+            game_high_score: data.high_score,
+            game_total_plays: data.total_plays
+          });
+          
           updateUser({
             game_high_score: data.high_score,
             game_total_plays: data.total_plays
           });
           
           fetchLeaderboard();
+        } else {
+          console.error('❌ API returned success: false', data);
+          toast.error(data.error || 'Не удалось сохранить результат');
         }
       } catch (error) {
-        console.error('Error saving score:', error);
+        console.error('❌ Error saving score:', error);
         toast.error('Не удалось сохранить результат');
       }
     } else {
+      console.log('⚠️ User not authenticated, showing register prompt');
       setShowRegisterPrompt(true);
     }
   };
