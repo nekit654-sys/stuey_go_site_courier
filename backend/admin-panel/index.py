@@ -219,6 +219,46 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'success': True, 'message': 'Пароль успешно изменен'}),
                     'isBase64Encoded': False
                 }
+            
+            elif action == 'reset_password':
+                username = body_data.get('username', '').strip()
+                new_password_hash = body_data.get('new_password_hash', '').strip()
+                
+                if not username or not new_password_hash:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'message': 'Логин и хеш пароля обязательны'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute(
+                    "SELECT id FROM t_p25272970_courier_button_site.admins WHERE username = %s",
+                    (username,)
+                )
+                admin = cursor.fetchone()
+                
+                if not admin:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'message': f'Админ с логином {username} не найден'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute("""
+                    UPDATE t_p25272970_courier_button_site.admins 
+                    SET password_hash = %s, updated_at = NOW() 
+                    WHERE username = %s
+                """, (new_password_hash, username))
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': f'Пароль для {username} успешно обновлён'}),
+                    'isBase64Encoded': False
+                }
         
         if method == 'GET' and action == 'get_all_couriers':
             # Получение всех пользователей (курьеров)
