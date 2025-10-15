@@ -57,17 +57,17 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.innerHTML = `
-      var rad_backcolor="#434242"; 
+      var rad_backcolor="#ffff00"; 
       var rad_logo = "black"; 
-      var rad_autoplay = true; 
+      var rad_autoplay = false; 
       var rad_width = "responsive"; 
       var rad_width_px = 330;
       var rad_stations =[
         ['https://ep256.hostingradio.ru:8052/europaplus256.mp3','Европа плюс','europaplus'],
         ['https://radiorecord.hostingradio.ru/rr_main96.aacp','Радио Рекорд','radiorecord'],
         ['https://nashe1.hostingradio.ru/nashe-256','Наше радио','nashe'],
-        ['https://pub0101.101.ru/stream/air/aac/64/100','Авторадио','avtoradio'],
-        ['https://pub0202.101.ru:8443/stream/air/aac/64/99','Радио Energy','nrj']
+        ['https://pub0202.101.ru:8443/stream/air/aac/64/99','Радио Energy','nrj'],
+        ['https://hr.amgradio.ru/Horoshee?r_bells','Хорошее радио','horoshee']
       ];
     `;
     document.head.appendChild(script);
@@ -176,9 +176,18 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
       <div className="relative z-10 w-full max-w-4xl px-4">
         <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-3 md:mb-4 gradient-text">
-            Присоединяйся! 🚀
-          </h1>
+          <div className="flex items-center justify-center gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-white rounded-2xl border-3 border-black shadow-lg flex items-center justify-center flex-shrink-0">
+              <img 
+                src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png"
+                alt="Stuey.Go"
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+              />
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black gradient-text">
+              Stuey.Go
+            </h1>
+          </div>
           <p className="text-lg sm:text-xl md:text-2xl text-orange-800 font-medium tracking-wide">
             Мы нанимаем курьеров и меняем правила в доставке
           </p>
@@ -254,7 +263,9 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           </Button>
 
           <div className="text-center w-full">
-            <div id="rad_upd" className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full"></div>
+            <div id="radiobells_container" className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full">
+              <a href="https://www.radiobells.com/" id="RP_link">Онлайн радио</a>
+            </div>
           </div>
         </div>
       </div>
