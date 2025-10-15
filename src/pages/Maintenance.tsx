@@ -4,12 +4,14 @@ import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
+import { useGame } from '@/contexts/GameContext';
 
 interface MaintenanceProps {
   onUnlock: () => void;
 }
 
 export default function Maintenance({ onUnlock }: MaintenanceProps) {
+  const { openGame } = useGame();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -213,10 +215,10 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
       <div className="relative z-10 w-full max-w-4xl">
         <div className="text-center mb-12 float-element">
           <h1 className="text-7xl md:text-8xl font-black mb-4 gradient-text">
-            ПОЕХАЛИ! 🚀
+            Присоединяйся! 🚀
           </h1>
           <p className="text-2xl text-purple-200 font-light tracking-wide">
-            Запускаем что-то невероятное
+            Мы запускаем лучший сервис доставки
           </p>
         </div>
 
@@ -241,11 +243,11 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
             <div className="text-center space-y-4">
               <p className="text-xl text-white/90">
-                <span className="inline-block mr-2">⚡</span>
-                <span className="font-semibold">Готовим для вас лучший сервис доставки</span>
+                <span className="inline-block mr-2">🎯</span>
+                <span className="font-semibold">Мы меняем правила игры в доставке</span>
               </p>
               <p className="text-purple-200/80">
-                Скоро здесь будет что-то грандиозное
+                А пока можешь сыграть в нашу игру или послушать радио
               </p>
             </div>
           </div>
@@ -288,8 +290,18 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           </div>
         )}
 
-        <div className="mt-8 text-center">
-          <div id="rad_upd" className="inline-block rounded-2xl overflow-hidden border border-white/10 shadow-2xl"></div>
+        <div className="mt-8 flex flex-col items-center gap-6">
+          <Button
+            onClick={openGame}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold px-8 py-4 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] border-2 border-white/20"
+          >
+            <Icon name="Gamepad2" size={24} className="mr-2" />
+            Сыграть в игру
+          </Button>
+
+          <div className="text-center">
+            <div id="rad_upd" className="inline-block rounded-2xl overflow-hidden border border-white/10 shadow-2xl"></div>
+          </div>
         </div>
       </div>
 
