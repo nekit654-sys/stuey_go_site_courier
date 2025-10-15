@@ -35,7 +35,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if method == 'POST':
         body_data = json.loads(event.get('body', '{}'))
     
-    if not auth_token and not (method == 'POST' and body_data.get('action') == 'login'):
+    if not auth_token and not (method == 'POST' and body_data.get('action') in ['login', 'reset_password']):
         return {
             'statusCode': 401,
             'headers': {
