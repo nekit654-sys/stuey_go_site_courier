@@ -11,6 +11,7 @@ import WithdrawalRequestForm from '@/components/WithdrawalRequestForm';
 import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
 import GameTab from '@/components/GameTab';
 import StartupPayoutModal from '@/components/StartupPayoutModal';
+import StartupBonusNotification from '@/components/StartupBonusNotification';
 
 
 interface Stats {
@@ -254,6 +255,15 @@ export default function Dashboard() {
             </div>
           </div>
         </Card>
+
+        {user?.id && (
+          <div className="mb-6">
+            <StartupBonusNotification 
+              userId={user.id} 
+              onOpenPayoutModal={() => setShowStartupPayoutModal(true)} 
+            />
+          </div>
+        )}
 
         <Button
           onClick={copyReferralLink}

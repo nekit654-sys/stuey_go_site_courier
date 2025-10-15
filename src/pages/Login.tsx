@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LoginForm from '@/components/admin/LoginForm';
 import AdminHeader from '@/components/admin/AdminHeader';
-import AdminTabs from '@/components/admin/AdminTabs';
+import CompactAdminTabs from '@/components/admin/CompactAdminTabs';
 import SettingsModal from '@/components/admin/SettingsModal';
 import { useAdminAuth } from '@/components/admin/useAdminAuth';
 import { useAdminData } from '@/components/admin/useAdminData';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
 const Login: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('requests');
+  const [activeTab, setActiveTab] = useState('couriers');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -89,7 +89,7 @@ const Login: React.FC = () => {
             onLogout={handleLogout}
           />
 
-          <AdminTabs
+          <CompactAdminTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
             requests={requests}

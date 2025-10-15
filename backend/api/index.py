@@ -111,6 +111,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_reset_admin_password(event, headers)
     elif route == 'startup-payout':
         return handle_startup_payout(event, headers)
+    elif route == 'startup-notification':
+        return handle_startup_notification(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -1906,7 +1908,23 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                         is_completed = (bonus_earned + %s >= 3000),
                         updated_at = NOW()
                     WHERE courier_id = %s
-                """, (eats_order_number, reward, reward, courier_id))
+                """, (actual_orders, actual_reward, actual_reward, courier_id))
+                
+                # Проверяем достигли ли 30 заказов для стартовой выплаты
+                cur.execute("""
+                    SELECT orders_completed FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+                    WHERE courier_id = %s
+                """, (courier_id,))
+                
+                tracking = cur.fetchone()
+                if tracking and tracking['orders_completed'] >= 30:
+                    # Отмечаем что курьер достиг 30 заказов и нужно уведомить
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET startup_bonus_eligible_at = NOW(),
+                            startup_bonus_notified = FALSE
+                        WHERE id = %s AND startup_bonus_eligible_at IS NULL
+                    """, (courier_id,))
             
             cur.execute("""
                 INSERT INTO t_p25272970_courier_button_site.referral_progress
@@ -4138,6 +4156,111 @@ def handle_startup_payout(event: Dict[str, Any], headers: Dict[str, str]) -> Dic
                 'body': json.dumps({'requests': convert_decimals(requests)}),
                 'isBase64Encoded': False
             }
+    
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_startup_notification(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    
+    if method == 'GET':
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        
+        if not user_id_header:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        user_id = int(user_id_header)
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT 
+                u.startup_bonus_eligible_at,
+                u.startup_bonus_notified,
+                csb.orders_completed,
+                csb.bonus_earned,
+                csb.is_completed
+            FROM t_p25272970_courier_button_site.users u
+            LEFT JOIN t_p25272970_courier_button_site.courier_self_bonus_tracking csb ON csb.courier_id = u.id
+            WHERE u.id = %s
+        """, (user_id,))
+        
+        data = cur.fetchone()
+        
+        cur.execute("""
+            SELECT COUNT(*) as count
+            FROM t_p25272970_courier_button_site.startup_payout_requests
+            WHERE courier_id = %s
+        """, (user_id,))
+        
+        has_request = cur.fetchone()['count'] > 0
+        
+        cur.close()
+        conn.close()
+        
+        eligible = (
+            data 
+            and data['orders_completed'] >= 30 
+            and not data['startup_bonus_notified']
+            and not has_request
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'eligible': eligible,
+                'orders_completed': data['orders_completed'] if data else 0,
+                'bonus_earned': data['bonus_earned'] if data else 0,
+                'has_request': has_request
+            })),
+            'isBase64Encoded': False
+        }
+    
+    elif method == 'POST':
+        user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+        
+        if not user_id_header:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        user_id = int(user_id_header)
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET startup_bonus_notified = TRUE
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Notification marked as seen'}),
+            'isBase64Encoded': False
+        }
     
     return {
         'statusCode': 405,
