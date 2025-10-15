@@ -22,18 +22,21 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-            <Icon name="Shield" size={24} className="text-blue-600" />
-            Вход в админ-панель
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 bg-white/95 backdrop-blur shadow-2xl">
+        <CardHeader className="text-center pb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Icon name="Shield" size={32} className="text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Админ-панель
           </CardTitle>
+          <p className="text-gray-600 mt-2">Авторизация администратора</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="username">Логин</Label>
+              <Label htmlFor="username" className="text-sm font-medium">Логин</Label>
               <Input
                 id="username"
                 name="username"
@@ -41,11 +44,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 value={credentials.username}
                 onChange={onInputChange}
                 placeholder="Введите логин"
+                className="mt-2"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="password">Пароль</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Пароль</Label>
               <Input
                 id="password"
                 name="password"
@@ -53,12 +57,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 value={credentials.password}
                 onChange={onInputChange}
                 placeholder="Введите пароль"
+                className="mt-2"
                 required
               />
             </div>
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-6"
               disabled={isLoading}
             >
               {isLoading ? (
