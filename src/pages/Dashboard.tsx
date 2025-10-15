@@ -10,7 +10,8 @@ import ProfileSetupModal from '@/components/ProfileSetupModal';
 import WithdrawalRequestForm from '@/components/WithdrawalRequestForm';
 import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
 import GameTab from '@/components/GameTab';
-import StartupPayoutRequests from '@/components/StartupPayoutRequests';
+import StartupPayoutModal from '@/components/StartupPayoutModal';
+
 
 interface Stats {
   total_referrals: number;
@@ -51,9 +52,10 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'startup' | 'game' | 'profile'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile'>('stats');
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
+  const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -170,7 +172,7 @@ export default function Dashboard() {
     fetchStats();
   };
 
-  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'startup' | 'game' | 'profile') => {
+  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile') => {
     setActiveTab(tab);
     // Обновляем данные при переключении вкладок
     if (tab === 'stats' || tab === 'referrals') {
@@ -261,7 +263,7 @@ export default function Dashboard() {
           Скопировать реферальную ссылку
         </Button>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
             onClick={() => handleTabChange('stats')}
@@ -285,14 +287,6 @@ export default function Dashboard() {
           >
             <Icon name="Wallet" className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Выплаты</span>
-          </Button>
-          <Button
-            variant={activeTab === 'startup' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('startup')}
-            className={activeTab === 'startup' ? '' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'}
-          >
-            <Icon name="Gift" className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">3000₽</span>
           </Button>
           <Button
             variant={activeTab === 'game' ? 'default' : 'outline'}
@@ -411,6 +405,27 @@ export default function Dashboard() {
 
         {activeTab === 'withdrawals' && (
           <div className="space-y-6">
+            <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 border-0 shadow-2xl p-6 text-black">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="text-2xl font-extrabold mb-2 flex items-center gap-2">
+                    <Icon name="Gift" className="h-7 w-7" />
+                    Получи 3000₽ за 30 заказов!
+                  </h3>
+                  <p className="text-sm opacity-90">
+                    Зарегистрируйся в Яндекс Еде по нашему коду, выполни 30 заказов и получи бонус!
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowStartupPayoutModal(true)}
+                  className="bg-black hover:bg-gray-900 text-white font-extrabold py-6 px-6 rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[3px] transition-all"
+                >
+                  <Icon name="Sparkles" className="mr-2 h-5 w-5" />
+                  Оставить заявку
+                </Button>
+              </div>
+            </Card>
+
             <WithdrawalRequestForm
               userId={user.id}
               availableBalance={stats?.referral_earnings || 0}
@@ -424,10 +439,6 @@ export default function Dashboard() {
               loading={loadingWithdrawals}
             />
           </div>
-        )}
-
-        {activeTab === 'startup' && (
-          <StartupPayoutRequests />
         )}
 
         {activeTab === 'game' && (
@@ -512,6 +523,11 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <StartupPayoutModal
+        isOpen={showStartupPayoutModal}
+        onClose={() => setShowStartupPayoutModal(false)}
+      />
     </div>
   );
 }
