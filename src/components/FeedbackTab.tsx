@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const PAYOUT_API_URL = 'https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a';
 
@@ -14,6 +16,8 @@ interface FormData {
 
 const FeedbackTab: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -34,7 +38,14 @@ const FeedbackTab: React.FC = () => {
       // Игнорируем ошибки звука
     }
     
-    // Всегда открываем модальное окно с формой
+    // Проверяем авторизацию
+    if (!isAuthenticated) {
+      toast.error('Для подачи заявки необходимо войти в систему');
+      navigate('/auth');
+      return;
+    }
+    
+    // Открываем модальное окно только для авторизованных
     setIsModalOpen(true);
   };
 
