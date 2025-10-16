@@ -25,7 +25,7 @@ User-agent: facebookexternalhit
 Allow: /
 
 # Sitemap
-Sitemap: https://courier-button-site.vercel.app/sitemap.xml
+Sitemap: https://stuey-go.ru/sitemap.xml
 
 # Время задержки между запросами (в секундах)
-Crawl-delay: 1
+Crawl-delay: 0.5
