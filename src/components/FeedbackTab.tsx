@@ -225,6 +225,31 @@ const FeedbackTab: React.FC = () => {
 
             {/* Содержимое */}
             <div className="p-6">
+              {!isAuthenticated && (
+                <div className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-5 shadow-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
+                      <Icon name="AlertCircle" size={24} className="text-black" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-extrabold text-black text-lg mb-2">⚠️ Требуется регистрация</p>
+                      <p className="text-sm text-gray-800 font-bold mb-3">Чтобы отправить заявку на выплату 3000₽, необходимо войти в личный кабинет</p>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          handleCloseModal();
+                          navigate('/auth');
+                        }}
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-extrabold py-4 rounded-xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all"
+                      >
+                        <Icon name="LogIn" size={20} className="mr-2" />
+                        Войти через Яндекс
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {isSuccess ? (
                 <div className="text-center py-8 animate-in zoom-in-50 duration-300">
                   <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black" style={{boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.9)'}}>
@@ -235,30 +260,6 @@ const FeedbackTab: React.FC = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {!isAuthenticated && (
-                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-4 animate-in slide-in-from-top duration-300">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
-                          <Icon name="AlertCircle" size={20} className="text-black" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-extrabold text-black mb-2">⚠️ Требуется регистрация</p>
-                          <p className="text-sm text-gray-700 mb-3">Чтобы отправить заявку на выплату 3000₽, необходимо войти в личный кабинет</p>
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              handleCloseModal();
-                              navigate('/auth');
-                            }}
-                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-extrabold py-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
-                          >
-                            <Icon name="LogIn" size={18} className="mr-2" />
-                            Войти через Яндекс
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   <div>
                     <label className="block text-sm font-extrabold text-black mb-2">
                       ФИО <span className="text-red-500">*</span>
