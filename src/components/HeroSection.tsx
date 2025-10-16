@@ -49,7 +49,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-extrabold text-white text-base drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
-            Зарабатывайте до 8 500₽ в день в своём городе —<br />
+            От 1 500₽ до 6 200₽ в день —<br />
             ваш график, ваш транспорт, ваши правила!
           </p>
 

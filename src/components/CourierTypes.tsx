@@ -23,7 +23,7 @@ const CourierTypes = () => {
       type: "Пеший курьер",
       icon: "User",
       description: "Доставка пешком",
-      benefits: ["До 4500₽ в день", "Минимум вложений", "Работа у дома"],
+      benefits: ["1 500-3 000₽ в день", "Без вложений", "Работа у дома"],
       bgColor: "bg-yellow-50 hover:bg-yellow-100",
       buttonColor: "bg-yellow-500 hover:bg-yellow-600",
     },
@@ -31,7 +31,7 @@ const CourierTypes = () => {
       type: "Вело курьер",
       icon: "Bike",
       description: "Доставка на велосипеде",
-      benefits: ["До 6500₽ в день", "Высокая скорость", "Экологичность"],
+      benefits: ["2 000-4 000₽ в день", "Быстрая доставка", "Больше заказов"],
       bgColor: "bg-yellow-50 hover:bg-yellow-100",
       buttonColor: "bg-yellow-500 hover:bg-yellow-600",
     },
@@ -40,8 +40,8 @@ const CourierTypes = () => {
       icon: "Car",
       description: "Доставка на автомобиле",
       benefits: [
-        "До 8500₽ в день",
-        "Максимальный заработок",
+        "3 000-6 200₽ в день",
+        "Больше всех заказов",
         "Работа в любую погоду",
       ],
       bgColor: "bg-yellow-50 hover:bg-yellow-100",
@@ -77,8 +77,7 @@ const CourierTypes = () => {
             Выбери свой способ доставки!
           </h2>
         <p className="text-xl text-center mb-12 text-gray-600 max-w-2xl mx-auto">
-          Каждый тип курьерской работы имеет свои преимущества. Выбери
-          подходящий для тебя!
+          Выбери свой транспорт и начни зарабатывать
         </p>
 
         <div className="grid md:grid-cols-3 gap-8">

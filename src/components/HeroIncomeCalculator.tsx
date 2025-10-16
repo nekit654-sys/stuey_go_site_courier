@@ -23,9 +23,9 @@ const HeroIncomeCalculator = () => {
   };
 
   const courierTypeSettings = {
-    walking: { maxIncome: 140000, label: 'Пеший', icon: 'User' },
-    bicycle: { maxIncome: 170000, label: 'Вело', icon: 'Bike' },
-    car: { maxIncome: 230000, label: 'Авто', icon: 'Car' }
+    walking: { maxIncome: 95000, label: 'Пеший', icon: 'User' },
+    bicycle: { maxIncome: 120000, label: 'Вело', icon: 'Bike' },
+    car: { maxIncome: 165000, label: 'Авто', icon: 'Car' }
   };
 
   const calculateIncome = useCallback((daysValue: number, hoursValue: number, withBonus: boolean, type: CourierType) => {
@@ -34,7 +34,7 @@ const HeroIncomeCalculator = () => {
     const maxHours = 12;
     
     const income = (daysValue / maxDays) * (hoursValue / maxHours) * maxIncome;
-    return Math.round(income) + (withBonus ? 18000 : 0);
+    return Math.round(income) + (withBonus ? 3000 : 0);
   }, []);
 
   const income = useMemo(() => 
@@ -132,7 +132,7 @@ const HeroIncomeCalculator = () => {
           <div className="flex items-center gap-2">
             <Icon name="UserPlus" size={20} className="text-black" />
             <span className="text-black font-extrabold">Приведи друга</span>
-            <span className="text-black font-extrabold">+18 000 ₽</span>
+            <span className="text-black font-extrabold">+3 000 ₽</span>
           </div>
         </label>
       </div>
