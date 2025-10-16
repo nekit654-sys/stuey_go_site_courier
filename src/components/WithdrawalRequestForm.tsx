@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +21,6 @@ export default function WithdrawalRequestForm({
   userBankName = '',
   onSuccess
 }: WithdrawalRequestFormProps) {
-  // Форматируем телефон при инициализации
   const formatInitialPhone = (phone: string) => {
     if (!phone) return '+7';
     if (phone.startsWith('+')) return phone;
@@ -127,23 +125,18 @@ export default function WithdrawalRequestForm({
   };
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm p-6">
-      <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <Icon name="Wallet" className="text-green-600" />
-        Вывод средств
-      </h3>
-
-      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div>
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-yellow-400 border-2 border-black rounded-xl shadow-[0_3px_0_0_rgba(0,0,0,1)]">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-blue-800">Доступно для вывода:</span>
-          <span className="text-2xl font-bold text-blue-900">{availableBalance.toFixed(2)} ₽</span>
+          <span className="text-xs sm:text-sm font-bold text-black/70">Доступно для вывода:</span>
+          <span className="text-xl sm:text-2xl font-extrabold text-black">{availableBalance.toFixed(2)} ₽</span>
         </div>
-        <p className="text-xs text-blue-700">Минимальная сумма вывода: 1000₽</p>
+        <p className="text-xs font-bold text-black/70">Минимальная сумма вывода: 1000₽</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         <div>
-          <Label htmlFor="amount">Сумма вывода (₽)</Label>
+          <Label htmlFor="amount" className="text-black font-extrabold mb-2 block text-sm">Сумма вывода (₽)</Label>
           <Input
             id="amount"
             type="number"
@@ -152,38 +145,44 @@ export default function WithdrawalRequestForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Введите сумму"
+            className="border-2 border-black rounded-xl h-11 sm:h-12 font-bold text-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] transition-all"
             required
           />
         </div>
 
         <div>
-          <Label htmlFor="sbp_phone">Номер телефона СБП</Label>
+          <Label htmlFor="sbp_phone" className="text-black font-extrabold mb-2 block text-sm">Номер телефона СБП</Label>
           <Input
             id="sbp_phone"
             type="tel"
             value={sbpPhone}
             onChange={handlePhoneChange}
             placeholder="+7 (XXX) XXX-XX-XX"
-            className="font-mono"
+            className="font-mono border-2 border-black rounded-xl h-11 sm:h-12 font-bold text-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] transition-all"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Номер, привязанный к системе быстрых платежей (начинается с +7)</p>
+          <p className="text-xs font-bold text-black/70 mt-1">Номер, привязанный к СБП (начинается с +7)</p>
         </div>
 
         <div>
-          <Label htmlFor="sbp_bank">Банк СБП</Label>
+          <Label htmlFor="sbp_bank" className="text-black font-extrabold mb-2 block text-sm">Банк СБП</Label>
           <Input
             id="sbp_bank"
             type="text"
             value={sbpBankName}
             onChange={(e) => setSbpBankName(e.target.value)}
             placeholder="Например: Сбербанк, Тинькофф, Альфа-Банк"
+            className="border-2 border-black rounded-xl h-11 sm:h-12 font-bold text-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] transition-all"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Укажите название вашего банка</p>
+          <p className="text-xs font-bold text-black/70 mt-1">Укажите название вашего банка</p>
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className="w-full h-11 sm:h-12 bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none font-extrabold text-sm sm:text-base transition-all"
+        >
           {loading ? (
             <>
               <Icon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
@@ -197,11 +196,11 @@ export default function WithdrawalRequestForm({
           )}
         </Button>
 
-        <div className="text-xs text-gray-600 space-y-1 mt-4 p-3 bg-gray-50 rounded">
+        <div className="text-xs font-bold text-black/70 space-y-1 mt-3 sm:mt-4 p-3 bg-yellow-400/30 border border-black/20 rounded-xl">
           <p>ℹ️ Заявка будет рассмотрена в течение 1-3 рабочих дней</p>
           <p>ℹ️ Средства поступят на указанный номер телефона через СБП</p>
         </div>
       </form>
-    </Card>
+    </div>
   );
 }

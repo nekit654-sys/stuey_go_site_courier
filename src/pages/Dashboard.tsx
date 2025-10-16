@@ -457,8 +457,9 @@ export default function Dashboard() {
               <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 text-black">Создать заявку на выплату</h3>
               <WithdrawalRequestForm
                 userId={user?.id || 0}
-                token={token || ''}
-                pendingBonus={stats?.pending_bonus || 0}
+                availableBalance={stats?.pending_bonus || 0}
+                userPhone={user?.phone}
+                userBankName={''}
                 onSuccess={handleWithdrawalSuccess}
               />
             </Card>
@@ -477,8 +478,8 @@ export default function Dashboard() {
         )}
 
         {/* Game Tab */}
-        {activeTab === 'game' && (
-          <GameTab />
+        {activeTab === 'game' && user?.id && (
+          <GameTab userId={user.id} />
         )}
 
         {/* Profile Tab */}
