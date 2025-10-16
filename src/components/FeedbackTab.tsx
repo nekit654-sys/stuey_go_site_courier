@@ -38,14 +38,7 @@ const FeedbackTab: React.FC = () => {
       // Игнорируем ошибки звука
     }
     
-    // Проверяем авторизацию
-    if (!isAuthenticated) {
-      toast.error('Для подачи заявки необходимо войти в систему');
-      navigate('/auth');
-      return;
-    }
-    
-    // Открываем модальное окно только для авторизованных
+    // Открываем модальное окно для всех
     setIsModalOpen(true);
   };
 
@@ -110,6 +103,13 @@ const FeedbackTab: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast.error('Для отправки заявки необходимо войти в систему');
+      navigate('/auth');
+      handleCloseModal();
+      return;
+    }
     
     if (!formData.fullName || !formData.city || !formData.phone) {
       alert('Пожалуйста, заполните все обязательные поля');
@@ -234,7 +234,32 @@ const FeedbackTab: React.FC = () => {
                   <p className="text-gray-700 font-bold text-base">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <>
+                  {!isAuthenticated && (
+                    <div className="mb-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-4 animate-in slide-in-from-top duration-300">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
+                          <Icon name="AlertCircle" size={20} className="text-black" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-extrabold text-black mb-2">Требуется регистрация</p>
+                          <p className="text-sm text-gray-700 mb-3">Чтобы отправить заявку на выплату 3000₽, необходимо войти в личный кабинет</p>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              handleCloseModal();
+                              navigate('/auth');
+                            }}
+                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-extrabold py-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                          >
+                            <Icon name="LogIn" size={18} className="mr-2" />
+                            Войти через Яндекс
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-extrabold text-black mb-2">
                       ФИО <span className="text-red-500">*</span>
@@ -340,6 +365,7 @@ const FeedbackTab: React.FC = () => {
                     Нажимая "Отправить заявку", вы соглашаетесь с обработкой персональных данных
                   </div>
                 </form>
+                </>
               )}
             </div>
           </div>
