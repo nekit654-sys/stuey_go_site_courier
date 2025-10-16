@@ -234,15 +234,15 @@ const FeedbackTab: React.FC = () => {
                   <p className="text-gray-700 font-bold text-base">Мы рассмотрим вашу заявку в течение 24 часов и свяжемся с вами.</p>
                 </div>
               ) : (
-                <>
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {!isAuthenticated && (
-                    <div className="mb-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-4 animate-in slide-in-from-top duration-300">
+                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-4 animate-in slide-in-from-top duration-300">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
                           <Icon name="AlertCircle" size={20} className="text-black" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-extrabold text-black mb-2">Требуется регистрация</p>
+                          <p className="font-extrabold text-black mb-2">⚠️ Требуется регистрация</p>
                           <p className="text-sm text-gray-700 mb-3">Чтобы отправить заявку на выплату 3000₽, необходимо войти в личный кабинет</p>
                           <Button
                             type="button"
@@ -259,7 +259,6 @@ const FeedbackTab: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-extrabold text-black mb-2">
                       ФИО <span className="text-red-500">*</span>
@@ -365,7 +364,6 @@ const FeedbackTab: React.FC = () => {
                     Нажимая "Отправить заявку", вы соглашаетесь с обработкой персональных данных
                   </div>
                 </form>
-                </>
               )}
             </div>
           </div>
