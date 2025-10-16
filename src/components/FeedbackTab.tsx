@@ -17,7 +17,6 @@ interface FormData {
 const FeedbackTab: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -27,6 +26,11 @@ const FeedbackTab: React.FC = () => {
     phone: '',
     screenshot: null
   });
+
+  const isUserAuthenticated = () => {
+    const token = localStorage.getItem('auth_token');
+    return !!token;
+  };
 
   const handleTabClick = () => {
     // Воспроизводим звук клика с уменьшенной громкостью
@@ -104,7 +108,7 @@ const FeedbackTab: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
+    if (!isUserAuthenticated()) {
       toast.error('Для отправки заявки необходимо войти в систему');
       navigate('/auth');
       handleCloseModal();
@@ -225,7 +229,7 @@ const FeedbackTab: React.FC = () => {
 
             {/* Содержимое */}
             <div className="p-6">
-              {!isAuthenticated && (
+              {!isUserAuthenticated() && (
                 <div className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-3 border-yellow-400 rounded-xl p-5 shadow-lg">
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-black">
