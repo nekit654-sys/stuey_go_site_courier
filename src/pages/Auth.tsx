@@ -222,10 +222,15 @@ export default function Auth() {
             </CardTitle>
             <CardDescription className="text-lg">
               {referralCode ? (
-                <span className="text-yellow-300 font-bold flex items-center justify-center gap-2">
-                  <Icon name="Gift" className="h-5 w-5" />
-                  🎉 Вас пригласили!
-                </span>
+                <div className="space-y-2">
+                  <div className="text-yellow-300 font-bold flex items-center justify-center gap-2">
+                    <Icon name="Gift" className="h-5 w-5" />
+                    🎉 Вас пригласили!
+                  </div>
+                  <p className="text-purple-200 text-sm">
+                    При регистрации вы станете рефералом и получите бонусы
+                  </p>
+                </div>
               ) : (
                 <span className="text-purple-200">Выберите способ входа</span>
               )}

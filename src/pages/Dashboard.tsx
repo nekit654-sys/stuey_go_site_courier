@@ -140,7 +140,7 @@ export default function Dashboard() {
   const copyReferralLink = () => {
     if (!user?.referral_code) return;
 
-    const link = `${window.location.origin}/?ref=${user.referral_code}`;
+    const link = `${window.location.origin}/auth?ref=${user.referral_code}`;
     navigator.clipboard.writeText(link);
     toast.success('Реферальная ссылка скопирована!');
   };
@@ -268,13 +268,18 @@ export default function Dashboard() {
         )}
 
         {/* Copy Referral Link Button */}
-        <Button
-          onClick={copyReferralLink}
-          className="w-full mb-4 sm:mb-6 h-12 sm:h-14 text-base sm:text-lg font-extrabold bg-black text-yellow-400 border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[5px] active:shadow-none transition-all"
-        >
-          <Icon name="Share2" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-          Скопировать реферальную ссылку
-        </Button>
+        <div className="mb-4 sm:mb-6">
+          <Button
+            onClick={copyReferralLink}
+            className="w-full h-12 sm:h-14 text-base sm:text-lg font-extrabold bg-black text-yellow-400 border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[5px] active:shadow-none transition-all"
+          >
+            <Icon name="Share2" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+            Скопировать реферальную ссылку
+          </Button>
+          <p className="text-black/70 text-xs sm:text-sm text-center mt-2 font-bold">
+            Отправьте эту ссылку друзьям — они зарегистрируются по вашему приглашению 🎁
+          </p>
+        </div>
 
         {/* Tabs Navigation */}
         <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">

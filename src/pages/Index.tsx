@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
@@ -9,11 +10,18 @@ import WelcomeBanner from "@/components/WelcomeBanner";
 
 const Index = () => {
   const [showBanner, setShowBanner] = useState(true);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title =
       "Stuey.Go — свобода выбора, стабильность заработка. Присоединяйся! 🚀";
-  }, []);
+    
+    const ref = searchParams.get('ref');
+    if (ref) {
+      navigate(`/auth?ref=${ref}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   return (
     <div className="min-h-screen">
