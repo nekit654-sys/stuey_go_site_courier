@@ -1317,12 +1317,17 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         conn.commit()
         
         cur.execute("""
-            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
-                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
-                   nickname, game_high_score, game_total_plays, agreed_to_terms
-            FROM t_p25272970_courier_button_site.users
-            WHERE id = %s
+            SELECT 
+                u.id, u.oauth_id, u.oauth_provider, u.full_name, u.email, u.phone, u.city, u.avatar_url, 
+                u.referral_code, u.invited_by_user_id, u.total_orders, u.total_earnings, u.referral_earnings,
+                u.is_verified, u.vehicle_type, u.created_at, u.self_orders_count, u.self_bonus_paid,
+                u.nickname, u.game_high_score, u.game_total_plays, u.agreed_to_terms,
+                inviter.full_name as inviter_name,
+                inviter.avatar_url as inviter_avatar,
+                inviter.referral_code as inviter_code
+            FROM t_p25272970_courier_button_site.users u
+            LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
+            WHERE u.id = %s
         """, (user_id,))
         
         user = cur.fetchone()
@@ -1348,12 +1353,17 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         conn.commit()
         
         cur.execute("""
-            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
-                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
-                   nickname, game_high_score, game_total_plays, agreed_to_terms
-            FROM t_p25272970_courier_button_site.users
-            WHERE id = %s
+            SELECT 
+                u.id, u.oauth_id, u.oauth_provider, u.full_name, u.email, u.phone, u.city, u.avatar_url, 
+                u.referral_code, u.invited_by_user_id, u.total_orders, u.total_earnings, u.referral_earnings,
+                u.is_verified, u.vehicle_type, u.created_at, u.self_orders_count, u.self_bonus_paid,
+                u.nickname, u.game_high_score, u.game_total_plays, u.agreed_to_terms,
+                inviter.full_name as inviter_name,
+                inviter.avatar_url as inviter_avatar,
+                inviter.referral_code as inviter_code
+            FROM t_p25272970_courier_button_site.users u
+            LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
+            WHERE u.id = %s
         """, (user_id,))
         
         user = cur.fetchone()
@@ -1405,12 +1415,17 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         conn.commit()
         
         cur.execute("""
-            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
-                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
-                   nickname, game_high_score, game_total_plays, agreed_to_terms
-            FROM t_p25272970_courier_button_site.users
-            WHERE id = %s
+            SELECT 
+                u.id, u.oauth_id, u.oauth_provider, u.full_name, u.email, u.phone, u.city, u.avatar_url, 
+                u.referral_code, u.invited_by_user_id, u.total_orders, u.total_earnings, u.referral_earnings,
+                u.is_verified, u.vehicle_type, u.created_at, u.self_orders_count, u.self_bonus_paid,
+                u.nickname, u.game_high_score, u.game_total_plays, u.agreed_to_terms,
+                inviter.full_name as inviter_name,
+                inviter.avatar_url as inviter_avatar,
+                inviter.referral_code as inviter_code
+            FROM t_p25272970_courier_button_site.users u
+            LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
+            WHERE u.id = %s
         """, (user_id,))
         
         user = cur.fetchone()
@@ -1434,12 +1449,17 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         conn.commit()
         
         cur.execute("""
-            SELECT id, oauth_id, oauth_provider, full_name, email, phone, city, avatar_url, 
-                   referral_code, invited_by_user_id, total_orders, total_earnings, referral_earnings,
-                   is_verified, vehicle_type, created_at, self_orders_count, self_bonus_paid,
-                   nickname, game_high_score, game_total_plays, agreed_to_terms
-            FROM t_p25272970_courier_button_site.users
-            WHERE id = %s
+            SELECT 
+                u.id, u.oauth_id, u.oauth_provider, u.full_name, u.email, u.phone, u.city, u.avatar_url, 
+                u.referral_code, u.invited_by_user_id, u.total_orders, u.total_earnings, u.referral_earnings,
+                u.is_verified, u.vehicle_type, u.created_at, u.self_orders_count, u.self_bonus_paid,
+                u.nickname, u.game_high_score, u.game_total_plays, u.agreed_to_terms,
+                inviter.full_name as inviter_name,
+                inviter.avatar_url as inviter_avatar,
+                inviter.referral_code as inviter_code
+            FROM t_p25272970_courier_button_site.users u
+            LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
+            WHERE u.id = %s
         """, (user_id,))
         
         user = cur.fetchone()
