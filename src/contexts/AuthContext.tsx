@@ -18,9 +18,6 @@ interface User {
   vehicle_type?: string;
   created_at?: string;
   invited_by_user_id?: number;
-  inviter_name?: string;
-  inviter_avatar?: string;
-  inviter_code?: string;
   self_orders_count?: number;
   self_bonus_paid?: boolean;
   nickname?: string;

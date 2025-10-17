@@ -12,7 +12,6 @@ import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
 import GameTab from '@/components/GameTab';
 import StartupPayoutModal from '@/components/StartupPayoutModal';
 import StartupBonusNotification from '@/components/StartupBonusNotification';
-import InviterCard from '@/components/InviterCard';
 
 
 interface Stats {
@@ -34,7 +33,6 @@ interface Referral {
   bonus_paid: boolean;
   created_at: string;
   city: string;
-  avatar_url?: string;
 }
 
 interface WithdrawalRequest {
@@ -269,15 +267,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Inviter Card - показываем кто пригласил */}
-        {user?.inviter_name && (
-          <InviterCard 
-            inviterName={user.inviter_name}
-            inviterAvatar={user.inviter_avatar}
-            inviterCode={user.inviter_code}
-          />
-        )}
-
         {/* Copy Referral Link Button */}
         <div className="mb-4 sm:mb-6">
           <Button
@@ -435,26 +424,13 @@ export default function Dashboard() {
                 <Card key={ref.id} className="bg-white border-3 border-black rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] p-3 sm:p-4">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                        {ref.avatar_url ? (
-                          <img 
-                            src={ref.avatar_url} 
-                            alt={ref.full_name}
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] flex-shrink-0">
-                            <Icon name="User" className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-black flex-shrink-0">
+                          <Icon name="User" className="h-4 w-4 sm:h-5 sm:w-5 text-black" />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-extrabold text-black text-sm sm:text-base truncate">{ref.full_name}</h4>
                           <p className="text-xs text-black/70 font-bold truncate">{ref.city}</p>
-                          {ref.created_at && (
-                            <p className="text-xs text-black/50 font-bold">
-                              Присоединился: {new Date(ref.created_at).toLocaleDateString('ru-RU')}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
