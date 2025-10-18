@@ -113,6 +113,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_startup_payout(event, headers)
     elif route == 'startup-notification':
         return handle_startup_notification(event, headers)
+    elif route == 'news':
+        return handle_news(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -4301,6 +4303,53 @@ def handle_startup_notification(event: Dict[str, Any], headers: Dict[str, str]) 
             'statusCode': 200,
             'headers': headers,
             'body': json.dumps({'success': True, 'message': 'Notification marked as seen'}),
+            'isBase64Encoded': False
+        }
+    
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_news(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'list')
+    
+    print(f'>>> Handler вызван: method={method}, route=news, action={action}')
+    
+    if method == 'GET' and action == 'list':
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Unauthorized'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT id, type, message, user_id, user_name, amount, referrer_name, created_at
+            FROM t_p25272970_courier_button_site.news_events
+            ORDER BY created_at DESC
+            LIMIT 100
+        """)
+        
+        events = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'events': convert_decimals(events)}),
             'isBase64Encoded': False
         }
     
