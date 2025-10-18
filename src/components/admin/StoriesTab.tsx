@@ -31,11 +31,7 @@ interface Story {
   updatedAt: string;
 }
 
-interface StoriesTabProps {
-  authToken: string;
-}
-
-export default function StoriesTab({ authToken }: StoriesTabProps) {
+export default function StoriesTab() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -230,13 +226,13 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
       </div>
 
       {showCreateForm && (
-        <Card className="p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-          <h3 className="text-xl font-extrabold mb-4">
+        <Card className="p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] bg-white">
+          <h3 className="text-xl font-extrabold mb-4 text-gray-900">
             {editingStory ? 'Редактировать историю' : 'Новая история'}
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold mb-2">
+              <label className="block text-sm font-bold mb-2 text-gray-900">
                 Заголовок <span className="text-red-500">*</span>
               </label>
               <Input
@@ -248,7 +244,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Описание</label>
+              <label className="block text-sm font-bold mb-2 text-gray-900">Описание</label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -259,7 +255,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">
+              <label className="block text-sm font-bold mb-2 text-gray-900">
                 URL изображения <span className="text-red-500">*</span>
               </label>
               <Input
@@ -281,7 +277,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold mb-2">Текст кнопки</label>
+                <label className="block text-sm font-bold mb-2 text-gray-900">Текст кнопки</label>
                 <Input
                   value={formData.buttonText}
                   onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
@@ -291,7 +287,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-bold mb-2">Ссылка кнопки</label>
+                <label className="block text-sm font-bold mb-2 text-gray-900">Ссылка кнопки</label>
                 <Input
                   value={formData.buttonLink}
                   onChange={(e) => setFormData({ ...formData, buttonLink: e.target.value })}
@@ -302,7 +298,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Позиция (порядок)</label>
+              <label className="block text-sm font-bold mb-2 text-gray-900">Позиция (порядок)</label>
               <Input
                 type="number"
                 value={formData.position}
@@ -319,7 +315,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold mb-2">Тип анимации</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Тип анимации</label>
                   <Select
                     value={formData.animationType}
                     onValueChange={(value) => setFormData({ ...formData, animationType: value })}
@@ -338,7 +334,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
                 {formData.animationType === 'falling' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2">URL падающих элементов</label>
+                      <label className="block text-sm font-bold mb-2 text-gray-900">URL падающих элементов</label>
                       <Input
                         value={formData.animationConfig.fallingImage}
                         onChange={(e) => setFormData({
@@ -361,7 +357,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold mb-2">Количество</label>
+                        <label className="block text-sm font-bold mb-2 text-gray-900">Количество</label>
                         <Input
                           type="number"
                           value={formData.animationConfig.fallingCount}
@@ -374,7 +370,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-bold mb-2">Скорость (мс)</label>
+                        <label className="block text-sm font-bold mb-2 text-gray-900">Скорость (мс)</label>
                         <Input
                           type="number"
                           value={formData.animationConfig.fallingSpeed}
@@ -392,7 +388,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
                 {formData.animationType === 'jumping' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2">URL персонажа</label>
+                      <label className="block text-sm font-bold mb-2 text-gray-900">URL персонажа</label>
                       <Input
                         value={formData.animationConfig.jumpingImage}
                         onChange={(e) => setFormData({
@@ -414,7 +410,7 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold mb-2">Позиция персонажа</label>
+                      <label className="block text-sm font-bold mb-2 text-gray-900">Позиция персонажа</label>
                       <Select
                         value={formData.animationConfig.jumpingPosition}
                         onValueChange={(value) => setFormData({

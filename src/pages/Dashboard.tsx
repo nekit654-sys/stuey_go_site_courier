@@ -13,7 +13,8 @@ import GameTab from '@/components/GameTab';
 import StartupPayoutModal from '@/components/StartupPayoutModal';
 import StartupBonusNotification from '@/components/StartupBonusNotification';
 import InviterCard from '@/components/InviterCard';
-import StoriesTab from '@/components/admin/StoriesTab';
+import StoriesCarousel from '@/components/StoriesCarousel';
+import StoriesViewer from '@/components/StoriesViewer';
 
 
 interface Stats {
@@ -56,10 +57,11 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'stories'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile'>('stats');
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
+  const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -176,7 +178,7 @@ export default function Dashboard() {
     fetchStats();
   };
 
-  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'stories') => {
+  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile') => {
     setActiveTab(tab);
     if (tab === 'stats' || tab === 'referrals') {
       fetchStats();
@@ -279,6 +281,11 @@ export default function Dashboard() {
           />
         )}
 
+        {/* Stories Carousel */}
+        <div className="mb-4 sm:mb-6">
+          <StoriesCarousel onStoryClick={(id) => setSelectedStoryId(id)} />
+        </div>
+
         {/* Copy Referral Link Button */}
         <div className="mb-4 sm:mb-6">
           <Button
@@ -354,18 +361,6 @@ export default function Dashboard() {
           >
             <Icon name="User" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
             <span className="hidden xs:inline">Профиль</span>
-          </Button>
-          <Button
-            variant={activeTab === 'stories' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('stories')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'stories' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="Sparkles" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
-            <span className="hidden xs:inline">Истории</span>
           </Button>
         </div>
 
@@ -524,11 +519,6 @@ export default function Dashboard() {
           <GameTab userId={user.id} />
         )}
 
-        {/* Stories Tab */}
-        {activeTab === 'stories' && (
-          <StoriesTab />
-        )}
-
         {/* Profile Tab */}
         {activeTab === 'profile' && (
           <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
@@ -567,6 +557,14 @@ export default function Dashboard() {
         <StartupPayoutModal
           userId={user.id}
           onClose={() => setShowStartupPayoutModal(false)}
+        />
+      )}
+
+      {/* Stories Viewer */}
+      {selectedStoryId && (
+        <StoriesViewer
+          initialStoryId={selectedStoryId}
+          onClose={() => setSelectedStoryId(null)}
         />
       )}
 
