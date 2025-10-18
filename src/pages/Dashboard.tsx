@@ -81,9 +81,8 @@ export default function Dashboard() {
         fetchWithdrawalRequests();
         fetchStories();
       }
+      setLoading(false);
     }
-
-    setLoading(false);
   }, [isAuthenticated, navigate, user?.id]);
 
   useEffect(() => {
