@@ -95,11 +95,13 @@ export default function StoriesTab() {
         resetForm();
         fetchStories();
       } else {
-        toast.error('Ошибка создания истории');
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Ошибка создания истории');
+        console.error('Create error:', errorData);
       }
     } catch (error) {
       toast.error('Ошибка создания истории');
-      console.error(error);
+      console.error('Create exception:', error);
     }
   };
 
@@ -123,11 +125,13 @@ export default function StoriesTab() {
         resetForm();
         fetchStories();
       } else {
-        toast.error('Ошибка обновления истории');
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Ошибка обновления истории');
+        console.error('Update error:', errorData);
       }
     } catch (error) {
       toast.error('Ошибка обновления истории');
-      console.error(error);
+      console.error('Update exception:', error);
     }
   };
 
@@ -143,10 +147,45 @@ export default function StoriesTab() {
         toast.success('История удалена');
         fetchStories();
       } else {
-        toast.error('Ошибка удаления истории');
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Ошибка удаления истории');
+        console.error('Delete error:', errorData);
       }
     } catch (error) {
       toast.error('Ошибка удаления истории');
+      console.error('Delete exception:', error);
+    }
+  };
+
+  const handleToggleActive = async (story: Story) => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: story.id,
+          title: story.title,
+          description: story.description,
+          imageUrl: story.imageUrl,
+          buttonText: story.buttonText,
+          buttonLink: story.buttonLink,
+          position: story.position,
+          animationType: story.animationType,
+          animationConfig: story.animationConfig,
+          isActive: !story.isActive,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(story.isActive ? 'История скрыта' : 'История показана');
+        fetchStories();
+      } else {
+        toast.error('Ошибка обновления истории');
+      }
+    } catch (error) {
+      toast.error('Ошибка обновления истории');
       console.error(error);
     }
   };
@@ -501,6 +540,17 @@ export default function StoriesTab() {
                   >
                     <Icon name="Edit" size={16} className="mr-1" />
                     Изменить
+                  </Button>
+                  <Button
+                    onClick={() => handleToggleActive(story)}
+                    size="sm"
+                    className={`border-2 border-black font-bold ${
+                      story.isActive 
+                        ? 'bg-orange-400 hover:bg-orange-500 text-black' 
+                        : 'bg-green-400 hover:bg-green-500 text-black'
+                    }`}
+                  >
+                    <Icon name={story.isActive ? 'EyeOff' : 'Eye'} size={16} />
                   </Button>
                   <Button
                     onClick={() => handleDelete(story.id)}

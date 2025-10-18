@@ -64,7 +64,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   }
 
   return (
-    <div className="w-full bg-white border-t-4 border-b-4 border-black py-4 shadow-[0_4px_0_0_rgba(0,0,0,0.3)]">
+    <div className="w-full border-t-4 border-b-4 border-black py-4">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center gap-3 mb-3">
           <Icon name="Sparkles" size={20} className="text-black" />
