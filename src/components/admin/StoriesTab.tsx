@@ -62,7 +62,7 @@ export default function StoriesTab() {
   const fetchStories = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e');
+      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?admin=true');
       const data = await response.json();
       
       const allStories = data.stories || [];
@@ -193,6 +193,9 @@ export default function StoriesTab() {
 
   const handleEdit = (story: Story) => {
     setEditingStory(story);
+    
+    const config = story.animationConfig || {};
+    
     setFormData({
       title: story.title,
       description: story.description,
@@ -201,17 +204,16 @@ export default function StoriesTab() {
       buttonLink: story.buttonLink || '',
       position: story.position,
       animationType: story.animationType || '',
-      animationConfig: story.animationConfig || {
-        fallingImage: '',
-        fallingCount: 15,
-        fallingSpeed: 100,
-        jumpingImage: '',
-        jumpingPosition: 'bottom-left',
+      animationConfig: {
+        fallingImage: config.fallingImage || '',
+        fallingCount: config.fallingCount || 15,
+        fallingSpeed: config.fallingSpeed || 100,
+        jumpingImage: config.jumpingImage || '',
+        jumpingPosition: config.jumpingPosition || 'bottom-left',
       },
     });
     setShowCreateForm(true);
     
-    // Прокрутка к форме
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
@@ -261,7 +263,13 @@ export default function StoriesTab() {
           </Button>
           
           <Button
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => {
+              if (showCreateForm) {
+                resetForm();
+              } else {
+                setShowCreateForm(true);
+              }
+            }}
             className="bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
           >
             <Icon name={showCreateForm ? 'X' : 'Plus'} size={20} className="mr-2" />

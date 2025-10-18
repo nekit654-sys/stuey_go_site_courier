@@ -64,25 +64,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     params = event.get('queryStringParameters') or {}
     user_id = params.get('user_id')
+    is_admin = params.get('admin') == 'true'
     
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute("""
-        SELECT 
-            s.id, s.title, s.description, s.image_url, 
-            s.button_text, s.button_link, s.is_active, s.position,
-            s.animation_type, s.animation_config,
-            s.created_at, s.updated_at,
-            CASE 
-                WHEN sv.user_id IS NOT NULL THEN true 
-                ELSE false 
-            END as is_viewed
-        FROM stories s
-        LEFT JOIN story_views sv ON s.id = sv.story_id AND sv.user_id = %s
-        WHERE s.is_active = true
-        ORDER BY s.position ASC, s.created_at DESC
-    """, (user_id,))
+    if is_admin:
+        cursor.execute("""
+            SELECT 
+                s.id, s.title, s.description, s.image_url, 
+                s.button_text, s.button_link, s.is_active, s.position,
+                s.animation_type, s.animation_config,
+                s.created_at, s.updated_at,
+                false as is_viewed
+            FROM stories s
+            ORDER BY s.position ASC, s.created_at DESC
+        """)
+    else:
+        cursor.execute("""
+            SELECT 
+                s.id, s.title, s.description, s.image_url, 
+                s.button_text, s.button_link, s.is_active, s.position,
+                s.animation_type, s.animation_config,
+                s.created_at, s.updated_at,
+                CASE 
+                    WHEN sv.user_id IS NOT NULL THEN true 
+                    ELSE false 
+                END as is_viewed
+            FROM stories s
+            LEFT JOIN story_views sv ON s.id = sv.story_id AND sv.user_id = %s
+            WHERE s.is_active = true
+            ORDER BY s.position ASC, s.created_at DESC
+        """, (user_id,))
     
     stories = cursor.fetchall()
     cursor.close()
