@@ -115,10 +115,15 @@ export default function Dashboard() {
   }, [activeTab, isAuthenticated]);
 
   const fetchStats = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !token) return;
 
     try {
-      const response = await fetch(`${API_URL}?route=referrals&action=stats&user_id=${user.id}`);
+      const response = await fetch(`${API_URL}?route=referrals&action=stats&user_id=${user.id}`, {
+        headers: {
+          'X-User-Id': user.id.toString(),
+          'X-Auth-Token': token,
+        },
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -130,10 +135,15 @@ export default function Dashboard() {
   };
 
   const fetchReferrals = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !token) return;
 
     try {
-      const response = await fetch(`${API_URL}?route=referrals&action=list&user_id=${user.id}`);
+      const response = await fetch(`${API_URL}?route=referrals&action=list&user_id=${user.id}`, {
+        headers: {
+          'X-User-Id': user.id.toString(),
+          'X-Auth-Token': token,
+        },
+      });
       const data = await response.json();
 
       if (data.success) {

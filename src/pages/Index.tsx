@@ -68,7 +68,6 @@ const Index = () => {
       const hasSeenStoriesBefore = localStorage.getItem('stories_seen');
 
       if (activeStories.length > 0 && (!hasSeenStoriesBefore || hasUnviewedStories)) {
-        setShowBanner(false);
         setShowStories(true);
         localStorage.setItem('stories_seen', 'true');
       }
