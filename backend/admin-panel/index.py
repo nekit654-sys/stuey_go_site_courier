@@ -5,6 +5,14 @@ import bcrypt
 import secrets
 from typing import Dict, Any
 
+def log_activity(cursor, event_type: str, message: str, data: Dict = None):
+    """Логирование события в таблицу activity_log"""
+    cursor.execute("""
+        INSERT INTO t_p25272970_courier_button_site.activity_log 
+        (event_type, message, data, created_at)
+        VALUES (%s, %s, %s, NOW())
+    """, (event_type, message, json.dumps(data) if data else None))
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Админ API для просмотра заявок на выплаты и управления пользователями
@@ -57,6 +65,32 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         query_params = event.get('queryStringParameters') or {}
         action = query_params.get('action', 'payouts')
+        
+        # Получение ленты активности
+        if method == 'GET' and action == 'activity':
+            cursor.execute("""
+                SELECT id, event_type, message, data, created_at 
+                FROM t_p25272970_courier_button_site.activity_log 
+                ORDER BY created_at DESC 
+                LIMIT 50
+            """)
+            rows = cursor.fetchall()
+            activities = []
+            for row in rows:
+                activities.append({
+                    'id': str(row[0]),
+                    'type': row[1],
+                    'message': row[2],
+                    'data': row[3],
+                    'timestamp': row[4].isoformat() if row[4] else None
+                })
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'activities': activities}),
+                'isBase64Encoded': False
+            }
         
         if method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
@@ -167,7 +201,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cursor.execute("""
                     INSERT INTO t_p25272970_courier_button_site.admins (username, password_hash, created_at, updated_at)
                     VALUES (%s, %s, NOW(), NOW())
+                    RETURNING id
                 """, (username, password_hash))
+                admin_id = cursor.fetchone()[0]
+                
+                log_activity(cursor, 'admin_created', f'Создан новый администратор: {username}', {'admin_id': admin_id})
                 conn.commit()
                 
                 return {
@@ -189,9 +227,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cursor.execute(
+                    "SELECT username FROM t_p25272970_courier_button_site.admins WHERE id = %s",
+                    (admin_id,)
+                )
+                admin = cursor.fetchone()
+                username = admin[0] if admin else 'Неизвестно'
+                
+                cursor.execute(
                     "DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s",
                     (admin_id,)
                 )
+                
+                log_activity(cursor, 'admin_deleted', f'Удалён администратор: {username}', {'admin_id': admin_id})
                 conn.commit()
                 
                 return {

@@ -7,7 +7,7 @@ def log_activity(conn, event_type: str, message: str, data: Dict = None):
     cur = conn.cursor()
     data_json = json.dumps(data) if data else None
     cur.execute(
-        'INSERT INTO activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        'INSERT INTO t_p25272970_courier_button_site.activity_log (event_type, message, data) VALUES (%s, %s, %s)',
         (event_type, message, data_json)
     )
     cur.close()
@@ -104,10 +104,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur = conn.cursor()
             
             cur.execute("""
+                SELECT name FROM t_p25272970_courier_button_site.payout_requests
+                WHERE id = %s
+            """, (request_id,))
+            payout = cur.fetchone()
+            courier_name = payout[0] if payout else 'Неизвестно'
+            
+            cur.execute("""
                 UPDATE t_p25272970_courier_button_site.payout_requests
                 SET status = %s, updated_at = NOW()
                 WHERE id = %s
             """, (status, request_id))
+            
+            status_text = {'pending': 'На рассмотрении', 'approved': 'Одобрена', 'rejected': 'Отклонена', 'paid': 'Выплачено'}
+            log_activity(conn, 'payout_status_changed', 
+                        f'Заявка курьера {courier_name} изменена на "{status_text.get(status, status)}"',
+                        {'request_id': request_id, 'status': status, 'courier_name': courier_name})
             
             conn.commit()
             cur.close()
@@ -150,9 +162,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur = conn.cursor()
             
             cur.execute("""
+                SELECT name FROM t_p25272970_courier_button_site.payout_requests
+                WHERE id = %s
+            """, (request_id,))
+            payout = cur.fetchone()
+            courier_name = payout[0] if payout else 'Неизвестно'
+            
+            cur.execute("""
                 DELETE FROM t_p25272970_courier_button_site.payout_requests
                 WHERE id = %s
             """, (request_id,))
+            
+            log_activity(conn, 'payout_deleted', 
+                        f'Удалена заявка на выплату от {courier_name}',
+                        {'request_id': request_id, 'courier_name': courier_name})
             
             conn.commit()
             cur.close()

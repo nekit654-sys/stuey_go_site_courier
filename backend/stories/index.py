@@ -20,7 +20,7 @@ def log_activity(conn, event_type: str, message: str, data: Optional[Dict] = Non
     cursor = conn.cursor()
     data_json = json.dumps(data) if data else None
     cursor.execute(
-        'INSERT INTO activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        'INSERT INTO t_p25272970_courier_button_site.activity_log (event_type, message, data) VALUES (%s, %s, %s)',
         (event_type, message, data_json)
     )
     cursor.close()
@@ -92,7 +92,7 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 s.animation_type, s.animation_config,
                 s.created_at, s.updated_at,
                 FALSE as is_viewed
-            FROM stories s
+            FROM t_p25272970_courier_button_site.stories s
             ORDER BY s.position ASC, s.created_at DESC
         """)
     else:
@@ -106,8 +106,8 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                     WHEN sv.user_id IS NOT NULL THEN TRUE 
                     ELSE FALSE 
                 END as is_viewed
-            FROM stories s
-            LEFT JOIN story_views sv ON s.id = sv.story_id AND sv.user_id = %s
+            FROM t_p25272970_courier_button_site.stories s
+            LEFT JOIN t_p25272970_courier_button_site.story_views sv ON s.id = sv.story_id AND sv.user_id = %s
             WHERE s.is_active = TRUE
             ORDER BY s.position ASC, s.created_at DESC
         """, (user_id,))
@@ -167,7 +167,7 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     animation_config_json = json.dumps(animation_config) if animation_config else None
     
     cursor.execute("""
-        INSERT INTO stories 
+        INSERT INTO t_p25272970_courier_button_site.stories 
         (title, description, image_url, button_text, button_link, position, animation_type, animation_config, is_active)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id, title, description, image_url, button_text, button_link, 
@@ -252,7 +252,7 @@ def update_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     update_values.append(story_id)
     
     query = f"""
-        UPDATE stories 
+        UPDATE t_p25272970_courier_button_site.stories 
         SET {', '.join(update_fields)}
         WHERE id = %s
         RETURNING id, title, description, image_url, button_text, button_link,
@@ -313,7 +313,7 @@ def delete_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT title FROM stories WHERE id = %s', (story_id,))
+    cursor.execute('SELECT title FROM t_p25272970_courier_button_site.stories WHERE id = %s', (story_id,))
     story = cursor.fetchone()
     
     if not story:
@@ -328,7 +328,7 @@ def delete_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     
     story_title = story['title']
     
-    cursor.execute('DELETE FROM stories WHERE id = %s RETURNING id', (story_id,))
+    cursor.execute('DELETE FROM t_p25272970_courier_button_site.stories WHERE id = %s RETURNING id', (story_id,))
     deleted = cursor.fetchone()
     
     if deleted:
@@ -351,7 +351,7 @@ def get_activity(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     
     cursor.execute("""
         SELECT id, event_type, message, data, created_at
-        FROM activity_log
+        FROM t_p25272970_courier_button_site.activity_log
         ORDER BY created_at DESC
         LIMIT 50
     """)
