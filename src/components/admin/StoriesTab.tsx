@@ -45,7 +45,7 @@ export default function StoriesTab() {
     buttonText: '',
     buttonLink: '',
     position: 0,
-    animationType: '',
+    animationType: 'none',
     animationConfig: {
       fallingImage: '',
       fallingCount: 15,
@@ -203,7 +203,7 @@ export default function StoriesTab() {
       buttonText: story.buttonText || '',
       buttonLink: story.buttonLink || '',
       position: story.position,
-      animationType: story.animationType || '',
+      animationType: story.animationType || 'none',
       animationConfig: {
         fallingImage: config.fallingImage || '',
         fallingCount: config.fallingCount || 15,
@@ -227,7 +227,7 @@ export default function StoriesTab() {
       buttonText: '',
       buttonLink: '',
       position: 0,
-      animationType: '',
+      animationType: 'none',
       animationConfig: {
         fallingImage: '',
         fallingCount: 15,
@@ -264,12 +264,9 @@ export default function StoriesTab() {
           
           <Button
             onClick={() => {
-              console.log('Кнопка создать нажата, текущее состояние:', showCreateForm);
               if (showCreateForm) {
-                console.log('Закрываем форму');
                 resetForm();
               } else {
-                console.log('Открываем форму');
                 setShowCreateForm(true);
               }
             }}
@@ -419,7 +416,7 @@ export default function StoriesTab() {
                       <SelectValue placeholder="Без анимации" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Без анимации</SelectItem>
+                      <SelectItem value="none">Без анимации</SelectItem>
                       <SelectItem value="falling">Падающие элементы</SelectItem>
                       <SelectItem value="jumping">Прыгающий персонаж</SelectItem>
                     </SelectContent>
