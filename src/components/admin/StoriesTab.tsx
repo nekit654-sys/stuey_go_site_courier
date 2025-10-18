@@ -264,9 +264,12 @@ export default function StoriesTab() {
           
           <Button
             onClick={() => {
+              console.log('Кнопка создать нажата, текущее состояние:', showCreateForm);
               if (showCreateForm) {
+                console.log('Закрываем форму');
                 resetForm();
               } else {
+                console.log('Открываем форму');
                 setShowCreateForm(true);
               }
             }}
