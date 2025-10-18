@@ -8,6 +8,8 @@ import UnifiedCsvUploadTab from './UnifiedCsvUploadTab';
 import WithdrawalRequestsTab from './WithdrawalRequestsTab';
 import AdminFinances from './AdminFinances';
 import StartupPayoutTab from './StartupPayoutTab';
+import StoriesTab from './StoriesTab';
+import NewsTab from './NewsTab';
 
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 import { Courier } from './payments/types';
@@ -32,6 +34,8 @@ interface CompactAdminTabsProps {
   onRefreshReferrals: () => void;
   onDeleteAllUsers?: () => void;
   onViewImage?: (url: string) => void;
+  pendingRequestsCount?: number;
+  pendingWithdrawalsCount?: number;
 }
 
 export default function CompactAdminTabs({
@@ -54,17 +58,33 @@ export default function CompactAdminTabs({
   onRefreshReferrals,
   onDeleteAllUsers,
   onViewImage,
+  pendingRequestsCount = 0,
+  pendingWithdrawalsCount = 0,
 }: CompactAdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="couriers" className="flex items-center gap-2">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="couriers" className="flex items-center gap-2 relative">
           <Icon name="Users" size={16} />
           Курьеры
+          {pendingRequestsCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+          )}
         </TabsTrigger>
-        <TabsTrigger value="payments" className="flex items-center gap-2">
+        <TabsTrigger value="payments" className="flex items-center gap-2 relative">
           <Icon name="DollarSign" size={16} />
           Выплаты
+          {pendingWithdrawalsCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="stories" className="flex items-center gap-2">
+          <Icon name="Sparkles" size={16} />
+          Истории
+        </TabsTrigger>
+        <TabsTrigger value="news" className="flex items-center gap-2">
+          <Icon name="Bell" size={16} />
+          Новости
         </TabsTrigger>
         <TabsTrigger value="finances" className="flex items-center gap-2">
           <Icon name="TrendingUp" size={16} />
@@ -173,7 +193,17 @@ export default function CompactAdminTabs({
         </Tabs>
       </TabsContent>
 
-      {/* Вкладка 3: Финансы */}
+      {/* Вкладка 3: Истории */}
+      <TabsContent value="stories" className="space-y-6">
+        <StoriesTab />
+      </TabsContent>
+
+      {/* Вкладка 4: Новости */}
+      <TabsContent value="news" className="space-y-6">
+        <NewsTab authToken={authToken} />
+      </TabsContent>
+
+      {/* Вкладка 5: Финансы */}
       <TabsContent value="finances" className="space-y-6">
         <AdminFinances authToken={authToken} />
       </TabsContent>

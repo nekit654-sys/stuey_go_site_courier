@@ -64,12 +64,12 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 border-t-4 border-b-4 border-black py-4 shadow-[0_4px_0_0_rgba(0,0,0,0.3)]">
+    <div className="w-full bg-white border-t-4 border-b-4 border-black py-4 shadow-[0_4px_0_0_rgba(0,0,0,0.3)]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center gap-3 mb-3">
           <Icon name="Sparkles" size={20} className="text-black" />
           <h3 className="font-extrabold text-black text-lg">
-            Новости и акции
+            Истории
             {hasNewStories && (
               <span className="ml-2 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             )}

@@ -7,11 +7,13 @@ import { useAdminAuth } from '@/components/admin/useAdminAuth';
 import { useAdminData } from '@/components/admin/useAdminData';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { API_URL } from '@/config/api';
 
 const Login: React.FC = () => {
   const [activeTab, setActiveTab] = useState('couriers');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
 
   const {
     credentials,
@@ -53,14 +55,37 @@ const Login: React.FC = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    if (activeTab === 'analytics') {
-      loadReferralStats();
-    } else if (activeTab === 'couriers') {
+    loadRequests();
+    loadAllCouriers();
+    loadReferralStats();
+    loadWithdrawalsCount();
+
+    const interval = setInterval(() => {
+      loadRequests();
       loadAllCouriers();
-    } else if (activeTab === 'income') {
-      loadAdmins();
+      loadReferralStats();
+      loadWithdrawalsCount();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  const loadWithdrawalsCount = async () => {
+    try {
+      const response = await fetch(`${API_URL}?route=withdrawal&action=list`, {
+        headers: {
+          'X-Auth-Token': authToken,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        const pending = (data.requests || []).filter((r: any) => r.status === 'pending').length;
+        setPendingWithdrawals(pending);
+      }
+    } catch (error) {
+      console.error('Error loading withdrawals:', error);
     }
-  }, [activeTab, isAuthenticated]);
+  };
 
   const handleLoginSuccess = async (token: string) => {
     await Promise.all([
@@ -109,6 +134,8 @@ const Login: React.FC = () => {
             onRefreshReferrals={loadReferralStats}
             onDeleteAllUsers={deleteAllUsers}
             onViewImage={setSelectedImage}
+            pendingRequestsCount={stats.new}
+            pendingWithdrawalsCount={pendingWithdrawals}
           />
         </div>
 
