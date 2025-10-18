@@ -6,7 +6,7 @@ interface ActivityEvent {
   id: string;
   type: 'courier_registered' | 'request_created' | 'payout_status_changed' | 'payout_deleted' | 
         'story_created' | 'story_updated' | 'story_deleted' | 
-        'admin_created' | 'admin_deleted';
+        'admin_created' | 'admin_deleted' | 'referral_created';
   message: string;
   timestamp: string;
   data?: any;
@@ -67,6 +67,8 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
         return 'ShieldPlus';
       case 'admin_deleted':
         return 'ShieldMinus';
+      case 'referral_created':
+        return 'Users';
       default:
         return 'Activity';
     }
@@ -92,6 +94,8 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
         return 'bg-cyan-100 text-cyan-600 border-cyan-300';
       case 'admin_deleted':
         return 'bg-rose-100 text-rose-600 border-rose-300';
+      case 'referral_created':
+        return 'bg-violet-100 text-violet-600 border-violet-300';
       default:
         return 'bg-gray-100 text-gray-600 border-gray-300';
     }

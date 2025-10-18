@@ -22,6 +22,16 @@ JWT_EXPIRATION_HOURS = 24
 
 login_attempts = {}
 
+def log_activity(conn, event_type: str, message: str, data: Dict = None):
+    """Логирование события в таблицу activity_log"""
+    cur = conn.cursor()
+    data_json = json.dumps(data) if data else None
+    cur.execute(
+        'INSERT INTO t_p25272970_courier_button_site.activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        (event_type, message, data_json)
+    )
+    cur.close()
+
 def convert_decimals(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {key: convert_decimals(value) for key, value in obj.items()}
@@ -713,6 +723,38 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
         VALUES (%s, %s, 0, false, 0)
     """, (referrer_id, user_id))
     
+    # Получаем имена курьеров для логирования
+    cur.execute("""
+        SELECT full_name, phone FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (referrer_id,))
+    referrer_info = cur.fetchone()
+    
+    cur.execute("""
+        SELECT full_name, phone FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (user_id,))
+    referred_info = cur.fetchone()
+    
+    referrer_name = referrer_info['full_name'] if referrer_info and referrer_info['full_name'] else (referrer_info['phone'] if referrer_info else f'ID {referrer_id}')
+    referred_name = referred_info['full_name'] if referred_info and referred_info['full_name'] else (referred_info['phone'] if referred_info else f'ID {user_id}')
+    
+    # Логируем событие
+    log_activity(
+        conn, 
+        'referral_created', 
+        f'Курьер {referrer_name} привел курьера {referred_name}',
+        {
+            'referrer_id': referrer_id,
+            'referrer_name': referrer_info['full_name'] if referrer_info else None,
+            'referrer_phone': referrer_info['phone'] if referrer_info else None,
+            'referred_id': user_id,
+            'referred_name': referred_info['full_name'] if referred_info else None,
+            'referred_phone': referred_info['phone'] if referred_info else None,
+            'inviter_code': inviter_code
+        }
+    )
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -1158,6 +1200,32 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                         (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
                         VALUES (%s, %s, 0, false, 0)
                     """, (referrer['id'], user_id))
+                    
+                    # Получаем имя реферера для логирования
+                    cur.execute("""
+                        SELECT full_name, phone FROM t_p25272970_courier_button_site.users
+                        WHERE id = %s
+                    """, (referrer['id'],))
+                    referrer_info = cur.fetchone()
+                    
+                    referrer_name = referrer_info['full_name'] if referrer_info and referrer_info['full_name'] else (referrer_info['phone'] if referrer_info else f'ID {referrer["id"]}')
+                    referred_name = full_name if full_name else email
+                    
+                    # Логируем событие
+                    log_activity(
+                        conn, 
+                        'referral_created', 
+                        f'Курьер {referrer_name} привел курьера {referred_name}',
+                        {
+                            'referrer_id': referrer['id'],
+                            'referrer_name': referrer_info['full_name'] if referrer_info else None,
+                            'referrer_phone': referrer_info['phone'] if referrer_info else None,
+                            'referred_id': user_id,
+                            'referred_name': full_name,
+                            'referred_email': email,
+                            'referral_code': referral_code
+                        }
+                    )
         
         conn.commit()
         cur.execute("""
