@@ -57,6 +57,15 @@ def record_login_attempt(username: str):
         login_attempts[username] = []
     login_attempts[username].append(datetime.now())
 
+def log_activity(conn, event_type: str, message: str, data: Dict = None):
+    cur = conn.cursor()
+    data_json = json.dumps(data) if data else None
+    cur.execute(
+        'INSERT INTO activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        (event_type, message, data_json)
+    )
+    cur.close()
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
     
@@ -1126,6 +1135,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             """, (oauth_id, provider, full_name, email, phone, avatar_url, generated_ref_code))
             
             user_id = cur.fetchone()['id']
+            
+            log_activity(conn, 'courier_registered', f'Зарегистрирован новый курьер: {full_name or email}', {'user_id': user_id, 'provider': provider})
             
             if referral_code:
                 cur.execute("""
@@ -2580,6 +2591,8 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
         """, (user_id, amount, sbp_phone, sbp_bank_name))
         
         request_id = cur.fetchone()['id']
+        
+        log_activity(conn, 'request_created', f'Новая заявка на вывод: {amount}₽', {'request_id': request_id, 'user_id': user_id, 'amount': float(amount)})
         
         conn.commit()
         cur.close()

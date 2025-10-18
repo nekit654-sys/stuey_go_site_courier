@@ -37,6 +37,7 @@ export default function StoriesTab() {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingStory, setEditingStory] = useState<Story | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -527,6 +528,14 @@ export default function StoriesTab() {
 
             <div className="flex gap-3 pt-4 border-t-3 border-black">
               <Button
+                onClick={() => setShowPreview(true)}
+                variant="outline"
+                className="border-3 border-black font-extrabold hover:bg-blue-50"
+              >
+                <Icon name="Eye" size={20} className="mr-2" />
+                Предпросмотр
+              </Button>
+              <Button
                 onClick={editingStory ? handleUpdate : handleCreate}
                 className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
               >
@@ -618,6 +627,45 @@ export default function StoriesTab() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {showPreview && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowPreview(false)}
+        >
+          <div 
+            className="relative w-full max-w-md aspect-[9/16] bg-white rounded-3xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPreview(false)}
+              className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full border-2 border-black shadow-lg hover:bg-white"
+            >
+              <Icon name="X" size={20} />
+            </button>
+
+            <div className="relative w-full h-full">
+              <img
+                src={formData.imageUrl || 'https://via.placeholder.com/400x700?text=No+Image'}
+                alt={formData.title}
+                className="w-full h-full object-cover"
+              />
+
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                <h3 className="text-white text-2xl font-extrabold mb-2">{formData.title || 'Без заголовка'}</h3>
+                {formData.description && (
+                  <p className="text-white/90 text-sm mb-4">{formData.description}</p>
+                )}
+                {formData.buttonText && (
+                  <button className="w-full bg-white text-black font-extrabold py-3 px-6 rounded-full border-2 border-black shadow-lg">
+                    {formData.buttonText}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

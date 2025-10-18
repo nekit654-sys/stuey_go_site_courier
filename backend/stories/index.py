@@ -16,6 +16,15 @@ def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
     return psycopg2.connect(dsn, cursor_factory=RealDictCursor)
 
+def log_activity(conn, event_type: str, message: str, data: Optional[Dict] = None):
+    cursor = conn.cursor()
+    data_json = json.dumps(data) if data else None
+    cursor.execute(
+        'INSERT INTO activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        (event_type, message, data_json)
+    )
+    cursor.close()
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method: str = event.get('httpMethod', 'GET')
     
@@ -38,6 +47,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     }
     
     try:
+        params = event.get('queryStringParameters') or {}
+        action = params.get('action')
+        
+        if action == 'activity':
+            return get_activity(event, headers)
+        
         if method == 'GET':
             return get_stories(event, headers)
         elif method == 'POST':
@@ -160,6 +175,9 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     """, (title, description, image_url, button_text, button_link, position, animation_type, animation_config_json, True))
     
     story = cursor.fetchone()
+    
+    log_activity(conn, 'story_created', f'Создана история: {story["title"]}', {'story_id': story['id']})
+    
     conn.commit()
     cursor.close()
     conn.close()
@@ -243,17 +261,22 @@ def update_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     
     cursor.execute(query, update_values)
     story = cursor.fetchone()
-    conn.commit()
-    cursor.close()
-    conn.close()
     
     if not story:
+        cursor.close()
+        conn.close()
         return {
             'statusCode': 404,
             'headers': headers,
             'body': json.dumps({'error': 'Story not found'}),
             'isBase64Encoded': False
         }
+    
+    log_activity(conn, 'story_updated', f'Обновлена история: {story["title"]}', {'story_id': story['id']})
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
     
     return {
         'statusCode': 200,
@@ -290,7 +313,27 @@ def delete_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('DELETE FROM stories WHERE id = %s', (story_id,))
+    cursor.execute('SELECT title FROM stories WHERE id = %s', (story_id,))
+    story = cursor.fetchone()
+    
+    if not story:
+        cursor.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'error': 'Story not found'}),
+            'isBase64Encoded': False
+        }
+    
+    story_title = story['title']
+    
+    cursor.execute('DELETE FROM stories WHERE id = %s RETURNING id', (story_id,))
+    deleted = cursor.fetchone()
+    
+    if deleted:
+        log_activity(conn, 'story_deleted', f'Удалена история: {story_title}', {'story_id': int(story_id)})
+    
     conn.commit()
     cursor.close()
     conn.close()
@@ -298,6 +341,38 @@ def delete_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({'success': true, 'message': 'Story deactivated'}),
+        'body': json.dumps({'success': True, 'message': 'Story deleted'}),
+        'isBase64Encoded': False
+    }
+
+def get_activity(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT id, event_type, message, data, created_at
+        FROM activity_log
+        ORDER BY created_at DESC
+        LIMIT 50
+    """)
+    
+    activities = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    activities_list = []
+    for activity in activities:
+        activities_list.append({
+            'id': str(activity['id']),
+            'type': activity['event_type'],
+            'message': activity['message'],
+            'timestamp': activity['created_at'].isoformat() if activity['created_at'] else None,
+            'data': activity['data']
+        })
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'activities': activities_list}),
         'isBase64Encoded': False
     }

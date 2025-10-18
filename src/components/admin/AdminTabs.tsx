@@ -8,6 +8,7 @@ import FinalPaymentsTab from './FinalPaymentsTab';
 import WithdrawalRequestsTab from './WithdrawalRequestsTab';
 import AdminFinances from './AdminFinances';
 import StoriesTab from './StoriesTab';
+import ActivityTab from './ActivityTab';
 
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
@@ -56,7 +57,11 @@ export default function AdminTabs({
 }: AdminTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-7">
+        <TabsTrigger value="activity" className="flex items-center gap-2">
+          <Icon name="Activity" size={16} />
+          Активность
+        </TabsTrigger>
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           Заявки
@@ -134,6 +139,10 @@ export default function AdminTabs({
 
       <TabsContent value="stories" className="space-y-6">
         <StoriesTab authToken={authToken} />
+      </TabsContent>
+
+      <TabsContent value="activity" className="space-y-6">
+        <ActivityTab authToken={authToken} />
       </TabsContent>
     </Tabs>
   );

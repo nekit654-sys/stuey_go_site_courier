@@ -3,6 +3,15 @@ import os
 import psycopg2
 from typing import Dict, Any
 
+def log_activity(conn, event_type: str, message: str, data: Dict = None):
+    cur = conn.cursor()
+    data_json = json.dumps(data) if data else None
+    cur.execute(
+        'INSERT INTO activity_log (event_type, message, data) VALUES (%s, %s, %s)',
+        (event_type, message, data_json)
+    )
+    cur.close()
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Handle payout requests from couriers (save, list, update status)
@@ -233,7 +242,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             INSERT INTO t_p25272970_courier_button_site.payout_requests 
             (name, phone, city, attachment_data, status, created_at, updated_at) 
             VALUES (%s, %s, %s, %s, 'new', NOW(), NOW())
+            RETURNING id
         """, (name, phone, city, attachment_data))
+        
+        request_id = cur.fetchone()[0]
+        
+        log_activity(conn, 'request_created', f'Новая заявка на выплату от {name}', {'request_id': request_id, 'phone': phone, 'city': city})
         
         conn.commit()
         cur.close()
