@@ -611,8 +611,9 @@ export default function Dashboard() {
       )}
 
       {/* Stories Viewer */}
-      {selectedStoryId && (
+      {selectedStoryId && stories.length > 0 && (
         <StoriesViewer
+          stories={stories}
           initialStoryId={selectedStoryId}
           onClose={() => setSelectedStoryId(null)}
         />
