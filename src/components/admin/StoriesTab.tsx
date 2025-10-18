@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { createInitialStories } from '@/utils/createInitialStories';
+import ImageUploader from './ImageUploader';
 
 interface AnimationConfig {
   fallingImage?: string;
@@ -307,23 +308,20 @@ export default function StoriesTab() {
 
             <div>
               <label className="block text-sm font-bold mb-2 text-gray-900">
-                URL изображения <span className="text-red-500">*</span>
+                Главное изображение истории <span className="text-red-500">*</span>
               </label>
+              <ImageUploader
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                label="Загрузить главное фото"
+                previewClassName="w-48 h-32"
+              />
               <Input
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://cdn.poehali.dev/files/..."
-                className="border-3 border-black"
+                placeholder="или вставьте URL: https://cdn.poehali.dev/files/..."
+                className="border-3 border-black mt-2"
               />
-              {formData.imageUrl && (
-                <div className="mt-2">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Превью"
-                    className="w-32 h-20 object-cover rounded border-2 border-black"
-                  />
-                </div>
-              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -385,25 +383,25 @@ export default function StoriesTab() {
                 {formData.animationType === 'falling' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-gray-900">URL падающих элементов</label>
+                      <label className="block text-sm font-bold mb-2 text-gray-900">Изображение падающих элементов</label>
+                      <ImageUploader
+                        value={formData.animationConfig.fallingImage || ''}
+                        onChange={(url) => setFormData({
+                          ...formData,
+                          animationConfig: { ...formData.animationConfig, fallingImage: url }
+                        })}
+                        label="Загрузить картинку эффекта"
+                        previewClassName="w-16 h-16"
+                      />
                       <Input
                         value={formData.animationConfig.fallingImage}
                         onChange={(e) => setFormData({
                           ...formData,
                           animationConfig: { ...formData.animationConfig, fallingImage: e.target.value }
                         })}
-                        placeholder="https://cdn.poehali.dev/files/..."
-                        className="border-3 border-black"
+                        placeholder="или вставьте URL"
+                        className="border-3 border-black mt-2"
                       />
-                      {formData.animationConfig.fallingImage && (
-                        <div className="mt-2">
-                          <img
-                            src={formData.animationConfig.fallingImage}
-                            alt="Падающий элемент"
-                            className="w-16 h-10 object-contain border-2 border-black rounded"
-                          />
-                        </div>
-                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -439,25 +437,25 @@ export default function StoriesTab() {
                 {formData.animationType === 'jumping' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-gray-900">URL персонажа</label>
+                      <label className="block text-sm font-bold mb-2 text-gray-900">Изображение персонажа</label>
+                      <ImageUploader
+                        value={formData.animationConfig.jumpingImage || ''}
+                        onChange={(url) => setFormData({
+                          ...formData,
+                          animationConfig: { ...formData.animationConfig, jumpingImage: url }
+                        })}
+                        label="Загрузить персонажа"
+                        previewClassName="w-24 h-24"
+                      />
                       <Input
                         value={formData.animationConfig.jumpingImage}
                         onChange={(e) => setFormData({
                           ...formData,
                           animationConfig: { ...formData.animationConfig, jumpingImage: e.target.value }
                         })}
-                        placeholder="https://cdn.poehali.dev/files/..."
-                        className="border-3 border-black"
+                        placeholder="или вставьте URL"
+                        className="border-3 border-black mt-2"
                       />
-                      {formData.animationConfig.jumpingImage && (
-                        <div className="mt-2">
-                          <img
-                            src={formData.animationConfig.jumpingImage}
-                            alt="Персонаж"
-                            className="w-24 h-24 object-contain border-2 border-black rounded"
-                          />
-                        </div>
-                      )}
                     </div>
 
                     <div>
