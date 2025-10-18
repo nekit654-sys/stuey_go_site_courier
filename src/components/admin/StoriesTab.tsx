@@ -290,34 +290,48 @@ export default function StoriesTab() {
               </span>
             )}
           </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold mb-2 text-gray-900">
-                Заголовок <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Новая акция!"
-                className="border-3 border-black"
-              />
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-2 border-black">
+              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+                <Icon name="FileText" size={20} className="text-purple-600" />
+                Основная информация
+              </h4>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                    <Icon name="Heading" size={16} className="inline mr-1" />
+                    Заголовок <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Например: Бонус 3000₽!"
+                    className="border-3 border-black focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                    <Icon name="AlignLeft" size={16} className="inline mr-1" />
+                    Описание
+                  </label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Подробное описание акции или предложения"
+                    className="border-3 border-black focus:ring-2 focus:ring-purple-400"
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold mb-2 text-gray-900">Описание</label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Получи бонус 3000₽"
-                className="border-3 border-black"
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2 text-gray-900">
-                Главное изображение истории <span className="text-red-500">*</span>
-              </label>
+            <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg border-2 border-black">
+              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+                <Icon name="Image" size={20} className="text-green-600" />
+                Главное изображение <span className="text-red-500">*</span>
+              </h4>
               <ImageUploader
                 value={formData.imageUrl}
                 onChange={(url) => setFormData({ ...formData, imageUrl: url })}
@@ -332,42 +346,63 @@ export default function StoriesTab() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold mb-2 text-gray-900">Текст кнопки</label>
-                <Input
-                  value={formData.buttonText}
-                  onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
-                  placeholder="Подробнее"
-                  className="border-3 border-black"
-                />
-              </div>
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-black">
+              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+                <Icon name="MousePointerClick" size={20} className="text-blue-600" />
+                Кнопка внутри истории
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                    <Icon name="Type" size={16} className="inline mr-1" />
+                    Надпись на кнопке
+                  </label>
+                  <Input
+                    value={formData.buttonText}
+                    onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
+                    placeholder="Например: Подать заявку"
+                    className="border-3 border-black focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-bold mb-2 text-gray-900">Ссылка кнопки</label>
-                <Input
-                  value={formData.buttonLink}
-                  onChange={(e) => setFormData({ ...formData, buttonLink: e.target.value })}
-                  placeholder="/career"
-                  className="border-3 border-black"
-                />
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                    <Icon name="Link" size={16} className="inline mr-1" />
+                    Куда ведёт ссылка
+                  </label>
+                  <Input
+                    value={formData.buttonLink}
+                    onChange={(e) => setFormData({ ...formData, buttonLink: e.target.value })}
+                    placeholder="/career или https://..."
+                    className="border-3 border-black focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                <Icon name="Info" size={14} />
+                Это кнопка, которую увидят пользователи внутри истории
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2 text-gray-900">Позиция (порядок)</label>
+              <label className="block text-sm font-bold mb-2 text-gray-900">
+                <Icon name="Hash" size={16} className="inline mr-1" />
+                Позиция (порядок показа)
+              </label>
               <Input
                 type="number"
                 value={formData.position}
                 onChange={(e) => setFormData({ ...formData, position: parseInt(e.target.value) || 0 })}
-                className="border-3 border-black"
+                className="border-3 border-black w-32"
+                min="0"
               />
+              <p className="text-xs text-gray-500 mt-1">Истории с меньшим номером показываются первыми</p>
             </div>
 
-            <div className="border-t-3 border-black pt-4">
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg border-2 border-black">
               <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
-                <Icon name="Sparkles" size={20} />
-                Анимация
+                <Icon name="Sparkles" size={20} className="text-yellow-600" />
+                Анимация (необязательно)
               </h4>
 
               <div className="space-y-4">
@@ -490,19 +525,20 @@ export default function StoriesTab() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-4 border-t-3 border-black">
               <Button
                 onClick={editingStory ? handleUpdate : handleCreate}
-                className="bg-green-400 hover:bg-green-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+                className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
               >
                 <Icon name="Check" size={20} className="mr-2" />
-                {editingStory ? 'Обновить' : 'Создать'}
+                {editingStory ? '💾 Сохранить изменения' : '✨ Создать историю'}
               </Button>
               <Button
                 onClick={resetForm}
                 variant="outline"
-                className="border-3 border-black font-extrabold"
+                className="border-3 border-black font-extrabold hover:bg-red-50"
               >
+                <Icon name="X" size={20} className="mr-2" />
                 Отмена
               </Button>
             </div>

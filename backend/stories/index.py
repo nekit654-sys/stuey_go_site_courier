@@ -76,7 +76,7 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 s.button_text, s.button_link, s.is_active, s.position,
                 s.animation_type, s.animation_config,
                 s.created_at, s.updated_at,
-                false as is_viewed
+                FALSE as is_viewed
             FROM stories s
             ORDER BY s.position ASC, s.created_at DESC
         """)
@@ -88,12 +88,12 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
                 s.animation_type, s.animation_config,
                 s.created_at, s.updated_at,
                 CASE 
-                    WHEN sv.user_id IS NOT NULL THEN true 
-                    ELSE false 
+                    WHEN sv.user_id IS NOT NULL THEN TRUE 
+                    ELSE FALSE 
                 END as is_viewed
             FROM stories s
             LEFT JOIN story_views sv ON s.id = sv.story_id AND sv.user_id = %s
-            WHERE s.is_active = true
+            WHERE s.is_active = TRUE
             ORDER BY s.position ASC, s.created_at DESC
         """, (user_id,))
     
@@ -154,10 +154,10 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     cursor.execute("""
         INSERT INTO stories 
         (title, description, image_url, button_text, button_link, position, animation_type, animation_config, is_active)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, true)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id, title, description, image_url, button_text, button_link, 
                   animation_type, animation_config, is_active, position, created_at, updated_at
-    """, (title, description, image_url, button_text, button_link, position, animation_type, animation_config_json))
+    """, (title, description, image_url, button_text, button_link, position, animation_type, animation_config_json, True))
     
     story = cursor.fetchone()
     conn.commit()
