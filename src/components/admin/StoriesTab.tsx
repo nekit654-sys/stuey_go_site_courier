@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { createInitialStories } from '@/utils/createInitialStories';
 
 interface AnimationConfig {
   fallingImage?: string;
@@ -205,13 +206,27 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
             Управление историями на главной странице
           </p>
         </div>
-        <Button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
-        >
-          <Icon name={showCreateForm ? 'X' : 'Plus'} size={20} className="mr-2" />
-          {showCreateForm ? 'Отмена' : 'Создать историю'}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={async () => {
+              await createInitialStories();
+              fetchStories();
+              toast.success('3 истории созданы!');
+            }}
+            className="bg-green-400 hover:bg-green-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+          >
+            <Icon name="Sparkles" size={20} className="mr-2" />
+            Создать 3 готовые истории
+          </Button>
+          
+          <Button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+          >
+            <Icon name={showCreateForm ? 'X' : 'Plus'} size={20} className="mr-2" />
+            {showCreateForm ? 'Отмена' : 'Создать историю'}
+          </Button>
+        </div>
       </div>
 
       {showCreateForm && (
