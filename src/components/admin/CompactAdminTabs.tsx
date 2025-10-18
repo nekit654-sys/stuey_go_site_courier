@@ -9,7 +9,7 @@ import WithdrawalRequestsTab from './WithdrawalRequestsTab';
 import AdminFinances from './AdminFinances';
 import StartupPayoutTab from './StartupPayoutTab';
 import StoriesTab from './StoriesTab';
-import NewsTab from './NewsTab';
+import ActivityTab from './ActivityTab';
 
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 import { Courier } from './payments/types';
@@ -200,7 +200,7 @@ export default function CompactAdminTabs({
 
       {/* Вкладка 4: Новости */}
       <TabsContent value="news" className="space-y-6">
-        <NewsTab authToken={authToken} />
+        <ActivityTab authToken={authToken} />
       </TabsContent>
 
       {/* Вкладка 5: Финансы */}
