@@ -54,39 +54,13 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   }, [onUnlock]);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.innerHTML = `
-      var rad_backcolor="#ffff00"; 
-      var rad_logo = "black"; 
-      var rad_autoplay = false; 
-      var rad_width = "fixed"; 
-      var rad_width_px = 330;
-      var rad_stations =[
-        ['https://ep256.hostingradio.ru:8052/europaplus256.mp3','Европа плюс','europaplus'],
-        ['https://radiorecord.hostingradio.ru/rr_main96.aacp','Радио Рекорд','radiorecord'],
-        ['https://nashe1.hostingradio.ru/nashe-256','Наше радио','nashe'],
-        ['https://pub0202.101.ru:8443/stream/air/aac/64/99','Радио Energy','nrj'],
-        ['https://hr.amgradio.ru/Horoshee?r_bells','Хорошее радио','horoshee']
-      ];
-    `;
-    document.head.appendChild(script);
-
-    const link = document.createElement('link');
-    link.href = 'https://www.radiobells.com/script/style.css';
-    link.type = 'text/css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-
     const radioScript = document.createElement('script');
-    radioScript.type = 'text/javascript';
-    radioScript.src = 'https://www.radiobells.com/script/v2_1.js';
+    radioScript.defer = true;
+    radioScript.src = 'https://radiopotok.ru/f/script6/2b1fb3af94ad68f53cab22efe829de9a39e3907c4719d7455f86c6871a055c47.js';
     radioScript.charset = 'UTF-8';
     document.body.appendChild(radioScript);
 
     return () => {
-      document.head.removeChild(script);
-      document.head.removeChild(link);
       if (document.body.contains(radioScript)) {
         document.body.removeChild(radioScript);
       }
@@ -170,17 +144,12 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           -webkit-text-fill-color: transparent;
         }
         
-        /* Radio player text color fix */
-        #radiobells * {
-          color: #000000 !important;
+        /* Radio player styles */
+        .RP-SCRIPT {
+          background: transparent !important;
         }
-        #radiobells .station-name,
-        #radiobells .track-info,
-        #radiobells button,
-        #radiobells select,
-        #radiobells option,
-        #radiobells .volume-control {
-          color: #000000 !important;
+        .RP-SCRIPT * {
+          max-width: 100%;
         }
       `}</style>
 
@@ -276,8 +245,10 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           </Button>
 
           <div className="text-center w-full">
-            <div id="radiobells_container" className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full">
-              <a href="https://www.radiobells.com/" id="RP_link">Онлайн радио</a>
+            <div className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full">
+              <div className="RP-SCRIPT" style={{width: '640px', maxWidth: '100%'}} data-height="2">
+                <a className="RP-LINK" href="https://radiopotok.ru/">RadioPotok.ru</a>
+              </div>
             </div>
           </div>
         </div>
