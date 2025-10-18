@@ -202,18 +202,6 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
-        <Icon name="Loader2" className="h-8 w-8 animate-spin text-black" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   const handleProfileComplete = () => {
     setShowProfileSetup(false);
     fetchStats();
@@ -243,6 +231,18 @@ export default function Dashboard() {
     setSelectedStoryId(storyId);
     setShowStories(true);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
+        <Icon name="Loader2" className="h-8 w-8 animate-spin text-black" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
