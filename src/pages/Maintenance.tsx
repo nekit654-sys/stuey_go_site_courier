@@ -169,6 +169,19 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
+        
+        /* Radio player text color fix */
+        #radiobells * {
+          color: #000000 !important;
+        }
+        #radiobells .station-name,
+        #radiobells .track-info,
+        #radiobells button,
+        #radiobells select,
+        #radiobells option,
+        #radiobells .volume-control {
+          color: #000000 !important;
+        }
       `}</style>
 
       <div className="absolute top-20 left-10 w-64 h-64 bg-orange-300/20 rounded-full blur-[100px]"></div>
