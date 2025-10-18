@@ -8,6 +8,7 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { createInitialStories } from '@/utils/createInitialStories';
 import ImageUploader from './ImageUploader';
+import StoryAnimations from '@/components/StoryAnimations';
 
 interface AnimationConfig {
   fallingImage?: string;
@@ -653,7 +654,13 @@ export default function StoriesTab() {
                 className="w-full h-full object-cover"
               />
 
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+              {/* Animations */}
+              <StoryAnimations 
+                animationType={formData.animationType}
+                animationConfig={formData.animationConfig}
+              />
+
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-10">
                 <h3 className="text-white text-2xl font-extrabold mb-2">{formData.title || 'Без заголовка'}</h3>
                 {formData.description && (
                   <p className="text-white/90 text-sm mb-4">{formData.description}</p>

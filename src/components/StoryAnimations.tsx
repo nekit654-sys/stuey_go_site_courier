@@ -136,7 +136,7 @@ export default function StoryAnimations({ animationType, animationConfig }: Stor
             }
           `}
         </style>
-        <div className={`absolute ${positionClasses}`}>
+        <div className={`absolute ${positionClasses} z-20 pointer-events-none`}>
           <div className="animate-[characterJump_2s_infinite_ease-in-out]">
             <img
               src={animationConfig.jumpingImage}
