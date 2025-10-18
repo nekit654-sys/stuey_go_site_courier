@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 
+interface AnimationConfig {
+  fallingImage?: string;
+  fallingCount?: number;
+  fallingSpeed?: number;
+  jumpingImage?: string;
+  jumpingPosition?: string;
+}
+
 interface Story {
   id: number;
   title: string;
@@ -12,6 +20,8 @@ interface Story {
   isActive: boolean;
   position: number;
   isViewed: boolean;
+  animationType?: string;
+  animationConfig?: AnimationConfig;
 }
 
 interface StoriesCarouselProps {

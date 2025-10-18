@@ -3,8 +3,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+
+interface AnimationConfig {
+  fallingImage?: string;
+  fallingCount?: number;
+  fallingSpeed?: number;
+  jumpingImage?: string;
+  jumpingPosition?: string;
+}
 
 interface Story {
   id: number;
@@ -15,6 +24,8 @@ interface Story {
   buttonLink?: string;
   isActive: boolean;
   position: number;
+  animationType?: string;
+  animationConfig?: AnimationConfig;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +47,14 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
     buttonText: '',
     buttonLink: '',
     position: 0,
+    animationType: '',
+    animationConfig: {
+      fallingImage: '',
+      fallingCount: 15,
+      fallingSpeed: 100,
+      jumpingImage: '',
+      jumpingPosition: 'bottom-left',
+    },
   });
 
   useEffect(() => {
@@ -144,6 +163,14 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
       buttonText: story.buttonText || '',
       buttonLink: story.buttonLink || '',
       position: story.position,
+      animationType: story.animationType || '',
+      animationConfig: story.animationConfig || {
+        fallingImage: '',
+        fallingCount: 15,
+        fallingSpeed: 100,
+        jumpingImage: '',
+        jumpingPosition: 'bottom-left',
+      },
     });
     setShowCreateForm(true);
   };
@@ -156,6 +183,14 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
       buttonText: '',
       buttonLink: '',
       position: 0,
+      animationType: '',
+      animationConfig: {
+        fallingImage: '',
+        fallingCount: 15,
+        fallingSpeed: 100,
+        jumpingImage: '',
+        jumpingPosition: 'bottom-left',
+      },
     });
     setShowCreateForm(false);
     setEditingStory(null);
@@ -259,6 +294,132 @@ export default function StoriesTab({ authToken }: StoriesTabProps) {
                 onChange={(e) => setFormData({ ...formData, position: parseInt(e.target.value) || 0 })}
                 className="border-3 border-black"
               />
+            </div>
+
+            <div className="border-t-3 border-black pt-4">
+              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+                <Icon name="Sparkles" size={20} />
+                Анимация
+              </h4>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2">Тип анимации</label>
+                  <Select
+                    value={formData.animationType}
+                    onValueChange={(value) => setFormData({ ...formData, animationType: value })}
+                  >
+                    <SelectTrigger className="border-3 border-black">
+                      <SelectValue placeholder="Без анимации" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Без анимации</SelectItem>
+                      <SelectItem value="falling">Падающие элементы</SelectItem>
+                      <SelectItem value="jumping">Прыгающий персонаж</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.animationType === 'falling' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-bold mb-2">URL падающих элементов</label>
+                      <Input
+                        value={formData.animationConfig.fallingImage}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          animationConfig: { ...formData.animationConfig, fallingImage: e.target.value }
+                        })}
+                        placeholder="https://cdn.poehali.dev/files/..."
+                        className="border-3 border-black"
+                      />
+                      {formData.animationConfig.fallingImage && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.animationConfig.fallingImage}
+                            alt="Падающий элемент"
+                            className="w-16 h-10 object-contain border-2 border-black rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-bold mb-2">Количество</label>
+                        <Input
+                          type="number"
+                          value={formData.animationConfig.fallingCount}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            animationConfig: { ...formData.animationConfig, fallingCount: parseInt(e.target.value) || 15 }
+                          })}
+                          className="border-3 border-black"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold mb-2">Скорость (мс)</label>
+                        <Input
+                          type="number"
+                          value={formData.animationConfig.fallingSpeed}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            animationConfig: { ...formData.animationConfig, fallingSpeed: parseInt(e.target.value) || 100 }
+                          })}
+                          className="border-3 border-black"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formData.animationType === 'jumping' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-bold mb-2">URL персонажа</label>
+                      <Input
+                        value={formData.animationConfig.jumpingImage}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          animationConfig: { ...formData.animationConfig, jumpingImage: e.target.value }
+                        })}
+                        placeholder="https://cdn.poehali.dev/files/..."
+                        className="border-3 border-black"
+                      />
+                      {formData.animationConfig.jumpingImage && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.animationConfig.jumpingImage}
+                            alt="Персонаж"
+                            className="w-24 h-24 object-contain border-2 border-black rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold mb-2">Позиция персонажа</label>
+                      <Select
+                        value={formData.animationConfig.jumpingPosition}
+                        onValueChange={(value) => setFormData({
+                          ...formData,
+                          animationConfig: { ...formData.animationConfig, jumpingPosition: value }
+                        })}
+                      >
+                        <SelectTrigger className="border-3 border-black">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bottom-left">Снизу слева</SelectItem>
+                          <SelectItem value="bottom-right">Снизу справа</SelectItem>
+                          <SelectItem value="bottom-center">Снизу по центру</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3">

@@ -6,8 +6,15 @@ import CourierTypes from "@/components/CourierTypes";
 import Benefits from "@/components/Benefits";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import WelcomeBanner from "@/components/WelcomeBanner";
 import StoriesViewer from "@/components/StoriesViewer";
+
+interface AnimationConfig {
+  fallingImage?: string;
+  fallingCount?: number;
+  fallingSpeed?: number;
+  jumpingImage?: string;
+  jumpingPosition?: string;
+}
 
 interface Story {
   id: number;
@@ -19,10 +26,11 @@ interface Story {
   isActive: boolean;
   position: number;
   isViewed: boolean;
+  animationType?: string;
+  animationConfig?: AnimationConfig;
 }
 
 const Index = () => {
-  const [showBanner, setShowBanner] = useState(true);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [stories, setStories] = useState<Story[]>([]);
@@ -76,8 +84,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {showBanner && <WelcomeBanner onClose={() => setShowBanner(false)} />}
-      
       {showStories && stories.length > 0 && (
         <StoriesViewer
           stories={stories}

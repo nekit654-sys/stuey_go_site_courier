@@ -72,6 +72,7 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         SELECT 
             s.id, s.title, s.description, s.image_url, 
             s.button_text, s.button_link, s.is_active, s.position,
+            s.animation_type, s.animation_config,
             s.created_at, s.updated_at,
             CASE 
                 WHEN sv.user_id IS NOT NULL THEN true 
@@ -98,6 +99,8 @@ def get_stories(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
             'buttonLink': story['button_link'],
             'isActive': story['is_active'],
             'position': story['position'],
+            'animationType': story['animation_type'],
+            'animationConfig': story['animation_config'],
             'isViewed': story['is_viewed'],
             'createdAt': story['created_at'].isoformat() if story['created_at'] else None,
             'updatedAt': story['updated_at'].isoformat() if story['updated_at'] else None
@@ -119,6 +122,8 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     button_text = body_data.get('buttonText')
     button_link = body_data.get('buttonLink')
     position = body_data.get('position', 0)
+    animation_type = body_data.get('animationType')
+    animation_config = body_data.get('animationConfig')
     
     if not title or not image_url:
         return {
@@ -131,13 +136,15 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    animation_config_json = json.dumps(animation_config) if animation_config else None
+    
     cursor.execute("""
         INSERT INTO stories 
-        (title, description, image_url, button_text, button_link, position, is_active)
-        VALUES (%s, %s, %s, %s, %s, %s, true)
+        (title, description, image_url, button_text, button_link, position, animation_type, animation_config, is_active)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, true)
         RETURNING id, title, description, image_url, button_text, button_link, 
-                  is_active, position, created_at, updated_at
-    """, (title, description, image_url, button_text, button_link, position))
+                  animation_type, animation_config, is_active, position, created_at, updated_at
+    """, (title, description, image_url, button_text, button_link, position, animation_type, animation_config_json))
     
     story = cursor.fetchone()
     conn.commit()
@@ -154,6 +161,8 @@ def create_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
             'imageUrl': story['image_url'],
             'buttonText': story['button_text'],
             'buttonLink': story['button_link'],
+            'animationType': story['animation_type'],
+            'animationConfig': story['animation_config'],
             'isActive': story['is_active'],
             'position': story['position'],
             'createdAt': story['created_at'].isoformat() if story['created_at'] else None,
@@ -201,6 +210,12 @@ def update_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     if 'isActive' in body_data:
         update_fields.append('is_active = %s')
         update_values.append(body_data['isActive'])
+    if 'animationType' in body_data:
+        update_fields.append('animation_type = %s')
+        update_values.append(body_data['animationType'])
+    if 'animationConfig' in body_data:
+        update_fields.append('animation_config = %s')
+        update_values.append(json.dumps(body_data['animationConfig']) if body_data['animationConfig'] else None)
     
     update_fields.append('updated_at = CURRENT_TIMESTAMP')
     update_values.append(story_id)
@@ -210,7 +225,7 @@ def update_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
         SET {', '.join(update_fields)}
         WHERE id = %s
         RETURNING id, title, description, image_url, button_text, button_link,
-                  is_active, position, created_at, updated_at
+                  animation_type, animation_config, is_active, position, created_at, updated_at
     """
     
     cursor.execute(query, update_values)
@@ -237,6 +252,8 @@ def update_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
             'imageUrl': story['image_url'],
             'buttonText': story['button_text'],
             'buttonLink': story['button_link'],
+            'animationType': story['animation_type'],
+            'animationConfig': story['animation_config'],
             'isActive': story['is_active'],
             'position': story['position'],
             'createdAt': story['created_at'].isoformat() if story['created_at'] else None,

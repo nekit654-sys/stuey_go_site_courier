@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { useNavigate } from 'react-router-dom';
+import StoryAnimations from './StoryAnimations';
+
+interface AnimationConfig {
+  fallingImage?: string;
+  fallingCount?: number;
+  fallingSpeed?: number;
+  jumpingImage?: string;
+  jumpingPosition?: string;
+}
 
 interface Story {
   id: number;
@@ -13,6 +22,8 @@ interface Story {
   isActive: boolean;
   position: number;
   isViewed: boolean;
+  animationType?: string;
+  animationConfig?: AnimationConfig;
 }
 
 interface StoriesViewerProps {
@@ -105,6 +116,11 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
           style={{ backgroundImage: `url(${currentStory.imageUrl})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+          
+          <StoryAnimations 
+            animationType={currentStory.animationType}
+            animationConfig={currentStory.animationConfig}
+          />
         </div>
 
         <div className="relative z-10 h-full flex flex-col">
