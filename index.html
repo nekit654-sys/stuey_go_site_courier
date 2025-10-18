@@ -9,19 +9,45 @@
     <meta http-equiv="Expires" content="0" />
     
     <!-- Yandex.Metrika counter -->
-    <script type="text/javascript" >
-       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-       m[i].l=1*new Date();
-       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-
-       ym(104067688, "init", {
-            clickmap:true,
-            trackLinks:true,
-            accurateTrackBounce:true,
-            webvisor:true
-       });
+    <script type="text/javascript">
+       window.yaCounter104067688 = null;
+       
+       (function(m,e,t,r,i,k,a){
+           m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+           m[i].l=1*new Date();
+           
+           var loadMetrika = function() {
+               for (var j = 0; j < document.scripts.length; j++) {
+                   if (document.scripts[j].src === r) { return; }
+               }
+               k=e.createElement(t);
+               a=e.getElementsByTagName(t)[0];
+               k.async=1;
+               k.defer=1;
+               k.src=r;
+               k.onload = function() {
+                   try {
+                       window.yaCounter104067688 = new Ya.Metrika2({
+                           id:104067688,
+                           clickmap:true,
+                           trackLinks:true,
+                           accurateTrackBounce:true,
+                           webvisor:true
+                       });
+                   } catch(e) {}
+               };
+               k.onerror = function() {
+                   console.warn('Яндекс Метрика недоступна (возможно заблокирована)');
+               };
+               a.parentNode.insertBefore(k,a);
+           };
+           
+           if (document.readyState === 'complete') {
+               loadMetrika();
+           } else {
+               window.addEventListener('load', loadMetrika);
+           }
+       })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/104067688" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
