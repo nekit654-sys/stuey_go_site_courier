@@ -59,8 +59,8 @@ export default function AdminTabs({
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
       <TabsList className="grid w-full grid-cols-7">
         <TabsTrigger value="activity" className="flex items-center gap-2">
-          <Icon name="Activity" size={16} />
-          Активность
+          <Icon name="Newspaper" size={16} />
+          Новости
         </TabsTrigger>
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
