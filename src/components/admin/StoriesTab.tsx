@@ -209,6 +209,11 @@ export default function StoriesTab() {
       },
     });
     setShowCreateForm(true);
+    
+    // Прокрутка к форме
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   const resetForm = () => {
@@ -265,10 +270,17 @@ export default function StoriesTab() {
       </div>
 
       {showCreateForm && (
-        <Card className="p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] bg-white">
-          <h3 className="text-xl font-extrabold mb-4 text-gray-900">
-            {editingStory ? 'Редактировать историю' : 'Новая история'}
-          </h3>
+        <Card className={`p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] bg-white ${editingStory ? 'ring-4 ring-blue-400' : ''}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-extrabold text-gray-900">
+              {editingStory ? '✏️ Редактировать историю' : '➕ Новая история'}
+            </h3>
+            {editingStory && (
+              <span className="bg-blue-400 text-black px-3 py-1 rounded-full text-sm font-bold border-2 border-black">
+                Режим редактирования
+              </span>
+            )}
+          </div>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-bold mb-2 text-gray-900">
