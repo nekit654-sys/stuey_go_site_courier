@@ -221,6 +221,7 @@ export default function Dashboard() {
       const data = await response.json();
 
       const activeStories = (data.stories || []).filter((s: any) => s.isActive);
+      console.log('[Dashboard] Fetched stories:', activeStories.length);
       setStories(activeStories);
     } catch (error) {
       console.error('Error fetching stories:', error);
@@ -228,8 +229,10 @@ export default function Dashboard() {
   };
 
   const handleStoryClick = (storyId: number) => {
+    console.log('[Dashboard] Story clicked:', storyId, 'Stories count:', stories.length);
     setSelectedStoryId(storyId);
     setShowStories(true);
+    console.log('[Dashboard] showStories set to true');
   };
 
   if (loading) {
