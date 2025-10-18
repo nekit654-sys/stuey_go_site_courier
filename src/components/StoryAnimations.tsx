@@ -117,10 +117,10 @@ export default function StoryAnimations({ animationType, animationConfig }: Stor
   if (animationType === 'jumping' && animationConfig?.jumpingImage) {
     const position = animationConfig.jumpingPosition || 'bottom-left';
     const positionClasses = {
-      'bottom-left': 'bottom-4 left-8',
-      'bottom-right': 'bottom-4 right-8',
-      'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
-    }[position] || 'bottom-4 left-8';
+      'bottom-left': 'bottom-32 left-8',
+      'bottom-right': 'bottom-32 right-8',
+      'bottom-center': 'bottom-32 left-1/2 -translate-x-1/2',
+    }[position] || 'bottom-32 left-8';
 
     return (
       <>
