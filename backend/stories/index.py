@@ -290,7 +290,7 @@ def delete_story(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('UPDATE stories SET is_active = false WHERE id = %s', (story_id,))
+    cursor.execute('DELETE FROM stories WHERE id = %s', (story_id,))
     conn.commit()
     cursor.close()
     conn.close()
