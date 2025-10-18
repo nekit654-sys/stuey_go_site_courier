@@ -5,8 +5,13 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { useMagicEffect } from "@/hooks/useMagicEffect";
 import { useAuth } from "@/contexts/AuthContext";
 import HeroIncomeCalculator from "@/components/HeroIncomeCalculator";
+import StoriesCarousel from "@/components/StoriesCarousel";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onStoryClick?: (storyId: number) => void;
+}
+
+const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   const { cityInPrepositional, loading } = useUserLocation();
   const { triggerMagicEffect } = useMagicEffect();
   const { isAuthenticated } = useAuth();
@@ -41,6 +46,8 @@ const HeroSection = () => {
       <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
       <div className="relative max-w-6xl mx-auto text-center">
+        <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
+        
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-6 sm:p-10 shadow-[0_8px_0_0_rgba(0,0,0,0.8)] my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-extrabold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">

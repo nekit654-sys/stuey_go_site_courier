@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "Get all stories",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "stories": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create new story",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "title": "Новая акция!",
+        "description": "Получи бонус 3000₽",
+        "imageUrl": "https://cdn.poehali.dev/files/test.jpg",
+        "buttonText": "Подробнее",
+        "buttonLink": "/career",
+        "position": 0
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "id": "number",
+        "title": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
