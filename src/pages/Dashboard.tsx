@@ -62,6 +62,8 @@ export default function Dashboard() {
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
+  const [stories, setStories] = useState<any[]>([]);
+  const [showStories, setShowStories] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -77,6 +79,7 @@ export default function Dashboard() {
         fetchStats();
         fetchReferrals();
         fetchWithdrawalRequests();
+        fetchStories();
       }
     }
 
@@ -208,8 +211,43 @@ export default function Dashboard() {
     fetchReferrals();
   };
 
+  const fetchStories = async () => {
+    try {
+      const userId = localStorage.getItem('story_user_id') || `guest_${Date.now()}`;
+      if (!localStorage.getItem('story_user_id')) {
+        localStorage.setItem('story_user_id', userId);
+      }
+
+      const response = await fetch(
+        `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`
+      );
+      const data = await response.json();
+
+      const activeStories = (data.stories || []).filter((s: any) => s.isActive);
+      setStories(activeStories);
+    } catch (error) {
+      console.error('Error fetching stories:', error);
+    }
+  };
+
+  const handleStoryClick = (storyId: number) => {
+    setSelectedStoryId(storyId);
+    setShowStories(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
+      {showStories && stories.length > 0 && (
+        <StoriesViewer
+          stories={stories}
+          initialStoryId={selectedStoryId || undefined}
+          onClose={() => {
+            setShowStories(false);
+            setSelectedStoryId(null);
+          }}
+        />
+      )}
+
       {showProfileSetup && (
         <ProfileSetupModal
           user={user}
@@ -283,7 +321,7 @@ export default function Dashboard() {
 
         {/* Stories Carousel */}
         <div className="mb-4 sm:mb-6">
-          <StoriesCarousel onStoryClick={(id) => setSelectedStoryId(id)} />
+          <StoriesCarousel onStoryClick={handleStoryClick} />
         </div>
 
         {/* Copy Referral Link Button */}
