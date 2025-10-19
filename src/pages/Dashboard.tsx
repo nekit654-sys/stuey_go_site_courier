@@ -359,7 +359,7 @@ export default function Dashboard() {
                 : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
             }`}
           >
-            <Icon name="BarChart3" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
+            <Icon name="BarChart3" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'stats' ? 'text-white' : ''}`} />
             <span className="hidden xs:inline">Статистика</span>
           </Button>
           <Button
@@ -371,7 +371,7 @@ export default function Dashboard() {
                 : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
             }`}
           >
-            <Icon name="Users" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
+            <Icon name="Users" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'referrals' ? 'text-white' : ''}`} />
             <span className="hidden xs:inline">Рефералы</span>
           </Button>
           <Button
@@ -383,7 +383,7 @@ export default function Dashboard() {
                 : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
             }`}
           >
-            <Icon name="Wallet" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
+            <Icon name="Wallet" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'withdrawals' ? 'text-white' : ''}`} />
             <span className="hidden xs:inline">Выплаты</span>
           </Button>
           <Button
@@ -395,7 +395,7 @@ export default function Dashboard() {
                 : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
             }`}
           >
-            <Icon name="Gamepad2" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
+            <Icon name="Gamepad2" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'game' ? 'text-white' : ''}`} />
             <span className="hidden xs:inline">Игра</span>
           </Button>
           <Button
@@ -407,7 +407,7 @@ export default function Dashboard() {
                 : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
             }`}
           >
-            <Icon name="User" className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5" />
+            <Icon name="User" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'profile' ? 'text-white' : ''}`} />
             <span className="hidden xs:inline">Профиль</span>
           </Button>
         </div>
