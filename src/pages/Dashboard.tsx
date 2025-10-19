@@ -272,11 +272,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Stories Carousel - Full Width */}
-      <div className="mb-4">
-        <StoriesCarousel onStoryClick={handleStoryClick} />
-      </div>
-
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
         {/* Header */}
         <div className="flex justify-between items-start mb-4 sm:mb-6">
@@ -296,6 +291,14 @@ export default function Dashboard() {
             <span className="hidden sm:inline">Выход</span>
           </Button>
         </div>
+      </div>
+
+      {/* Stories Carousel - Full Width */}
+      <div className="mb-4">
+        <StoriesCarousel onStoryClick={handleStoryClick} />
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 max-w-4xl">
 
         {/* Main Earnings Card */}
         <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] mb-4 sm:mb-6 p-4 sm:p-6">
