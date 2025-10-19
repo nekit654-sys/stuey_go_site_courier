@@ -135,8 +135,8 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-screen -ml-6 py-4">
-      <div className="px-6">
+    <div className="w-full py-4">
+      <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
         <div className="flex items-center gap-3 mb-3 bg-yellow-400/90 backdrop-blur-sm rounded-xl px-4 py-2 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-fit">
           <Icon name="Sparkles" size={20} className="text-black" />
           <h3 className="font-extrabold text-black text-lg drop-shadow-none">
@@ -155,12 +155,14 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleDragEnd}
         onMouseEnter={() => setIsPaused(true)}
-        onMouseOver={() => setIsPaused(true)}
+        onMouseLeave={() => {
+          setIsPaused(false);
+          handleDragEnd();
+        }}
       >
         <style>
           {`

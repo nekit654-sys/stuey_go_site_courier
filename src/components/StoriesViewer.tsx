@@ -109,8 +109,8 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
   if (!currentStory) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center" onClick={onClose}>
-      <div className="relative w-full max-w-lg h-[80vh] bg-black rounded-xl overflow-hidden border-4 border-yellow-400 shadow-[0_8px_0_0_rgba(0,0,0,1)]" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
+      <div className="relative w-full max-w-lg h-[80vh] bg-black rounded-xl overflow-hidden border-4 border-yellow-400 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${currentStory.imageUrl})` }}
