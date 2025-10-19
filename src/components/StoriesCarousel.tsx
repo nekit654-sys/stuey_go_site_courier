@@ -65,7 +65,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
   return (
     <div className="w-full py-4">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="px-6">
         <div className="flex items-center gap-3 mb-3 bg-yellow-400/90 backdrop-blur-sm rounded-xl px-4 py-2 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-fit">
           <Icon name="Sparkles" size={20} className="text-black" />
           <h3 className="font-extrabold text-black text-lg drop-shadow-none">
@@ -75,8 +75,10 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             )}
           </h3>
         </div>
+      </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="w-full overflow-x-auto">
+        <div className="flex gap-3 pb-2 scrollbar-hide px-6 min-w-full">
           <style>
             {`
               .scrollbar-hide::-webkit-scrollbar {

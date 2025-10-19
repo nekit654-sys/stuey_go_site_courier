@@ -272,6 +272,11 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Stories Carousel - Full Width */}
+      <div className="mb-4">
+        <StoriesCarousel onStoryClick={handleStoryClick} />
+      </div>
+
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
         {/* Header */}
         <div className="flex justify-between items-start mb-4 sm:mb-6">
@@ -330,11 +335,6 @@ export default function Dashboard() {
             inviterCode={user.inviter_code}
           />
         )}
-
-        {/* Stories Carousel */}
-        <div className="mb-4 sm:mb-6">
-          <StoriesCarousel onStoryClick={handleStoryClick} />
-        </div>
 
         {/* Copy Referral Link Button */}
         <div className="mb-4 sm:mb-6">
