@@ -91,28 +91,31 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
     return 'bg-gray-400';
   };
   return (
-    <Tabs value={adminSubTab} onValueChange={setAdminSubTab} className="space-y-6">
+    <Tabs value={adminSubTab} onValueChange={setAdminSubTab} className="space-y-4 sm:space-y-6">
       <TabsList className="grid w-full max-w-md grid-cols-2">
-        <TabsTrigger value="list" className="flex items-center gap-2">
-          <Icon name="Users" size={16} />
-          Управление
+        <TabsTrigger value="list" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <Icon name="Users" size={14} className="sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Управление</span>
+          <span className="sm:hidden">Админы</span>
         </TabsTrigger>
-        <TabsTrigger value="security" className="flex items-center gap-2">
-          <Icon name="Lock" size={16} />
-          Безопасность
+        <TabsTrigger value="security" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <Icon name="Lock" size={14} className="sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Безопасность</span>
+          <span className="sm:hidden">Пароль</span>
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="list" className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <TabsContent value="list" className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon name="UserPlus" size={20} />
-            Добавить администратора
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Icon name="UserPlus" size={18} className="sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Добавить администратора</span>
+            <span className="sm:hidden">Новый админ</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6 py-3 sm:py-6">
           <form onSubmit={onAddAdmin} className="space-y-4">
             <div>
               <Label htmlFor="adminUsername">Логин</Label>
@@ -155,24 +158,24 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Icon name="Users" size={20} />
-              Активные администраторы
+              <Icon name="Users" size={18} className="sm:w-5 sm:h-5" />
+              <span className="text-base sm:text-lg">Активные админы</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-sm font-normal text-gray-500">
+              <div className="text-xs sm:text-sm font-normal text-gray-500">
                 Всего: {admins.length}
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                Авто-обновление
+                <span className="hidden sm:inline">Авто-обновление</span>
               </div>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6 py-3 sm:py-6">
           {admins.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Icon name="Users" size={48} className="mx-auto mb-4 text-gray-300" />
@@ -180,16 +183,16 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
               <p className="text-xs text-gray-400 mt-2">Добавьте первого администратора</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {admins.map((admin) => (
-                <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${getOnlineStatusColor(admin.last_login)} flex-shrink-0`} />
-                      <div>
-                        <div className="font-medium text-lg">{admin.username}</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Создан: {new Date(admin.created_at).toLocaleDateString('ru-RU', {
+                <div key={admin.id} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${getOnlineStatusColor(admin.last_login)} flex-shrink-0`} />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm sm:text-lg truncate">{admin.username}</div>
+                        <div className="text-xs text-gray-500 mt-0.5 sm:mt-1">
+                          <span className="hidden sm:inline">Создан: </span>{new Date(admin.created_at).toLocaleDateString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -204,12 +207,12 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
                       </div>
                     </div>
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-2 sm:ml-4 flex-shrink-0">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => onDeleteAdmin(admin.id)}
-                      className="text-red-600 border-red-600 hover:bg-red-50"
+                      className="text-red-600 border-red-600 hover:bg-red-50 h-8 w-8 sm:h-9 sm:w-9 p-0"
                     >
                       <Icon name="Trash2" size={14} />
                     </Button>
@@ -223,15 +226,15 @@ const AdminsTab: React.FC<AdminsTabProps> = ({
         </div>
       </TabsContent>
 
-      <TabsContent value="security" className="space-y-6">
+      <TabsContent value="security" className="space-y-4 sm:space-y-6">
         <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="Lock" size={20} />
+          <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Icon name="Lock" size={18} className="sm:w-5 sm:h-5" />
               Смена пароля
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6 py-3 sm:py-6">
             <form onSubmit={onChangePassword} className="space-y-4">
               <div>
                 <Label htmlFor="currentPassword">Текущий пароль</Label>

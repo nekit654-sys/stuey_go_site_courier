@@ -137,19 +137,20 @@ export default function AdminFinances({ authToken }: AdminFinancesProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Icon name="TrendingUp" className="h-6 w-6" />
-              <span>Общая статистика</span>
+              <Icon name="TrendingUp" className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-base sm:text-lg">Общая статистика</span>
             </div>
             {!editMode && (
               <Button
                 onClick={() => setEditMode(true)}
                 variant="secondary"
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 <Icon name="Edit" className="h-4 w-4 mr-2" />
                 Изменить расходы
@@ -157,45 +158,45 @@ export default function AdminFinances({ authToken }: AdminFinancesProps) {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-6">
+        <CardContent className="px-3 sm:px-6 py-3 sm:py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div>
-              <div className="text-sm opacity-90">Всего потрачено</div>
-              <div className="text-3xl font-bold mt-1">
+              <div className="text-xs sm:text-sm opacity-90">Всего потрачено</div>
+              <div className="text-2xl sm:text-3xl font-bold mt-1">
                 {formatMoney(stats.total_ad_spend)}
               </div>
             </div>
             <div>
-              <div className="text-sm opacity-90">Всего заработано</div>
-              <div className="text-3xl font-bold mt-1">
+              <div className="text-xs sm:text-sm opacity-90">Всего заработано</div>
+              <div className="text-2xl sm:text-3xl font-bold mt-1">
                 {formatMoney(stats.total_admin_earnings)}
               </div>
             </div>
             <div>
-              <div className="text-sm opacity-90">ROI</div>
-              <div className="text-3xl font-bold mt-1">{stats.overall_roi.toFixed(1)}%</div>
+              <div className="text-xs sm:text-sm opacity-90">ROI</div>
+              <div className="text-2xl sm:text-3xl font-bold mt-1">{stats.overall_roi.toFixed(1)}%</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon name="Users" className="h-5 w-5" />
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Icon name="Users" className="h-4 w-4 sm:h-5 sm:w-5" />
             Распределение по админам
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="px-3 sm:px-6 py-3 sm:py-6">
+          <div className="space-y-3 sm:space-y-4">
             {stats.admins.map((admin) => (
               <div
                 key={admin.id}
-                className="flex items-center gap-4 p-4 rounded-lg border bg-gray-50"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-gray-50"
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{admin.username}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm sm:text-base">{admin.username}</span>
                     {admin.is_super_admin && (
                       <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
                         Супер-админ
@@ -204,8 +205,8 @@ export default function AdminFinances({ authToken }: AdminFinancesProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="text-center min-w-[120px]">
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6">
+                  <div className="text-center">
                     <Label className="text-xs text-gray-500">Расходы</Label>
                     {editMode ? (
                       <Input
@@ -214,31 +215,31 @@ export default function AdminFinances({ authToken }: AdminFinancesProps) {
                         onChange={(e) =>
                           setSpends({ ...spends, [admin.id]: e.target.value })
                         }
-                        className="mt-1"
+                        className="mt-1 h-8 text-sm"
                       />
                     ) : (
-                      <div className="font-bold text-lg">
+                      <div className="font-bold text-sm sm:text-lg">
                         {formatMoney(admin.ad_spend)}
                       </div>
                     )}
                   </div>
 
-                  <div className="text-center min-w-[80px]">
+                  <div className="text-center">
                     <Label className="text-xs text-gray-500">Доля</Label>
-                    <div className="font-bold text-lg">{admin.percentage.toFixed(1)}%</div>
+                    <div className="font-bold text-sm sm:text-lg">{admin.percentage.toFixed(1)}%</div>
                   </div>
 
-                  <div className="text-center min-w-[120px]">
+                  <div className="text-center">
                     <Label className="text-xs text-gray-500">Заработано</Label>
-                    <div className="font-bold text-lg text-green-600">
+                    <div className="font-bold text-sm sm:text-lg text-green-600">
                       {formatMoney(admin.expected_earnings)}
                     </div>
                   </div>
 
-                  <div className="text-center min-w-[80px]">
+                  <div className="text-center">
                     <Label className="text-xs text-gray-500">ROI</Label>
                     <div
-                      className={`font-bold text-lg ${
+                      className={`font-bold text-sm sm:text-lg ${
                         admin.roi > 100 ? 'text-green-600' : 'text-orange-600'
                       }`}
                     >
