@@ -20,6 +20,7 @@ import StatsCards from '@/components/dashboard/StatsCards';
 import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
 import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
 import Footer from '@/components/Footer';
+import Sidebar from '@/components/dashboard/Sidebar';
 
 
 interface Stats {
@@ -62,7 +63,7 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages'>('stats');
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
@@ -190,7 +191,7 @@ export default function Dashboard() {
     fetchStats();
   };
 
-  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile') => {
+  const handleTabChange = (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages') => {
     setActiveTab(tab);
     if (tab === 'stats' || tab === 'referrals') {
       fetchStats();
@@ -272,8 +273,9 @@ export default function Dashboard() {
         />
       )}
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
-        <ProfileHeader user={user} stats={stats} onLogout={logout} />
+      {/* Header - Full Width on Mobile, Hidden on Desktop with Sidebar */}
+      <div className="lg:hidden container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
+        <ProfileHeader user={user} stats={stats} onLogout={logout} onSettingsClick={() => setActiveTab('profile')} />
       </div>
 
       {/* Stories Carousel - Full Width */}
@@ -281,7 +283,18 @@ export default function Dashboard() {
         <StoriesCarousel onStoryClick={handleStoryClick} />
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 max-w-4xl">
+      {/* Main Layout: Sidebar + Content */}
+      <div className="container mx-auto px-3 sm:px-4 max-w-7xl flex gap-6">
+        {/* Sidebar - только на больших экранах */}
+        <Sidebar 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange}
+          stats={stats}
+          user={user}
+        />
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
 
         {/* Main Earnings Card */}
         <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] mb-4 sm:mb-6 p-4 sm:p-6">
@@ -336,8 +349,8 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        {/* Tabs Navigation - только на мобильных */}
+        <div className="lg:hidden flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
             onClick={() => handleTabChange('stats')}
@@ -495,6 +508,33 @@ export default function Dashboard() {
             </div>
           </Card>
         )}
+
+        {/* Friends Tab - NEW */}
+        {activeTab === 'friends' && (
+          <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
+            <Icon name="Heart" className="h-16 w-16 mx-auto mb-4 text-pink-500" />
+            <h3 className="text-xl font-black text-black mb-2">Скоро здесь появятся друзья!</h3>
+            <p className="text-gray-600 mb-4">Добавляйте в друзья других курьеров и следите за их успехами</p>
+            <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white border-3 border-black font-bold">
+              <Icon name="UserPlus" className="mr-2 h-4 w-4" />
+              Найти друзей
+            </Button>
+          </Card>
+        )}
+
+        {/* Messages Tab - NEW */}
+        {activeTab === 'messages' && (
+          <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
+            <Icon name="MessageCircle" className="h-16 w-16 mx-auto mb-4 text-blue-500" />
+            <h3 className="text-xl font-black text-black mb-2">Чат курьеров появится скоро!</h3>
+            <p className="text-gray-600 mb-4">Общайтесь с коллегами, делитесь опытом и полезными советами</p>
+            <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-3 border-black font-bold">
+              <Icon name="Send" className="mr-2 h-4 w-4" />
+              Написать сообщение
+            </Button>
+          </Card>
+        )}
+        </div>
       </div>
 
       {/* Startup Payout Modal */}

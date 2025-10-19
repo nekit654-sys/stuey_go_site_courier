@@ -22,9 +22,10 @@ interface ProfileHeaderProps {
   user: User;
   stats: Stats | null;
   onLogout: () => void;
+  onSettingsClick?: () => void;
 }
 
-export default function ProfileHeader({ user, stats, onLogout }: ProfileHeaderProps) {
+export default function ProfileHeader({ user, stats, onLogout, onSettingsClick }: ProfileHeaderProps) {
   const getInitials = (name: string) => {
     const parts = name.split(' ');
     return parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : name[0];
@@ -76,15 +77,27 @@ export default function ProfileHeader({ user, stats, onLogout }: ProfileHeaderPr
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onLogout}
-            className="ml-2 flex-shrink-0 bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white hover:bg-white/30 font-bold shadow-lg"
-          >
-            <Icon name="LogOut" className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Выход</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {onSettingsClick && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSettingsClick}
+                className="flex-shrink-0 bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white hover:bg-white/30 font-bold shadow-lg"
+              >
+                <Icon name="Settings" className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onLogout}
+              className="flex-shrink-0 bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white hover:bg-white/30 font-bold shadow-lg"
+            >
+              <Icon name="LogOut" className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Выход</span>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -109,8 +109,8 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
   if (!currentStory) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center">
-      <div className="relative w-full max-w-lg h-[80vh] bg-black rounded-xl overflow-hidden border-4 border-yellow-400 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
+    <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center" onClick={onClose}>
+      <div className="relative w-full max-w-lg h-[80vh] bg-black rounded-xl overflow-hidden border-4 border-yellow-400 shadow-[0_8px_0_0_rgba(0,0,0,1)]" onClick={(e) => e.stopPropagation()}>
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${currentStory.imageUrl})` }}
@@ -152,12 +152,15 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
                 </div>
               </div>
 
-              <Button
-                onClick={onClose}
-                className="bg-white/20 hover:bg-white/30 text-white font-extrabold border-2 border-white/50 rounded-full p-2"
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-extrabold border-3 border-black rounded-full p-2 w-10 h-10 flex items-center justify-center shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
               >
                 <Icon name="X" size={20} />
-              </Button>
+              </button>
             </div>
           </div>
 
