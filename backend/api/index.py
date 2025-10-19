@@ -18,7 +18,7 @@ from decimal import Decimal
 
 JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = 'HS256'
-JWT_EXPIRATION_HOURS = 24
+JWT_EXPIRATION_HOURS = 720
 
 login_attempts = {}
 
