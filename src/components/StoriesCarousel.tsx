@@ -116,13 +116,13 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-hidden"
+        className="w-full overflow-x-hidden pl-6"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
       >
-        <div className="flex gap-3 pb-2 px-6">
+        <div className="flex gap-3 pb-2">
           <style>
             {`
               .scrollbar-hide::-webkit-scrollbar {
@@ -162,11 +162,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         </div>
       </div>
 
-      <div className="text-center mt-2 px-6">
-        <p className="text-xs text-black/60 font-bold">
-          {isPaused ? '⏸ Наведите мышь чтобы остановить' : '▶ Автопрокрутка активна'}
-        </p>
-      </div>
+
     </div>
   );
 }
