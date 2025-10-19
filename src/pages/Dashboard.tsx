@@ -15,6 +15,10 @@ import StartupBonusNotification from '@/components/StartupBonusNotification';
 import InviterCard from '@/components/InviterCard';
 import StoriesCarousel from '@/components/StoriesCarousel';
 import StoriesViewer from '@/components/StoriesViewer';
+import ProfileHeader from '@/components/ProfileHeader';
+import StatsCards from '@/components/dashboard/StatsCards';
+import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
+import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
 
 
 interface Stats {
@@ -268,24 +272,7 @@ export default function Dashboard() {
       )}
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-4 sm:mb-6">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-black truncate">
-              👋 Привет, {user?.full_name?.split(' ')[0] || 'Курьер'}!
-            </h1>
-            <p className="text-black/70 text-xs sm:text-sm mt-1 font-bold truncate">{user?.city || 'Город не указан'}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={logout}
-            className="ml-2 flex-shrink-0 bg-white border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[3px] active:shadow-none text-black font-bold transition-all"
-          >
-            <Icon name="LogOut" className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Выход</span>
-          </Button>
-        </div>
+        <ProfileHeader user={user} stats={stats} onLogout={logout} />
       </div>
 
       {/* Stories Carousel - Full Width */}
@@ -413,40 +400,9 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Tab */}
-        {activeTab === 'stats' && (
+        {activeTab === 'stats' && stats && (
           <div className="space-y-3 sm:space-y-4">
-            <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 flex items-center gap-2 text-black">
-                <Icon name="TrendingUp" className="text-yellow-400 h-5 w-5 sm:h-6 sm:w-6" />
-                Детальная статистика
-              </h3>
-              <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                <div className="bg-yellow-400 border-2 border-black rounded-xl p-3 sm:p-4 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-xs sm:text-sm font-bold text-black/70">Всего заработано</div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-black truncate">
-                    {stats?.total_bonus_earned?.toLocaleString('ru-RU') || '0'} ₽
-                  </div>
-                </div>
-                <div className="bg-yellow-400 border-2 border-black rounded-xl p-3 sm:p-4 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-xs sm:text-sm font-bold text-black/70">Выплачено</div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-black truncate">
-                    {stats?.total_bonus_paid?.toLocaleString('ru-RU') || '0'} ₽
-                  </div>
-                </div>
-                <div className="bg-yellow-400 border-2 border-black rounded-xl p-3 sm:p-4 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-xs sm:text-sm font-bold text-black/70">Ожидает выплаты</div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-black truncate">
-                    {stats?.pending_bonus?.toLocaleString('ru-RU') || '0'} ₽
-                  </div>
-                </div>
-                <div className="bg-yellow-400 border-2 border-black rounded-xl p-3 sm:p-4 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-xs sm:text-sm font-bold text-black/70">Всего заказов</div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-black">
-                    {stats?.total_orders || 0}
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <StatsCards stats={stats} />
 
             <Card className="bg-black border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-yellow-400">
               <h3 className="text-base sm:text-lg font-extrabold mb-3">💡 Как заработать больше?</h3>
@@ -471,67 +427,7 @@ export default function Dashboard() {
         {/* Referrals Tab */}
         {activeTab === 'referrals' && (
           <div className="space-y-3 sm:space-y-4">
-            {referrals.length === 0 ? (
-              <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-6 sm:p-8 text-center">
-                <Icon name="Users" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-yellow-400 mb-4" />
-                <h3 className="text-lg sm:text-xl font-extrabold mb-2 text-black">Пока нет рефералов</h3>
-                <p className="text-black/70 mb-4 text-sm sm:text-base font-bold">
-                  Поделись своей ссылкой и начни зарабатывать!
-                </p>
-                <Button 
-                  onClick={copyReferralLink} 
-                  className="mx-auto bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] font-extrabold"
-                >
-                  <Icon name="Share2" className="mr-2 h-4 w-4" />
-                  Скопировать ссылку
-                </Button>
-              </Card>
-            ) : (
-              referrals.map((ref) => (
-                <Card key={ref.id} className="bg-white border-3 border-black rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] p-3 sm:p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                        {ref.avatar_url ? (
-                          <img 
-                            src={ref.avatar_url} 
-                            alt={ref.full_name}
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] flex-shrink-0">
-                            <Icon name="User" className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-black text-sm sm:text-base truncate">{ref.full_name}</h4>
-                          <p className="text-xs text-black/70 font-bold truncate">{ref.city}</p>
-                          {ref.created_at && (
-                            <p className="text-xs text-black/50 font-bold">
-                              Присоединился: {new Date(ref.created_at).toLocaleDateString('ru-RU')}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-base sm:text-xl font-extrabold text-black">
-                        {ref.bonus_amount?.toLocaleString('ru-RU')} ₽
-                      </div>
-                      <div className="text-xs text-black/70 font-bold">
-                        {ref.total_orders} заказов
-                      </div>
-                      {ref.bonus_paid && (
-                        <div className="inline-flex items-center gap-1 bg-yellow-400 border border-black rounded-lg px-2 py-0.5 text-xs font-bold text-black mt-1">
-                          <Icon name="Check" className="h-3 w-3" />
-                          Выплачено
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
+            <ReferralsGrid referrals={referrals} />
           </div>
         )}
 
@@ -539,7 +435,10 @@ export default function Dashboard() {
         {activeTab === 'withdrawals' && (
           <div className="space-y-4 sm:space-y-6">
             <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 text-black">Создать заявку на выплату</h3>
+              <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 text-black flex items-center gap-2">
+                <Icon name="DollarSign" className="h-5 w-5 text-green-600" />
+                Создать заявку на выплату
+              </h3>
               <WithdrawalRequestForm
                 userId={user?.id || 0}
                 availableBalance={stats?.pending_bonus || 0}
@@ -549,16 +448,13 @@ export default function Dashboard() {
               />
             </Card>
 
-            <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 text-black">История заявок</h3>
-              {loadingWithdrawals ? (
-                <div className="flex justify-center py-8">
-                  <Icon name="Loader2" className="h-6 w-6 animate-spin text-black" />
-                </div>
-              ) : (
-                <WithdrawalRequestsList requests={withdrawalRequests} />
-              )}
-            </Card>
+            <div>
+              <h3 className="text-base sm:text-lg font-extrabold mb-4 text-black flex items-center gap-2">
+                <Icon name="History" className="h-5 w-5 text-purple-600" />
+                История заявок
+              </h3>
+              <WithdrawalsTimeline requests={withdrawalRequests} loading={loadingWithdrawals} />
+            </div>
           </div>
         )}
 

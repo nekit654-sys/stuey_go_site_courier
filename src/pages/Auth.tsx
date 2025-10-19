@@ -104,7 +104,24 @@ export default function Auth() {
   };
 
   const openAuthModal = (provider: AuthProvider) => {
+    const hasAuthToken = localStorage.getItem('auth_token');
+    
+    if (hasAuthToken) {
+      if (provider === 'yandex') {
+        handleYandexAuth();
+      } else if (provider === 'vk') {
+        handleVKAuth();
+      } else if (provider === 'telegram') {
+        toast.info('Вход через Telegram временно недоступен');
+      }
+      return;
+    }
+    
     setSelectedProvider(provider);
+    const savedRef = localStorage.getItem('referral_code');
+    if (savedRef) {
+      setManualRefCode(savedRef);
+    }
     setShowAuthModal(true);
     setAgreedToTerms(false);
   };
@@ -118,10 +135,24 @@ export default function Auth() {
     if (manualRefCode.trim()) {
       setReferralCode(manualRefCode.trim());
       localStorage.setItem('referral_code', manualRefCode.trim());
+    } else if (referralCode) {
+      localStorage.setItem('referral_code', referralCode);
     }
 
     setShowAuthModal(false);
 
+    if (selectedProvider === 'yandex') {
+      handleYandexAuth();
+    } else if (selectedProvider === 'vk') {
+      handleVKAuth();
+    } else if (selectedProvider === 'telegram') {
+      toast.info('Вход через Telegram временно недоступен');
+    }
+  };
+
+  const skipReferral = () => {
+    setShowAuthModal(false);
+    
     if (selectedProvider === 'yandex') {
       handleYandexAuth();
     } else if (selectedProvider === 'vk') {
@@ -347,22 +378,25 @@ export default function Auth() {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAuthModal(false)}
-                  className="flex-1 py-6 text-lg font-bold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
-                >
-                  Отмена
-                </Button>
+              <div className="space-y-3 pt-3">
                 <Button
                   onClick={proceedWithAuth}
                   disabled={!agreedToTerms}
-                  className="flex-1 py-6 text-lg font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full py-6 text-lg font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <Icon name="CheckCircle" className="mr-2 h-5 w-5" />
                   Продолжить
                 </Button>
+                
+                {!referralCode && (
+                  <Button
+                    variant="outline"
+                    onClick={skipReferral}
+                    className="w-full py-4 text-base font-bold border-3 border-gray-300 shadow-[0_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                  >
+                    Пропустить (без реферала)
+                  </Button>
+                )}
               </div>
 
               {!agreedToTerms && (
