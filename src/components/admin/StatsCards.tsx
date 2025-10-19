@@ -13,47 +13,47 @@ interface StatsCardsProps {
 
 const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <Icon name="FileText" size={24} className="text-blue-600 mr-3" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center">
+            <Icon name="FileText" size={20} className="text-blue-600 mb-2 sm:mb-0 sm:mr-3" />
             <div>
-              <div className="text-2xl font-bold">{stats.total}</div>
-              <div className="text-gray-600">Всего заявок</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Всего</div>
             </div>
           </div>
         </CardContent>
       </Card>
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <Icon name="Clock" size={24} className="text-yellow-600 mr-3" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center">
+            <Icon name="Clock" size={20} className="text-yellow-600 mb-2 sm:mb-0 sm:mr-3" />
             <div>
-              <div className="text-2xl font-bold">{stats.new}</div>
-              <div className="text-gray-600">Новые</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.new}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Новые</div>
             </div>
           </div>
         </CardContent>
       </Card>
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <Icon name="CheckCircle" size={24} className="text-green-600 mr-3" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center">
+            <Icon name="CheckCircle" size={20} className="text-green-600 mb-2 sm:mb-0 sm:mr-3" />
             <div>
-              <div className="text-2xl font-bold">{stats.approved}</div>
-              <div className="text-gray-600">Одобрены</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.approved}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Одобрены</div>
             </div>
           </div>
         </CardContent>
       </Card>
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <Icon name="XCircle" size={24} className="text-red-600 mr-3" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center">
+            <Icon name="XCircle" size={20} className="text-red-600 mb-2 sm:mb-0 sm:mr-3" />
             <div>
-              <div className="text-2xl font-bold">{stats.rejected}</div>
-              <div className="text-gray-600">Отклонены</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.rejected}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Отклонены</div>
             </div>
           </div>
         </CardContent>

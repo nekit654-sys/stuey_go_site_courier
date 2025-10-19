@@ -62,51 +62,51 @@ export default function CompactAdminTabs({
   pendingWithdrawalsCount = 0,
 }: CompactAdminTabsProps) {
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="couriers" className="flex items-center gap-2 relative">
-          <Icon name="Users" size={16} />
-          Курьеры
+    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 sm:space-y-6">
+      <TabsList className="grid w-full grid-cols-5 h-auto">
+        <TabsTrigger value="couriers" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 relative py-2 sm:py-3 px-2 sm:px-4">
+          <Icon name="Users" size={16} className="sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm">Курьеры</span>
           {pendingRequestsCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+            <span className="absolute top-0 right-0 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse" />
           )}
         </TabsTrigger>
-        <TabsTrigger value="payments" className="flex items-center gap-2 relative">
-          <Icon name="DollarSign" size={16} />
-          Выплаты
+        <TabsTrigger value="payments" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 relative py-2 sm:py-3 px-2 sm:px-4">
+          <Icon name="DollarSign" size={16} className="sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm">Выплаты</span>
           {pendingWithdrawalsCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+            <span className="absolute top-0 right-0 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse" />
           )}
         </TabsTrigger>
-        <TabsTrigger value="stories" className="flex items-center gap-2">
-          <Icon name="Sparkles" size={16} />
-          Истории
+        <TabsTrigger value="stories" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-3 px-2 sm:px-4">
+          <Icon name="Sparkles" size={16} className="sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm">Истории</span>
         </TabsTrigger>
-        <TabsTrigger value="news" className="flex items-center gap-2">
-          <Icon name="Bell" size={16} />
-          Новости
+        <TabsTrigger value="news" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-3 px-2 sm:px-4">
+          <Icon name="Bell" size={16} className="sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm">Новости</span>
         </TabsTrigger>
-        <TabsTrigger value="finances" className="flex items-center gap-2">
-          <Icon name="TrendingUp" size={16} />
-          Финансы
+        <TabsTrigger value="finances" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-3 px-2 sm:px-4">
+          <Icon name="TrendingUp" size={16} className="sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm">Финансы</span>
         </TabsTrigger>
       </TabsList>
 
       {/* Вкладка 1: Курьеры (Заявки + Все курьеры + Статистика) */}
       <TabsContent value="couriers" className="space-y-6">
         <Tabs defaultValue="requests" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="requests">
-              <Icon name="FileText" size={14} className="mr-1" />
-              Заявки
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="requests" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="FileText" size={14} />
+              <span className="text-xs sm:text-sm">Заявки</span>
             </TabsTrigger>
-            <TabsTrigger value="all">
-              <Icon name="Users" size={14} className="mr-1" />
-              Все курьеры
+            <TabsTrigger value="all" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="Users" size={14} />
+              <span className="text-xs sm:text-sm">Все</span>
             </TabsTrigger>
-            <TabsTrigger value="stats">
-              <Icon name="BarChart3" size={14} className="mr-1" />
-              Статистика
+            <TabsTrigger value="stats" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="BarChart3" size={14} />
+              <span className="text-xs sm:text-sm">Статы</span>
             </TabsTrigger>
           </TabsList>
 
@@ -159,18 +159,18 @@ export default function CompactAdminTabs({
       {/* Вкладка 2: Выплаты (CSV + Запросы + Стартовые) */}
       <TabsContent value="payments" className="space-y-6">
         <Tabs defaultValue="csv" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="csv">
-              <Icon name="Upload" size={14} className="mr-1" />
-              Загрузить CSV
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="csv" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="Upload" size={14} />
+              <span className="text-xs sm:text-sm">CSV</span>
             </TabsTrigger>
-            <TabsTrigger value="withdrawals">
-              <Icon name="Wallet" size={14} className="mr-1" />
-              Запросы
+            <TabsTrigger value="withdrawals" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="Wallet" size={14} />
+              <span className="text-xs sm:text-sm">Запросы</span>
             </TabsTrigger>
-            <TabsTrigger value="startup">
-              <Icon name="Gift" size={14} className="mr-1" />
-              Стартовые 3000₽
+            <TabsTrigger value="startup" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+              <Icon name="Gift" size={14} />
+              <span className="text-xs sm:text-sm">3000₽</span>
             </TabsTrigger>
           </TabsList>
 

@@ -14,7 +14,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   return (
     <Card className="border-2 border-blue-200">
-      <CardContent className="py-4">
+      <CardContent className="py-2 sm:py-4 px-3 sm:px-6">
         <div className="flex items-center justify-end">
           <OnlineIndicator lastUpdate={lastUpdate} autoRefresh={true} />
         </div>
