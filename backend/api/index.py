@@ -1989,6 +1989,29 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             
             earning_id = cur.fetchone()['id']
             
+            # Получаем имя курьера для логирования
+            cur.execute("""
+                SELECT full_name FROM t_p25272970_courier_button_site.users
+                WHERE id = %s
+            """, (courier_id,))
+            courier_name_result = cur.fetchone()
+            courier_name = courier_name_result['full_name'] if courier_name_result else f'ID {courier_id}'
+            
+            # Логируем начисление выплаты
+            log_activity(
+                conn,
+                'csv_payment_created',
+                f'Начислена выплата курьеру {courier_name}: {actual_reward}₽ ({actual_orders} заказов)',
+                {
+                    'courier_id': courier_id,
+                    'courier_name': courier_name,
+                    'amount': float(actual_reward),
+                    'orders': actual_orders,
+                    'external_id': external_id,
+                    'earning_id': earning_id
+                }
+            )
+            
             distributions = calculate_payment_distribution(
                 actual_reward, courier_id, referrer_id, self_bonus_completed, cur
             )
@@ -2000,6 +2023,30 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     VALUES (%s, %s, %s, %s, %s, %s, 'pending')
                 """, (earning_id, dist['recipient_type'], dist['recipient_id'], 
                       dist['amount'], dist['percentage'], dist['description']))
+                
+                # Логируем распределение выплаты
+                if dist['recipient_type'] == 'courier_referrer' and dist['recipient_id']:
+                    cur.execute("""
+                        SELECT full_name FROM t_p25272970_courier_button_site.users
+                        WHERE id = %s
+                    """, (dist['recipient_id'],))
+                    referrer_result = cur.fetchone()
+                    referrer_name = referrer_result['full_name'] if referrer_result else f"ID {dist['recipient_id']}"
+                    
+                    log_activity(
+                        conn,
+                        'referrer_payment_allocated',
+                        f"Рефереру {referrer_name} начислено {dist['amount']:.2f}₽ (60%) за курьера {courier_name}",
+                        {
+                            'referrer_id': dist['recipient_id'],
+                            'referrer_name': referrer_name,
+                            'courier_id': courier_id,
+                            'courier_name': courier_name,
+                            'amount': float(dist['amount']),
+                            'percentage': float(dist['percentage']),
+                            'earning_id': earning_id
+                        }
+                    )
             
             if not self_bonus_completed:
                 cur.execute("""
@@ -2009,7 +2056,26 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                         is_completed = (bonus_earned + %s >= 3000),
                         updated_at = NOW()
                     WHERE courier_id = %s
-                """, (actual_orders, actual_reward, actual_reward, courier_id))
+                    RETURNING bonus_earned + %s as new_bonus_total, is_completed
+                """, (actual_orders, actual_reward, actual_reward, courier_id, actual_reward))
+                
+                updated_tracking = cur.fetchone()
+                new_bonus_total = float(updated_tracking['new_bonus_total']) if updated_tracking else 0
+                just_completed = updated_tracking['is_completed'] if updated_tracking else False
+                
+                # Если самобонус только что завершился
+                if just_completed and not self_bonus_completed:
+                    log_activity(
+                        conn,
+                        'self_bonus_completed',
+                        f'Курьер {courier_name} завершил самобонус: {new_bonus_total:.2f}₽',
+                        {
+                            'courier_id': courier_id,
+                            'courier_name': courier_name,
+                            'total_bonus': new_bonus_total,
+                            'external_id': external_id
+                        }
+                    )
                 
                 # Проверяем достигли ли 30 заказов для стартовой выплаты
                 cur.execute("""
@@ -2092,6 +2158,27 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
     """)
     
     summary = cur.fetchone()
+    
+    # Логируем итоги загрузки CSV
+    if processed > 0:
+        log_activity(
+            conn,
+            'csv_uploaded',
+            f'Загружен CSV файл: обработано {processed} записей на сумму {float(summary["total_uploaded"] or 0):.2f}₽',
+            {
+                'filename': csv_filename,
+                'processed': processed,
+                'skipped': skipped,
+                'duplicates': duplicates,
+                'total_amount': float(summary['total_uploaded'] or 0),
+                'courier_self': float(summary['courier_self_total'] or 0),
+                'referrers': float(summary['referrer_total'] or 0),
+                'admins': float(summary['admin_total'] or 0),
+                'period_start': csv_period_start,
+                'period_end': csv_period_end
+            }
+        )
+        conn.commit()
     
     cur.close()
     conn.close()
