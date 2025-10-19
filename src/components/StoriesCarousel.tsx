@@ -33,24 +33,26 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const animationFrameRef = useRef<number>();
 
   useEffect(() => {
     fetchStories();
   }, []);
 
   useEffect(() => {
-    if (stories.length === 0 || !scrollContainerRef.current) return;
+    if (stories.length === 0 || !scrollContainerRef.current || isDragging) return;
 
     const container = scrollContainerRef.current;
-    let animationFrameId: number;
-    let scrollPosition = 0;
-    const scrollSpeed = 0.5; // Пикселей за кадр
+    let scrollPosition = container.scrollLeft;
+    const scrollSpeed = 0.5;
 
     const scroll = () => {
-      if (!isPaused && container) {
+      if (!isPaused && !isDragging && container) {
         scrollPosition += scrollSpeed;
         
-        // Когда доходим до конца, возвращаемся в начало
         if (scrollPosition >= container.scrollWidth / 2) {
           scrollPosition = 0;
         }
@@ -58,17 +60,17 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         container.scrollLeft = scrollPosition;
       }
       
-      animationFrameId = requestAnimationFrame(scroll);
+      animationFrameRef.current = requestAnimationFrame(scroll);
     };
 
-    animationFrameId = requestAnimationFrame(scroll);
+    animationFrameRef.current = requestAnimationFrame(scroll);
 
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [stories, isPaused]);
+  }, [stories, isPaused, isDragging]);
 
   const fetchStories = async () => {
     try {
@@ -91,17 +93,49 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   const hasNewStories = stories.some((s) => !s.isViewed);
 
   if (loading || stories.length === 0) {
     return null;
   }
 
-  // Дублируем истории для бесшовной прокрутки
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-full py-4">
+    <div className="w-screen -ml-6 py-4">
       <div className="px-6">
         <div className="flex items-center gap-3 mb-3 bg-yellow-400/90 backdrop-blur-sm rounded-xl px-4 py-2 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-fit">
           <Icon name="Sparkles" size={20} className="text-black" />
@@ -116,33 +150,39 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-hidden pl-6"
+        className="w-full overflow-x-auto pl-6 cursor-grab active:cursor-grabbing"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleDragEnd}
         onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        onTouchStart={() => setIsPaused(true)}
-        onTouchEnd={() => setIsPaused(false)}
+        onMouseOver={() => setIsPaused(true)}
       >
-        <div className="flex gap-3 pb-2">
-          <style>
-            {`
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-              }
-              .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-            `}
-          </style>
-
+        <style>
+          {`
+            .stories-container::-webkit-scrollbar {
+              display: none;
+            }
+          `}
+        </style>
+        <div className="flex gap-3 pb-2 stories-container">
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
-              onClick={() => onStoryClick(story.id)}
-              className="flex-shrink-0 w-36 h-24 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group"
+              onClick={(e) => {
+                if (!isDragging) {
+                  onStoryClick(story.id);
+                }
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="flex-shrink-0 w-36 h-24 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group select-none"
             >
               <div
-                className="absolute inset-0 bg-cover bg-center"
+                className="absolute inset-0 bg-cover bg-center pointer-events-none"
                 style={{ backgroundImage: `url(${story.imageUrl})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -152,7 +192,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
                 <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse z-10" />
               )}
 
-              <div className="relative z-10 h-full flex flex-col justify-end p-3">
+              <div className="relative z-10 h-full flex flex-col justify-end p-3 pointer-events-none">
                 <h4 className="font-extrabold text-white text-sm drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] line-clamp-2">
                   {story.title}
                 </h4>
@@ -161,8 +201,6 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
           ))}
         </div>
       </div>
-
-
     </div>
   );
 }
