@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 
@@ -31,10 +31,44 @@ interface StoriesCarouselProps {
 export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchStories();
   }, []);
+
+  useEffect(() => {
+    if (stories.length === 0 || !scrollContainerRef.current) return;
+
+    const container = scrollContainerRef.current;
+    let animationFrameId: number;
+    let scrollPosition = 0;
+    const scrollSpeed = 0.5; // Пикселей за кадр
+
+    const scroll = () => {
+      if (!isPaused && container) {
+        scrollPosition += scrollSpeed;
+        
+        // Когда доходим до конца, возвращаемся в начало
+        if (scrollPosition >= container.scrollWidth / 2) {
+          scrollPosition = 0;
+        }
+        
+        container.scrollLeft = scrollPosition;
+      }
+      
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [stories, isPaused]);
 
   const fetchStories = async () => {
     try {
@@ -63,6 +97,9 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     return null;
   }
 
+  // Дублируем истории для бесшовной прокрутки
+  const duplicatedStories = [...stories, ...stories, ...stories];
+
   return (
     <div className="w-full py-4">
       <div className="px-6">
@@ -77,8 +114,15 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <div className="flex gap-3 pb-2 scrollbar-hide px-6 min-w-full">
+      <div 
+        ref={scrollContainerRef}
+        className="w-full overflow-x-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+      >
+        <div className="flex gap-3 pb-2 px-6">
           <style>
             {`
               .scrollbar-hide::-webkit-scrollbar {
@@ -91,9 +135,9 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             `}
           </style>
 
-          {stories.map((story) => (
+          {duplicatedStories.map((story, index) => (
             <Card
-              key={story.id}
+              key={`${story.id}-${index}`}
               onClick={() => onStoryClick(story.id)}
               className="flex-shrink-0 w-36 h-24 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group"
             >
@@ -115,13 +159,13 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
               </div>
             </Card>
           ))}
-
-          {stories.length > 0 && (
-            <div className="flex-shrink-0 w-36 h-24 flex items-center justify-center">
-              <Icon name="ChevronRight" size={32} className="text-black/30" />
-            </div>
-          )}
         </div>
+      </div>
+
+      <div className="text-center mt-2 px-6">
+        <p className="text-xs text-black/60 font-bold">
+          {isPaused ? '⏸ Наведите мышь чтобы остановить' : '▶ Автопрокрутка активна'}
+        </p>
       </div>
     </div>
   );
