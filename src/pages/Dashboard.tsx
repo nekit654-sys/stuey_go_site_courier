@@ -19,6 +19,7 @@ import ProfileHeader from '@/components/ProfileHeader';
 import StatsCards from '@/components/dashboard/StatsCards';
 import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
 import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
+import Footer from '@/components/Footer';
 
 
 interface Stats {
@@ -247,7 +248,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500 flex flex-col">
       {showStories && stories.length > 0 && (
         <StoriesViewer
           stories={stories}
@@ -529,6 +530,8 @@ export default function Dashboard() {
           }
         }
       `}} />
+
+      <Footer />
     </div>
   );
 }

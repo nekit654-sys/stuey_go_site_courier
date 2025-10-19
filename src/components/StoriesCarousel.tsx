@@ -42,35 +42,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     fetchStories();
   }, []);
 
-  useEffect(() => {
-    if (stories.length === 0 || !scrollContainerRef.current || isDragging) return;
-
-    const container = scrollContainerRef.current;
-    let scrollPosition = container.scrollLeft;
-    const scrollSpeed = 0.5;
-
-    const scroll = () => {
-      if (!isPaused && !isDragging && container) {
-        scrollPosition += scrollSpeed;
-        
-        if (scrollPosition >= container.scrollWidth / 2) {
-          scrollPosition = 0;
-        }
-        
-        container.scrollLeft = scrollPosition;
-      }
-      
-      animationFrameRef.current = requestAnimationFrame(scroll);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(scroll);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [stories, isPaused, isDragging]);
+  // Отключаем автоскролл - пользователь сам листает истории
 
   const fetchStories = async () => {
     try {

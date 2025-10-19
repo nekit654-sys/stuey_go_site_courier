@@ -63,12 +63,13 @@ export default function StatsCards({ stats }: StatsCardsProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: card.delay, duration: 0.4 }}
+          className="h-full"
         >
-          <Card className={`bg-gradient-to-br ${card.gradient} border-4 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-200 overflow-hidden relative group`}>
+          <Card className={`bg-gradient-to-br ${card.gradient} border-4 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-200 overflow-hidden relative group h-full`}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.3),transparent_50%)]"></div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
             
-            <div className="relative p-5">
+            <div className="relative p-5 h-full flex flex-col">
               <div className="flex items-start justify-between mb-4">
                 <div className={`${card.iconBg} border-3 border-black rounded-xl p-3 shadow-[0_4px_0_0_rgba(0,0,0,1)] group-hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] group-hover:translate-y-[2px] transition-all`}>
                   <Icon name={card.icon as any} className="h-6 w-6 text-black" />
@@ -78,14 +79,16 @@ export default function StatsCards({ stats }: StatsCardsProps) {
                 </div>
               </div>
               
-              <div>
-                <p className="text-sm font-bold text-white/90 mb-2">{card.label}</p>
+              <div className="flex-1 flex flex-col justify-end">
+                <p className="text-sm font-bold text-white/90 mb-2 min-h-[40px] flex items-center">{card.label}</p>
                 <div className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mb-1">
                   {card.value}
                 </div>
-                {card.subtext && (
-                  <p className="text-xs font-bold text-white/80">{card.subtext}</p>
-                )}
+                <div className="min-h-[20px]">
+                  {card.subtext && (
+                    <p className="text-xs font-bold text-white/80">{card.subtext}</p>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
