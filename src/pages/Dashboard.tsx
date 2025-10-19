@@ -72,15 +72,10 @@ export default function Dashboard() {
     }
 
     if (user) {
-      const isProfileComplete = user?.phone && user?.city && user?.full_name;
-      setShowProfileSetup(!isProfileComplete);
-
-      if (isProfileComplete) {
-        fetchStats();
-        fetchReferrals();
-        fetchWithdrawalRequests();
-        fetchStories();
-      }
+      fetchStats();
+      fetchReferrals();
+      fetchWithdrawalRequests();
+      fetchStories();
       setLoading(false);
     }
   }, [isAuthenticated, navigate, user?.id]);
