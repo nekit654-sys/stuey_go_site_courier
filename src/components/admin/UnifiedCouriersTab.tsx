@@ -9,6 +9,8 @@ import CouriersList from './couriers/CouriersList';
 import ReferralStatsTab from './couriers/ReferralStatsTab';
 import ReferralsListTab from './couriers/ReferralsListTab';
 import TopReferrersTab from './couriers/TopReferrersTab';
+import EditCourierModal from './EditCourierModal';
+import { toast } from 'sonner';
 
 interface Courier {
   id: number;
@@ -82,11 +84,12 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const [filterReferrals, setFilterReferrals] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [editingCourier, setEditingCourier] = useState<Courier | null>(null);
 
   const handleUpdateExternalId = async (courierId: number, externalId: string) => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      alert('Необходима авторизация');
+      toast.error('Необходима авторизация');
       return;
     }
 
@@ -112,10 +115,83 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         throw new Error(data.error || 'Ошибка обновления External ID');
       }
 
-      alert(data.message || 'External ID успешно обновлён');
-      onRefresh(); // Обновляем список курьеров
+      toast.success(data.message || 'External ID успешно обновлён');
+      onRefresh();
     } catch (error: any) {
-      alert(error.message || 'Ошибка при обновлении External ID');
+      toast.error(error.message || 'Ошибка при обновлении External ID');
+      throw error;
+    }
+  };
+
+  const handleEditCourier = async (courierId: number, data: Partial<Courier>) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      toast.error('Необходима авторизация');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=couriers&action=update',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': token,
+          },
+          body: JSON.stringify({
+            courier_id: courierId,
+            ...data
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Ошибка обновления данных');
+      }
+
+      toast.success('Данные курьера успешно обновлены');
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || 'Ошибка при обновлении данных');
+      throw error;
+    }
+  };
+
+  const handleDeleteCourier = async (courierId: number) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      toast.error('Необходима авторизация');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=couriers&action=delete',
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': token,
+          },
+          body: JSON.stringify({
+            courier_id: courierId
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Ошибка удаления');
+      }
+
+      toast.success('Курьер успешно удалён');
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || 'Ошибка при удалении');
       throw error;
     }
   };
@@ -203,6 +279,8 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             onSearchChange={setSearchQuery}
             onFilterToggle={() => setFilterReferrals(!filterReferrals)}
             onUpdateExternalId={handleUpdateExternalId}
+            onEditCourier={(courier) => setEditingCourier(courier)}
+            onDeleteCourier={handleDeleteCourier}
           />
         </TabsContent>
 
@@ -218,6 +296,14 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
           <TopReferrersTab topReferrers={topReferrers} isLoading={isLoadingReferrals} />
         </TabsContent>
       </Tabs>
+
+      {editingCourier && (
+        <EditCourierModal
+          courier={editingCourier}
+          onClose={() => setEditingCourier(null)}
+          onSave={handleEditCourier}
+        />
+      )}
     </div>
   );
 };

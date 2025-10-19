@@ -32,6 +32,8 @@ interface CouriersListProps {
   onSearchChange: (query: string) => void;
   onFilterToggle: () => void;
   onUpdateExternalId?: (courierId: number, externalId: string) => Promise<void>;
+  onEditCourier?: (courier: Courier) => void;
+  onDeleteCourier?: (courierId: number) => void;
 }
 
 export default function CouriersList({
@@ -41,7 +43,9 @@ export default function CouriersList({
   filterReferrals,
   onSearchChange,
   onFilterToggle,
-  onUpdateExternalId
+  onUpdateExternalId,
+  onEditCourier,
+  onDeleteCourier
 }: CouriersListProps) {
   const [editingExternalId, setEditingExternalId] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -127,6 +131,7 @@ export default function CouriersList({
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заработано</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата рег.</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -245,6 +250,36 @@ export default function CouriersList({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(courier.created_at).toLocaleDateString('ru-RU')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex items-center gap-2">
+                        {onEditCourier && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onEditCourier(courier)}
+                            className="h-8 px-3"
+                          >
+                            <Icon name="Edit" size={14} className="mr-1" />
+                            Изменить
+                          </Button>
+                        )}
+                        {onDeleteCourier && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (confirm(`Удалить курьера ${courier.full_name}?`)) {
+                                onDeleteCourier(courier.id);
+                              }
+                            }}
+                            className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Icon name="Trash2" size={14} className="mr-1" />
+                            Удалить
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

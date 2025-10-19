@@ -230,6 +230,30 @@ def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
                 'isBase64Encoded': False
             }
     
+    elif method == 'PUT':
+        action = query_params.get('action', '')
+        if action == 'update':
+            return update_courier(event, headers)
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid action'}),
+                'isBase64Encoded': False
+            }
+    
+    elif method == 'DELETE':
+        action = query_params.get('action', '')
+        if action == 'delete':
+            return delete_courier(event, headers)
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid action'}),
+                'isBase64Encoded': False
+            }
+    
     return {
         'statusCode': 405,
         'headers': headers,
@@ -283,6 +307,130 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             'success': True,
             'couriers': couriers_list
         })),
+        'isBase64Encoded': False
+    }
+
+
+def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    body_data = json.loads(event.get('body', '{}'))
+    courier_id = body_data.get('courier_id')
+    
+    if not courier_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'courier_id is required'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    
+    update_fields = []
+    values = []
+    
+    if 'full_name' in body_data:
+        update_fields.append('full_name = %s')
+        values.append(body_data['full_name'])
+    
+    if 'phone' in body_data:
+        update_fields.append('phone = %s')
+        values.append(body_data['phone'])
+    
+    if 'city' in body_data:
+        update_fields.append('city = %s')
+        values.append(body_data['city'])
+    
+    if 'email' in body_data:
+        update_fields.append('email = %s')
+        values.append(body_data['email'])
+    
+    if 'external_id' in body_data:
+        update_fields.append('external_id = %s')
+        values.append(body_data['external_id'])
+    
+    if 'total_orders' in body_data:
+        update_fields.append('total_orders = %s')
+        values.append(body_data['total_orders'])
+    
+    if 'total_earnings' in body_data:
+        update_fields.append('total_earnings = %s')
+        values.append(body_data['total_earnings'])
+    
+    if 'is_active' in body_data:
+        update_fields.append('is_active = %s')
+        values.append(body_data['is_active'])
+    
+    if not update_fields:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'No fields to update'}),
+            'isBase64Encoded': False
+        }
+    
+    update_fields.append('updated_at = NOW()')
+    values.append(courier_id)
+    
+    query = f"""
+        UPDATE t_p25272970_courier_button_site.users
+        SET {', '.join(update_fields)}
+        WHERE id = %s
+    """
+    
+    cur.execute(query, values)
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': 'Данные курьера обновлены'}),
+        'isBase64Encoded': False
+    }
+
+
+def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    body_data = json.loads(event.get('body', '{}'))
+    courier_id = body_data.get('courier_id')
+    
+    if not courier_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'courier_id is required'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    
+    cur.execute("""
+        DELETE FROM t_p25272970_courier_button_site.referrals
+        WHERE referrer_id = %s OR referee_id = %s
+    """, (courier_id, courier_id))
+    
+    cur.execute("""
+        DELETE FROM t_p25272970_courier_button_site.withdrawal_requests
+        WHERE user_id = %s
+    """, (courier_id,))
+    
+    cur.execute("""
+        DELETE FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (courier_id,))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': 'Курьер успешно удалён'}),
         'isBase64Encoded': False
     }
 
