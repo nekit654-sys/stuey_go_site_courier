@@ -21,6 +21,7 @@ import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
 import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardNav from '@/components/dashboard/DashboardNav';
 
 
 interface Stats {
@@ -249,7 +250,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500 flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
       {showStories && stories.length > 0 && (
         <StoriesViewer
           stories={stories}
@@ -260,6 +261,12 @@ export default function Dashboard() {
           }}
         />
       )}
+
+      {/* Navigation */}
+      <DashboardNav 
+        onSettings={() => setActiveTab('profile')}
+        onLogout={logout}
+      />
 
       {showProfileSetup && (
         <ProfileSetupModal
@@ -273,84 +280,26 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Header - Full Width on Mobile, Hidden on Desktop with Sidebar */}
-      <div className="lg:hidden container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
-        <ProfileHeader user={user} stats={stats} onLogout={logout} onSettingsClick={() => setActiveTab('profile')} />
-      </div>
-
       {/* Stories Carousel - Full Width */}
-      <div className="mb-4">
+      <div className="w-full">
         <StoriesCarousel onStoryClick={handleStoryClick} />
       </div>
 
-      {/* Main Layout: Sidebar + Content */}
-      <div className="container mx-auto px-3 sm:px-4 max-w-7xl flex gap-6">
-        {/* Sidebar - только на больших экранах */}
-        <Sidebar 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange}
-          stats={stats}
-          user={user}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
-
-        {/* Main Earnings Card */}
-        <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] mb-4 sm:mb-6 p-4 sm:p-6">
-          <div className="text-center">
-            <p className="text-xs sm:text-sm font-bold text-black/70 mb-2">💰 Ваш заработок с рефералов</p>
-            <div className="text-4xl sm:text-5xl md:text-6xl font-black text-black mb-3 sm:mb-4">
-              {stats?.referral_earnings?.toLocaleString('ru-RU') || '0'} ₽
-            </div>
-            <div className="flex justify-center gap-2 sm:gap-4 text-xs sm:text-sm">
-              <div className="bg-yellow-400 border-2 border-black rounded-xl px-3 sm:px-4 py-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] flex-1 max-w-[140px]">
-                <div className="font-bold text-black/70">Всего</div>
-                <div className="text-xl sm:text-2xl font-extrabold text-black">{stats?.total_referrals || 0}</div>
-              </div>
-              <div className="bg-yellow-400 border-2 border-black rounded-xl px-3 sm:px-4 py-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] flex-1 max-w-[140px]">
-                <div className="font-bold text-black/70">Активных</div>
-                <div className="text-xl sm:text-2xl font-extrabold text-black">{stats?.active_referrals || 0}</div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Startup Bonus Notification */}
-        {user?.id && (
-          <div className="mb-4 sm:mb-6">
-            <StartupBonusNotification 
-              userId={user.id} 
-              onOpenPayoutModal={() => setShowStartupPayoutModal(true)} 
-            />
-          </div>
-        )}
-
-        {/* Inviter Card - показываем кто пригласил */}
-        {user?.inviter_name && (
-          <InviterCard 
-            inviterName={user.inviter_name}
-            inviterAvatar={user.inviter_avatar}
-            inviterCode={user.inviter_code}
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-3 sm:px-4 max-w-7xl py-6 flex gap-6">
+          {/* Sidebar - только на больших экранах */}
+          <Sidebar 
+            activeTab={activeTab} 
+            onTabChange={handleTabChange}
+            stats={stats}
+            user={user}
           />
-        )}
 
-        {/* Copy Referral Link Button */}
-        <div className="mb-4 sm:mb-6">
-          <Button
-            onClick={copyReferralLink}
-            className="w-full h-12 sm:h-14 text-base sm:text-lg font-extrabold bg-black text-yellow-400 border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[5px] active:shadow-none transition-all"
-          >
-            <Icon name="Share2" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-            Скопировать реферальную ссылку
-          </Button>
-          <p className="text-black/70 text-xs sm:text-sm text-center mt-2 font-bold">
-            Отправьте эту ссылку друзьям — они зарегистрируются по вашему приглашению 🎁
-          </p>
-        </div>
-
-        {/* Tabs Navigation - только на мобильных */}
-        <div className="lg:hidden flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Tabs Navigation - только на мобильных */}
+            <div className="lg:hidden flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
             onClick={() => handleTabChange('stats')}
@@ -413,41 +362,67 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Stats Tab */}
-        {activeTab === 'stats' && stats && (
-          <div className="space-y-3 sm:space-y-4">
-            <StatsCards stats={stats} />
+            {/* Stats Tab */}
+            {activeTab === 'stats' && stats && (
+              <div className="space-y-3 sm:space-y-4">
+                {/* Startup Bonus Notification */}
+                {user?.id && (
+                  <StartupBonusNotification 
+                    userId={user.id} 
+                    onOpenPayoutModal={() => setShowStartupPayoutModal(true)} 
+                  />
+                )}
 
-            <Card className="bg-black border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-yellow-400">
-              <h3 className="text-base sm:text-lg font-extrabold mb-3">💡 Как заработать больше?</h3>
-              <ul className="space-y-2 text-xs sm:text-sm">
-                <li className="flex items-start gap-2">
-                  <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
-                  <span className="font-bold">Делись ссылкой в чатах курьеров</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
-                  <span className="font-bold">Рассказывай коллегам на точках</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
-                  <span className="font-bold">Чем больше рефералов — тем выше заработок</span>
-                </li>
-              </ul>
-            </Card>
-          </div>
-        )}
+                {/* Inviter Card */}
+                {user?.inviter_name && (
+                  <InviterCard 
+                    inviterName={user.inviter_name}
+                    inviterAvatar={user.inviter_avatar}
+                    inviterCode={user.inviter_code}
+                  />
+                )}
 
-        {/* Referrals Tab */}
-        {activeTab === 'referrals' && (
-          <div className="space-y-3 sm:space-y-4">
-            <ReferralsGrid referrals={referrals} />
-          </div>
-        )}
+                <StatsCards stats={stats} />
 
-        {/* Withdrawals Tab */}
-        {activeTab === 'withdrawals' && (
-          <div className="space-y-4 sm:space-y-6">
+                {/* Copy Referral Link */}
+                <Button
+                  onClick={copyReferralLink}
+                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-extrabold bg-black text-yellow-400 border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all"
+                >
+                  <Icon name="Share2" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  Скопировать реферальную ссылку
+                </Button>
+
+                <Card className="bg-black border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-yellow-400">
+                  <h3 className="text-base sm:text-lg font-extrabold mb-3">💡 Как заработать больше?</h3>
+                  <ul className="space-y-2 text-xs sm:text-sm">
+                    <li className="flex items-start gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <span className="font-bold">Делись ссылкой в чатах курьеров</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <span className="font-bold">Рассказывай коллегам на точках</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <span className="font-bold">Чем больше рефералов — тем выше заработок</span>
+                    </li>
+                  </ul>
+                </Card>
+              </div>
+            )}
+
+            {/* Referrals Tab */}
+            {activeTab === 'referrals' && (
+              <div className="space-y-3 sm:space-y-4">
+                <ReferralsGrid referrals={referrals} />
+              </div>
+            )}
+
+            {/* Withdrawals Tab */}
+            {activeTab === 'withdrawals' && (
+              <div className="space-y-4 sm:space-y-6">
             <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
               <h3 className="text-base sm:text-lg font-extrabold mb-3 sm:mb-4 text-black flex items-center gap-2">
                 <Icon name="DollarSign" className="h-5 w-5 text-green-600" />
@@ -467,19 +442,19 @@ export default function Dashboard() {
                 <Icon name="History" className="h-5 w-5 text-purple-600" />
                 История заявок
               </h3>
-              <WithdrawalsTimeline requests={withdrawalRequests} loading={loadingWithdrawals} />
+                <WithdrawalsTimeline requests={withdrawalRequests} loading={loadingWithdrawals} />
+              </div>
             </div>
-          </div>
-        )}
+            )}
 
-        {/* Game Tab */}
-        {activeTab === 'game' && user?.id && (
-          <GameTab userId={user.id} />
-        )}
+            {/* Game Tab */}
+            {activeTab === 'game' && user?.id && (
+              <GameTab userId={user.id} />
+            )}
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
+            {/* Profile Tab */}
+            {activeTab === 'profile' && (
+              <Card className="bg-white border-3 border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
             <h3 className="text-base sm:text-lg font-extrabold mb-4 sm:mb-6 text-black">Профиль курьера</h3>
             <div className="space-y-3 sm:space-y-4">
               <div className="bg-yellow-400 border-2 border-black rounded-xl p-3 sm:p-4 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
@@ -504,38 +479,42 @@ export default function Dashboard() {
               >
                 <Icon name="Edit" className="mr-2 h-4 w-4" />
                 Редактировать профиль
-              </Button>
-            </div>
-          </Card>
-        )}
+                  </Button>
+                </div>
+              </Card>
+            )}
 
-        {/* Friends Tab - NEW */}
-        {activeTab === 'friends' && (
-          <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
+            {/* Friends Tab - NEW */}
+            {activeTab === 'friends' && (
+              <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
             <Icon name="Heart" className="h-16 w-16 mx-auto mb-4 text-pink-500" />
             <h3 className="text-xl font-black text-black mb-2">Скоро здесь появятся друзья!</h3>
             <p className="text-gray-600 mb-4">Добавляйте в друзья других курьеров и следите за их успехами</p>
             <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white border-3 border-black font-bold">
               <Icon name="UserPlus" className="mr-2 h-4 w-4" />
-              Найти друзей
-            </Button>
-          </Card>
-        )}
+                  Найти друзей
+                </Button>
+              </Card>
+            )}
 
-        {/* Messages Tab - NEW */}
-        {activeTab === 'messages' && (
-          <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
+            {/* Messages Tab - NEW */}
+            {activeTab === 'messages' && (
+              <Card className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-center">
             <Icon name="MessageCircle" className="h-16 w-16 mx-auto mb-4 text-blue-500" />
             <h3 className="text-xl font-black text-black mb-2">Чат курьеров появится скоро!</h3>
             <p className="text-gray-600 mb-4">Общайтесь с коллегами, делитесь опытом и полезными советами</p>
             <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-3 border-black font-bold">
               <Icon name="Send" className="mr-2 h-4 w-4" />
-              Написать сообщение
-            </Button>
-          </Card>
-        )}
+                  Написать сообщение
+                </Button>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Footer - Fixed at bottom */}
+      <Footer />
 
       {/* Startup Payout Modal */}
       {showStartupPayoutModal && user?.id && (
@@ -570,8 +549,6 @@ export default function Dashboard() {
           }
         }
       `}} />
-
-      <Footer />
     </div>
   );
 }

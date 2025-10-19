@@ -11,12 +11,12 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, onTabChange, stats, user }: SidebarProps) {
   const menuItems = [
-    { id: 'stats', icon: 'BarChart3', label: 'Статистика', badge: null },
-    { id: 'referrals', icon: 'Users', label: 'Рефералы', badge: stats?.total_referrals || 0 },
-    { id: 'withdrawals', icon: 'Wallet', label: 'Выплаты', badge: null },
-    { id: 'game', icon: 'Gamepad2', label: 'Игра', badge: null },
+    { id: 'stats', icon: 'Home', label: 'Главная', badge: null },
     { id: 'friends', icon: 'Heart', label: 'Друзья', badge: 'NEW', isNew: true },
     { id: 'messages', icon: 'MessageCircle', label: 'Сообщения', badge: '3', isNew: true },
+    { id: 'referrals', icon: 'Users', label: 'Рефералы', badge: stats?.total_referrals || 0 },
+    { id: 'game', icon: 'Trophy', label: 'Игра', badge: null },
+    { id: 'withdrawals', icon: 'Wallet', label: 'Выплаты', badge: null },
   ];
 
   return (
