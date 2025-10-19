@@ -1,18 +1,15 @@
 '''
-Business: Upload images to Yandex Object Storage and return public URL
+Business: Upload images and return data URL for inline display
 Args: event - dict with httpMethod, body (base64 encoded image data)
       context - object with request_id, function_name
-Returns: HTTP response with image URL
+Returns: HTTP response with data URL (base64)
 '''
 
 import json
 import base64
-import os
 import uuid
 from typing import Dict, Any
 from datetime import datetime
-import boto3
-from botocore.exceptions import ClientError
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
@@ -69,62 +66,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         image_bytes = base64.b64decode(image_data)
         
         ext = filename.split('.')[-1] if '.' in filename else 'png'
-        unique_filename = f"images/{uuid.uuid4()}.{ext}"
-        
-        s3_access_key = os.environ.get('S3_ACCESS_KEY_ID')
-        s3_secret_key = os.environ.get('S3_SECRET_ACCESS_KEY')
-        s3_bucket = os.environ.get('S3_BUCKET_NAME')
-        s3_endpoint = os.environ.get('S3_ENDPOINT_URL', 'https://storage.yandexcloud.net')
-        
-        if not all([s3_access_key, s3_secret_key, s3_bucket]):
-            return {
-                'statusCode': 500,
-                'headers': {**cors_headers, 'Content-Type': 'application/json'},
-                'body': json.dumps({'error': 'S3 credentials not configured'}),
-                'isBase64Encoded': False
-            }
-        
-        s3_client = boto3.client(
-            's3',
-            endpoint_url=s3_endpoint,
-            aws_access_key_id=s3_access_key,
-            aws_secret_access_key=s3_secret_key,
-            region_name='ru-central1'
-        )
-        
         content_type = 'image/jpeg' if ext.lower() in ['jpg', 'jpeg'] else f'image/{ext.lower()}'
         
-        s3_client.put_object(
-            Bucket=s3_bucket,
-            Key=unique_filename,
-            Body=image_bytes,
-            ContentType=content_type,
-            ACL='public-read'
-        )
-        
-        image_url = f"{s3_endpoint}/{s3_bucket}/{unique_filename}"
+        data_url = f"data:{content_type};base64,{image_data}"
+        unique_id = str(uuid.uuid4())
         
         return {
             'statusCode': 200,
             'headers': {**cors_headers, 'Content-Type': 'application/json'},
             'body': json.dumps({
-                'url': image_url,
-                'filename': unique_filename,
+                'url': data_url,
+                'id': unique_id,
                 'size': len(image_bytes),
                 'uploaded_at': datetime.now().isoformat()
             }),
             'isBase64Encoded': False
         }
         
-    except ClientError as e:
-        error_msg = str(e)
-        print(f'S3 upload error: {error_msg}')
-        return {
-            'statusCode': 500,
-            'headers': {**cors_headers, 'Content-Type': 'application/json'},
-            'body': json.dumps({'error': f'S3 upload failed: {error_msg}'}),
-            'isBase64Encoded': False
-        }
     except Exception as e:
         print(f'Upload error: {str(e)}')
         return {
