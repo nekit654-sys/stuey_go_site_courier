@@ -1354,46 +1354,12 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
                     ON CONFLICT (referrer_id, referee_id) DO NOTHING
                 """, (referrer['id'], user_id, full_name, city))
         
-        # Проверяем, нет ли уже пользователя с таким телефоном
+        # Просто обновляем текущего пользователя
         cur.execute("""
-            SELECT id, oauth_provider FROM t_p25272970_courier_button_site.users
-            WHERE phone = %s AND id != %s
-        """, (phone, user_id))
-        
-        existing_user = cur.fetchone()
-        
-        # Если нашли пользователя с таким телефоном - объединяем аккаунты
-        if existing_user:
-            main_user_id = existing_user['id']
-            
-            # Обновляем данные основного аккаунта
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET full_name = %s, city = %s, updated_at = NOW()
-                WHERE id = %s
-            """, (full_name, city, main_user_id))
-            
-            # Переносим рефералов с текущего аккаунта на основной
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.referrals
-                SET referrer_id = %s
-                WHERE referrer_id = %s
-            """, (main_user_id, user_id))
-            
-            # Удаляем дубликат
-            cur.execute("""
-                DELETE FROM t_p25272970_courier_button_site.users
-                WHERE id = %s
-            """, (user_id,))
-            
-            user_id = main_user_id
-        else:
-            # Просто обновляем текущего пользователя
-            cur.execute("""
-                UPDATE t_p25272970_courier_button_site.users
-                SET full_name = %s, phone = %s, city = %s, updated_at = NOW()
-                WHERE id = %s
-            """, (full_name, phone, city, user_id))
+            UPDATE t_p25272970_courier_button_site.users
+            SET full_name = %s, phone = %s, city = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (full_name, phone, city, user_id))
         
         conn.commit()
         
