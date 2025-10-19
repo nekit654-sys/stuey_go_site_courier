@@ -100,11 +100,11 @@ export default function StoryAnimations({ animationType, animationConfig }: Stor
               <img
                 src={animationConfig.fallingImage}
                 alt="Falling item"
-                className="object-contain rounded-sm border-2 border-black"
+                className="object-contain"
                 style={{
                   width: `${item.size * 3}px`,
                   height: `${item.size * 1.5}px`,
-                  boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 0.8)',
+                  filter: 'drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6))',
                 }}
               />
             </div>
@@ -134,16 +134,34 @@ export default function StoryAnimations({ animationType, animationConfig }: Stor
                 transform: translateY(-10px);
               }
             }
+            @keyframes shadowSquash {
+              0%, 100% {
+                transform: scaleX(1) scaleY(1);
+                opacity: 0.4;
+              }
+              50% {
+                transform: scaleX(1.3) scaleY(0.7);
+                opacity: 0.3;
+              }
+            }
           `}
         </style>
         <div className={`absolute ${positionClasses} z-20 pointer-events-none`}>
-          <div className="animate-[characterJump_2s_infinite_ease-in-out]">
-            <img
-              src={animationConfig.jumpingImage}
-              alt="Character"
-              className="w-28 h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain"
+          <div className="relative">
+            <div className="animate-[characterJump_2s_infinite_ease-in-out]">
+              <img
+                src={animationConfig.jumpingImage}
+                alt="Character"
+                className="w-28 h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain relative z-10"
+              />
+            </div>
+            <div 
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full blur-sm"
               style={{
-                filter: 'drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.8))',
+                width: '80%',
+                height: '20%',
+                background: 'rgba(0, 0, 0, 0.4)',
+                animation: 'shadowSquash 2s infinite ease-in-out',
               }}
             />
           </div>
