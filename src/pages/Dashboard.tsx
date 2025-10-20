@@ -22,6 +22,7 @@ import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
+import NewCourierNotification from '@/components/NewCourierNotification';
 
 
 interface Stats {
@@ -71,6 +72,7 @@ export default function Dashboard() {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
   const [stories, setStories] = useState<any[]>([]);
   const [showStories, setShowStories] = useState(false);
+  const [showNewCourierNotification, setShowNewCourierNotification] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -92,6 +94,13 @@ export default function Dashboard() {
 
     const isProfileComplete = user?.phone && user?.city && user?.full_name;
     if (!isProfileComplete) return;
+
+    const hasNoOrders = (user?.total_orders || 0) === 0;
+    const notificationDismissed = localStorage.getItem('new_courier_notification_dismissed');
+    
+    if (hasNoOrders && !notificationDismissed) {
+      setShowNewCourierNotification(true);
+    }
 
     const statsInterval = setInterval(() => {
       fetchStats();
@@ -130,6 +139,11 @@ export default function Dashboard() {
 
       if (data.success) {
         setStats(data.stats);
+        
+        if (data.stats?.total_orders > 0 && showNewCourierNotification) {
+          setShowNewCourierNotification(false);
+          localStorage.setItem('new_courier_notification_dismissed', 'true');
+        }
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -208,6 +222,11 @@ export default function Dashboard() {
     setShowProfileSetup(false);
     fetchStats();
     fetchReferrals();
+  };
+
+  const handleDismissNewCourierNotification = () => {
+    setShowNewCourierNotification(false);
+    localStorage.setItem('new_courier_notification_dismissed', 'true');
   };
 
   const fetchStories = async () => {
@@ -365,6 +384,13 @@ export default function Dashboard() {
             {/* Stats Tab */}
             {activeTab === 'stats' && stats && (
               <div className="space-y-3 sm:space-y-4">
+                {/* New Courier Notification */}
+                {showNewCourierNotification && (
+                  <NewCourierNotification 
+                    onDismiss={handleDismissNewCourierNotification}
+                  />
+                )}
+
                 {/* Startup Bonus Notification */}
                 {user?.id && (
                   <StartupBonusNotification 
