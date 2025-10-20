@@ -89,7 +89,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const handleEditCourier = async (courierId: number, data: Partial<Courier>) => {
     console.log('🎯 ФУНКЦИЯ handleEditCourier ВЫЗВАНА!', { courierId, data });
     
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       console.error('❌ НЕТ ТОКЕНА!');
       toast.error('Необходима авторизация');
@@ -134,7 +134,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   };
 
   const handleDeleteCourier = async (courierId: number) => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       toast.error('Необходима авторизация');
       return;
