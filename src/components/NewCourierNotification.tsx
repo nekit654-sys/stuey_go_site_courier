@@ -89,22 +89,6 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
           </div>
         </div>
 
-        <div className="bg-black/10 backdrop-blur-sm rounded-xl p-3 border-2 border-black/30 mb-4">
-          <p className="text-xs text-black/70 font-bold mb-2">
-            📎 Твоя реферальная ссылка для регистрации:
-          </p>
-          <div className="bg-white rounded-lg p-2 border-2 border-black/20 break-all">
-            <a 
-              href={referralLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-600 hover:text-blue-800 underline font-mono"
-            >
-              {referralLink}
-            </a>
-          </div>
-        </div>
-
         <Button
           onClick={handleOpenGuide}
           className="w-full bg-black hover:bg-black/90 text-yellow-400 font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all mb-3"
