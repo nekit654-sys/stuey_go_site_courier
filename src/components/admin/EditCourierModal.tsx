@@ -45,14 +45,20 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
       return;
     }
 
+    console.log('📝 МОДАЛКА: Отправляем данные курьера:', {
+      courier_id: courier.id,
+      formData
+    });
+
     setIsSaving(true);
     try {
       await onSave(courier.id, formData);
+      console.log('✅ МОДАЛКА: Сохранение успешно');
       toast.success('Данные курьера обновлены');
       onClose();
     } catch (error) {
+      console.error('❌ МОДАЛКА: Ошибка сохранения:', error);
       toast.error('Ошибка при сохранении данных');
-      console.error(error);
     } finally {
       setIsSaving(false);
     }
