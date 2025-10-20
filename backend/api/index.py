@@ -1683,6 +1683,53 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     }
 
 
+def _distribute_to_admins(admin_share_total: float, original_total: float, cur) -> list:
+    '''Распределяет деньги между админами пропорционально рекламным расходам'''
+    distributions = []
+    
+    cur.execute("""
+        SELECT id, username, ad_spend_current 
+        FROM t_p25272970_courier_button_site.admins 
+        WHERE ad_spend_current > 0
+        ORDER BY ad_spend_current DESC
+    """)
+    
+    admins_with_spend = cur.fetchall()
+    
+    if admins_with_spend:
+        total_ad_spend = sum([float(a[2] or 0) for a in admins_with_spend])
+        
+        for admin in admins_with_spend:
+            admin_id = admin[0]
+            admin_username = admin[1]
+            admin_ad_spend = float(admin[2] or 0)
+            
+            admin_amount = (admin_ad_spend / total_ad_spend) * admin_share_total
+            admin_percentage = (admin_amount / original_total) * 100.0
+            
+            distributions.append({
+                'recipient_type': 'admin',
+                'recipient_id': admin_id,
+                'amount': admin_amount,
+                'percentage': admin_percentage,
+                'description': f'Админ {admin_username} ({(admin_ad_spend/total_ad_spend)*100:.1f}% расходов)'
+            })
+    else:
+        cur.execute("SELECT COUNT(*) FROM t_p25272970_courier_button_site.admins")
+        admin_count = cur.fetchone()[0]
+        
+        if admin_count > 0:
+            distributions.append({
+                'recipient_type': 'admin',
+                'recipient_id': None,
+                'amount': admin_share_total,
+                'percentage': (admin_share_total / original_total) * 100.0,
+                'description': f'Распределение поровну между {admin_count} админами'
+            })
+    
+    return distributions
+
+
 def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, cur) -> list:
     '''
     Рассчитывает распределение выплат по правилам:
@@ -1693,13 +1740,49 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
     distributions = []
     
     if not self_bonus_completed:
-        distributions.append({
-            'recipient_type': 'courier_self',
-            'recipient_id': courier_id,
-            'amount': total_amount,
-            'percentage': 100.0,
-            'description': 'Самобонус (первые 3000₽ за 30 заказов)'
-        })
+        # Получаем текущий прогресс самобонуса
+        cur.execute("""
+            SELECT bonus_earned FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+            WHERE courier_id = %s
+        """, (courier_id,))
+        tracking = cur.fetchone()
+        current_bonus = float(tracking['bonus_earned']) if tracking else 0.0
+        remaining_bonus = max(0, 3000 - current_bonus)
+        
+        # Самобонус: только до 3000₽
+        self_bonus_amount = min(total_amount, remaining_bonus)
+        remaining_amount = total_amount - self_bonus_amount
+        
+        if self_bonus_amount > 0:
+            distributions.append({
+                'recipient_type': 'courier_self',
+                'recipient_id': courier_id,
+                'amount': self_bonus_amount,
+                'percentage': (self_bonus_amount / total_amount) * 100.0,
+                'description': f'Самобонус ({current_bonus:.0f}₽ → {current_bonus + self_bonus_amount:.0f}₽ из 3000₽)'
+            })
+        
+        # Остаток распределяем: 60% рефереру, 40% админам
+        if remaining_amount > 0:
+            if referrer_id:
+                referrer_share = remaining_amount * 0.60
+                admin_share_total = remaining_amount * 0.40
+                
+                distributions.append({
+                    'recipient_type': 'courier_referrer',
+                    'recipient_id': referrer_id,
+                    'amount': referrer_share,
+                    'percentage': (referrer_share / total_amount) * 100.0,
+                    'description': 'Выплата рефереру (60% от остатка)'
+                })
+                
+                # Админам
+                admin_distributions = _distribute_to_admins(admin_share_total, total_amount, cur)
+                distributions.extend(admin_distributions)
+            else:
+                # Нет реферера - всё админам
+                admin_distributions = _distribute_to_admins(remaining_amount, total_amount, cur)
+                distributions.extend(admin_distributions)
     elif referrer_id:
         referrer_share = total_amount * 0.60
         admin_share_total = total_amount * 0.40
@@ -2252,15 +2335,52 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
     
     stats_by_courier = cur.fetchall()
     
-    for stat in stats_by_courier:
-        courier_id = stat['id']
-        total_earnings = float(stat['total_pending_payment'] or 0)
+    # Обновляем статистику курьеров: total_orders, total_earnings, referral_earnings
+    cur.execute("""
+        SELECT 
+            courier_id,
+            SUM(orders_count) as total_orders,
+            SUM(total_amount) as total_earnings
+        FROM t_p25272970_courier_button_site.courier_earnings
+        GROUP BY courier_id
+    """)
+    
+    earnings_stats = cur.fetchall()
+    
+    for stat in earnings_stats:
+        courier_id = stat['courier_id']
+        total_orders = int(stat['total_orders'] or 0)
+        total_earnings = float(stat['total_earnings'] or 0)
+        
+        # Получаем сумму выплат рефереру
+        cur.execute("""
+            SELECT COALESCE(SUM(amount), 0) as referral_earnings
+            FROM t_p25272970_courier_button_site.payment_distributions
+            WHERE recipient_id = %s AND recipient_type = 'courier_referrer'
+        """, (courier_id,))
+        ref_earnings = cur.fetchone()
+        referral_earnings = float(ref_earnings['referral_earnings'] or 0)
+        
+        # Проверяем достиг ли курьер 30 заказов
+        cur.execute("""
+            SELECT orders_completed, is_completed 
+            FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+            WHERE courier_id = %s
+        """, (courier_id,))
+        bonus_tracking = cur.fetchone()
+        self_orders_count = int(bonus_tracking['orders_completed']) if bonus_tracking else 0
+        self_bonus_paid = bool(bonus_tracking['is_completed']) if bonus_tracking else False
         
         cur.execute("""
             UPDATE t_p25272970_courier_button_site.users
-            SET referral_earnings = %s, updated_at = NOW()
+            SET total_orders = %s,
+                total_earnings = %s,
+                referral_earnings = %s,
+                self_orders_count = %s,
+                self_bonus_paid = %s,
+                updated_at = NOW()
             WHERE id = %s
-        """, (total_earnings, courier_id))
+        """, (total_orders, total_earnings, referral_earnings, self_orders_count, self_bonus_paid, courier_id))
     
     conn.commit()
     
