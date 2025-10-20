@@ -105,23 +105,21 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <Button
-            onClick={handleOpenGuide}
-            className="flex-1 bg-black hover:bg-black/90 text-yellow-400 font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
-          >
-            <Icon name="Rocket" size={20} className="mr-2" />
-            Зарегистрироваться
-          </Button>
-          
-          <Button
-            onClick={onDismiss}
-            variant="outline"
-            className="bg-white/50 hover:bg-white/70 text-black font-bold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
-          >
-            Позже
-          </Button>
-        </div>
+        <Button
+          onClick={handleOpenGuide}
+          className="w-full bg-black hover:bg-black/90 text-yellow-400 font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all mb-3"
+        >
+          <Icon name="Rocket" size={20} className="mr-2" />
+          Начать выполнять заказы
+        </Button>
+
+        <Button
+          onClick={onDismiss}
+          variant="outline"
+          className="w-full bg-white/50 hover:bg-white/70 text-black font-bold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+        >
+          Позже
+        </Button>
 
         <div className="mt-4 flex items-center gap-2 text-xs text-black/70">
           <Icon name="Info" size={14} />

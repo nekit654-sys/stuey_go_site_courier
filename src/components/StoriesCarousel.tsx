@@ -136,7 +136,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
   return (
     <div className="w-full py-4">
-      <div className="container mx-auto px-3 sm:px-4 max-w-7xl mb-3">
+      <div className="px-6 mb-3">
         <div className="flex items-center gap-3 bg-yellow-400/90 backdrop-blur-sm rounded-xl px-4 py-2 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-fit">
           <Icon name="Sparkles" size={20} className="text-black" />
           <h3 className="font-extrabold text-black text-lg drop-shadow-none">
@@ -150,7 +150,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto pl-3 sm:pl-4 pr-3 sm:pr-4 cursor-grab active:cursor-grabbing"
+        className="w-full overflow-x-auto cursor-grab active:cursor-grabbing"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -171,7 +171,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             }
           `}
         </style>
-        <div className="flex gap-3 pb-2 stories-container">
+        <div className="flex gap-3 pb-2 px-6 stories-container">
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
