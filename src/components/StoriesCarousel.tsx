@@ -172,7 +172,6 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
           `}
         </style>
         <div className="flex gap-3 pb-2 stories-container">
-          <div className="w-4 sm:w-6 flex-shrink-0"></div>
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
@@ -202,7 +201,6 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
               </div>
             </Card>
           ))}
-          <div className="w-4 sm:w-6 flex-shrink-0"></div>
         </div>
       </div>
     </div>
