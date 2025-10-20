@@ -136,18 +136,6 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
   return (
     <div className="w-full py-4">
-      <div className="pl-4 sm:pl-6 mb-3">
-        <div className="flex items-center gap-3 bg-yellow-400/90 backdrop-blur-sm rounded-xl px-4 py-2 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-fit">
-          <Icon name="Sparkles" size={20} className="text-black" />
-          <h3 className="font-extrabold text-black text-lg drop-shadow-none">
-            Истории
-            {hasNewStories && (
-              <span className="ml-2 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            )}
-          </h3>
-        </div>
-      </div>
-
       <div 
         ref={scrollContainerRef}
         className="w-full overflow-x-auto cursor-grab active:cursor-grabbing"
