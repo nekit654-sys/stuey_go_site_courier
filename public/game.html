@@ -88,26 +88,13 @@
       inset 0 10px 30px rgba(0, 0, 0, 0.3);
   }
   
-  /* 🆕 Фон с параллакс-зданиями */
-  #game::before {
-    content: "🏢 🏛️ 🏬 🏢 🏭 🏬 🏢 🏛️ 🏢 🏬 🏢 🏛️ 🏬 🏢 🏭 🏬";
+  /* 🆕 Светофоры на разных уровнях */
+  .traffic-light {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 200%;
-    height: 100%;
-    font-size: clamp(2rem, 5vw, 3rem);
-    opacity: 0.15;
+    font-size: clamp(2rem, 4vw, 2.5rem);
     z-index: 0;
-    animation: buildingsScroll 40s linear infinite;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
     pointer-events: none;
-  }
-  @keyframes buildingsScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    opacity: 0.5;
   }
   .lane {
     flex: 1;
@@ -228,16 +215,15 @@
     75% { transform: translateY(-0.2rem); }
   }
 
-  /* 🆕 Фара самоката */
+  /* 🆕 Фара самоката - на середине высоты */
   #courier::before {
     content: "";
     position: absolute;
     left: -1em;
-    top: 50%;
+    top: 0.5em;
     width: 2.5em;
     height: 0.4em;
     background: radial-gradient(ellipse at left, rgba(255, 255, 150, 0.7), rgba(255, 255, 150, 0.3) 50%, transparent 70%);
-    transform: translateY(-50%);
     pointer-events: none;
     z-index: -1;
     animation: headlightPulse 2s ease-in-out infinite;
@@ -410,10 +396,9 @@
   /* --- Главное меню --- */
   #mainMenu {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
     width: 100%;
     height: 100%;
     background: black;
@@ -435,7 +420,6 @@
     border: 6px solid #000;
     border-radius: clamp(10px, 2vw, 20px);
     box-shadow: 0 0 0 4px #FFD700, inset 0 0 0 2px #FFD700;
-    transform: none;
     margin: 0;
   }
   /* Контейнер всего содержимого меню в единой рамке */
@@ -1805,7 +1789,7 @@
     }
   }
   
-  // 🆕 Создание частиц пыли из-под колес
+  // 🆕 Создание частиц пыли из-под колес - снизу слева от героя
   let lastDustTime = 0;
   function createDustParticles() {
     const now = Date.now();
@@ -1818,12 +1802,43 @@
     for (let i = 0; i < 2; i++) {
       const dust = document.createElement('div');
       dust.className = 'dust-particle';
-      dust.style.left = `${courierRect.right - gameRect.left}px`;
-      dust.style.top = `${courierRect.top - gameRect.top + courierRect.height / 2 + (Math.random() - 0.5) * 30}px`;
+      // Снизу слева от картинки героя
+      dust.style.left = `${courierRect.left - gameRect.left + (Math.random() * 10)}px`;
+      dust.style.top = `${courierRect.bottom - gameRect.top - 5 + (Math.random() - 0.5) * 10}px`;
       game.appendChild(dust);
       
       setTimeout(() => dust.remove(), 800);
     }
+  }
+  
+  // 🆕 Создание светофоров на разных уровнях
+  let trafficLights = [];
+  function createTrafficLights() {
+    // Очистка старых светофоров
+    trafficLights.forEach(tl => tl.remove());
+    trafficLights = [];
+    
+    const gameRect = game.getBoundingClientRect();
+    const positions = [
+      { x: '15%', y: '10%' },
+      { x: '35%', y: '25%' },
+      { x: '55%', y: '15%' },
+      { x: '75%', y: '30%' },
+      { x: '25%', y: '65%' },
+      { x: '45%', y: '75%' },
+      { x: '65%', y: '70%' },
+      { x: '85%', y: '80%' },
+    ];
+    
+    positions.forEach(pos => {
+      const light = document.createElement('div');
+      light.className = 'traffic-light';
+      light.textContent = '🚦';
+      light.style.left = pos.x;
+      light.style.top = pos.y;
+      game.appendChild(light);
+      trafficLights.push(light);
+    });
   }
   
   // 🆕 Создание конфетти при сборе
@@ -2201,6 +2216,7 @@
 
     updateDashSpeed();
 
+    createTrafficLights(); // 🆕 Создаем светофоры
     startSpawning();
     startTimer();
 
@@ -2220,6 +2236,7 @@
     medkits.forEach(m => m.elem.remove());
     bonuses.forEach(b => b.elem.remove());
     policeCars.forEach(p => p.elem.remove());
+    trafficLights.forEach(tl => tl.remove()); // 🆕 Удаляем светофоры
     pedestrians = [];
     standingPeds = [];
     policeStandings = [];
@@ -2227,6 +2244,7 @@
     medkits = [];
     bonuses = [];
     policeCars = [];
+    trafficLights = [];
     touchControls.style.display = 'none';
     movingUp = false;
     movingDown = false;
