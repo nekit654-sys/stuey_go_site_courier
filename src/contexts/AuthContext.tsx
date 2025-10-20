@@ -28,6 +28,8 @@ interface User {
   game_total_plays?: number;
   game_achievements?: string[];
   agreed_to_terms?: boolean;
+  sbp_phone?: string;
+  sbp_bank_name?: string;
 }
 
 interface AuthContextType {

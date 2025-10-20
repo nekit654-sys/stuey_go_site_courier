@@ -11,6 +11,11 @@ interface Stats {
   referral_earnings: number;
   total_orders: number;
   total_earnings: number;
+  self_bonus_pending: number;
+  self_bonus_paid: boolean;
+  self_orders_count: number;
+  self_bonus_completed: boolean;
+  available_for_withdrawal: number;
 }
 
 interface StatsCardsProps {
@@ -21,8 +26,9 @@ export default function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
       icon: 'Wallet',
-      label: 'Заработано с рефералов',
-      value: `${stats.referral_earnings?.toLocaleString('ru-RU') || '0'} ₽`,
+      label: 'Доступно для вывода',
+      value: `${stats.available_for_withdrawal?.toLocaleString('ru-RU') || '0'} ₽`,
+      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : `📦 Заказов: ${stats.self_orders_count || 0}/150`,
       gradient: 'from-green-500 to-emerald-600',
       iconBg: 'bg-green-400',
       delay: 0,
@@ -38,17 +44,18 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       icon: 'TrendingUp',
-      label: 'Бонусов выплачено',
-      value: `${stats.total_bonus_paid?.toLocaleString('ru-RU') || '0'} ₽`,
-      subtext: `Заработано: ${stats.total_bonus_earned?.toLocaleString('ru-RU') || '0'} ₽`,
+      label: 'Всего заработано',
+      value: `${stats.total_earnings?.toLocaleString('ru-RU') || '0'} ₽`,
+      subtext: `С рефералов: ${stats.referral_earnings?.toLocaleString('ru-RU') || '0'} ₽`,
       gradient: 'from-purple-500 to-pink-600',
       iconBg: 'bg-purple-400',
       delay: 0.2,
     },
     {
-      icon: 'Clock',
-      label: 'Ожидает выплаты',
-      value: `${stats.pending_bonus?.toLocaleString('ru-RU') || '0'} ₽`,
+      icon: 'Package',
+      label: 'Заказов выполнено',
+      value: stats.total_orders || 0,
+      subtext: stats.self_bonus_completed ? '🎉 Самобонус 3000₽!' : `До бонуса: ${Math.max(0, 150 - (stats.self_orders_count || 0))}`,
       gradient: 'from-orange-500 to-red-600',
       iconBg: 'bg-orange-400',
       delay: 0.3,

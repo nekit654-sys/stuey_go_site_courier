@@ -444,7 +444,8 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     cur.execute("""
-        SELECT referral_code, referral_earnings, total_orders, total_earnings
+        SELECT referral_code, referral_earnings, total_orders, total_earnings, 
+               self_bonus_paid, self_orders_count
         FROM t_p25272970_courier_button_site.users
         WHERE id = %s
     """, (user_id,))
@@ -461,6 +462,7 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
             'isBase64Encoded': False
         }
     
+    # Получаем рефералов
     cur.execute("""
         SELECT 
             r.id,
@@ -486,6 +488,31 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     total_bonus_earned = sum(float(r['bonus_amount']) for r in referrals)
     total_bonus_paid = sum(float(r['bonus_amount']) for r in referrals if r['bonus_paid'])
     
+    # Получаем доступную сумму для вывода из payment_distributions
+    cur.execute("""
+        SELECT 
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') THEN pd.amount ELSE 0 END), 0) as available,
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_self' THEN pd.amount ELSE 0 END), 0) as self_bonus_pending,
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'paid' THEN pd.amount ELSE 0 END), 0) as total_paid
+        FROM t_p25272970_courier_button_site.payment_distributions pd
+        LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
+        WHERE (ce.courier_id = %s OR pd.recipient_id = %s)
+    """, (user_id, user_id))
+    
+    balance = cur.fetchone()
+    available = float(balance['available'] or 0)
+    self_bonus_pending = float(balance['self_bonus_pending'] or 0)
+    total_paid = float(balance['total_paid'] or 0)
+    
+    # Получаем инфо о самобонусе
+    cur.execute("""
+        SELECT orders_completed, bonus_earned, is_completed
+        FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+        WHERE courier_id = %s
+    """, (user_id,))
+    
+    self_bonus_tracking = cur.fetchone()
+    
     cur.close()
     conn.close()
     
@@ -497,10 +524,15 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
             'active_referrals': active_referrals,
             'total_bonus_earned': total_bonus_earned,
             'total_bonus_paid': total_bonus_paid,
-            'pending_bonus': total_bonus_earned - total_bonus_paid,
-            'referral_earnings': user_data['referral_earnings'],
-            'total_orders': user_data['total_orders'],
-            'total_earnings': user_data['total_earnings']
+            'pending_bonus': available,  # Теперь из payment_distributions
+            'referral_earnings': float(user_data['referral_earnings'] or 0),
+            'total_orders': user_data['total_orders'] or 0,
+            'total_earnings': float(user_data['total_earnings'] or 0),
+            'self_bonus_pending': self_bonus_pending,
+            'self_bonus_paid': user_data['self_bonus_paid'],
+            'self_orders_count': user_data['self_orders_count'] or 0,
+            'self_bonus_completed': self_bonus_tracking['is_completed'] if self_bonus_tracking else False,
+            'available_for_withdrawal': available
         }
     }
     

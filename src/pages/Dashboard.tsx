@@ -35,6 +35,11 @@ interface Stats {
   referral_earnings: number;
   total_orders: number;
   total_earnings: number;
+  self_bonus_pending: number;
+  self_bonus_paid: boolean;
+  self_orders_count: number;
+  self_bonus_completed: boolean;
+  available_for_withdrawal: number;
 }
 
 interface Referral {
@@ -349,6 +354,38 @@ export default function Dashboard() {
 
                 <StatsCards stats={stats} />
 
+                {stats?.self_bonus_completed && stats?.available_for_withdrawal > 0 && (
+                  <Card className="border-3 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-[0_5px_0_0_rgba(0,0,0,1)] rounded-2xl overflow-hidden">
+                    <div className="p-5">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="p-3 bg-green-500 rounded-xl border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                          <Icon name="Trophy" className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-black text-green-700 mb-1">🎉 Поздравляем!</h3>
+                          <p className="text-sm font-bold text-gray-600">Вы выполнили 150 заказов</p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-white p-4 rounded-xl border-2 border-green-200 mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-bold text-gray-600">Доступно для вывода:</span>
+                          <span className="text-2xl font-black text-green-600">{stats.available_for_withdrawal.toLocaleString('ru-RU')} ₽</span>
+                        </div>
+                        <p className="text-xs font-bold text-gray-500">Ваш стартовый бонус готов к выплате!</p>
+                      </div>
+
+                      <Button
+                        onClick={() => setActiveTab('withdrawals')}
+                        className="w-full h-12 bg-green-600 hover:bg-green-700 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all font-black"
+                      >
+                        <Icon name="DollarSign" className="mr-2 h-5 w-5" />
+                        Оформить выплату
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+
                 {/* Copy Referral Link */}
                 <Button
                   onClick={copyReferralLink}
@@ -395,9 +432,9 @@ export default function Dashboard() {
               </h3>
               <WithdrawalRequestForm
                 userId={user?.id || 0}
-                availableBalance={stats?.pending_bonus || 0}
-                userPhone={user?.phone}
-                userBankName={''}
+                availableBalance={stats?.available_for_withdrawal || 0}
+                userPhone={user?.sbp_phone || user?.phone}
+                userBankName={user?.sbp_bank_name || ''}
                 onSuccess={handleWithdrawalSuccess}
               />
             </Card>
