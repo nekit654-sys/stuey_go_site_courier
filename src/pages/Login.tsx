@@ -136,6 +136,15 @@ const Login: React.FC = () => {
             onViewImage={setSelectedImage}
             pendingRequestsCount={stats.new}
             pendingWithdrawalsCount={pendingWithdrawals}
+            passwordForm={passwordForm}
+            onPasswordFormChange={setPasswordForm}
+            onChangePassword={changePassword}
+            adminForm={adminForm}
+            onAdminFormChange={setAdminForm}
+            onAddAdmin={addAdmin}
+            onDeleteAdmin={deleteAdmin}
+            onLoadAdmins={loadAdmins}
+            admins={admins}
           />
         </div>
 

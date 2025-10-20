@@ -4,6 +4,7 @@ import StatsCards from './StatsCards';
 import RequestsTable from './RequestsTable';
 import ControlPanel from './ControlPanel';
 import UnifiedCouriersTab from './UnifiedCouriersTab';
+import WithdrawalRequestsTab from './WithdrawalRequestsTab';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 interface PeopleTabProps {
@@ -23,6 +24,7 @@ interface PeopleTabProps {
   onRefreshReferrals: () => void;
   onDeleteAllUsers?: () => void;
   onViewImage?: (url: string) => void;
+  authToken: string;
 }
 
 export default function PeopleTab({
@@ -42,10 +44,11 @@ export default function PeopleTab({
   onRefreshReferrals,
   onDeleteAllUsers,
   onViewImage,
+  authToken,
 }: PeopleTabProps) {
   return (
     <Tabs defaultValue="requests" className="space-y-4">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
           <span className="hidden sm:inline">Заявки</span>
@@ -53,6 +56,10 @@ export default function PeopleTab({
         <TabsTrigger value="couriers" className="flex items-center gap-2">
           <Icon name="Users" size={16} />
           <span className="hidden sm:inline">Курьеры</span>
+        </TabsTrigger>
+        <TabsTrigger value="withdrawals" className="flex items-center gap-2">
+          <Icon name="Wallet" size={16} />
+          <span className="hidden sm:inline">Выплаты</span>
         </TabsTrigger>
       </TabsList>
 
@@ -86,6 +93,10 @@ export default function PeopleTab({
           isLoadingReferrals={isLoadingReferrals}
           onRefreshReferrals={onRefreshReferrals}
         />
+      </TabsContent>
+
+      <TabsContent value="withdrawals" className="space-y-4">
+        <WithdrawalRequestsTab authToken={authToken} />
       </TabsContent>
     </Tabs>
   );

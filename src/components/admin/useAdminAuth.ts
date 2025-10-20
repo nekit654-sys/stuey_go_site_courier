@@ -66,6 +66,7 @@ export function useAdminAuth() {
       
       if (data.success && data.token) {
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('adminUsername', credentials.username);
         setAuthToken(data.token);
         setIsAuthenticated(true);
         await onSuccess(data.token);
@@ -93,6 +94,7 @@ export function useAdminAuth() {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('adminUsername');
     setIsAuthenticated(false);
     setAuthToken('');
   };

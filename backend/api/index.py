@@ -134,6 +134,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_startup_notification(event, headers)
     elif route == 'news':
         return handle_news(event, headers)
+    elif route == 'company_stats':
+        return handle_company_stats(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -4812,5 +4814,104 @@ def handle_news(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
         'statusCode': 405,
         'headers': headers,
         'body': json.dumps({'error': 'Method not allowed'}),
+        'isBase64Encoded': False
+    }
+
+
+def handle_company_stats(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    method = event.get('httpMethod', 'GET')
+    
+    if method != 'GET':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_result = verify_token(auth_token)
+    if not token_result.get('valid'):
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT 
+            COALESCE(SUM(ce.total_amount), 0) as total_revenue,
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_type = 'courier_self' AND pd.amount > 0), 
+                0
+            ) as total_payouts_to_couriers,
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_type = 'courier_referrer' AND pd.amount > 0), 
+                0
+            ) as total_payouts_to_referrers,
+            COALESCE(
+                (SELECT SUM(ae.amount) 
+                 FROM t_p25272970_courier_button_site.admin_expenses ae), 
+                0
+            ) as total_admin_expenses,
+            (
+                SELECT COUNT(*) 
+                FROM t_p25272970_courier_button_site.users
+            ) as total_couriers,
+            (
+                SELECT COUNT(*) 
+                FROM t_p25272970_courier_button_site.users
+                WHERE is_active = true
+            ) as active_couriers,
+            COALESCE(SUM(ce.orders_count), 0) as total_orders
+        FROM t_p25272970_courier_button_site.courier_earnings ce
+    """)
+    
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    total_revenue = float(result['total_revenue']) if result['total_revenue'] else 0
+    total_payouts_to_couriers = float(result['total_payouts_to_couriers']) if result['total_payouts_to_couriers'] else 0
+    total_payouts_to_referrers = float(result['total_payouts_to_referrers']) if result['total_payouts_to_referrers'] else 0
+    total_admin_expenses = float(result['total_admin_expenses']) if result['total_admin_expenses'] else 0
+    total_orders = int(result['total_orders']) if result['total_orders'] else 0
+    
+    net_profit = total_revenue - total_payouts_to_couriers - total_payouts_to_referrers - total_admin_expenses
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+    
+    stats = {
+        'total_revenue': round(total_revenue, 2),
+        'total_payouts_to_couriers': round(total_payouts_to_couriers, 2),
+        'total_payouts_to_referrers': round(total_payouts_to_referrers, 2),
+        'total_admin_expenses': round(total_admin_expenses, 2),
+        'net_profit': round(net_profit, 2),
+        'total_couriers': result['total_couriers'],
+        'active_couriers': result['active_couriers'],
+        'total_orders': total_orders,
+        'avg_order_value': round(avg_order_value, 2)
+    }
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(stats),
         'isBase64Encoded': False
     }

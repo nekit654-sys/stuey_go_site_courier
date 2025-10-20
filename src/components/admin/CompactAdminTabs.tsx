@@ -4,6 +4,7 @@ import PeopleTab from './PeopleTab';
 import FinancesTab from './FinancesTab';
 import StoriesTab from './StoriesTab';
 import ActivityTab from './ActivityTab';
+import AdminsTab from './AdminsTab';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 import { Courier } from './payments/types';
 
@@ -29,6 +30,15 @@ interface CompactAdminTabsProps {
   onViewImage?: (url: string) => void;
   pendingRequestsCount?: number;
   pendingWithdrawalsCount?: number;
+  passwordForm?: any;
+  onPasswordFormChange?: any;
+  onChangePassword?: any;
+  adminForm?: any;
+  onAdminFormChange?: any;
+  onAddAdmin?: any;
+  onDeleteAdmin?: any;
+  onLoadAdmins?: any;
+  admins?: any[];
 }
 
 export default function CompactAdminTabs({
@@ -53,7 +63,19 @@ export default function CompactAdminTabs({
   onViewImage,
   pendingRequestsCount = 0,
   pendingWithdrawalsCount = 0,
+  passwordForm,
+  onPasswordFormChange,
+  onChangePassword,
+  adminForm,
+  onAdminFormChange,
+  onAddAdmin,
+  onDeleteAdmin,
+  onLoadAdmins,
+  admins = [],
 }: CompactAdminTabsProps) {
+  const currentUsername = localStorage.getItem('adminUsername') || '';
+  const isSuperAdmin = currentUsername === 'nekit654';
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 pb-24">
       <TabsContent value="activity" className="space-y-4">
@@ -78,6 +100,7 @@ export default function CompactAdminTabs({
           onRefreshReferrals={onRefreshReferrals}
           onDeleteAllUsers={onDeleteAllUsers}
           onViewImage={onViewImage}
+          authToken={authToken}
         />
       </TabsContent>
 
@@ -94,8 +117,25 @@ export default function CompactAdminTabs({
         <StoriesTab />
       </TabsContent>
 
+      {isSuperAdmin && (
+        <TabsContent value="settings" className="space-y-4">
+          <AdminsTab
+            admins={admins}
+            adminForm={adminForm || { username: '', password: '' }}
+            onAdminFormChange={onAdminFormChange || (() => {})}
+            onAddAdmin={onAddAdmin || (() => {})}
+            onDeleteAdmin={onDeleteAdmin || (() => {})}
+            onLoadAdmins={onLoadAdmins || (() => {})}
+            passwordForm={passwordForm || { currentPassword: '', newPassword: '', confirmPassword: '' }}
+            onPasswordFormChange={onPasswordFormChange || (() => {})}
+            onChangePassword={onChangePassword || (() => {})}
+            lastUpdate={lastUpdate}
+          />
+        </TabsContent>
+      )}
+
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50">
-        <div className="grid grid-cols-4 h-16">
+        <div className={`grid ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
           <button
             onClick={() => onTabChange('activity')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
@@ -153,6 +193,20 @@ export default function CompactAdminTabs({
             <Icon name="Image" size={20} />
             <span className="text-[10px] font-bold">Контент</span>
           </button>
+
+          {isSuperAdmin && (
+            <button
+              onClick={() => onTabChange('settings')}
+              className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
+                activeTab === 'settings' 
+                  ? 'bg-yellow-400 text-black' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Icon name="Settings" size={20} />
+              <span className="text-[10px] font-bold">Админы</span>
+            </button>
+          )}
         </div>
       </div>
     </Tabs>
