@@ -7,8 +7,10 @@ interface NewCourierNotificationProps {
 }
 
 export default function NewCourierNotification({ onDismiss }: NewCourierNotificationProps) {
+  const referralLink = 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank';
+  
   const handleOpenGuide = () => {
-    window.open('https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank', '_blank');
+    window.open(referralLink, '_blank');
   };
 
   return (
@@ -27,7 +29,7 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
                 Добро пожаловать в Stuey.Go! 🎉
               </h3>
               <p className="text-black/70 text-sm font-bold">
-                Начни зарабатывать уже сегодня
+                Зарегистрируйся через нашу ссылку
               </p>
             </div>
           </div>
@@ -49,10 +51,10 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
               </div>
               <div>
                 <p className="font-bold text-black text-sm">
-                  Зарегистрируйся курьером в Яндекс.Еда
+                  Зарегистрируйся по нашей реферальной ссылке
                 </p>
                 <p className="text-black/60 text-xs">
-                  Это займет всего 5 минут
+                  Только так ты получишь бонусы от Stuey.Go
                 </p>
               </div>
             </div>
@@ -87,13 +89,29 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
           </div>
         </div>
 
+        <div className="bg-black/10 backdrop-blur-sm rounded-xl p-3 border-2 border-black/30 mb-4">
+          <p className="text-xs text-black/70 font-bold mb-2">
+            📎 Твоя реферальная ссылка для регистрации:
+          </p>
+          <div className="bg-white rounded-lg p-2 border-2 border-black/20 break-all">
+            <a 
+              href={referralLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:text-blue-800 underline font-mono"
+            >
+              {referralLink}
+            </a>
+          </div>
+        </div>
+
         <div className="flex gap-3">
           <Button
             onClick={handleOpenGuide}
             className="flex-1 bg-black hover:bg-black/90 text-yellow-400 font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.3)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
           >
             <Icon name="Rocket" size={20} className="mr-2" />
-            Начать зарабатывать
+            Зарегистрироваться
           </Button>
           
           <Button
