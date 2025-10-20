@@ -31,7 +31,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
 
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat text-white px-6 border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
+      className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
         backgroundImage:
           "url(https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg)",
@@ -45,11 +45,11 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
-      <div className="relative w-full">
+      <div className="relative w-full -mx-6">
         <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
       </div>
 
-      <div className="relative max-w-6xl mx-auto text-center">
+      <div className="relative max-w-6xl mx-auto text-center px-6">
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-6 sm:p-10 shadow-[0_8px_0_0_rgba(0,0,0,0.8)] my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-extrabold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
