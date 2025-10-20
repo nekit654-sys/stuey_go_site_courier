@@ -19,6 +19,8 @@ import ProfileHeader from '@/components/ProfileHeader';
 import StatsCards from '@/components/dashboard/StatsCards';
 import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
 import WithdrawalsTimeline from '@/components/dashboard/WithdrawalsTimeline';
+import ReferralMotivation from '@/components/dashboard/ReferralMotivation';
+import EarningsCalculator from '@/components/dashboard/EarningsCalculator';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
@@ -32,14 +34,13 @@ interface Stats {
   total_bonus_earned: number;
   total_bonus_paid: number;
   pending_bonus: number;
-  referral_earnings: number;
-  total_orders: number;
-  total_earnings: number;
-  self_bonus_pending: number;
+  self_bonus_amount: number;
+  referral_income: number;
   self_bonus_paid: boolean;
   self_orders_count: number;
   self_bonus_completed: boolean;
   available_for_withdrawal: number;
+  total_paid: number;
 }
 
 interface Referral {
@@ -354,6 +355,11 @@ export default function Dashboard() {
 
                 <StatsCards stats={stats} />
 
+                <ReferralMotivation 
+                  hasReferrals={(stats?.total_referrals || 0) > 0}
+                  onCopyLink={copyReferralLink}
+                />
+
                 {stats?.self_bonus_completed && stats?.available_for_withdrawal > 0 && (
                   <Card className="border-3 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-[0_5px_0_0_rgba(0,0,0,1)] rounded-2xl overflow-hidden">
                     <div className="p-5">
@@ -418,6 +424,7 @@ export default function Dashboard() {
             {/* Referrals Tab */}
             {activeTab === 'referrals' && (
               <div className="space-y-3 sm:space-y-4">
+                <EarningsCalculator />
                 <ReferralsGrid referrals={referrals} />
               </div>
             )}

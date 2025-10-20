@@ -8,14 +8,13 @@ interface Stats {
   total_bonus_earned: number;
   total_bonus_paid: number;
   pending_bonus: number;
-  referral_earnings: number;
-  total_orders: number;
-  total_earnings: number;
-  self_bonus_pending: number;
+  self_bonus_amount: number;
+  referral_income: number;
   self_bonus_paid: boolean;
   self_orders_count: number;
   self_bonus_completed: boolean;
   available_for_withdrawal: number;
+  total_paid: number;
 }
 
 interface StatsCardsProps {
@@ -23,6 +22,8 @@ interface StatsCardsProps {
 }
 
 export default function StatsCards({ stats }: StatsCardsProps) {
+  const totalEarnings = (stats.self_bonus_amount || 0) + (stats.referral_income || 0);
+  
   const cards = [
     {
       icon: 'Wallet',
@@ -44,18 +45,18 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       icon: 'TrendingUp',
-      label: 'Всего заработано',
-      value: `${stats.total_earnings?.toLocaleString('ru-RU') || '0'} ₽`,
-      subtext: `С рефералов: ${stats.referral_earnings?.toLocaleString('ru-RU') || '0'} ₽`,
+      label: 'Ваш заработок',
+      value: `${totalEarnings.toLocaleString('ru-RU')} ₽`,
+      subtext: `С рефералов: ${(stats.referral_income || 0).toLocaleString('ru-RU')} ₽`,
       gradient: 'from-purple-500 to-pink-600',
       iconBg: 'bg-purple-400',
       delay: 0.2,
     },
     {
-      icon: 'Package',
-      label: 'Заказов выполнено',
-      value: stats.total_orders || 0,
-      subtext: stats.self_bonus_completed ? '🎉 Самобонус 3000₽!' : `До бонуса: ${Math.max(0, 150 - (stats.self_orders_count || 0))}`,
+      icon: 'Gift',
+      label: 'Самобонус',
+      value: stats.self_bonus_completed ? '✅ Получен' : `${stats.self_orders_count || 0}/150`,
+      subtext: stats.self_bonus_completed ? '3000₽ выполнено' : `Ещё ${Math.max(0, 150 - (stats.self_orders_count || 0))} заказов до 3000₽`,
       gradient: 'from-orange-500 to-red-600',
       iconBg: 'bg-orange-400',
       delay: 0.3,

@@ -489,11 +489,13 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     total_bonus_paid = sum(float(r['bonus_amount']) for r in referrals if r['bonus_paid'])
     
     # Получаем доступную сумму для вывода из payment_distributions
+    # Курьер видит только: самобонус + реферальный доход (НЕ видит total_earnings)
     cur.execute("""
         SELECT 
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') THEN pd.amount ELSE 0 END), 0) as available,
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_self' THEN pd.amount ELSE 0 END), 0) as self_bonus_pending,
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'paid' THEN pd.amount ELSE 0 END), 0) as total_paid
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as available,
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_self' AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as self_bonus_pending,
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_referrer' AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as referral_income_pending,
+            COALESCE(SUM(CASE WHEN pd.payment_status = 'paid' AND pd.recipient_type IN ('courier_self', 'courier_referrer') AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as total_paid
         FROM t_p25272970_courier_button_site.payment_distributions pd
         LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
         WHERE (ce.courier_id = %s OR pd.recipient_id = %s)
@@ -502,6 +504,7 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     balance = cur.fetchone()
     available = float(balance['available'] or 0)
     self_bonus_pending = float(balance['self_bonus_pending'] or 0)
+    referral_income_pending = float(balance['referral_income_pending'] or 0)
     total_paid = float(balance['total_paid'] or 0)
     
     # Получаем инфо о самобонусе
@@ -524,15 +527,14 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
             'active_referrals': active_referrals,
             'total_bonus_earned': total_bonus_earned,
             'total_bonus_paid': total_bonus_paid,
-            'pending_bonus': available,  # Теперь из payment_distributions
-            'referral_earnings': float(user_data['referral_earnings'] or 0),
-            'total_orders': user_data['total_orders'] or 0,
-            'total_earnings': float(user_data['total_earnings'] or 0),
-            'self_bonus_pending': self_bonus_pending,
+            'pending_bonus': available,
+            'self_bonus_amount': self_bonus_pending,
+            'referral_income': referral_income_pending + total_paid,
             'self_bonus_paid': user_data['self_bonus_paid'],
             'self_orders_count': user_data['self_orders_count'] or 0,
             'self_bonus_completed': self_bonus_tracking['is_completed'] if self_bonus_tracking else False,
-            'available_for_withdrawal': available
+            'available_for_withdrawal': available,
+            'total_paid': total_paid
         }
     }
     
