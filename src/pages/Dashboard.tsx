@@ -23,6 +23,8 @@ import Footer from '@/components/Footer';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
+import BottomNav from '@/components/dashboard/BottomNav';
+import BottomNav from '@/components/dashboard/BottomNav';
 
 
 interface Stats {
@@ -324,70 +326,7 @@ export default function Dashboard() {
           />
 
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {/* Tabs Navigation - только на мобильных */}
-            <div className="lg:hidden flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
-          <Button
-            variant={activeTab === 'stats' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('stats')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'stats' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="BarChart3" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'stats' ? 'text-white' : ''}`} />
-            <span className="hidden xs:inline">Статистика</span>
-          </Button>
-          <Button
-            variant={activeTab === 'referrals' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('referrals')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'referrals' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="Users" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'referrals' ? 'text-white' : ''}`} />
-            <span className="hidden xs:inline">Рефералы</span>
-          </Button>
-          <Button
-            variant={activeTab === 'withdrawals' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('withdrawals')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'withdrawals' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="Wallet" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'withdrawals' ? 'text-white' : ''}`} />
-            <span className="hidden xs:inline">Выплаты</span>
-          </Button>
-          <Button
-            variant={activeTab === 'game' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('game')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'game' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="Gamepad2" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'game' ? 'text-white' : ''}`} />
-            <span className="hidden xs:inline">Игра</span>
-          </Button>
-          <Button
-            variant={activeTab === 'profile' ? 'default' : 'outline'}
-            onClick={() => handleTabChange('profile')}
-            className={`flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-11 text-xs sm:text-sm font-extrabold transition-all ${
-              activeTab === 'profile' 
-                ? 'bg-black text-yellow-400 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]' 
-                : 'bg-white text-black border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]'
-            }`}
-          >
-            <Icon name="User" className={`h-3 w-3 sm:h-4 sm:w-4 sm:mr-1.5 ${activeTab === 'profile' ? 'text-white' : ''}`} />
-            <span className="hidden xs:inline">Профиль</span>
-          </Button>
-        </div>
+          <div className="flex-1 min-w-0 pb-20 lg:pb-0">
 
             {/* Stats Tab */}
             {activeTab === 'stats' && stats && (
@@ -542,6 +481,9 @@ export default function Dashboard() {
 
       {/* Footer - Fixed at bottom */}
       <Footer />
+
+      {/* Bottom Navigation - только на мобильных */}
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Startup Payout Modal */}
       {showStartupPayoutModal && user?.id && (
