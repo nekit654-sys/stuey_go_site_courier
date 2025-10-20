@@ -15,7 +15,8 @@ interface Courier {
   inviter_name?: string;
   inviter_code?: string;
   total_orders: number;
-  total_earnings: number;
+  self_bonus_amount?: number;
+  referral_income?: number;
   is_active: boolean;
   oauth_provider?: string;
   avatar_url?: string;
@@ -98,7 +99,7 @@ export default function CouriersList({
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">External ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Пригласил</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заказы</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заработано</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Выплаты курьеру</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата рег.</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
@@ -161,8 +162,20 @@ export default function CouriersList({
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {courier.total_orders || 0}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {courier.total_earnings || 0} ₽
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-gray-900">
+                          {((courier.self_bonus_amount || 0) + (courier.referral_income || 0)).toLocaleString('ru-RU')} ₽
+                        </span>
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          {(courier.self_bonus_amount || 0) > 0 && (
+                            <div>Самобонус: {courier.self_bonus_amount?.toLocaleString('ru-RU')} ₽</div>
+                          )}
+                          {(courier.referral_income || 0) > 0 && (
+                            <div>С рефералов: {courier.referral_income?.toLocaleString('ru-RU')} ₽</div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${

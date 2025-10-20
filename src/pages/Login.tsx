@@ -10,7 +10,7 @@ import Icon from '@/components/ui/icon';
 import { API_URL } from '@/config/api';
 
 const Login: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('couriers');
+  const [activeTab, setActiveTab] = useState('activity');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [pendingWithdrawals, setPendingWithdrawals] = useState(0);

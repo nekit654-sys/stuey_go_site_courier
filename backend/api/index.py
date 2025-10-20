@@ -280,13 +280,28 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.referral_code,
             u.invited_by_user_id,
             u.total_orders,
-            u.total_earnings,
-            u.referral_earnings,
             u.is_active,
             u.created_at,
             u.external_id,
             inviter.full_name as inviter_name,
-            inviter.referral_code as inviter_code
+            inviter.referral_code as inviter_code,
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
+                 WHERE (ce.courier_id = u.id OR pd.recipient_id = u.id) 
+                   AND pd.recipient_type = 'courier_self' 
+                   AND pd.amount > 0), 
+                0
+            ) as self_bonus_amount,
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_id = u.id 
+                   AND pd.recipient_type = 'courier_referrer' 
+                   AND pd.amount > 0), 
+                0
+            ) as referral_income
         FROM t_p25272970_courier_button_site.users u
         LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
         ORDER BY u.created_at DESC
