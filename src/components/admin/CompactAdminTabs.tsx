@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import Icon from '@/components/ui/icon';
 import PeopleTab from './PeopleTab';
 import FinancesTab from './FinancesTab';
@@ -77,47 +77,82 @@ export default function CompactAdminTabs({
   const isSuperAdmin = currentUsername === 'nekit654';
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
-      <TabsList className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-auto`}>
-        <TabsTrigger value="activity" className="flex flex-row items-center gap-2 py-3 px-4">
+    <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
+      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
+        <button
+          onClick={() => onTabChange('activity')}
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+            activeTab === 'activity'
+              ? 'bg-white text-black shadow-sm border-2 border-black'
+              : 'bg-transparent text-gray-600 hover:bg-gray-200'
+          }`}
+        >
           <Icon name="Newspaper" size={16} />
           <span>Новости</span>
-        </TabsTrigger>
-        <TabsTrigger value="people" className="flex flex-row items-center gap-2 relative py-3 px-4">
+        </button>
+        <button
+          onClick={() => onTabChange('people')}
+          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-bold transition-colors ${
+            activeTab === 'people'
+              ? 'bg-white text-black shadow-sm border-2 border-black'
+              : 'bg-transparent text-gray-600 hover:bg-gray-200'
+          }`}
+        >
           <Icon name="Users" size={16} />
           <span>Люди</span>
           {pendingRequestsCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white">
               {pendingRequestsCount}
             </span>
           )}
-        </TabsTrigger>
-        <TabsTrigger value="finances" className="flex flex-row items-center gap-2 relative py-3 px-4">
+        </button>
+        <button
+          onClick={() => onTabChange('finances')}
+          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-bold transition-colors ${
+            activeTab === 'finances'
+              ? 'bg-white text-black shadow-sm border-2 border-black'
+              : 'bg-transparent text-gray-600 hover:bg-gray-200'
+          }`}
+        >
           <Icon name="DollarSign" size={16} />
           <span>Финансы</span>
           {pendingWithdrawalsCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white">
               {pendingWithdrawalsCount}
             </span>
           )}
-        </TabsTrigger>
-        <TabsTrigger value="stories" className="flex flex-row items-center gap-2 py-3 px-4">
+        </button>
+        <button
+          onClick={() => onTabChange('stories')}
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+            activeTab === 'stories'
+              ? 'bg-white text-black shadow-sm border-2 border-black'
+              : 'bg-transparent text-gray-600 hover:bg-gray-200'
+          }`}
+        >
           <Icon name="Image" size={16} />
           <span>Контент</span>
-        </TabsTrigger>
+        </button>
         {isSuperAdmin && (
-          <TabsTrigger value="settings" className="flex flex-row items-center gap-2 py-3 px-4">
+          <button
+            onClick={() => onTabChange('settings')}
+            className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+              activeTab === 'settings'
+                ? 'bg-white text-black shadow-sm border-2 border-black'
+                : 'bg-transparent text-gray-600 hover:bg-gray-200'
+            }`}
+          >
             <Icon name="Settings" size={16} />
             <span>Админы</span>
-          </TabsTrigger>
+          </button>
         )}
-      </TabsList>
+      </div>
 
-      <TabsContent value="activity" className="space-y-4">
+      {activeTab === 'activity' && (
         <ActivityTab authToken={authToken} />
-      </TabsContent>
+      )}
 
-      <TabsContent value="people" className="space-y-4">
+      {activeTab === 'people' && (
         <PeopleTab
           requests={requests}
           stats={stats}
@@ -137,23 +172,22 @@ export default function CompactAdminTabs({
           onViewImage={onViewImage}
           authToken={authToken}
         />
-      </TabsContent>
+      )}
 
-      <TabsContent value="finances" className="space-y-4">
+      {activeTab === 'finances' && (
         <FinancesTab
           authToken={authToken}
           couriers={allCouriers}
           isLoadingCouriers={isLoadingCouriers}
           onRefreshCouriers={onRefreshCouriers}
         />
-      </TabsContent>
+      )}
 
-      <TabsContent value="stories" className="space-y-4">
+      {activeTab === 'stories' && (
         <StoriesTab />
-      </TabsContent>
+      )}
 
-      {isSuperAdmin && (
-        <TabsContent value="settings" className="space-y-4">
+      {isSuperAdmin && activeTab === 'settings' && (
           <AdminsTab
             admins={admins}
             adminForm={adminForm || { username: '', password: '' }}
@@ -166,7 +200,6 @@ export default function CompactAdminTabs({
             onChangePassword={onChangePassword || (() => {})}
             lastUpdate={lastUpdate}
           />
-        </TabsContent>
       )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 sm:hidden">
@@ -244,6 +277,6 @@ export default function CompactAdminTabs({
           )}
         </div>
       </div>
-    </Tabs>
+    </div>
   );
 }
