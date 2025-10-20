@@ -93,13 +93,18 @@ export default function Dashboard() {
     if (!user || !isAuthenticated) return;
 
     const isProfileComplete = user?.phone && user?.city && user?.full_name;
-    if (!isProfileComplete) return;
+    if (!isProfileComplete) {
+      setShowNewCourierNotification(false);
+      return;
+    }
 
     const hasNoOrders = (user?.total_orders || 0) === 0;
     const notificationDismissed = localStorage.getItem('new_courier_notification_dismissed');
     
     if (hasNoOrders && !notificationDismissed) {
       setShowNewCourierNotification(true);
+    } else {
+      setShowNewCourierNotification(false);
     }
 
     const statsInterval = setInterval(() => {
@@ -117,7 +122,7 @@ export default function Dashboard() {
       clearInterval(statsInterval);
       clearInterval(withdrawalsInterval);
     };
-  }, [isAuthenticated, user?.id, activeTab]);
+  }, [isAuthenticated, user?.id, user?.total_orders, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'profile' && isAuthenticated) {
