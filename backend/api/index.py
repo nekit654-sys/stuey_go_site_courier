@@ -4884,6 +4884,66 @@ def handle_news(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
     }
 
 
+def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Обработка запросов админ-панели"""
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', '')
+    
+    print(f'>>> handle_admin: method={method}, action={action}')
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_result = verify_token(auth_token)
+    if not token_result.get('valid'):
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    if method == 'GET' and action == 'activity':
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT id, event_type, message, data, created_at
+            FROM t_p25272970_courier_button_site.activity_log
+            ORDER BY created_at DESC
+            LIMIT 100
+        """)
+        
+        activities = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'activities': convert_decimals([dict(a) for a in activities])
+            }),
+            'isBase64Encoded': False
+        }
+    
+    return {
+        'statusCode': 400,
+        'headers': headers,
+        'body': json.dumps({'error': 'Invalid action'}),
+        'isBase64Encoded': False
+    }
+
+
 def handle_company_stats(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
     

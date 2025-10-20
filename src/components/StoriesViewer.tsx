@@ -139,7 +139,7 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
               ))}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between relative z-50">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 bg-yellow-400 rounded-full border-3 border-black flex items-center justify-center">
                   <Icon name="Zap" size={20} className="text-black" />
@@ -157,7 +157,7 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
                   e.stopPropagation();
                   onClose();
                 }}
-                className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-extrabold border-3 border-black rounded-full p-2 w-10 h-10 flex items-center justify-center shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                className="relative z-50 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-extrabold border-3 border-black rounded-full p-2 w-10 h-10 flex items-center justify-center shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
               >
                 <Icon name="X" size={20} />
               </button>
