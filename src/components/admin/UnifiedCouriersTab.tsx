@@ -86,43 +86,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [editingCourier, setEditingCourier] = useState<Courier | null>(null);
 
-  const handleUpdateExternalId = async (courierId: number, externalId: string) => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      toast.error('Необходима авторизация');
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=update-external-id',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Auth-Token': token,
-          },
-          body: JSON.stringify({
-            courier_id: courierId,
-            external_id: externalId,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Ошибка обновления External ID');
-      }
-
-      toast.success(data.message || 'External ID успешно обновлён');
-      onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Ошибка при обновлении External ID');
-      throw error;
-    }
-  };
-
   const handleEditCourier = async (courierId: number, data: Partial<Courier>) => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
@@ -278,7 +241,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             filterReferrals={filterReferrals}
             onSearchChange={setSearchQuery}
             onFilterToggle={() => setFilterReferrals(!filterReferrals)}
-            onUpdateExternalId={handleUpdateExternalId}
             onEditCourier={(courier) => setEditingCourier(courier)}
             onDeleteCourier={handleDeleteCourier}
           />
