@@ -3750,6 +3750,43 @@ def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
     Обработка маршрута admin для управления администраторами
     '''
     method = event.get('httpMethod', 'POST')
+    query_params = event.get('queryStringParameters') or {}
+    
+    # Поддержка GET для получения данных (activity, stats и т.д.)
+    if method == 'GET':
+        action = query_params.get('action', '')
+        
+        if action == 'activity':
+            # Возвращаем события из activity_log
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cur.execute("""
+                SELECT id, event_type, message, data, created_at
+                FROM t_p25272970_courier_button_site.activity_log
+                ORDER BY created_at DESC
+                LIMIT 100
+            """)
+            
+            activities = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'activities': convert_decimals(activities)
+                }),
+                'isBase64Encoded': False
+            }
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid GET action'}),
+                'isBase64Encoded': False
+            }
     
     if method != 'POST':
         return {

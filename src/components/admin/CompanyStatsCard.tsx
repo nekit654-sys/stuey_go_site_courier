@@ -68,6 +68,18 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
     );
   }
 
+  const safeStats = {
+    total_revenue: stats.total_revenue || 0,
+    total_payouts_to_couriers: stats.total_payouts_to_couriers || 0,
+    total_payouts_to_referrers: stats.total_payouts_to_referrers || 0,
+    total_admin_expenses: stats.total_admin_expenses || 0,
+    net_profit: stats.net_profit || 0,
+    total_couriers: stats.total_couriers || 0,
+    active_couriers: stats.active_couriers || 0,
+    total_orders: stats.total_orders || 0,
+    avg_order_value: stats.avg_order_value || 0,
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -87,7 +99,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Общий доход</p>
               <p className="text-3xl font-extrabold text-blue-600 mt-2">
-                {stats.total_revenue.toLocaleString('ru-RU')} ₽
+                {safeStats.total_revenue.toLocaleString('ru-RU')} ₽
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-lg border-2 border-blue-300">
@@ -101,7 +113,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Выплачено курьерам</p>
               <p className="text-3xl font-extrabold text-green-600 mt-2">
-                {stats.total_payouts_to_couriers.toLocaleString('ru-RU')} ₽
+                {safeStats.total_payouts_to_couriers.toLocaleString('ru-RU')} ₽
               </p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg border-2 border-green-300">
@@ -115,7 +127,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Рефералам</p>
               <p className="text-3xl font-extrabold text-purple-600 mt-2">
-                {stats.total_payouts_to_referrers.toLocaleString('ru-RU')} ₽
+                {safeStats.total_payouts_to_referrers.toLocaleString('ru-RU')} ₽
               </p>
             </div>
             <div className="p-3 bg-purple-100 rounded-lg border-2 border-purple-300">
@@ -129,7 +141,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Расходы админов</p>
               <p className="text-3xl font-extrabold text-orange-600 mt-2">
-                {stats.total_admin_expenses.toLocaleString('ru-RU')} ₽
+                {safeStats.total_admin_expenses.toLocaleString('ru-RU')} ₽
               </p>
             </div>
             <div className="p-3 bg-orange-100 rounded-lg border-2 border-orange-300">
@@ -143,7 +155,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Чистая прибыль</p>
               <p className="text-3xl font-extrabold text-emerald-600 mt-2">
-                {stats.net_profit.toLocaleString('ru-RU')} ₽
+                {safeStats.net_profit.toLocaleString('ru-RU')} ₽
               </p>
             </div>
             <div className="p-3 bg-emerald-100 rounded-lg border-2 border-emerald-300">
@@ -157,7 +169,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600 uppercase">Всего заказов</p>
               <p className="text-3xl font-extrabold text-cyan-600 mt-2">
-                {stats.total_orders.toLocaleString('ru-RU')}
+                {safeStats.total_orders.toLocaleString('ru-RU')}
               </p>
             </div>
             <div className="p-3 bg-cyan-100 rounded-lg border-2 border-cyan-300">
@@ -176,7 +188,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600">Курьеров</p>
               <p className="text-xl font-extrabold text-gray-900">
-                {stats.active_couriers} / {stats.total_couriers}
+                {safeStats.active_couriers} / {safeStats.total_couriers}
                 <span className="text-sm font-normal text-gray-500 ml-2">активных</span>
               </p>
             </div>
@@ -191,7 +203,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
             <div>
               <p className="text-sm font-bold text-gray-600">Средний чек</p>
               <p className="text-xl font-extrabold text-gray-900">
-                {stats.avg_order_value.toLocaleString('ru-RU')} ₽
+                {safeStats.avg_order_value.toLocaleString('ru-RU')} ₽
               </p>
             </div>
           </div>
