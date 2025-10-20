@@ -93,13 +93,23 @@ export default function Dashboard() {
     if (!user || !isAuthenticated) return;
 
     const isProfileComplete = user?.phone && user?.city && user?.full_name;
+    const hasNoOrders = (user?.total_orders || 0) === 0;
+    const notificationDismissed = localStorage.getItem('new_courier_notification_dismissed');
+    
+    console.log('[NewCourierNotification] Debug:', {
+      isProfileComplete,
+      hasNoOrders,
+      notificationDismissed,
+      user_total_orders: user?.total_orders,
+      phone: user?.phone,
+      city: user?.city,
+      full_name: user?.full_name
+    });
+    
     if (!isProfileComplete) {
       setShowNewCourierNotification(false);
       return;
     }
-
-    const hasNoOrders = (user?.total_orders || 0) === 0;
-    const notificationDismissed = localStorage.getItem('new_courier_notification_dismissed');
     
     if (hasNoOrders && !notificationDismissed) {
       setShowNewCourierNotification(true);
