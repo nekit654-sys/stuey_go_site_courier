@@ -14,14 +14,14 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
   };
 
   return (
-    <Card className="bg-gradient-to-br from-red-500 to-red-600 border-4 border-black shadow-[0_8px_0_0_rgba(0,0,0,1)] p-6 mb-6 relative overflow-hidden animate-pulse">
+    <Card className="bg-gradient-to-br from-red-500 to-red-600 border-4 border-black shadow-[0_8px_0_0_rgba(0,0,0,1)] p-6 mb-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-red-400/30 rounded-full blur-2xl -mr-16 -mt-16" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-700/20 rounded-full blur-xl -ml-12 -mb-12" />
       
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center animate-bounce">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Icon name="AlertCircle" size={24} className="text-red-600" />
             </div>
             <div>
