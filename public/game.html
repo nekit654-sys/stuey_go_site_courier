@@ -88,13 +88,23 @@
       inset 0 10px 30px rgba(0, 0, 0, 0.3);
   }
   
-  /* 🆕 Светофоры на разных уровнях */
+  /* 🆕 Светофоры со столбиками */
   .traffic-light {
     position: absolute;
     font-size: clamp(2rem, 4vw, 2.5rem);
-    z-index: 0;
+    z-index: 5;
     pointer-events: none;
-    opacity: 0.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .traffic-light-pole {
+    width: 4px;
+    height: 2em;
+    background: linear-gradient(to bottom, #555, #333);
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .lane {
     flex: 1;
@@ -1429,6 +1439,7 @@
   let medkitSpawnTimer;
   let bonusSpawnTimer;
   let policeCarSpawnTimer;
+  let trafficLightSpawnTimer; // 🆕 Светофоры
   let gameLoopId;
   let lastFrameTime = 0;
   let timerInterval;
@@ -1633,6 +1644,7 @@
     moveArray(medkits);
     moveArray(bonuses);
     moveArray(policeCars);
+    moveArray(trafficLights); // 🆕 Светофоры двигаются
   }
 
   function checkCollisions() {
@@ -1802,42 +1814,43 @@
     for (let i = 0; i < 2; i++) {
       const dust = document.createElement('div');
       dust.className = 'dust-particle';
-      // Снизу слева от картинки героя
-      dust.style.left = `${courierRect.left - gameRect.left + (Math.random() * 10)}px`;
-      dust.style.top = `${courierRect.bottom - gameRect.top - 5 + (Math.random() - 0.5) * 10}px`;
+      // Еще левее и чуть ниже
+      dust.style.left = `${courierRect.left - gameRect.left - 10 + (Math.random() * 5)}px`;
+      dust.style.top = `${courierRect.bottom - gameRect.top + (Math.random() - 0.5) * 10}px`;
       game.appendChild(dust);
       
       setTimeout(() => dust.remove(), 800);
     }
   }
   
-  // 🆕 Создание светофоров на разных уровнях
+  // 🆕 Создание светофоров на уровне полос с движением
   let trafficLights = [];
-  function createTrafficLights() {
-    // Очистка старых светофоров
-    trafficLights.forEach(tl => tl.remove());
-    trafficLights = [];
+  function createTrafficLight() {
+    if (gameOverFlag) return;
+    const lane = Math.floor(Math.random() * 5);
     
-    const gameRect = game.getBoundingClientRect();
-    const positions = [
-      { x: '15%', y: '10%' },
-      { x: '35%', y: '25%' },
-      { x: '55%', y: '15%' },
-      { x: '75%', y: '30%' },
-      { x: '25%', y: '65%' },
-      { x: '45%', y: '75%' },
-      { x: '65%', y: '70%' },
-      { x: '85%', y: '80%' },
-    ];
+    const lightContainer = document.createElement('div');
+    lightContainer.className = 'traffic-light';
+    lightContainer.style.top = (lanePositions[lane] - 48) + 'px';
+    lightContainer.style.left = window.innerWidth + 'px';
     
-    positions.forEach(pos => {
-      const light = document.createElement('div');
-      light.className = 'traffic-light';
-      light.textContent = '🚦';
-      light.style.left = pos.x;
-      light.style.top = pos.y;
-      game.appendChild(light);
-      trafficLights.push(light);
+    // Светофор сверху
+    const lightEmoji = document.createElement('div');
+    lightEmoji.textContent = '🚦';
+    lightContainer.appendChild(lightEmoji);
+    
+    // Столбик снизу
+    const pole = document.createElement('div');
+    pole.className = 'traffic-light-pole';
+    lightContainer.appendChild(pole);
+    
+    game.appendChild(lightContainer);
+    
+    trafficLights.push({ 
+      elem: lightContainer, 
+      x: window.innerWidth, 
+      lane, 
+      speed: speedX * 0.5 
     });
   }
   
@@ -2048,6 +2061,7 @@
     medkitSpawnTimer = setInterval(createMedkit, 9000 * spawnMultiplier);
     bonusSpawnTimer = setInterval(createBonus, 15000 * spawnMultiplier);
     policeCarSpawnTimer = setInterval(createPoliceCar, 25000 * spawnMultiplier);
+    trafficLightSpawnTimer = setInterval(createTrafficLight, 4000 * spawnMultiplier); // 🆕 Светофоры
   }
   function stopSpawning() {
     clearInterval(pedestrianSpawnTimer);
@@ -2057,6 +2071,7 @@
     clearInterval(medkitSpawnTimer);
     clearInterval(bonusSpawnTimer);
     clearInterval(policeCarSpawnTimer);
+    clearInterval(trafficLightSpawnTimer); // 🆕 Светофоры
   }
 
   function checkUpcomingThreat() {
@@ -2157,6 +2172,15 @@
         if (speedX > maxSpeedX) speedX = maxSpeedX;
         updateDashSpeed();
       }
+      
+      // 🎁 Проверка пасхалок
+      easterEggCheckCounter++;
+      if (easterEggCheckCounter % 600 === 0) { // Каждые ~10 секунд
+        spawnUFO();
+      }
+      if (easterEggCheckCounter % 60 === 0) { // Каждую секунду
+        checkDevilScore();
+      }
     }
 
     requestAnimationFrame(gameTick);
@@ -2216,8 +2240,7 @@
 
     updateDashSpeed();
 
-    createTrafficLights(); // 🆕 Создаем светофоры
-    startSpawning();
+    startSpawning(); // Светофоры теперь спавнятся через интервал
     startTimer();
 
     lastFrameTime = 0;
@@ -2433,8 +2456,133 @@
   btnDown.addEventListener('touchstart', e => { e.preventDefault(); if (!gameOverFlag && !paused) movingDown = true; });
   btnDown.addEventListener('touchend', e => { e.preventDefault(); movingDown = false; });
 
-  // Клавиатура
+  // 🎁 ПАСХАЛКИ
+  let konamiCode = [];
+  const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let godModeActive = false;
+  let rainbowModeActive = false;
+  let lastEasterEggTime = 0;
+  
+  // 🎁 ПАСХАЛКА 1: Konami Code - бессмертие на 30 секунд
+  function checkKonamiCode(key) {
+    konamiCode.push(key);
+    if (konamiCode.length > 10) konamiCode.shift();
+    
+    if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
+      activateGodMode();
+      konamiCode = [];
+    }
+  }
+  
+  function activateGodMode() {
+    if (godModeActive) return;
+    godModeActive = true;
+    shieldActive = true;
+    showSpeech('🎮 GOD MODE ACTIVATED! 30 секунд бессмертия!');
+    courier.style.filter = 'drop-shadow(0 0 20px gold) brightness(1.5)';
+    
+    setTimeout(() => {
+      godModeActive = false;
+      shieldActive = false;
+      courier.style.filter = '';
+      showSpeech('🎮 God Mode деактивирован');
+    }, 30000);
+  }
+  
+  // 🎁 ПАСХАЛКА 2: Радужный режим (нажми R 3 раза быстро)
+  let rPresses = 0;
+  let rTimeout = null;
+  function checkRainbowMode(key) {
+    if (key === 'r') {
+      rPresses++;
+      if (rTimeout) clearTimeout(rTimeout);
+      rTimeout = setTimeout(() => { rPresses = 0; }, 1000);
+      
+      if (rPresses === 3) {
+        activateRainbowMode();
+        rPresses = 0;
+      }
+    }
+  }
+  
+  function activateRainbowMode() {
+    if (rainbowModeActive) return;
+    rainbowModeActive = true;
+    showSpeech('🌈 RAINBOW MODE! Радужные полосы!');
+    
+    const rainbowInterval = setInterval(() => {
+      lanes.forEach((lane, i) => {
+        const hue = (Date.now() / 10 + i * 60) % 360;
+        lane.style.background = `linear-gradient(90deg, 
+          hsl(${hue}, 70%, 30%) 0%, 
+          hsl(${hue + 30}, 70%, 25%) 100%)`;
+      });
+    }, 50);
+    
+    setTimeout(() => {
+      clearInterval(rainbowInterval);
+      rainbowModeActive = false;
+      lanes.forEach(lane => {
+        lane.style.background = '';
+      });
+      showSpeech('🌈 Rainbow Mode деактивирован');
+    }, 20000);
+  }
+  
+  // 🎁 ПАСХАЛКА 3: Редкое событие НЛО (1% шанс каждые 10 секунд)
+  function spawnUFO() {
+    const now = Date.now();
+    if (now - lastEasterEggTime < 30000) return; // Не чаще раза в 30 сек
+    
+    if (Math.random() < 0.01 && !gameOverFlag) {
+      lastEasterEggTime = now;
+      
+      const ufo = document.createElement('div');
+      ufo.textContent = '🛸';
+      ufo.style.position = 'absolute';
+      ufo.style.fontSize = 'clamp(2rem, 5vw, 3rem)';
+      ufo.style.top = '10%';
+      ufo.style.left = window.innerWidth + 'px';
+      ufo.style.zIndex = '100';
+      ufo.style.animation = 'pulse 0.5s ease-in-out infinite';
+      game.appendChild(ufo);
+      
+      showSpeech('👽 НЛО!!! +500 очков за наблюдение!');
+      score += 500;
+      updateScoreDisplay();
+      
+      let ufoX = window.innerWidth;
+      const ufoInterval = setInterval(() => {
+        ufoX -= 15;
+        ufo.style.left = ufoX + 'px';
+        if (ufoX < -100) {
+          clearInterval(ufoInterval);
+          ufo.remove();
+        }
+      }, 50);
+    }
+  }
+  
+  // 🎁 ПАСХАЛКА 4: Секретное сообщение при 666 очках
+  function checkDevilScore() {
+    const currentScore = Math.floor(score);
+    if (currentScore === 666) {
+      showSpeech('😈 Сатана одобряет твой скилл! +100 очков!');
+      score += 100;
+      updateScoreDisplay();
+      courier.style.filter = 'hue-rotate(180deg)';
+      setTimeout(() => { courier.style.filter = ''; }, 3000);
+    }
+  }
+  
+  // Проверяем пасхалки в игровом цикле
+  let easterEggCheckCounter = 0;
+
+  // Клавиатура с пасхалками
   window.addEventListener('keydown', e => {
+    checkKonamiCode(e.key);
+    checkRainbowMode(e.key);
+    
     if (gameOverFlag || paused) return;
     if (e.key === 'ArrowUp' || e.key === 'w') movingUp = true;
     else if (e.key === 'ArrowDown' || e.key === 's') movingDown = true;
@@ -2442,6 +2590,34 @@
   window.addEventListener('keyup', e => {
     if (e.key === 'ArrowUp' || e.key === 'w') movingUp = false;
     else if (e.key === 'ArrowDown' || e.key === 's') movingDown = false;
+  });
+  
+  // 🎁 ПАСХАЛКА 5: Секретный клик по курьеру (5 раз быстро)
+  let courierClicks = 0;
+  let courierClickTimeout = null;
+  courier.addEventListener('click', () => {
+    if (gameOverFlag) return;
+    courierClicks++;
+    
+    if (courierClickTimeout) clearTimeout(courierClickTimeout);
+    courierClickTimeout = setTimeout(() => { courierClicks = 0; }, 2000);
+    
+    if (courierClicks === 5) {
+      showSpeech('🎉 Секрет найден! Турбо-скорость + щит!');
+      activateSpeedBoost();
+      activateShield();
+      score += 250;
+      updateScoreDisplay();
+      courierClicks = 0;
+      
+      // Спецэффект
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const rect = courier.getBoundingClientRect();
+          createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }, i * 100);
+      }
+    }
   });
 
 
