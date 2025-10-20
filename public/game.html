@@ -98,13 +98,13 @@
     flex-direction: column;
     align-items: center;
     gap: 0;
+    will-change: transform;
   }
   .traffic-light-pole {
     width: 4px;
     height: 2em;
-    background: linear-gradient(to bottom, #555, #333);
+    background: #444;
     border-radius: 2px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .lane {
     flex: 1;
@@ -1804,14 +1804,19 @@
   // 🆕 Создание частиц пыли из-под колес - снизу слева от героя
   let lastDustTime = 0;
   function createDustParticles() {
+    // 🔥 Отключаем пыль на слабых устройствах
+    if (isLowEndDevice) return;
+    
     const now = Date.now();
-    if (now - lastDustTime < 100) return;
+    if (now - lastDustTime < 150) return; // Увеличили интервал
     lastDustTime = now;
     
     const courierRect = courier.getBoundingClientRect();
     const gameRect = game.getBoundingClientRect();
     
-    for (let i = 0; i < 2; i++) {
+    // 🔥 Меньше частиц
+    const particleCount = isMobile ? 1 : 2;
+    for (let i = 0; i < particleCount; i++) {
       const dust = document.createElement('div');
       dust.className = 'dust-particle';
       // Еще левее и чуть ниже
@@ -1827,6 +1832,11 @@
   let trafficLights = [];
   function createTrafficLight() {
     if (gameOverFlag) return;
+    
+    // 🔥 Лимит светофоров на экране для оптимизации
+    const maxLights = isLowEndDevice ? 2 : 4;
+    if (trafficLights.length >= maxLights) return;
+    
     const lane = Math.floor(Math.random() * 5);
     
     const lightContainer = document.createElement('div');
@@ -1839,7 +1849,7 @@
     lightEmoji.textContent = '🚦';
     lightContainer.appendChild(lightEmoji);
     
-    // Столбик снизу
+    // Столбик снизу (упрощенный)
     const pole = document.createElement('div');
     pole.className = 'traffic-light-pole';
     lightContainer.appendChild(pole);
@@ -1856,10 +1866,12 @@
   
   // 🆕 Создание конфетти при сборе
   function createConfetti(x, y) {
+    // 🔥 Меньше конфетти на слабых устройствах
+    const confettiCount = isLowEndDevice ? 4 : (isMobile ? 6 : 12);
     const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F59E0B'];
     const gameRect = game.getBoundingClientRect();
     
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < confettiCount; i++) {
       const confetti = document.createElement('div');
       confetti.className = 'confetti';
       confetti.style.left = `${x - gameRect.left}px`;
@@ -2052,7 +2064,7 @@
 
   function startSpawning() {
     // Оптимизация для слабых устройств - меньше объектов
-    const spawnMultiplier = isLowEndDevice ? 1.5 : 1;
+    const spawnMultiplier = isLowEndDevice ? 1.8 : 1;
     
     pedestrianSpawnTimer = setInterval(createPedestrian, 2200 * spawnMultiplier);
     standingPedSpawnTimer = setInterval(createStandingPedestrian, 2500 * spawnMultiplier);
@@ -2061,7 +2073,13 @@
     medkitSpawnTimer = setInterval(createMedkit, 9000 * spawnMultiplier);
     bonusSpawnTimer = setInterval(createBonus, 15000 * spawnMultiplier);
     policeCarSpawnTimer = setInterval(createPoliceCar, 25000 * spawnMultiplier);
-    trafficLightSpawnTimer = setInterval(createTrafficLight, 4000 * spawnMultiplier); // 🆕 Светофоры
+    
+    // 🆕 Светофоры - реже на слабых устройствах
+    if (!isLowEndDevice) {
+      trafficLightSpawnTimer = setInterval(createTrafficLight, 6000);
+    } else {
+      trafficLightSpawnTimer = setInterval(createTrafficLight, 12000);
+    }
   }
   function stopSpawning() {
     clearInterval(pedestrianSpawnTimer);
@@ -2161,11 +2179,6 @@
       updateObjects(delta);
 
       checkCollisions();
-      
-      // 🆕 Периодическая пыль из-под колес
-      if (!isLowEndDevice && gameTime % 3 === 0) {
-        createDustParticles();
-      }
 
       if (gameTime % 10 === 0 && speedX < maxSpeedX) {
         speedX += 0.015; // чуть медленнее рост скорости
@@ -2173,10 +2186,12 @@
         updateDashSpeed();
       }
       
-      // 🎁 Проверка пасхалок
+      // 🎁 Проверка пасхалок (реже на слабых устройствах)
       easterEggCheckCounter++;
-      if (easterEggCheckCounter % 600 === 0) { // Каждые ~10 секунд
-        spawnUFO();
+      if (!isLowEndDevice) {
+        if (easterEggCheckCounter % 600 === 0) { // Каждые ~10 секунд
+          spawnUFO();
+        }
       }
       if (easterEggCheckCounter % 60 === 0) { // Каждую секунду
         checkDevilScore();
@@ -2595,7 +2610,8 @@
   // 🎁 ПАСХАЛКА 5: Секретный клик по курьеру (5 раз быстро)
   let courierClicks = 0;
   let courierClickTimeout = null;
-  courier.addEventListener('click', () => {
+  
+  function handleCourierSecret() {
     if (gameOverFlag) return;
     courierClicks++;
     
@@ -2618,7 +2634,148 @@
         }, i * 100);
       }
     }
+  }
+  
+  courier.addEventListener('click', handleCourierSecret);
+  courier.addEventListener('touchend', handleCourierSecret); // 📱 Для телефонов
+  
+  // 🎁 ПАСХАЛКА 6 (МОБИЛЬНАЯ): Свайп вверх-вниз-вверх-вниз быстро
+  let swipePattern = [];
+  let lastSwipeTime = 0;
+  let swipeStartY = 0;
+  
+  game.addEventListener('touchstart', (e) => {
+    swipeStartY = e.touches[0].clientY;
   });
+  
+  game.addEventListener('touchend', (e) => {
+    if (gameOverFlag) return;
+    const swipeEndY = e.changedTouches[0].clientY;
+    const diff = swipeStartY - swipeEndY;
+    const now = Date.now();
+    
+    // Определяем направление свайпа
+    if (Math.abs(diff) > 30) { // Минимум 30px для свайпа
+      const direction = diff > 0 ? 'up' : 'down';
+      
+      // Сбрасываем паттерн если прошло > 2 секунды
+      if (now - lastSwipeTime > 2000) {
+        swipePattern = [];
+      }
+      
+      swipePattern.push(direction);
+      lastSwipeTime = now;
+      
+      // Проверяем паттерн: вверх-вниз-вверх-вниз
+      if (swipePattern.length > 4) swipePattern.shift();
+      
+      if (JSON.stringify(swipePattern) === JSON.stringify(['up', 'down', 'up', 'down'])) {
+        activateTurboMode();
+        swipePattern = [];
+      }
+    }
+  });
+  
+  function activateTurboMode() {
+    showSpeech('⚡️ ТУРБО РЕЖИМ! Суперскорость 15 сек!');
+    const oldSpeed = speedX;
+    speedX = maxSpeedX * 1.5;
+    updateDashSpeed();
+    
+    // Визуальный эффект
+    game.style.filter = 'hue-rotate(90deg) saturate(1.5)';
+    
+    setTimeout(() => {
+      speedX = oldSpeed;
+      updateDashSpeed();
+      game.style.filter = '';
+      showSpeech('⚡️ Турбо режим деактивирован');
+    }, 15000);
+  }
+  
+  // 🎁 ПАСХАЛКА 7 (МОБИЛЬНАЯ): Тап по углам экрана (4 угла по порядку)
+  let cornerTaps = [];
+  let lastCornerTapTime = 0;
+  
+  game.addEventListener('touchend', (e) => {
+    if (gameOverFlag) return;
+    const touch = e.changedTouches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const now = Date.now();
+    
+    // Сбрасываем если прошло > 3 секунды
+    if (now - lastCornerTapTime > 3000) {
+      cornerTaps = [];
+    }
+    
+    // Определяем угол (первая четверть экрана от края)
+    let corner = null;
+    if (x < w * 0.25 && y < h * 0.25) corner = 'tl'; // top-left
+    else if (x > w * 0.75 && y < h * 0.25) corner = 'tr'; // top-right
+    else if (x > w * 0.75 && y > h * 0.75) corner = 'br'; // bottom-right
+    else if (x < w * 0.25 && y > h * 0.75) corner = 'bl'; // bottom-left
+    
+    if (corner) {
+      cornerTaps.push(corner);
+      lastCornerTapTime = now;
+      
+      if (cornerTaps.length > 4) cornerTaps.shift();
+      
+      // Проверяем паттерн: по часовой стрелке
+      if (JSON.stringify(cornerTaps) === JSON.stringify(['tl', 'tr', 'br', 'bl'])) {
+        activateInvincibility();
+        cornerTaps = [];
+      }
+    }
+  });
+  
+  function activateInvincibility() {
+    showSpeech('🛡️ НЕУЯЗВИМОСТЬ! 20 секунд без урона!');
+    shieldActive = true;
+    courier.style.animation = 'pulse 0.5s ease-in-out infinite';
+    
+    setTimeout(() => {
+      shieldActive = false;
+      courier.style.animation = '';
+      showSpeech('🛡️ Неуязвимость закончилась');
+    }, 20000);
+  }
+  
+  // 🎁 ПАСХАЛКА 8 (МОБИЛЬНАЯ): Тройной тап по экрану
+  let tapCount = 0;
+  let tapTimeout = null;
+  
+  game.addEventListener('touchend', (e) => {
+    if (gameOverFlag) return;
+    tapCount++;
+    
+    if (tapTimeout) clearTimeout(tapTimeout);
+    tapTimeout = setTimeout(() => { tapCount = 0; }, 800);
+    
+    if (tapCount === 3) {
+      activateSlowMotion();
+      tapCount = 0;
+    }
+  });
+  
+  function activateSlowMotion() {
+    showSpeech('⏱️ ЗАМЕДЛЕНИЕ ВРЕМЕНИ! 10 секунд!');
+    const oldSpeed = speedX;
+    speedX = speedX * 0.3; // Замедляем в 3 раза
+    updateDashSpeed();
+    
+    game.style.filter = 'blur(0.5px) brightness(0.8)';
+    
+    setTimeout(() => {
+      speedX = oldSpeed;
+      updateDashSpeed();
+      game.style.filter = '';
+      showSpeech('⏱️ Время ускорилось');
+    }, 10000);
+  }
 
 
 
