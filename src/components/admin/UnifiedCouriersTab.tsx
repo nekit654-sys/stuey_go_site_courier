@@ -87,8 +87,11 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const [editingCourier, setEditingCourier] = useState<Courier | null>(null);
 
   const handleEditCourier = async (courierId: number, data: Partial<Courier>) => {
+    console.log('🎯 ФУНКЦИЯ handleEditCourier ВЫЗВАНА!', { courierId, data });
+    
     const token = localStorage.getItem('adminToken');
     if (!token) {
+      console.error('❌ НЕТ ТОКЕНА!');
       toast.error('Необходима авторизация');
       return;
     }
@@ -98,7 +101,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
       ...data
     };
     
-    console.log('🚀 Отправляем данные:', payload);
+    console.log('🚀 Отправляем данные на сервер:', payload);
 
     try {
       const response = await fetch(
