@@ -309,6 +309,15 @@ export default function Dashboard() {
         <StoriesCarousel onStoryClick={handleStoryClick} />
       </div>
 
+      {/* New Courier Notification - под историями */}
+      {showNewCourierNotification && (
+        <div className="container mx-auto px-3 sm:px-4 max-w-7xl pt-2">
+          <NewCourierNotification 
+            onDismiss={handleDismissNewCourierNotification}
+          />
+        </div>
+      )}
+
       {/* Main Content Area - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-3 sm:px-4 max-w-7xl py-6 flex gap-6">
@@ -389,13 +398,6 @@ export default function Dashboard() {
             {/* Stats Tab */}
             {activeTab === 'stats' && stats && (
               <div className="space-y-3 sm:space-y-4">
-                {/* New Courier Notification */}
-                {showNewCourierNotification && (
-                  <NewCourierNotification 
-                    onDismiss={handleDismissNewCourierNotification}
-                  />
-                )}
-
                 {/* Startup Bonus Notification */}
                 {user?.id && (
                   <StartupBonusNotification 

@@ -135,7 +135,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-full py-4">
+    <div className="w-full pt-4 pb-4">
       <div 
         ref={scrollContainerRef}
         className="w-full overflow-x-auto cursor-grab active:cursor-grabbing"
