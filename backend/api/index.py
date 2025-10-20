@@ -313,6 +313,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
 
 def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     body_data = json.loads(event.get('body', '{}'))
+    print(f'>>> UPDATE COURIER: body_data = {body_data}')
     courier_id = body_data.get('courier_id')
     
     if not courier_id:
@@ -380,8 +381,11 @@ def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         WHERE id = %s
     """
     
+    print(f'>>> UPDATE QUERY: {query}')
+    print(f'>>> UPDATE VALUES: {values}')
     cur.execute(query, values)
     conn.commit()
+    print(f'>>> UPDATE SUCCESS for courier_id={courier_id}')
     cur.close()
     conn.close()
     
