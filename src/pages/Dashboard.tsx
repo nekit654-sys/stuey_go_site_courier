@@ -24,7 +24,6 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
-import BottomNav from '@/components/dashboard/BottomNav';
 
 
 interface Stats {
