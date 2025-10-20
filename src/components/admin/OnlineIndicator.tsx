@@ -27,40 +27,38 @@ export default function OnlineIndicator({ lastUpdate, autoRefresh }: OnlineIndic
   const isOnline = autoRefresh && timeSinceUpdate < 15;
 
   return (
-    <div className="flex items-center gap-3">
-      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 transition-all duration-300 ${
+    <div className="flex items-center gap-2 flex-wrap justify-end">
+      <div className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full border-2 border-black transition-all duration-300 shadow-[0_2px_0_0_rgba(0,0,0,1)] ${
         isOnline 
-          ? 'bg-green-50 border-green-300' 
-          : 'bg-gray-50 border-gray-300'
+          ? 'bg-green-500' 
+          : 'bg-gray-400'
       }`}>
         <div className="relative">
-          <div className={`w-2.5 h-2.5 rounded-full ${
-            isOnline ? 'bg-green-500' : 'bg-gray-400'
-          }`} />
+          <div className="w-2 h-2 rounded-full bg-white" />
           {isOnline && (
-            <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75" />
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-white animate-ping opacity-75" />
           )}
         </div>
-        <span className={`text-sm font-bold ${
-          isOnline ? 'text-green-700' : 'text-gray-600'
-        }`}>
-          {isOnline ? 'Онлайн' : 'Автообновление выкл'}
+        <span className="text-xs sm:text-sm font-black text-white">
+          {isOnline ? 'Live' : 'Офлайн'}
         </span>
       </div>
 
       {showUpdated && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border-2 border-blue-300 animate-in fade-in slide-in-from-right-2 duration-300">
-          <Icon name="CheckCircle" size={14} className="text-blue-600" />
-          <span className="text-xs font-bold text-blue-700">Обновлено</span>
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500 border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] animate-in fade-in slide-in-from-right-2 duration-300">
+          <Icon name="CheckCircle" size={12} className="text-white" />
+          <span className="text-xs font-black text-white">OK</span>
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-600 font-bold">
         <Icon name="Clock" size={12} />
-        {timeSinceUpdate < 60 
-          ? `${timeSinceUpdate} сек назад`
-          : `${Math.floor(timeSinceUpdate / 60)} мин назад`
-        }
+        <span className="hidden sm:inline">
+          {timeSinceUpdate < 60 
+            ? `${timeSinceUpdate} сек`
+            : `${Math.floor(timeSinceUpdate / 60)} мин`
+          }
+        </span>
       </div>
     </div>
   );

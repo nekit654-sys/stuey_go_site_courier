@@ -62,8 +62,8 @@ export default function CompactAdminTabs({
   pendingWithdrawalsCount = 0,
 }: CompactAdminTabsProps) {
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 sm:space-y-6">
-      <TabsList className="grid w-full grid-cols-5 h-auto">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 sm:space-y-6 pb-20 sm:pb-6">
+      <TabsList className="hidden sm:grid w-full grid-cols-5 h-auto">
         <TabsTrigger value="couriers" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 relative py-2 sm:py-3 px-2 sm:px-4">
           <Icon name="Users" size={16} className="sm:w-4 sm:h-4" />
           <span className="text-xs sm:text-sm">Курьеры</span>
@@ -93,20 +93,20 @@ export default function CompactAdminTabs({
       </TabsList>
 
       {/* Вкладка 1: Курьеры (Заявки + Все курьеры + Статистика) */}
-      <TabsContent value="couriers" className="space-y-6">
-        <Tabs defaultValue="requests" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="requests" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+      <TabsContent value="couriers" className="space-y-4 sm:space-y-6">
+        <Tabs defaultValue="requests" className="space-y-3 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-3 h-auto gap-1 sm:gap-0 p-1">
+            <TabsTrigger value="requests" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="FileText" size={14} />
-              <span className="text-xs sm:text-sm">Заявки</span>
+              <span>Заявки</span>
             </TabsTrigger>
-            <TabsTrigger value="all" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+            <TabsTrigger value="all" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="Users" size={14} />
-              <span className="text-xs sm:text-sm">Все</span>
+              <span>Все</span>
             </TabsTrigger>
-            <TabsTrigger value="stats" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+            <TabsTrigger value="stats" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="BarChart3" size={14} />
-              <span className="text-xs sm:text-sm">Статы</span>
+              <span>Статы</span>
             </TabsTrigger>
           </TabsList>
 
@@ -157,20 +157,20 @@ export default function CompactAdminTabs({
       </TabsContent>
 
       {/* Вкладка 2: Выплаты (CSV + Запросы + Стартовые) */}
-      <TabsContent value="payments" className="space-y-6">
-        <Tabs defaultValue="csv" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="csv" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+      <TabsContent value="payments" className="space-y-4 sm:space-y-6">
+        <Tabs defaultValue="csv" className="space-y-3 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-3 h-auto gap-1 sm:gap-0 p-1">
+            <TabsTrigger value="csv" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="Upload" size={14} />
-              <span className="text-xs sm:text-sm">CSV</span>
+              <span>CSV</span>
             </TabsTrigger>
-            <TabsTrigger value="withdrawals" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+            <TabsTrigger value="withdrawals" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="Wallet" size={14} />
-              <span className="text-xs sm:text-sm">Запросы</span>
+              <span>Запросы</span>
             </TabsTrigger>
-            <TabsTrigger value="startup" className="flex flex-col sm:flex-row items-center gap-1 py-2 px-2 sm:px-3">
+            <TabsTrigger value="startup" className="flex flex-row items-center justify-center gap-1 py-2 px-2 text-xs">
               <Icon name="Gift" size={14} />
-              <span className="text-xs sm:text-sm">3000₽</span>
+              <span>3000₽</span>
             </TabsTrigger>
           </TabsList>
 
@@ -207,6 +207,67 @@ export default function CompactAdminTabs({
       <TabsContent value="finances" className="space-y-6">
         <AdminFinances authToken={authToken} />
       </TabsContent>
+
+      {/* Мобильная навигация снизу */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] sm:hidden z-50">
+        <div className="grid grid-cols-5 h-16">
+          <button
+            onClick={() => onTabChange('couriers')}
+            className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
+              activeTab === 'couriers' ? 'bg-purple-100 text-purple-600' : 'text-gray-600'
+            }`}
+          >
+            <Icon name="Users" size={20} />
+            <span className="text-[10px] font-bold">Курьеры</span>
+            {pendingRequestsCount > 0 && (
+              <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => onTabChange('payments')}
+            className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
+              activeTab === 'payments' ? 'bg-green-100 text-green-600' : 'text-gray-600'
+            }`}
+          >
+            <Icon name="DollarSign" size={20} />
+            <span className="text-[10px] font-bold">Выплаты</span>
+            {pendingWithdrawalsCount > 0 && (
+              <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => onTabChange('stories')}
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              activeTab === 'stories' ? 'bg-pink-100 text-pink-600' : 'text-gray-600'
+            }`}
+          >
+            <Icon name="Sparkles" size={20} />
+            <span className="text-[10px] font-bold">Истории</span>
+          </button>
+          
+          <button
+            onClick={() => onTabChange('news')}
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              activeTab === 'news' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+            }`}
+          >
+            <Icon name="Bell" size={20} />
+            <span className="text-[10px] font-bold">Новости</span>
+          </button>
+          
+          <button
+            onClick={() => onTabChange('finances')}
+            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              activeTab === 'finances' ? 'bg-orange-100 text-orange-600' : 'text-gray-600'
+            }`}
+          >
+            <Icon name="TrendingUp" size={20} />
+            <span className="text-[10px] font-bold">Финансы</span>
+          </button>
+        </div>
+      </div>
     </Tabs>
   );
 }
