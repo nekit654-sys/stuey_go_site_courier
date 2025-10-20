@@ -2023,17 +2023,6 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 errors.append(f"Пропущена строка: отсутствует ID или код курьера")
                 continue
             
-            cur.execute("""
-                SELECT id FROM t_p25272970_courier_button_site.courier_earnings
-                WHERE external_id = %s
-            """, (external_id,))
-            
-            existing_earning = cur.fetchone()
-            
-            if existing_earning:
-                duplicates += 1
-                continue
-            
             # Сначала ищем по external_id (если курьер уже был связан вручную)
             cur.execute("""
                 SELECT id, invited_by_user_id FROM t_p25272970_courier_button_site.users
@@ -2229,17 +2218,57 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     VALUES (%s, 0, 0, FALSE)
                 """, (courier_id,))
             
-            # Создаём запись только с дельтой (новой суммой)
+            # Проверяем есть ли уже earning для этого курьера (по courier_id)
             cur.execute("""
-                INSERT INTO t_p25272970_courier_button_site.courier_earnings
-                (courier_id, external_id, referrer_code, full_name, phone, city, 
-                 orders_count, total_amount, status, csv_period_start, csv_period_end, csv_filename)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)
-                RETURNING id
-            """, (courier_id, external_id, creator_username, referral_name, phone, city, 
-                  actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename))
+                SELECT id FROM t_p25272970_courier_button_site.courier_earnings
+                WHERE courier_id = %s
+                ORDER BY created_at DESC
+                LIMIT 1
+            """, (courier_id,))
             
-            earning_id = cur.fetchone()['id']
+            existing_earning = cur.fetchone()
+            
+            if existing_earning:
+                # ОБНОВЛЯЕМ существующую запись (финальная сумма из CSV)
+                earning_id = existing_earning['id']
+                
+                # Удаляем старые распределения
+                cur.execute("""
+                    DELETE FROM t_p25272970_courier_button_site.payment_distributions
+                    WHERE earning_id = %s
+                """, (earning_id,))
+                
+                # Обновляем earning с новыми данными
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.courier_earnings
+                    SET external_id = %s,
+                        referrer_code = %s,
+                        full_name = %s,
+                        phone = %s,
+                        city = %s,
+                        orders_count = %s,
+                        total_amount = %s,
+                        csv_period_start = %s,
+                        csv_period_end = %s,
+                        csv_filename = %s,
+                        created_at = NOW()
+                    WHERE id = %s
+                """, (external_id, creator_username, referral_name, phone, city, 
+                      actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename, earning_id))
+                
+                duplicates += 1
+            else:
+                # СОЗДАЁМ новую запись (первая загрузка для курьера)
+                cur.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.courier_earnings
+                    (courier_id, external_id, referrer_code, full_name, phone, city, 
+                     orders_count, total_amount, status, csv_period_start, csv_period_end, csv_filename)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)
+                    RETURNING id
+                """, (courier_id, external_id, creator_username, referral_name, phone, city, 
+                      actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename))
+                
+                earning_id = cur.fetchone()['id']
             
             # Получаем имя курьера для логирования
             cur.execute("""

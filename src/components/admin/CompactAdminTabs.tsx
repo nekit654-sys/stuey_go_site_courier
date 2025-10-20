@@ -1,4 +1,4 @@
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import PeopleTab from './PeopleTab';
 import FinancesTab from './FinancesTab';
@@ -77,7 +77,42 @@ export default function CompactAdminTabs({
   const isSuperAdmin = currentUsername === 'nekit654';
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 pb-24">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
+      <TabsList className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-auto`}>
+        <TabsTrigger value="activity" className="flex flex-row items-center gap-2 py-3 px-4">
+          <Icon name="Newspaper" size={16} />
+          <span>Новости</span>
+        </TabsTrigger>
+        <TabsTrigger value="people" className="flex flex-row items-center gap-2 relative py-3 px-4">
+          <Icon name="Users" size={16} />
+          <span>Люди</span>
+          {pendingRequestsCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {pendingRequestsCount}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="finances" className="flex flex-row items-center gap-2 relative py-3 px-4">
+          <Icon name="DollarSign" size={16} />
+          <span>Финансы</span>
+          {pendingWithdrawalsCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {pendingWithdrawalsCount}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="stories" className="flex flex-row items-center gap-2 py-3 px-4">
+          <Icon name="Image" size={16} />
+          <span>Контент</span>
+        </TabsTrigger>
+        {isSuperAdmin && (
+          <TabsTrigger value="settings" className="flex flex-row items-center gap-2 py-3 px-4">
+            <Icon name="Settings" size={16} />
+            <span>Админы</span>
+          </TabsTrigger>
+        )}
+      </TabsList>
+
       <TabsContent value="activity" className="space-y-4">
         <ActivityTab authToken={authToken} />
       </TabsContent>
@@ -134,14 +169,14 @@ export default function CompactAdminTabs({
         </TabsContent>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 sm:hidden">
         <div className={`grid ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
           <button
             onClick={() => onTabChange('activity')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'activity' 
                 ? 'bg-yellow-400 text-black' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             <Icon name="Newspaper" size={20} />
@@ -153,11 +188,11 @@ export default function CompactAdminTabs({
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'people' 
                 ? 'bg-yellow-400 text-black' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             {pendingRequestsCount > 0 && (
-              <span className="absolute top-1 right-4 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {pendingRequestsCount}
               </span>
             )}
@@ -170,11 +205,11 @@ export default function CompactAdminTabs({
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'finances' 
                 ? 'bg-yellow-400 text-black' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             {pendingWithdrawalsCount > 0 && (
-              <span className="absolute top-1 right-4 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {pendingWithdrawalsCount}
               </span>
             )}
@@ -187,7 +222,7 @@ export default function CompactAdminTabs({
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'stories' 
                 ? 'bg-yellow-400 text-black' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             <Icon name="Image" size={20} />
@@ -200,7 +235,7 @@ export default function CompactAdminTabs({
               className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
                 activeTab === 'settings' 
                   ? 'bg-yellow-400 text-black' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  : 'bg-white text-gray-600 active:bg-gray-100'
               }`}
             >
               <Icon name="Settings" size={20} />
