@@ -93,6 +93,13 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
       return;
     }
 
+    const payload = {
+      courier_id: courierId,
+      ...data
+    };
+    
+    console.log('🚀 Отправляем данные:', payload);
+
     try {
       const response = await fetch(
         'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=couriers&action=update',
@@ -102,14 +109,14 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             'Content-Type': 'application/json',
             'X-Auth-Token': token,
           },
-          body: JSON.stringify({
-            courier_id: courierId,
-            ...data
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       const result = await response.json();
+      
+      console.log('📥 Ответ сервера:', result);
+      console.log('📊 HTTP статус:', response.status);
 
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Ошибка обновления данных');
