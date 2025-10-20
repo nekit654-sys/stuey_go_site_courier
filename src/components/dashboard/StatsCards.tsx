@@ -74,8 +74,8 @@ export default function StatsCards({ stats }: StatsCardsProps) {
                 <div className={`${card.iconBg} border-3 border-black rounded-xl p-3 shadow-[0_4px_0_0_rgba(0,0,0,1)] group-hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] group-hover:translate-y-[2px] transition-all`}>
                   <Icon name={card.icon as any} className="h-6 w-6 text-black" />
                 </div>
-                <div className="bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full border-2 border-white/30">
-                  <span className="text-xs font-bold text-white">🔥 Live</span>
+                <div className="bg-red-500 px-3 py-1 rounded-full border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                  <span className="text-xs font-black text-white uppercase tracking-wide">🔥 Live</span>
                 </div>
               </div>
               
