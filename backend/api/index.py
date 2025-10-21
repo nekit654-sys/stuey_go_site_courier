@@ -282,6 +282,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.referral_code,
             u.invited_by_user_id,
             u.total_orders,
+            u.total_earnings,
             u.is_active,
             u.created_at,
             u.external_id,

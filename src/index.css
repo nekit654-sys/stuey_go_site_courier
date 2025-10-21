@@ -148,6 +148,23 @@
   }
 }
 
+@keyframes fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
 .bounce-hint {
   animation: bounce-hint 7s ease-in-out infinite;
   position: relative;

@@ -392,28 +392,19 @@ export default function Dashboard() {
                   </Card>
                 )}
 
-                {/* Copy Referral Link */}
-                <Button
-                  onClick={copyReferralLink}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-extrabold bg-black text-yellow-400 border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all"
-                >
-                  <Icon name="Share2" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  Скопировать реферальную ссылку
-                </Button>
-
-                <Card className="bg-black border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 text-yellow-400">
-                  <h3 className="text-base sm:text-lg font-extrabold mb-3">💡 Как заработать больше?</h3>
-                  <ul className="space-y-2 text-xs sm:text-sm">
+                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-3 border-purple-200 rounded-2xl shadow-[0_5px_0_0_rgba(147,51,234,0.3)] p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-extrabold mb-3 text-purple-900">💡 Как заработать больше?</h3>
+                  <ul className="space-y-2 text-xs sm:text-sm text-purple-800">
                     <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-purple-600" />
                       <span className="font-bold">Делись ссылкой в чатах курьеров</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-purple-600" />
                       <span className="font-bold">Рассказывай коллегам на точках</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-purple-600" />
                       <span className="font-bold">Чем больше рефералов — тем выше заработок</span>
                     </li>
                   </ul>

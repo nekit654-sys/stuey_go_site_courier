@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import PeopleTab from './PeopleTab';
 import FinancesTab from './FinancesTab';
-import StoriesTab from './StoriesTab';
+import ContentTab from './ContentTab';
 import ActivityTab from './ActivityTab';
 
 import { AdminRequest, AdminStats, ReferralStats } from './types';
@@ -102,7 +102,7 @@ export default function AdminTabs({
       </TabsContent>
 
       <TabsContent value="stories" className="space-y-6">
-        <StoriesTab authToken={authToken} />
+        <ContentTab authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="activity" className="space-y-6">
