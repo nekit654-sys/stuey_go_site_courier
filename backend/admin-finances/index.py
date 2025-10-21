@@ -99,6 +99,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return update_admin_spends(body_data, headers)
         elif action == 'recalculate_period':
             return recalculate_period_distribution(body_data, headers)
+        elif action == 'get_bonus_users':
+            return get_bonus_users(headers)
     
     return {
         'statusCode': 400,
@@ -347,5 +349,48 @@ def recalculate_period_distribution(body_data: Dict[str, Any], headers: Dict[str
         'statusCode': 200,
         'headers': headers,
         'body': json.dumps({'success': True, 'message': 'Пересчёт выполнен'}),
+        'isBase64Encoded': False
+    }
+
+
+def get_bonus_users(headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Получить список пользователей с бонусом 3000₽'''
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT 
+            u.id as user_id,
+            u.name,
+            u.phone,
+            u.bonus_3000_amount as bonus_amount,
+            u.bonus_3000_granted_at as granted_at,
+            u.bonus_3000_expires_at as expires_at,
+            u.bonus_3000_used as is_used
+        FROM t_p25272970_courier_button_site.users u
+        WHERE u.bonus_3000_granted = true
+        ORDER BY u.bonus_3000_granted_at DESC
+    """)
+    
+    users = cur.fetchall()
+    
+    stats = {
+        'total_granted': len(users),
+        'total_used': sum(1 for u in users if u['is_used']),
+        'total_active': sum(1 for u in users if not u['is_used'] and datetime.fromisoformat(str(u['expires_at'])) > datetime.now()),
+        'total_expired': sum(1 for u in users if not u['is_used'] and datetime.fromisoformat(str(u['expires_at'])) <= datetime.now())
+    }
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(convert_decimals({
+            'success': True,
+            'users': users,
+            'stats': stats
+        })),
         'isBase64Encoded': False
     }

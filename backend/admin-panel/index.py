@@ -109,7 +109,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cursor.execute(
-                    "SELECT id, password_hash FROM t_p25272970_courier_button_site.admins WHERE username = %s",
+                    "SELECT id, password_hash, is_super_admin FROM t_p25272970_courier_button_site.admins WHERE username = %s",
                     (username,)
                 )
                 admin = cursor.fetchone()
@@ -134,6 +134,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 token = secrets.token_urlsafe(32)
+                is_super_admin = admin[2] if len(admin) > 2 else False
                 
                 cursor.execute(
                     "UPDATE t_p25272970_courier_button_site.admins SET last_login = NOW() WHERE id = %s",
@@ -144,13 +145,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'success': True, 'token': token}),
+                    'body': json.dumps({'success': True, 'token': token, 'is_super_admin': is_super_admin, 'username': username}),
                     'isBase64Encoded': False
                 }
             
             elif action == 'get_admins':
                 cursor.execute("""
-                    SELECT id, username, created_at, last_login 
+                    SELECT id, username, created_at, last_login, is_super_admin 
                     FROM t_p25272970_courier_button_site.admins 
                     ORDER BY created_at DESC
                 """)
@@ -161,7 +162,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'id': row[0],
                         'username': row[1],
                         'created_at': row[2].isoformat() if row[2] else None,
-                        'last_login': row[3].isoformat() if row[3] else None
+                        'last_login': row[3].isoformat() if row[3] else None,
+                        'is_super_admin': row[4] if len(row) > 4 else False
                     })
                 
                 return {
