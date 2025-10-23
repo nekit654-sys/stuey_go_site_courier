@@ -2464,7 +2464,7 @@
   
   closeRulesBtn.addEventListener('click', () => {
     rulesDialog.style.display = 'none';
-    mainMenu.style.display = 'block';
+    mainMenu.style.display = 'flex';
   });
   
   restartBtn.addEventListener('click', () => {
@@ -2478,7 +2478,7 @@
     
     // Сброс всех возможных трансформаций и стилей
     mainMenu.style.cssText = '';
-    mainMenu.style.display = 'block';
+    mainMenu.style.display = 'flex';
     
     // Принудительный reflow для сброса позиционирования
     void mainMenu.offsetHeight;
