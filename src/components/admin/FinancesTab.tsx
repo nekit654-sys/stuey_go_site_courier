@@ -4,6 +4,7 @@ import FinalPaymentsTab from './FinalPaymentsTab';
 import AdminFinances from './AdminFinances';
 import CompanyStatsCard from './CompanyStatsCard';
 import BonusManagementTab from './BonusManagementTab';
+import RevenueChart from './RevenueChart';
 
 interface FinancesTabProps {
   authToken: string;
@@ -41,6 +42,7 @@ export default function FinancesTab({
 
       <TabsContent value="overview" className="space-y-4">
         <CompanyStatsCard authToken={authToken} />
+        <RevenueChart authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="payments" className="space-y-4">

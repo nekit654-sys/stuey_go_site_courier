@@ -149,6 +149,66 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        if method == 'GET' and action == 'revenue_chart':
+            cursor.execute("""
+                SELECT 
+                    DATE(ce.period_date) as date,
+                    COALESCE(SUM(ce.total_amount), 0) as revenue,
+                    COALESCE(SUM(ce.orders_count), 0) as orders
+                FROM t_p25272970_courier_button_site.courier_earnings ce
+                WHERE ce.period_date >= CURRENT_DATE - INTERVAL '30 days'
+                GROUP BY DATE(ce.period_date)
+                ORDER BY date ASC
+            """)
+            rows = cursor.fetchall()
+            
+            chart_data = []
+            for row in rows:
+                chart_data.append({
+                    'date': row[0].strftime('%Y-%m-%d') if row[0] else None,
+                    'revenue': float(row[1]) if row[1] else 0,
+                    'orders': int(row[2]) if row[2] else 0
+                })
+            
+            cursor.execute("""
+                SELECT 
+                    DATE(pd.created_at) as date,
+                    COALESCE(SUM(CASE WHEN pd.recipient_type = 'courier_self' THEN pd.amount ELSE 0 END), 0) as courier_payouts,
+                    COALESCE(SUM(CASE WHEN pd.recipient_type = 'courier_referrer' THEN pd.amount ELSE 0 END), 0) as referrer_payouts
+                FROM t_p25272970_courier_button_site.payment_distributions pd
+                WHERE pd.created_at >= CURRENT_DATE - INTERVAL '30 days'
+                GROUP BY DATE(pd.created_at)
+                ORDER BY date ASC
+            """)
+            payout_rows = cursor.fetchall()
+            
+            payout_map = {}
+            for row in payout_rows:
+                date_str = row[0].strftime('%Y-%m-%d') if row[0] else None
+                if date_str:
+                    payout_map[date_str] = {
+                        'courier_payouts': float(row[1]) if row[1] else 0,
+                        'referrer_payouts': float(row[2]) if row[2] else 0
+                    }
+            
+            for item in chart_data:
+                date_str = item['date']
+                if date_str and date_str in payout_map:
+                    item['courier_payouts'] = payout_map[date_str]['courier_payouts']
+                    item['referrer_payouts'] = payout_map[date_str]['referrer_payouts']
+                else:
+                    item['courier_payouts'] = 0
+                    item['referrer_payouts'] = 0
+                
+                item['profit'] = item['revenue'] - item['courier_payouts'] - item['referrer_payouts']
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'data': chart_data}),
+                'isBase64Encoded': False
+            }
+        
         if method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
             action = body_data.get('action', '')
