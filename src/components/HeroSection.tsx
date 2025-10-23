@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { Link } from "react-router-dom";
@@ -15,6 +16,24 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   const { cityInPrepositional, loading } = useUserLocation();
   const { triggerMagicEffect } = useMagicEffect();
   const { isAuthenticated } = useAuth();
+  
+  const [heroData, setHeroData] = useState<any>(null);
+  const defaultBgImage = "https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg";
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba');
+        const data = await response.json();
+        if (data.success && data.hero) {
+          setHeroData(data.hero);
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки Hero:', error);
+      }
+    };
+    fetchHeroData();
+  }, []);
 
   const referralLink =
     "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
@@ -33,8 +52,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage:
-          "url(https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg)",
+        backgroundImage: `url(${heroData?.image_url || defaultBgImage})`,
       }}
     >
       {/* Градиентный оверлей с анимацией */}
@@ -44,6 +62,25 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
       {/* Декоративные элементы */}
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
+
+      {/* Падающие элементы */}
+      {heroData?.animation_type === 'falling' && heroData?.animation_config?.fallingImage && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {Array.from({ length: heroData.animation_config.fallingCount || 20 }).map((_, i) => (
+            <img
+              key={i}
+              src={heroData.animation_config.fallingImage}
+              alt=""
+              className="absolute w-8 h-8 sm:w-12 sm:h-12 opacity-60 animate-fall"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${10 / ((heroData.animation_config.fallingSpeed || 100) / 100)}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="relative w-full -mx-6">
         <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
