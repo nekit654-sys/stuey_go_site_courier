@@ -169,15 +169,11 @@ export default function StartupPayoutTab({ authToken }: StartupPayoutTabProps) {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Icon name="Gift" size={24} />
             Заявки на стартовую выплату (3000₽)
           </CardTitle>
-          <Button onClick={fetchRequests} variant="outline" size="sm">
-            <Icon name="RefreshCw" size={16} className="mr-2" />
-            Обновить
-          </Button>
         </CardHeader>
         <CardContent>
           {requests.length === 0 ? (
