@@ -1078,7 +1078,7 @@
   #gtaGameOverScreen {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.95);
     color: #ff0000;
     font-size: clamp(6rem, 20vw, 12rem);
     font-weight: 900;
@@ -1097,7 +1097,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     opacity: 0;
-    animation: gtaFadeInOut 5s forwards;
+    animation: gtaFadeInOut 2s forwards;
     writing-mode: horizontal-tb;
     padding: 0 1rem;
     white-space: nowrap;
@@ -2212,6 +2212,8 @@
   }
 
   function startGame() {
+    console.log('🎮 startGame вызван');
+    
     pedestrians.forEach(p => p.elem.remove());
     standingPeds.forEach(p => p.elem.remove());
     policeStandings.forEach(p => p.elem.remove());
@@ -2228,6 +2230,12 @@
     policeCars = [];
     
     // Музыка уже играет, продолжаем
+    
+    // Отправляем событие родительскому окну что игра началась
+    if (window.parent && typeof window.parent.postMessage === 'function') {
+      window.parent.postMessage({ type: 'GAME_STARTED' }, '*');
+      console.log('📤 Sent GAME_STARTED to parent');
+    }
 
     score = 0;
     lives = 3;
@@ -2252,6 +2260,8 @@
     courierTargetLane = 2;
     courierCurrentY = lanePositions[courierLane] - courier.offsetHeight / 2;
     courier.style.top = courierCurrentY + 'px';
+    courier.style.display = 'block'; // Показываем героя при старте игры
+    courier.style.filter = ''; // Сбрасываем эффекты
 
     updateDashSpeed();
 
@@ -2284,6 +2294,8 @@
     policeCars = [];
     trafficLights = [];
     touchControls.style.display = 'none';
+    courier.style.display = 'none'; // Скрываем главного героя
+    speechBubble.style.opacity = '0'; // Скрываем речевой пузырь
     movingUp = false;
     movingDown = false;
     moveCooldown = 0;
@@ -2334,23 +2346,35 @@
   }
 
   function showGameOverAnimation() {
+    console.log('🎬 showGameOverAnimation: начало');
+    
     container.style.display = 'none';
     info.style.display = 'none';
     livesElem.style.display = 'none';
     gameOverMenu.style.display = 'none';
     mainMenu.style.display = 'none';
+    
+    console.log('🎬 Все элементы игры скрыты');
 
     gtaGameOverScreen.style.display = 'flex';
     gtaGameOverScreen.style.opacity = '1';
+    
+    console.log('🎬 Экран ПОТРАЧЕНО показан');
 
     gtaGameOverScreen.style.animation = 'none';
     void gtaGameOverScreen.offsetWidth;
     gtaGameOverScreen.style.animation = 'gtaFadeInOut 2s forwards';
+    
+    console.log('🎬 Анимация ПОТРАЧЕНО запущена (2 секунды)');
 
     setTimeout(async () => {
+      console.log('🎬 Анимация завершена, скрываем экран ПОТРАЧЕНО');
+      
       gtaGameOverScreen.style.display = 'none';
       gtaGameOverScreen.style.opacity = '0';
       finalScoreElem.textContent = Math.floor(score);
+      
+      console.log('🎬 Счёт установлен:', Math.floor(score));
       
       const saveResult = await saveGameResult();
       const gameOverMessage = document.getElementById('gameOverMessage');
@@ -2380,16 +2404,26 @@
         }
       }
       
+      console.log('🎬 Показываем меню Game Over');
       gameOverMenu.style.display = 'block';
       gameOverMenu.style.zIndex = '5000';
+      
+      console.log('🎬 Меню Game Over показано, z-index:', gameOverMenu.style.zIndex);
     }, 2000);
   }
   
   function gameOver() {
-    if (gameOverFlag) return;
+    console.log('☠️ gameOver вызван');
+    if (gameOverFlag) {
+      console.log('☠️ gameOver уже был вызван, выход');
+      return;
+    }
     gameOverFlag = true;
+    console.log('☠️ Вызываем stopGame()');
     stopGame();
+    console.log('☠️ stopGame() завершён');
 
+    console.log('☠️ Вызываем showGameOverAnimation()');
     showGameOverAnimation();
     
     // Отправляем событие родительскому окну с финальным счётом

@@ -34,6 +34,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [lastScore, setLastScore] = useState<number>(0);
   const [showRegisterPrompt, setShowRegisterPrompt] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -46,9 +47,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === 'GAME_OVER') {
+          setIsGameOver(true);
           handleGameOver(event.data.score);
+        } else if (event.data.type === 'GAME_STARTED') {
+          setIsGameOver(false);
+          setShowRegisterPrompt(false);
         } else if (event.data.type === 'openLeaderboard') {
           setShowLeaderboard(true);
+        } else if (event.data.type === 'closeGame') {
+          closeGame();
         }
       };
       
@@ -130,6 +137,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const openGame = () => {
     setIsGameOpen(true);
     setIsGameLoading(true);
+    setIsGameOver(false);
+    setShowRegisterPrompt(false);
     document.body.style.overflow = 'hidden';
     document.body.classList.add('game-modal-open');
   };
@@ -139,6 +148,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsGameLoading(false);
     setShowRegisterPrompt(false);
     setShowLeaderboard(false);
+    setIsGameOver(false);
     document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
   };
@@ -159,7 +169,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="relative w-full max-w-7xl h-[90vh] flex gap-4">
             <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden relative">
               {/* 3D кнопка закрытия игры */}
-              {!showLeaderboard && (
+              {!showLeaderboard && !isGameOver && (
                 <button
                   onClick={() => {
                     playSound('click');
