@@ -28,7 +28,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
   const fetchActivities = async () => {
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=admin&action=activity',
+        'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559?action=activity',
         {
           headers: {
             'X-Auth-Token': authToken,

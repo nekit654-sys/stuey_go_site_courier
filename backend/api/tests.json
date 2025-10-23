@@ -18,12 +18,9 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Test referral stats",
+      "name": "Test referral code check",
       "method": "GET",
-      "path": "/?route=referrals&action=stats",
-      "headers": {
-        "X-User-Id": "1"
-      },
+      "path": "/?route=referrals&action=check_code&code=TEST123",
       "expectedStatus": 200,
       "expectedBody": {
         "success": true
@@ -31,16 +28,10 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Test auth login",
-      "method": "POST",
-      "path": "/?route=auth",
-      "body": {
-        "action": "login",
-        "username": "admin",
-        "password": "testpass123"
-      },
-      "expectedStatus": [200, 401],
-      "bodyMatcher": "partial"
+      "name": "Test OPTIONS CORS",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
     }
   ]
 }

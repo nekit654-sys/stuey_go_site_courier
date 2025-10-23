@@ -148,6 +148,12 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
     if method == 'GET' and query_params.get('action') == 'check_code':
         return check_referral_code(query_params.get('code', ''), headers)
     
+    # Для админских запросов проверяем X-Auth-Token
+    if method == 'GET' and query_params.get('action') == 'admin_stats':
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if auth_token:
+            return get_admin_referral_stats(headers)
+    
     user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
     
     if not user_id_header:
