@@ -92,6 +92,63 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        if method == 'GET' and action == 'company_stats':
+            cursor.execute("""
+                SELECT 
+                    COALESCE(SUM(ce.total_amount), 0) as total_revenue,
+                    COALESCE(SUM(ce.orders_count), 0) as total_orders
+                FROM t_p25272970_courier_button_site.courier_earnings ce
+            """)
+            result = cursor.fetchone()
+            
+            cursor.execute("""
+                SELECT COALESCE(SUM(pd.amount), 0) as total_amount
+                FROM t_p25272970_courier_button_site.payment_distributions pd
+                WHERE pd.recipient_type = 'courier_self' AND pd.amount > 0
+            """)
+            payouts_couriers = cursor.fetchone()
+            
+            cursor.execute("""
+                SELECT COALESCE(SUM(pd.amount), 0) as total_amount
+                FROM t_p25272970_courier_button_site.payment_distributions pd
+                WHERE pd.recipient_type = 'courier_referrer' AND pd.amount > 0
+            """)
+            payouts_referrers = cursor.fetchone()
+            
+            cursor.execute("""
+                SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_active = true) as active
+                FROM t_p25272970_courier_button_site.users
+            """)
+            couriers = cursor.fetchone()
+            
+            total_revenue = float(result[0]) if result and result[0] else 0
+            total_orders = int(result[1]) if result and result[1] else 0
+            total_payouts_to_couriers = float(payouts_couriers[0]) if payouts_couriers and payouts_couriers[0] else 0
+            total_payouts_to_referrers = float(payouts_referrers[0]) if payouts_referrers and payouts_referrers[0] else 0
+            total_admin_expenses = 0
+            
+            net_profit = total_revenue - total_payouts_to_couriers - total_payouts_to_referrers - total_admin_expenses
+            avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+            
+            stats = {
+                'total_revenue': round(total_revenue, 2),
+                'total_payouts_to_couriers': round(total_payouts_to_couriers, 2),
+                'total_payouts_to_referrers': round(total_payouts_to_referrers, 2),
+                'total_admin_expenses': round(total_admin_expenses, 2),
+                'net_profit': round(net_profit, 2),
+                'total_couriers': couriers[0] if couriers else 0,
+                'active_couriers': couriers[1] if couriers else 0,
+                'total_orders': total_orders,
+                'avg_order_value': round(avg_order_value, 2)
+            }
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps(stats),
+                'isBase64Encoded': False
+            }
+        
         if method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
             action = body_data.get('action', '')

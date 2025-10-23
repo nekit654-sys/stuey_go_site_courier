@@ -726,13 +726,13 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
     
     cur.execute("""
         SELECT 
-            r.id,
-            r.referrer_id,
-            r.referred_id,
-            r.bonus_amount,
-            r.bonus_paid,
-            r.referred_total_orders,
-            r.created_at,
+            u_referred.id as id,
+            u_referrer.id as referrer_id,
+            u_referred.id as referred_id,
+            u_referred.referral_earnings as bonus_amount,
+            false as bonus_paid,
+            u_referred.total_orders as referred_total_orders,
+            u_referred.created_at,
             u_referrer.full_name as referrer_name,
             u_referrer.phone as referrer_phone,
             u_referrer.referral_code as referrer_code,
@@ -741,21 +741,22 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
             u_referred.total_orders as referred_orders,
             u_referred.is_active as referred_active,
             u_referred.city as referred_city
-        FROM t_p25272970_courier_button_site.referrals r
-        JOIN t_p25272970_courier_button_site.users u_referrer ON r.referrer_id = u_referrer.id
-        JOIN t_p25272970_courier_button_site.users u_referred ON r.referred_id = u_referred.id
-        ORDER BY r.created_at DESC
+        FROM t_p25272970_courier_button_site.users u_referred
+        JOIN t_p25272970_courier_button_site.users u_referrer ON u_referred.invited_by_user_id = u_referrer.id
+        WHERE u_referred.invited_by_user_id IS NOT NULL
+        ORDER BY u_referred.created_at DESC
     """)
     
     all_referrals = cur.fetchall()
     
     cur.execute("""
         SELECT 
-            COUNT(DISTINCT referrer_id) as total_referrers,
-            COUNT(DISTINCT referred_id) as total_referred,
-            SUM(bonus_amount) as total_bonuses,
-            SUM(CASE WHEN bonus_paid THEN bonus_amount ELSE 0 END) as paid_bonuses
-        FROM t_p25272970_courier_button_site.referrals
+            COUNT(DISTINCT invited_by_user_id) as total_referrers,
+            COUNT(DISTINCT id) as total_referred,
+            COALESCE(SUM(referral_earnings), 0) as total_bonuses,
+            0 as paid_bonuses
+        FROM t_p25272970_courier_button_site.users
+        WHERE invited_by_user_id IS NOT NULL
     """)
     
     overall_stats = cur.fetchone()
@@ -766,12 +767,12 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
             u.full_name,
             u.phone,
             u.referral_code,
-            COUNT(r.referred_id) as total_referrals,
-            SUM(r.bonus_amount) as total_earned
+            COUNT(u_referred.id) as total_referrals,
+            COALESCE(SUM(u_referred.referral_earnings), 0) as total_earned
         FROM t_p25272970_courier_button_site.users u
-        LEFT JOIN t_p25272970_courier_button_site.referrals r ON u.id = r.referrer_id
+        LEFT JOIN t_p25272970_courier_button_site.users u_referred ON u.id = u_referred.invited_by_user_id
+        WHERE u_referred.id IS NOT NULL
         GROUP BY u.id, u.full_name, u.phone, u.referral_code
-        HAVING COUNT(r.referred_id) > 0
         ORDER BY total_referrals DESC
         LIMIT 10
     """)
@@ -786,7 +787,7 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
         'headers': headers,
         'body': json.dumps(convert_decimals({
             'success': True,
-            'overall_stats': dict(overall_stats),
+            'overall_stats': dict(overall_stats) if overall_stats else {},
             'all_referrals': [dict(r) for r in all_referrals],
             'top_referrers': [dict(r) for r in top_referrers]
         })),
