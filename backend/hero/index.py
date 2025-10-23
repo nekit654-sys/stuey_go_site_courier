@@ -48,7 +48,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         if method == 'GET':
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute('SELECT * FROM hero_content ORDER BY updated_at DESC LIMIT 1')
+                cur.execute('SELECT * FROM t_p25272970_courier_button_site.hero_content ORDER BY updated_at DESC LIMIT 1')
                 hero = cur.fetchone()
                 
                 if hero:
@@ -91,12 +91,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             with conn.cursor() as cur:
-                cur.execute('SELECT id FROM hero_content ORDER BY updated_at DESC LIMIT 1')
+                cur.execute('SELECT id FROM t_p25272970_courier_button_site.hero_content ORDER BY updated_at DESC LIMIT 1')
                 existing = cur.fetchone()
                 
                 if existing:
                     cur.execute('''
-                        UPDATE hero_content 
+                        UPDATE t_p25272970_courier_button_site.hero_content 
                         SET title = %s, subtitle = %s, image_url = %s, 
                             button_text = %s, button_link = %s, 
                             animation_type = %s, animation_config = %s,
@@ -106,7 +106,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                           animation_type, json.dumps(animation_config), existing[0]))
                 else:
                     cur.execute('''
-                        INSERT INTO hero_content 
+                        INSERT INTO t_p25272970_courier_button_site.hero_content 
                         (title, subtitle, image_url, button_text, button_link, animation_type, animation_config)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     ''', (title, subtitle, image_url, button_text, button_link, 

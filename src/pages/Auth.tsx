@@ -85,9 +85,16 @@ export default function Auth() {
       console.log('[Auth] Данные:', data);
 
       if (data.success) {
+        // Если пользователь уже существует (не новый), сразу логиним без доп модалок
         login(data.token, data.user);
         localStorage.removeItem('referral_code');
-        toast.success('Успешный вход!');
+        
+        if (data.is_new_user) {
+          toast.success('Добро пожаловать! Регистрация завершена.');
+        } else {
+          toast.success('Вход выполнен!');
+        }
+        
         navigate('/dashboard');
       } else {
         const errorMsg = data.error || 'Ошибка авторизации';
@@ -104,26 +111,15 @@ export default function Auth() {
   };
 
   const openAuthModal = (provider: AuthProvider) => {
-    const hasAuthToken = localStorage.getItem('auth_token');
-    
-    if (hasAuthToken) {
-      if (provider === 'yandex') {
-        handleYandexAuth();
-      } else if (provider === 'vk') {
-        handleVKAuth();
-      } else if (provider === 'telegram') {
-        toast.info('Вход через Telegram временно недоступен');
-      }
-      return;
+    // Сразу переходим к авторизации без модалки
+    // Реферальный код берётся из URL или localStorage
+    if (provider === 'yandex') {
+      handleYandexAuth();
+    } else if (provider === 'vk') {
+      handleVKAuth();
+    } else if (provider === 'telegram') {
+      toast.info('Вход через Telegram временно недоступен');
     }
-    
-    setSelectedProvider(provider);
-    const savedRef = localStorage.getItem('referral_code');
-    if (savedRef) {
-      setManualRefCode(savedRef);
-    }
-    setShowAuthModal(true);
-    setAgreedToTerms(false);
   };
 
   const proceedWithAuth = () => {

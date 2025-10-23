@@ -1450,6 +1450,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                 conn.commit()
                 existing_user = phone_user
     
+        is_new_user = False
+        
         if existing_user:
             user_id = existing_user['id']
             
@@ -1482,6 +1484,7 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                 cur.execute(update_query, tuple(update_values))
                 conn.commit()
         else:
+            is_new_user = True
             generated_ref_code = str(uuid.uuid4())[:8].upper()
             
             cur.execute("""
@@ -1573,7 +1576,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
             'body': json.dumps(convert_decimals({
                 'success': True,
                 'token': token,
-                'user': dict(user)
+                'user': dict(user),
+                'is_new_user': is_new_user
             })),
             'isBase64Encoded': False
         }
@@ -4885,6 +4889,19 @@ def handle_startup_notification(event: Dict[str, Any], headers: Dict[str, str]) 
         
         has_request = cur.fetchone()['count'] > 0
         
+        # Проверяем оплачен ли самобонус
+        cur.execute("""
+            SELECT COUNT(*) as count
+            FROM t_p25272970_courier_button_site.payment_distributions pd
+            LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
+            WHERE ce.courier_id = %s 
+              AND pd.recipient_type = 'courier_self'
+              AND pd.payment_status = 'paid'
+              AND pd.amount > 0
+        """, (user_id,))
+        
+        self_bonus_paid = cur.fetchone()['count'] > 0
+        
         cur.close()
         conn.close()
         
@@ -4893,6 +4910,7 @@ def handle_startup_notification(event: Dict[str, Any], headers: Dict[str, str]) 
             and data['orders_completed'] >= 30 
             and not data['startup_bonus_notified']
             and not has_request
+            and not self_bonus_paid
         )
         
         return {

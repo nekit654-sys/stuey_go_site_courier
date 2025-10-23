@@ -171,11 +171,14 @@ const FeedbackTab: React.FC = () => {
     return null;
   }
 
+  // Определяем позицию кнопки в зависимости от страницы
+  const buttonTopClass = location.pathname === '/' ? 'top-1/2' : 'top-32';
+
   return (
     <>
       {/* Кнопка бонуса */}
       <div
-        className="fixed top-32 right-0 z-40 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 lg:top-32 bottom-auto"
+        className={`fixed ${buttonTopClass} right-0 z-40 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bottom-auto`}
         onClick={handleTabClick}
       >
         <div className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white px-2 py-3 rounded-l-xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] relative overflow-hidden">
