@@ -1,0 +1,36 @@
+{
+  "tests": [
+    {
+      "name": "Get hero content",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Update hero content with auth",
+      "method": "POST",
+      "path": "/",
+      "headers": {
+        "X-Auth-Token": "test-token"
+      },
+      "body": {
+        "title": "Test Hero Title",
+        "subtitle": "Test Hero Subtitle",
+        "imageUrl": "https://example.com/hero.jpg",
+        "buttonText": "Click Me",
+        "buttonLink": "/test",
+        "animationType": "none",
+        "animationConfig": {}
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

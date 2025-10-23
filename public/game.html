@@ -2338,8 +2338,10 @@
     info.style.display = 'none';
     livesElem.style.display = 'none';
     gameOverMenu.style.display = 'none';
+    mainMenu.style.display = 'none';
 
     gtaGameOverScreen.style.display = 'flex';
+    gtaGameOverScreen.style.opacity = '1';
 
     gtaGameOverScreen.style.animation = 'none';
     void gtaGameOverScreen.offsetWidth;
@@ -2347,6 +2349,7 @@
 
     setTimeout(async () => {
       gtaGameOverScreen.style.display = 'none';
+      gtaGameOverScreen.style.opacity = '0';
       finalScoreElem.textContent = Math.floor(score);
       
       const saveResult = await saveGameResult();
@@ -2378,6 +2381,7 @@
       }
       
       gameOverMenu.style.display = 'block';
+      gameOverMenu.style.zIndex = '5000';
     }, 2000);
   }
   

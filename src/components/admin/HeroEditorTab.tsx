@@ -55,7 +55,7 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
   const fetchHeroConfig = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://functions.poehali.dev/HERO_FUNCTION_URL', {
+      const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba', {
         headers: {
           'X-Auth-Token': authToken
         }
@@ -80,7 +80,7 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
     }
 
     try {
-      const response = await fetch('https://functions.poehali.dev/HERO_FUNCTION_URL', {
+      const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
