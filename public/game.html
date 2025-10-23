@@ -1783,6 +1783,7 @@
     if (shieldActive) return;
     lives -= amount;
     if (lives < 0) lives = 0;
+    console.log('💔 loseLife:', amount, '| Осталось жизней:', lives);
     updateLivesDisplay();
     
     // 🆕 Эффект тряски при уроне
@@ -1796,8 +1797,12 @@
       setTimeout(() => livesElem.classList.remove('damaged'), 600);
     }
     
+    console.log('🔍 Проверка: lives =', lives, '| lives <= 0:', lives <= 0);
     if (lives <= 0) {
+      console.log('☠️ Жизни закончились! Вызываем gameOver()');
       gameOver();
+    } else {
+      console.log('✅ Игра продолжается, жизней:', lives);
     }
   }
   
@@ -1908,7 +1913,9 @@
     let heartsStr = '';
     for(let i=0; i<fullHearts; i++) heartsStr += '❤️';
     if (halfHeart) heartsStr += '💔';
-    livesElem.textContent = heartsStr || '💀';
+    const displayText = heartsStr || '💀';
+    livesElem.textContent = displayText;
+    console.log('💖 updateLivesDisplay: жизни =', lives, '| отображение:', displayText);
   }
 
   function showSpeech(text) {
