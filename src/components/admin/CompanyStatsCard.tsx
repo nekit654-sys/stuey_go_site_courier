@@ -31,7 +31,7 @@ export default function CompanyStatsCard({ authToken }: CompanyStatsCardProps) {
   const fetchStats = async () => {
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559?route=company_stats',
+        'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559?action=company_stats',
         {
           headers: {
             'X-Auth-Token': authToken,

@@ -152,12 +152,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if method == 'GET' and action == 'revenue_chart':
             cursor.execute("""
                 SELECT 
-                    DATE(ce.period_date) as date,
+                    DATE(ce.created_at) as date,
                     COALESCE(SUM(ce.total_amount), 0) as revenue,
                     COALESCE(SUM(ce.orders_count), 0) as orders
                 FROM t_p25272970_courier_button_site.courier_earnings ce
-                WHERE ce.period_date >= CURRENT_DATE - INTERVAL '30 days'
-                GROUP BY DATE(ce.period_date)
+                WHERE ce.created_at >= CURRENT_DATE - INTERVAL '30 days'
+                GROUP BY DATE(ce.created_at)
                 ORDER BY date ASC
             """)
             rows = cursor.fetchall()
