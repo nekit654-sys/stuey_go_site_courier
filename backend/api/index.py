@@ -735,8 +735,22 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
             u_referred.id as id,
             u_referrer.id as referrer_id,
             u_referred.id as referred_id,
-            u_referred.referral_earnings as bonus_amount,
-            false as bonus_paid,
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_id = u_referrer.id 
+                   AND pd.recipient_type = 'courier_referrer' 
+                   AND pd.amount > 0), 
+                0
+            ) as bonus_amount,
+            COALESCE(
+                (SELECT BOOL_OR(pd.payment_status = 'paid')
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_id = u_referrer.id 
+                   AND pd.recipient_type = 'courier_referrer'
+                   AND pd.amount > 0),
+                false
+            ) as bonus_paid,
             u_referred.total_orders as referred_total_orders,
             u_referred.created_at,
             u_referrer.full_name as referrer_name,
@@ -769,16 +783,22 @@ def get_admin_referral_stats(headers: Dict[str, str]) -> Dict[str, Any]:
     
     cur.execute("""
         SELECT 
-            u.id,
-            u.full_name,
+            ROW_NUMBER() OVER (ORDER BY COUNT(u_referred.id) DESC) as rank,
+            u.full_name as name,
             u.phone,
-            u.referral_code,
             COUNT(u_referred.id) as total_referrals,
-            COALESCE(SUM(u_referred.referral_earnings), 0) as total_earned
+            COALESCE(
+                (SELECT SUM(pd.amount) 
+                 FROM t_p25272970_courier_button_site.payment_distributions pd
+                 WHERE pd.recipient_id = u.id 
+                   AND pd.recipient_type = 'courier_referrer' 
+                   AND pd.amount > 0), 
+                0
+            ) as total_bonuses
         FROM t_p25272970_courier_button_site.users u
         LEFT JOIN t_p25272970_courier_button_site.users u_referred ON u.id = u_referred.invited_by_user_id
         WHERE u_referred.id IS NOT NULL
-        GROUP BY u.id, u.full_name, u.phone, u.referral_code
+        GROUP BY u.id, u.full_name, u.phone
         ORDER BY total_referrals DESC
         LIMIT 10
     """)
