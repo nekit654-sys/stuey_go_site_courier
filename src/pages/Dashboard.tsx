@@ -378,7 +378,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-black text-green-700 mb-1">🎉 Поздравляем!</h3>
-                          <p className="text-sm font-bold text-gray-600">Вы выполнили 150 заказов</p>
+                          <p className="text-sm font-bold text-gray-600">Вы выполнили 30 заказов</p>
                         </div>
                       </div>
                       
