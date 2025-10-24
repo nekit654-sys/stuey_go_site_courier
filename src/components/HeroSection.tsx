@@ -100,7 +100,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         </div>
       )}
 
-      <div className="absolute top-20 left-0 right-0 z-20 w-screen">
+      <div className="absolute top-20 left-0 right-0 z-20">
         <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
       </div>
 
