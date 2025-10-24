@@ -334,7 +334,7 @@ export default function Dashboard() {
           <div className="flex-1 min-w-0 pb-20 lg:pb-0">
 
             {/* Stats Tab */}
-            {activeTab === 'stats' && stats && (
+            {activeTab === 'stats' && (
               <div className="space-y-3 sm:space-y-4">
                 {/* Startup Bonus Notification */}
                 {user?.id && (
@@ -353,7 +353,16 @@ export default function Dashboard() {
                   />
                 )}
 
-                <StatsCards stats={stats} />
+                {stats ? (
+                  <StatsCards stats={stats} />
+                ) : (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <Icon name="Loader2" className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+                      <p className="text-gray-600 font-bold">Загрузка статистики...</p>
+                    </div>
+                  </div>
+                )}
 
                 <ReferralMotivation 
                   hasReferrals={(stats?.total_referrals || 0) > 0}
