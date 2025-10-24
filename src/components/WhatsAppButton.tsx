@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { useSound } from '@/hooks/useSound';
 
 const WhatsAppButton: React.FC = () => {
+  const location = useLocation();
   const [isPulsing, setIsPulsing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const { playSound } = useSound();
@@ -38,8 +40,13 @@ const WhatsAppButton: React.FC = () => {
     setShowMenu(false);
   };
 
+  // На главной странице - внизу, в личном кабинете - выше из-за мобильного меню
+  const buttonPosition = location.pathname === '/dashboard' 
+    ? 'bottom-24 lg:bottom-6' 
+    : 'bottom-6';
+
   return (
-    <div className="fixed bottom-24 right-6 z-50 lg:bottom-6">
+    <div className={`fixed ${buttonPosition} right-6 z-50`}>
       {/* Выпадающее меню */}
       {showMenu && (
         <div className="absolute bottom-20 right-0 flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
