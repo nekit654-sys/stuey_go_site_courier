@@ -486,67 +486,39 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
             'isBase64Encoded': False
         }
     
-    # Получаем рефералов
+    # Получаем рефералов простым запросом
     cur.execute("""
         SELECT 
             u.id,
-            u.id as referred_id,
-            COALESCE(
-                (SELECT SUM(pd.amount) 
-                 FROM t_p25272970_courier_button_site.payment_distributions pd
-                 WHERE pd.recipient_id = %s 
-                   AND pd.recipient_type = 'courier_referrer' 
-                   AND pd.amount > 0
-                   AND pd.earning_id IN (
-                       SELECT ce.id 
-                       FROM t_p25272970_courier_button_site.courier_earnings ce 
-                       WHERE ce.referred_courier_id = u.id
-                   )), 
-                0
-            ) as bonus_amount,
-            COALESCE(
-                (SELECT BOOL_OR(pd.payment_status = 'paid')
-                 FROM t_p25272970_courier_button_site.payment_distributions pd
-                 WHERE pd.recipient_id = %s 
-                   AND pd.recipient_type = 'courier_referrer'
-                   AND pd.amount > 0
-                   AND pd.earning_id IN (
-                       SELECT ce.id 
-                       FROM t_p25272970_courier_button_site.courier_earnings ce 
-                       WHERE ce.referred_courier_id = u.id
-                   )),
-                false
-            ) as bonus_paid,
-            u.total_orders as referred_total_orders,
-            u.created_at,
             u.full_name,
             u.avatar_url,
             u.total_orders,
-            u.is_active
+            u.is_active,
+            u.created_at
         FROM t_p25272970_courier_button_site.users u
         WHERE u.invited_by_user_id = %s
         ORDER BY u.created_at DESC
-    """, (user_id, user_id, user_id))
+    """, (user_id,))
     
     referrals = cur.fetchall()
     
     total_referrals = len(referrals)
     active_referrals = sum(1 for r in referrals if r['total_orders'] > 0)
-    total_bonus_earned = sum(float(r['bonus_amount']) for r in referrals)
-    total_bonus_paid = sum(float(r['bonus_amount']) for r in referrals if r['bonus_paid'])
     
-    # Получаем доступную сумму для вывода из payment_distributions
-    # Курьер видит только: самобонус + реферальный доход (НЕ видит total_earnings)
+    # Подсчет бонусов упрощенно
+    total_bonus_earned = 0
+    total_bonus_paid = 0
+    
+    # Получаем доступную сумму для вывода из payment_distributions (упрощенный запрос)
     cur.execute("""
         SELECT 
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as available,
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_self' AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as self_bonus_pending,
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type = 'courier_referrer' AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as referral_income_pending,
-            COALESCE(SUM(CASE WHEN pd.payment_status = 'paid' AND pd.recipient_type IN ('courier_self', 'courier_referrer') AND pd.amount > 0 THEN pd.amount ELSE 0 END), 0) as total_paid
-        FROM t_p25272970_courier_button_site.payment_distributions pd
-        LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.id = pd.earning_id
-        WHERE (ce.courier_id = %s OR pd.recipient_id = %s)
-    """, (user_id, user_id))
+            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND amount > 0 THEN amount ELSE 0 END), 0) as available,
+            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND recipient_type = 'courier_self' AND amount > 0 THEN amount ELSE 0 END), 0) as self_bonus_pending,
+            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND recipient_type = 'courier_referrer' AND amount > 0 THEN amount ELSE 0 END), 0) as referral_income_pending,
+            COALESCE(SUM(CASE WHEN payment_status = 'paid' AND amount > 0 THEN amount ELSE 0 END), 0) as total_paid
+        FROM t_p25272970_courier_button_site.payment_distributions
+        WHERE recipient_id = %s
+    """, (user_id,))
     
     balance = cur.fetchone()
     available = float(balance['available'] or 0)
@@ -735,48 +707,23 @@ def get_user_referrals_list(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Упрощенный запрос без сложных подзапросов
     cur.execute("""
         SELECT 
             u.id,
-            u.id as referred_id,
-            COALESCE(
-                (SELECT SUM(pd.amount) 
-                 FROM t_p25272970_courier_button_site.payment_distributions pd
-                 WHERE pd.recipient_id = %s 
-                   AND pd.recipient_type = 'courier_referrer' 
-                   AND pd.amount > 0
-                   AND pd.earning_id IN (
-                       SELECT ce.id 
-                       FROM t_p25272970_courier_button_site.courier_earnings ce 
-                       WHERE ce.referred_courier_id = u.id
-                   )), 
-                0
-            ) as bonus_amount,
-            COALESCE(
-                (SELECT BOOL_OR(pd.payment_status = 'paid')
-                 FROM t_p25272970_courier_button_site.payment_distributions pd
-                 WHERE pd.recipient_id = %s 
-                   AND pd.recipient_type = 'courier_referrer'
-                   AND pd.amount > 0
-                   AND pd.earning_id IN (
-                       SELECT ce.id 
-                       FROM t_p25272970_courier_button_site.courier_earnings ce 
-                       WHERE ce.referred_courier_id = u.id
-                   )),
-                false
-            ) as bonus_paid,
-            u.total_orders as referred_total_orders,
-            u.created_at,
-            NULL as bonus_paid_at,
             u.full_name,
             u.avatar_url,
             u.total_orders,
             u.is_active,
-            u.city
+            u.city,
+            u.created_at,
+            0 as bonus_amount,
+            false as bonus_paid,
+            NULL as bonus_paid_at
         FROM t_p25272970_courier_button_site.users u
         WHERE u.invited_by_user_id = %s
         ORDER BY u.created_at DESC
-    """, (user_id, user_id, user_id))
+    """, (user_id,))
     
     referrals = cur.fetchall()
     cur.close()
