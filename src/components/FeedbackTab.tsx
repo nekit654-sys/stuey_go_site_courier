@@ -172,7 +172,7 @@ const FeedbackTab: React.FC = () => {
   }
 
   // Определяем позицию кнопки в зависимости от страницы
-  const buttonTopClass = location.pathname === '/' ? 'top-1/2' : 'top-32';
+  const buttonTopClass = 'top-32';
 
   return (
     <>
