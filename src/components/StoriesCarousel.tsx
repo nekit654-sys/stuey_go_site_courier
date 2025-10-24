@@ -142,7 +142,11 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="relative w-screen left-1/2 -translate-x-1/2 pt-4 pb-4">
+    <div className="relative pt-4 pb-4" style={{ 
+      width: '100vw',
+      marginLeft: '50%',
+      transform: 'translateX(-50%)'
+    }}>
       {/* Мигающий индикатор "NEW" если есть новые истории */}
       {hasNewStories && (
         <div className="absolute top-2 right-4 sm:right-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
@@ -174,7 +178,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             }
           `}
         </style>
-        <div className="flex gap-3 pb-2 stories-container">
+        <div className="flex gap-3 pb-2 stories-container px-0">
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
