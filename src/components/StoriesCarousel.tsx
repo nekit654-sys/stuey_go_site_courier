@@ -46,7 +46,13 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     if (stories.length === 0 || !scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
-    const scrollSpeed = 0.8;
+    const scrollSpeed = 1.2;
+
+    console.log('🎬 Auto-scroll started', { 
+      storiesCount: stories.length, 
+      isDragging,
+      scrollWidth: container.scrollWidth 
+    });
 
     const scroll = () => {
       if (!isDragging && container) {
@@ -56,6 +62,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         const maxScroll = container.scrollWidth / 3;
         if (container.scrollLeft >= maxScroll) {
           container.scrollLeft = 0;
+          console.log('🔄 Loop reset');
         }
       }
       
@@ -67,6 +74,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        console.log('⏹ Auto-scroll stopped');
       }
     };
   }, [stories, isDragging]);
@@ -134,7 +142,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-full pt-4 pb-4 relative">
+    <div className="relative w-screen left-1/2 -translate-x-1/2 pt-4 pb-4">
       {/* Мигающий индикатор "NEW" если есть новые истории */}
       {hasNewStories && (
         <div className="absolute top-2 right-4 sm:right-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
@@ -143,12 +151,11 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       )}
       <div 
         ref={scrollContainerRef}
-        className="overflow-x-auto cursor-grab active:cursor-grabbing"
+        className="overflow-x-scroll cursor-grab active:cursor-grabbing w-full"
         style={{ 
           scrollbarWidth: 'none', 
           msOverflowStyle: 'none',
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)'
+          WebkitOverflowScrolling: 'touch'
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
