@@ -65,13 +65,13 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
           console.log('📊 Scroll progress:', {
             scrollLeft: container.scrollLeft,
             scrollWidth: container.scrollWidth,
-            maxScroll: container.scrollWidth / 3,
+            maxScroll: container.scrollWidth / 5,
             isDragging
           });
         }
         
-        // Бесконечный скролл: когда доходим до 1/3 контента (первая копия закончилась), возвращаемся назад
-        const maxScroll = container.scrollWidth / 3;
+        // Бесконечный скролл: когда доходим до 1/5 контента (первая копия закончилась), возвращаемся назад
+        const maxScroll = container.scrollWidth / 5;
         if (container.scrollLeft >= maxScroll) {
           container.scrollLeft = 0;
           console.log('🔄 Loop reset');
@@ -151,7 +151,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
     return null;
   }
 
-  const duplicatedStories = [...stories, ...stories, ...stories];
+  const duplicatedStories = [...stories, ...stories, ...stories, ...stories, ...stories];
 
   return (
     <div className="relative pt-4 pb-4" style={{ 
