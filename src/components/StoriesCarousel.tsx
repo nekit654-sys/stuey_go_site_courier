@@ -167,11 +167,12 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       )}
       <div 
         ref={scrollContainerRef}
-        className="overflow-x-scroll cursor-grab active:cursor-grabbing w-full"
+        className="overflow-x-scroll cursor-grab active:cursor-grabbing"
         style={{ 
           scrollbarWidth: 'none', 
           msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          width: '100%'
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -190,7 +191,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             }
           `}
         </style>
-        <div className="flex gap-3 pb-2 stories-container px-0">
+        <div className="flex gap-3 pb-2 stories-container px-0" style={{ minWidth: 'max-content' }}>
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
@@ -200,7 +201,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
                 }
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              className="flex-shrink-0 w-36 h-24 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group select-none"
+              className="flex-shrink-0 w-40 h-28 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group select-none"
             >
               <div
                 className="absolute inset-0 bg-cover bg-center pointer-events-none"
