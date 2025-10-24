@@ -98,15 +98,20 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         localStorage.setItem('story_user_id', userId);
       }
 
+      console.log('📡 Fetching stories for user:', userId);
+
       const response = await fetch(
         `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`
       );
       const data = await response.json();
 
+      console.log('📦 Stories received:', { total: data.stories?.length, data });
+
       const activeStories = (data.stories || []).filter((s: Story) => s.isActive);
+      console.log('✅ Active stories:', activeStories.length);
       setStories(activeStories);
     } catch (error) {
-      console.error('Error fetching stories:', error);
+      console.error('❌ Error fetching stories:', error);
     } finally {
       setLoading(false);
     }
