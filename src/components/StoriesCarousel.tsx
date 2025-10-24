@@ -171,8 +171,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         style={{ 
           scrollbarWidth: 'none', 
           msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-          width: '100%'
+          WebkitOverflowScrolling: 'touch'
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
