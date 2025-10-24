@@ -164,10 +164,9 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       marginLeft: '50%',
       transform: 'translateX(-50%)'
     }}>
-      {/* Мигающий индикатор "NEW" если есть новые истории */}
       {hasNewStories && (
-        <div className="absolute top-2 right-4 sm:right-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
-          <span className="text-xs sm:text-sm">🔥 НОВОЕ</span>
+        <div className="absolute top-2 left-4 sm:left-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
+          <span className="text-xs sm:text-sm">ИСТОРИИ</span>
         </div>
       )}
       <div 
