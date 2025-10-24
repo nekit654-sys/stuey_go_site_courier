@@ -39,7 +39,7 @@ const WhatsAppButton: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 lg:bottom-6">
+    <div className="fixed top-32 right-6 z-50">
       {/* Выпадающее меню */}
       {showMenu && (
         <div className="absolute bottom-20 right-0 flex flex-col gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
