@@ -369,7 +369,7 @@ export default function Dashboard() {
                   onCopyLink={copyReferralLink}
                 />
 
-                {stats?.self_bonus_completed && stats?.available_for_withdrawal > 0 && (
+                {stats?.self_bonus_completed && stats?.available_for_withdrawal > 0 && !stats?.self_bonus_paid && (
                   <Card className="border-3 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-[0_5px_0_0_rgba(0,0,0,1)] rounded-2xl overflow-hidden">
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-4">
