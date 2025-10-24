@@ -100,10 +100,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         </div>
       )}
 
-      <div className="absolute top-20 left-0 right-0 z-20">
-        <div className="w-full">
-          <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
-        </div>
+      <div className="absolute top-20 left-0 right-0 z-20 w-screen">
+        <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
       </div>
 
       <div className="relative max-w-6xl mx-auto text-center px-6 pt-32">

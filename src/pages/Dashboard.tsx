@@ -306,7 +306,7 @@ export default function Dashboard() {
       )}
 
       {/* Stories Carousel - Full Width */}
-      <div className="w-full overflow-hidden">
+      <div className="w-full">
         <StoriesCarousel onStoryClick={handleStoryClick} />
       </div>
 

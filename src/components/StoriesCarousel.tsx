@@ -43,14 +43,14 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   }, []);
 
   useEffect(() => {
-    if (stories.length === 0 || !scrollContainerRef.current || isDragging) return;
+    if (stories.length === 0 || !scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
     let scrollPosition = container.scrollLeft;
-    const scrollSpeed = 0.3;
+    const scrollSpeed = 0.5;
 
     const scroll = () => {
-      if (!isPaused && !isDragging && container) {
+      if (!isDragging && container) {
         scrollPosition += scrollSpeed;
         
         if (scrollPosition >= container.scrollWidth / 2) {
@@ -70,7 +70,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [stories, isPaused, isDragging]);
+  }, [stories, isDragging]);
 
   const fetchStories = async () => {
     try {
@@ -135,7 +135,21 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-full pt-4 pb-4">
+    <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-12 xl:-mx-16 2xl:-mx-20 pt-6 pb-6 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 relative overflow-hidden">
+      {/* Фоновое выделение с анимацией */}
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-yellow-400/30 to-yellow-300/20 animate-pulse" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+      
+      {/* Мигающий индикатор "NEW" если есть новые истории */}
+      {hasNewStories && (
+        <div className="absolute top-2 right-4 sm:right-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
+          <span className="text-xs sm:text-sm">🔥 НОВОЕ</span>
+        </div>
+      )}
+      
+      {/* Контейнер с историями */}
+      <div className="relative z-10">
       <div 
         ref={scrollContainerRef}
         className="w-full overflow-x-auto cursor-grab active:cursor-grabbing"
@@ -143,14 +157,10 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleDragEnd}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => {
-          setIsPaused(false);
-          handleDragEnd();
-        }}
       >
         <style>
           {`
@@ -169,7 +179,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
                 }
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              className="flex-shrink-0 w-36 h-24 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group select-none"
+              className="flex-shrink-0 w-40 h-28 sm:w-44 sm:h-32 cursor-pointer border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150 overflow-hidden relative group select-none"
             >
               <div
                 className="absolute inset-0 bg-cover bg-center pointer-events-none"
@@ -190,6 +200,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             </Card>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
