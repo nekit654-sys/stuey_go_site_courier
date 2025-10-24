@@ -153,7 +153,9 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
+        onMouseLeave={(e) => {
+          if (isDragging) handleDragEnd();
+        }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleDragEnd}
@@ -165,7 +167,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             }
           `}
         </style>
-        <div className="flex gap-3 pb-2 stories-container pl-4 pr-4">
+        <div className="flex gap-3 pb-2 stories-container">
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
