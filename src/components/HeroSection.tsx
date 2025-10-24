@@ -23,11 +23,9 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba', {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
+        const timestamp = Date.now();
+        const response = await fetch(`https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba?_t=${timestamp}`, {
+          cache: 'no-store'
         });
         const data = await response.json();
         if (data.success && data.hero) {

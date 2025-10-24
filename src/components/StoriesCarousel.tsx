@@ -47,16 +47,28 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
 
     const container = scrollContainerRef.current;
     const scrollSpeed = 1.2;
+    let frameCount = 0;
 
     console.log('🎬 Auto-scroll started', { 
       storiesCount: stories.length, 
       isDragging,
-      scrollWidth: container.scrollWidth 
+      scrollWidth: container.scrollWidth,
+      clientWidth: container.clientWidth
     });
 
     const scroll = () => {
       if (!isDragging && container) {
         container.scrollLeft += scrollSpeed;
+        
+        frameCount++;
+        if (frameCount % 100 === 0) {
+          console.log('📊 Scroll progress:', {
+            scrollLeft: container.scrollLeft,
+            scrollWidth: container.scrollWidth,
+            maxScroll: container.scrollWidth / 3,
+            isDragging
+          });
+        }
         
         // Бесконечный скролл: когда доходим до 1/3 контента (первая копия закончилась), возвращаемся назад
         const maxScroll = container.scrollWidth / 3;
