@@ -23,16 +23,27 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba');
+        const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         const data = await response.json();
         if (data.success && data.hero) {
           setHeroData(data.hero);
+          console.log('Hero data loaded:', data.hero);
         }
       } catch (error) {
         console.error('Ошибка загрузки Hero:', error);
       }
     };
+    
     fetchHeroData();
+    
+    const interval = setInterval(fetchHeroData, 10000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const referralLink =
@@ -63,26 +74,33 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
       <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
 
-      {/* Падающие элементы */}
+      {/* Падающие элементы по краям */}
       {heroData?.animation_type === 'falling' && heroData?.animation_config?.fallingImage && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {Array.from({ length: heroData.animation_config.fallingCount || 20 }).map((_, i) => (
-            <img
-              key={i}
-              src={heroData.animation_config.fallingImage}
-              alt=""
-              className="absolute w-8 h-8 sm:w-12 sm:h-12 opacity-60 animate-fall"
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${10 / ((heroData.animation_config.fallingSpeed || 100) / 100)}s`,
-              }}
-            />
-          ))}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          {Array.from({ length: heroData.animation_config.fallingCount || 20 }).map((_, i) => {
+            const side = i % 2 === 0 ? 'left' : 'right';
+            const position = side === 'left' 
+              ? Math.random() * 15 
+              : 85 + Math.random() * 15;
+            
+            return (
+              <img
+                key={i}
+                src={heroData.animation_config.fallingImage}
+                alt=""
+                className="absolute w-8 h-8 sm:w-12 sm:h-12 opacity-60 animate-fall"
+                style={{
+                  left: `${position}%`,
+                  animationDelay: `${Math.random() * 5}s`,
+                  animationDuration: `${10 / ((heroData.animation_config.fallingSpeed || 100) / 100)}s`,
+                }}
+              />
+            );
+          })}
         </div>
       )}
 
-      <div className="absolute top-20 left-0 right-0 z-10">
+      <div className="absolute top-20 left-0 right-0 z-20">
         <div className="w-full">
           <StoriesCarousel onStoryClick={(id) => onStoryClick?.(id)} />
         </div>

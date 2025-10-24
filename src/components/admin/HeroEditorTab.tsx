@@ -62,8 +62,23 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
       const data = await response.json();
       
       if (data.success && data.hero) {
-        setHeroConfig(data.hero);
-        setFormData(data.hero);
+        const hero = data.hero;
+        const mappedHero: HeroConfig = {
+          id: hero.id,
+          title: hero.title || 'Свобода выбора — ваш ключ к успеху!',
+          subtitle: hero.subtitle || 'От 1 500₽ до 6 200₽ в день — ваш график, ваш транспорт, ваши правила!',
+          imageUrl: hero.image_url || '',
+          buttonText: hero.button_text || 'Начать зарабатывать',
+          buttonLink: hero.button_link || '/auth',
+          animationType: hero.animation_type || 'none',
+          animationConfig: typeof hero.animation_config === 'string' 
+            ? JSON.parse(hero.animation_config) 
+            : (hero.animation_config || { fallingImage: '', fallingCount: 20, fallingSpeed: 100 })
+        };
+        
+        setHeroConfig(mappedHero);
+        setFormData(mappedHero);
+        console.log('Hero config loaded:', mappedHero);
       }
     } catch (error) {
       console.error('Ошибка загрузки Hero:', error);
@@ -73,7 +88,8 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
   };
 
   const handleSave = async () => {
-
+    console.log('Saving hero data:', formData);
+    
     try {
       const response = await fetch('https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba', {
         method: 'POST',
@@ -84,15 +100,19 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
+      const result = await response.json();
+      console.log('Save response:', result);
+
+      if (response.ok && result.success) {
         toast.success('Hero-блок обновлён');
-        fetchHeroConfig();
+        await fetchHeroConfig();
       } else {
-        toast.error('Ошибка сохранения');
+        toast.error('Ошибка сохранения: ' + (result.error || 'неизвестная ошибка'));
+        console.error('Save failed:', result);
       }
     } catch (error) {
       toast.error('Ошибка сохранения');
-      console.error(error);
+      console.error('Save error:', error);
     }
   };
 
@@ -110,19 +130,22 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
 
       if (data.url) {
         if (field === 'imageUrl') {
-          setFormData({ ...formData, imageUrl: data.url });
+          setFormData(prev => ({ ...prev, imageUrl: data.url }));
+          console.log('Image URL set:', data.url);
         } else if (field === 'fallingImage') {
-          setFormData({
-            ...formData,
+          setFormData(prev => ({
+            ...prev,
             animationConfig: {
-              ...formData.animationConfig,
+              ...prev.animationConfig,
               fallingImage: data.url,
             },
-          });
+          }));
+          console.log('Falling image set:', data.url);
         }
         toast.success('Изображение загружено');
       } else {
         toast.error('Ошибка загрузки изображения');
+        console.error('Upload failed:', data);
       }
     } catch (error) {
       toast.error('Ошибка загрузки изображения');

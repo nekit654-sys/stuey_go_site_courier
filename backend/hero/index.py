@@ -74,6 +74,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             body_data = json.loads(event.get('body', '{}'))
+            print(f'Received body data: {json.dumps(body_data, indent=2)}')
             
             title = body_data.get('title', '')
             subtitle = body_data.get('subtitle', '')
@@ -82,6 +83,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             button_link = body_data.get('buttonLink', '')
             animation_type = body_data.get('animationType', 'none')
             animation_config = body_data.get('animationConfig', {})
+            
+            print(f'Parsed values - image_url: {image_url}, animation_type: {animation_type}, animation_config: {animation_config}')
             
             if not title or not subtitle:
                 return {
