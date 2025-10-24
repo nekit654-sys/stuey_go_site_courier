@@ -43,21 +43,20 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   }, []);
 
   useEffect(() => {
-    if (stories.length === 0 || !scrollContainerRef.current || isDragging) return;
+    if (stories.length === 0 || !scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
-    let scrollPosition = container.scrollLeft;
-    const scrollSpeed = 0.3;
+    const scrollSpeed = 0.8;
 
     const scroll = () => {
-      if (!isPaused && !isDragging && container) {
-        scrollPosition += scrollSpeed;
+      if (!isDragging && container) {
+        container.scrollLeft += scrollSpeed;
         
-        if (scrollPosition >= container.scrollWidth / 2) {
-          scrollPosition = 0;
+        // Бесконечный скролл: когда доходим до 1/3 контента (первая копия закончилась), возвращаемся назад
+        const maxScroll = container.scrollWidth / 3;
+        if (container.scrollLeft >= maxScroll) {
+          container.scrollLeft = 0;
         }
-        
-        container.scrollLeft = scrollPosition;
       }
       
       animationFrameRef.current = requestAnimationFrame(scroll);
@@ -70,7 +69,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [stories, isPaused, isDragging]);
+  }, [stories, isDragging]);
 
   const fetchStories = async () => {
     try {
@@ -135,22 +134,29 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
   const duplicatedStories = [...stories, ...stories, ...stories];
 
   return (
-    <div className="w-full pt-4 pb-4">
+    <div className="w-full pt-4 pb-4 relative">
+      {/* Мигающий индикатор "NEW" если есть новые истории */}
+      {hasNewStories && (
+        <div className="absolute top-2 right-4 sm:right-8 z-30 flex items-center gap-2 bg-red-500 text-white font-extrabold px-3 py-1 rounded-full border-2 border-black shadow-lg animate-bounce">
+          <span className="text-xs sm:text-sm">🔥 НОВОЕ</span>
+        </div>
+      )}
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto cursor-grab active:cursor-grabbing"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="overflow-x-auto cursor-grab active:cursor-grabbing"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)'
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleDragEnd}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => {
-          setIsPaused(false);
-          handleDragEnd();
-        }}
       >
         <style>
           {`
@@ -159,7 +165,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
             }
           `}
         </style>
-        <div className="flex gap-3 pb-2 stories-container">
+        <div className="flex gap-3 pb-2 stories-container pl-4 pr-4">
           {duplicatedStories.map((story, index) => (
             <Card
               key={`${story.id}-${index}`}
