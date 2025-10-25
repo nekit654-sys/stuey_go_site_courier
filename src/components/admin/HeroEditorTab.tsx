@@ -116,42 +116,7 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
     }
   };
 
-  const handleImageUpload = async (file: File, field: 'imageUrl' | 'fallingImage') => {
-    const formDataUpload = new FormData();
-    formDataUpload.append('image', file);
 
-    try {
-      const response = await fetch('https://functions.poehali.dev/4b0df5ab-4eb6-49c6-a55b-2c4f8cdf4e5f', {
-        method: 'POST',
-        body: formDataUpload,
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        if (field === 'imageUrl') {
-          setFormData(prev => ({ ...prev, imageUrl: data.url }));
-          console.log('Image URL set:', data.url);
-        } else if (field === 'fallingImage') {
-          setFormData(prev => ({
-            ...prev,
-            animationConfig: {
-              ...prev.animationConfig,
-              fallingImage: data.url,
-            },
-          }));
-          console.log('Falling image set:', data.url);
-        }
-        toast.success('Изображение загружено');
-      } else {
-        toast.error('Ошибка загрузки изображения');
-        console.error('Upload failed:', data);
-      }
-    } catch (error) {
-      toast.error('Ошибка загрузки изображения');
-      console.error(error);
-    }
-  };
 
   if (loading) {
     return (
@@ -173,9 +138,8 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
           <div>
             <label className="text-sm font-medium mb-2 block">Фоновое изображение</label>
             <ImageUploader
-              currentImageUrl={formData.imageUrl}
-              onImageSelect={(file) => handleImageUpload(file, 'imageUrl')}
-              onImageUrlChange={(url) => setFormData({ ...formData, imageUrl: url })}
+              value={formData.imageUrl}
+              onChange={(url) => setFormData({ ...formData, imageUrl: url })}
             />
           </div>
 
@@ -200,9 +164,8 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
               <div>
                 <label className="text-sm font-medium mb-2 block">Изображение для падения</label>
                 <ImageUploader
-                  currentImageUrl={formData.animationConfig?.fallingImage}
-                  onImageSelect={(file) => handleImageUpload(file, 'fallingImage')}
-                  onImageUrlChange={(url) =>
+                  value={formData.animationConfig?.fallingImage || ''}
+                  onChange={(url) =>
                     setFormData({
                       ...formData,
                       animationConfig: { ...formData.animationConfig, fallingImage: url },
