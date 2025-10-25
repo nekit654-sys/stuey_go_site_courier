@@ -39,6 +39,9 @@ const Index = () => {
   const [initialStoryId, setInitialStoryId] = useState<number | undefined>();
   const [showPayoutModal, setShowPayoutModal] = useState(false);
 
+  // Глобальная функция открытия модалки для WelcomeBanner
+  (window as any).openPayoutModal = () => setShowPayoutModal(true);
+
   useEffect(() => {
     document.title =
       "Stuey.Go — свобода выбора, стабильность заработка. Присоединяйся! 🚀";
