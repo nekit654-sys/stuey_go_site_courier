@@ -18,7 +18,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   const { isAuthenticated } = useAuth();
   
   const [heroData, setHeroData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const defaultBgImage = "https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg";
 
   useEffect(() => {
@@ -31,12 +31,20 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         const data = await response.json();
         if (data.success && data.hero) {
           setHeroData(data.hero);
+          const newBgImage = data.hero.image_url || defaultBgImage;
+          
+          // Предзагрузка изображения перед показом
+          if (newBgImage !== backgroundImage) {
+            const img = new Image();
+            img.onload = () => setBackgroundImage(newBgImage);
+            img.src = newBgImage;
+          }
+          
           console.log('Hero data loaded:', data.hero);
         }
       } catch (error) {
         console.error('Ошибка загрузки Hero:', error);
-      } finally {
-        setIsLoading(false);
+        setBackgroundImage(defaultBgImage);
       }
     };
     
@@ -64,7 +72,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage: `url(${heroData?.image_url || defaultBgImage})`,
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
+        backgroundColor: backgroundImage ? 'transparent' : '#f5f5f5',
       }}
     >
       {/* Градиентный оверлей с анимацией */}
