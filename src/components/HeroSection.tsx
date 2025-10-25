@@ -64,8 +64,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage: isLoading ? 'none' : `url(${heroData?.image_url || defaultBgImage})`,
-        backgroundColor: isLoading ? '#1a1a1a' : 'transparent',
+        backgroundImage: `url(${heroData?.image_url || defaultBgImage})`,
       }}
     >
       {/* Градиентный оверлей с анимацией */}
@@ -90,7 +89,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
                 key={i}
                 src={heroData.animation_config.fallingImage}
                 alt=""
-                className="absolute w-8 h-8 sm:w-12 sm:h-12 opacity-60 animate-fall"
+                className="absolute max-w-[50px] max-h-[50px] sm:max-w-[70px] sm:max-h-[70px] w-auto h-auto opacity-60 animate-fall object-contain"
                 style={{
                   left: `${position}%`,
                   animationDelay: `${Math.random() * 5}s`,
