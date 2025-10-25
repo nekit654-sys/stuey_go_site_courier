@@ -14,10 +14,22 @@ interface FormData {
   screenshot: File | null;
 }
 
+export const openFeedbackModal = (() => {
+  let opener: (() => void) | null = null;
+  return {
+    register: (fn: () => void) => { opener = fn; },
+    open: () => opener?.(),
+  };
+})();
+
 const FeedbackTab: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    openFeedbackModal.register(() => setIsModalOpen(true));
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<FormData>({

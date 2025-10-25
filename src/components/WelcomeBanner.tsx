@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { openFeedbackModal } from '@/components/FeedbackTab';
 
 interface WelcomeBannerProps {
   onClose?: () => void;
@@ -250,7 +251,13 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
           </div>
           
           {/* Мини-баннер регистрации */}
-          <div className="text-black px-2 py-2 sm:px-4 sm:py-3 text-center border-t-3 border-black bg-yellow-400">
+          <div 
+            className="text-black px-2 py-2 sm:px-4 sm:py-3 text-center border-t-3 border-black bg-yellow-400 cursor-pointer hover:bg-yellow-500 transition-colors"
+            onClick={() => {
+              handleClose();
+              openFeedbackModal.open();
+            }}
+          >
             <div className="font-extrabold text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2">
               <Icon name="Gift" size={18} className="text-black flex-shrink-0 sm:w-5 sm:h-5" />
               <span>Получи 3000₽ прямо сейчас!</span>
