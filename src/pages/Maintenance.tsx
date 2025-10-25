@@ -31,8 +31,9 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   }, []);
 
   useEffect(() => {
-    const audio = new Audio('http://air.radiorecord.ru:8102/rus_320');
+    const audio = new Audio('https://radiorecord.hostingradio.ru/rus96.aacp');
     audio.preload = 'none';
+    audio.crossOrigin = 'anonymous';
     setAudioElement(audio);
     
     return () => {
