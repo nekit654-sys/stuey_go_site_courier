@@ -73,7 +73,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
-        backgroundColor: backgroundImage ? 'transparent' : '#f5f5f5',
+        backgroundColor: backgroundImage ? 'transparent' : '#ffffff',
       }}
     >
       {/* Градиентный оверлей с анимацией */}
