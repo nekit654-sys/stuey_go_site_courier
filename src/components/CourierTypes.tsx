@@ -7,7 +7,11 @@ import PromoMarquee from "@/components/PromoMarquee";
 import { useState, useEffect } from "react";
 import LoadingSection from "@/components/LoadingSection";
 
-const CourierTypes = () => {
+interface CourierTypesProps {
+  onOpenPayoutModal?: () => void;
+}
+
+const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const referralLink =
     "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
@@ -69,7 +73,7 @@ const CourierTypes = () => {
   return (
     <section className="bg-gradient-to-b from-yellow-50 to-white">
       <div className="mb-12">
-        <PromoMarquee />
+        <PromoMarquee onOpenPayoutModal={onOpenPayoutModal} />
       </div>
       <div className="py-16 px-4">
         <div className="max-w-6xl mx-auto">

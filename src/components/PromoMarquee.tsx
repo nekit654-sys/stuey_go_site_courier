@@ -1,6 +1,10 @@
 import Icon from '@/components/ui/icon';
 
-const PromoMarquee = () => {
+interface PromoMarqueeProps {
+  onOpenPayoutModal?: () => void;
+}
+
+const PromoMarquee = ({ onOpenPayoutModal }: PromoMarqueeProps) => {
 
   const messages = (
     <>
@@ -26,7 +30,8 @@ const PromoMarquee = () => {
   return (
     <>
       <div 
-        className="w-full bg-yellow-400 border-y-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)]"
+        onClick={onOpenPayoutModal}
+        className="w-full bg-yellow-400 border-y-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] cursor-pointer hover:bg-yellow-500 transition-colors"
       >
         <div className="relative overflow-hidden py-5">
           <div className="flex items-center">

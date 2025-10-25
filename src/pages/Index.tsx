@@ -7,6 +7,7 @@ import Benefits from "@/components/Benefits";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import StoriesViewer from "@/components/StoriesViewer";
+import StartupPayoutModal from "@/components/StartupPayoutModal";
 
 interface AnimationConfig {
   fallingImage?: string;
@@ -36,6 +37,7 @@ const Index = () => {
   const [stories, setStories] = useState<Story[]>([]);
   const [showStories, setShowStories] = useState(false);
   const [initialStoryId, setInitialStoryId] = useState<number | undefined>();
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
 
   useEffect(() => {
     document.title =
@@ -98,10 +100,17 @@ const Index = () => {
         <Navigation />
         <HeroSection onStoryClick={handleStoryClick} />
       </div>
-      <CourierTypes />
+      <CourierTypes onOpenPayoutModal={() => setShowPayoutModal(true)} />
       <Benefits />
       <FAQ />
       <Footer />
+      
+      {showPayoutModal && (
+        <StartupPayoutModal
+          isOpen={showPayoutModal}
+          onClose={() => setShowPayoutModal(false)}
+        />
+      )}
     </div>
   );
 };
