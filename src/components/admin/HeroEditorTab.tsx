@@ -158,37 +158,61 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
             {formData.imageUrl && (
               <div className="mt-4 space-y-4">
                 <div className="border rounded-lg p-4 bg-muted/30">
-                  <h4 className="font-medium mb-2 flex items-center gap-2">
-                    <Icon name="Info" size={16} />
-                    Предпросмотр на разных устройствах
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <Icon name="Monitor" size={16} />
+                    Как будет выглядеть на устройствах
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">📱 Телефон (375x667)</p>
-                      <div className="border rounded overflow-hidden bg-background">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Icon name="Smartphone" size={12} />
+                        Телефон (вертикально)
+                      </p>
+                      <div className="border-2 rounded-lg overflow-hidden bg-black/5 shadow-sm">
                         <div 
-                          className="w-full h-32 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                          className="bg-cover bg-center"
+                          style={{ 
+                            backgroundImage: `url(${formData.imageUrl})`,
+                            aspectRatio: '9/16',
+                            width: '100%'
+                          }}
                         />
                       </div>
+                      <p className="text-[10px] text-muted-foreground">375×667 (iPhone SE)</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">💻 Ноутбук (1366x768)</p>
-                      <div className="border rounded overflow-hidden bg-background">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Icon name="Laptop" size={12} />
+                        Ноутбук
+                      </p>
+                      <div className="border-2 rounded-lg overflow-hidden bg-black/5 shadow-sm">
                         <div 
-                          className="w-full h-32 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                          className="bg-cover bg-center"
+                          style={{ 
+                            backgroundImage: `url(${formData.imageUrl})`,
+                            aspectRatio: '16/9',
+                            width: '100%'
+                          }}
                         />
                       </div>
+                      <p className="text-[10px] text-muted-foreground">1366×768 (MacBook Air)</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">🖥️ Монитор (1920x1080)</p>
-                      <div className="border rounded overflow-hidden bg-background">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Icon name="Monitor" size={12} />
+                        Широкий монитор
+                      </p>
+                      <div className="border-2 rounded-lg overflow-hidden bg-black/5 shadow-sm">
                         <div 
-                          className="w-full h-32 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                          className="bg-cover bg-center"
+                          style={{ 
+                            backgroundImage: `url(${formData.imageUrl})`,
+                            aspectRatio: '21/9',
+                            width: '100%'
+                          }}
                         />
                       </div>
+                      <p className="text-[10px] text-muted-foreground">2560×1080 (UltraWide)</p>
                     </div>
                   </div>
                 </div>
