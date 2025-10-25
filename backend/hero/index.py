@@ -93,27 +93,49 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'success': False, 'error': 'Title and subtitle are required'})
                 }
             
+            def escape_sql_string(s):
+                if s is None:
+                    return 'NULL'
+                return "'" + str(s).replace("'", "''").replace("\\", "\\\\") + "'"
+            
             with conn.cursor() as cur:
                 cur.execute('SELECT id FROM t_p25272970_courier_button_site.hero_content ORDER BY updated_at DESC LIMIT 1')
                 existing = cur.fetchone()
                 
+                title_escaped = escape_sql_string(title)
+                subtitle_escaped = escape_sql_string(subtitle)
+                image_url_escaped = escape_sql_string(image_url)
+                button_text_escaped = escape_sql_string(button_text)
+                button_link_escaped = escape_sql_string(button_link)
+                animation_type_escaped = escape_sql_string(animation_type)
+                animation_config_escaped = escape_sql_string(json.dumps(animation_config))
+                
                 if existing:
-                    cur.execute('''
+                    existing_id = existing[0]
+                    query = f'''
                         UPDATE t_p25272970_courier_button_site.hero_content 
-                        SET title = %s, subtitle = %s, image_url = %s, 
-                            button_text = %s, button_link = %s, 
-                            animation_type = %s, animation_config = %s,
+                        SET title = {title_escaped}, 
+                            subtitle = {subtitle_escaped}, 
+                            image_url = {image_url_escaped}, 
+                            button_text = {button_text_escaped}, 
+                            button_link = {button_link_escaped}, 
+                            animation_type = {animation_type_escaped}, 
+                            animation_config = {animation_config_escaped},
                             updated_at = CURRENT_TIMESTAMP
-                        WHERE id = %s
-                    ''', (title, subtitle, image_url, button_text, button_link, 
-                          animation_type, json.dumps(animation_config), existing[0]))
+                        WHERE id = {existing_id}
+                    '''
+                    print(f'Executing UPDATE query: {query}')
+                    cur.execute(query)
                 else:
-                    cur.execute('''
+                    query = f'''
                         INSERT INTO t_p25272970_courier_button_site.hero_content 
                         (title, subtitle, image_url, button_text, button_link, animation_type, animation_config)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ''', (title, subtitle, image_url, button_text, button_link, 
-                          animation_type, json.dumps(animation_config)))
+                        VALUES ({title_escaped}, {subtitle_escaped}, {image_url_escaped}, 
+                                {button_text_escaped}, {button_link_escaped}, 
+                                {animation_type_escaped}, {animation_config_escaped})
+                    '''
+                    print(f'Executing INSERT query: {query}')
+                    cur.execute(query)
             
             return {
                 'statusCode': 200,
