@@ -254,8 +254,8 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
             className="text-black px-2 py-2 sm:px-4 sm:py-3 text-center border-t-3 border-black bg-yellow-400 cursor-pointer hover:bg-yellow-500 transition-colors"
             onClick={() => {
               handleClose();
-              if ((window as any).openPayoutModal) {
-                (window as any).openPayoutModal();
+              if ((window as any).openFeedbackTabModal) {
+                (window as any).openFeedbackTabModal();
               }
             }}
           >

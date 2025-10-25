@@ -18,6 +18,10 @@ const FeedbackTab: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    (window as any).openFeedbackTabModal = () => setIsModalOpen(true);
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<FormData>({
