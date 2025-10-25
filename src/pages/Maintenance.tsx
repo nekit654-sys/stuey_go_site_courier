@@ -19,6 +19,8 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showSupportMenu, setShowSupportMenu] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -27,6 +29,32 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  useEffect(() => {
+    const audio = new Audio('http://air.radiorecord.ru:8102/rus_320');
+    audio.preload = 'none';
+    setAudioElement(audio);
+    
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  const toggleRadio = () => {
+    if (!audioElement) return;
+    
+    if (isPlaying) {
+      audioElement.pause();
+      setIsPlaying(false);
+    } else {
+      audioElement.play().catch(err => {
+        console.error('Radio play error:', err);
+        toast.error('Не удалось запустить радио');
+      });
+      setIsPlaying(true);
+    }
+  };
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -53,19 +81,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
     return () => clearInterval(timer);
   }, [onUnlock]);
 
-  useEffect(() => {
-    const radioScript = document.createElement('script');
-    radioScript.defer = true;
-    radioScript.src = 'https://radiopotok.ru/f/script6/01cf0b0a27cfae01e6fb9c10b5e80b9fe92f67b3c22ee3a9e8831cfa3e3b388f.js';
-    radioScript.charset = 'UTF-8';
-    document.body.appendChild(radioScript);
 
-    return () => {
-      if (document.body.contains(radioScript)) {
-        document.body.removeChild(radioScript);
-      }
-    };
-  }, []);
 
   const checkPassword = async () => {
     if (!username.trim() || !password.trim()) {
@@ -142,14 +158,6 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
           background-size: 200% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-        }
-        
-        /* Radio player styles */
-        .RP-SCRIPT {
-          background: transparent !important;
-        }
-        .RP-SCRIPT * {
-          max-width: 100%;
         }
       `}</style>
 
@@ -244,13 +252,13 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
             Сыграть в игру
           </Button>
 
-          <div className="text-center w-full">
-            <div className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full">
-              <div className="RP-SCRIPT" style={{width: '640px', maxWidth: '100%'}} data-height="1">
-                <a className="RP-LINK" href="https://radiopotok.ru/">RadioPotok.ru</a>
-              </div>
-            </div>
-          </div>
+          <Button
+            onClick={toggleRadio}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-6 sm:px-8 py-3 md:py-4 text-base md:text-lg rounded-xl transition-all duration-300 border-2 border-purple-400 shadow-lg w-full max-w-xs"
+          >
+            <Icon name={isPlaying ? "Pause" : "Play"} size={20} className="mr-2 inline" />
+            {isPlaying ? 'Остановить Radio Record' : 'Включить Radio Record Russian Mix'}
+          </Button>
         </div>
       </div>
 
