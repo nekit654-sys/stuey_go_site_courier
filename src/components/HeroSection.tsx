@@ -18,6 +18,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   const { isAuthenticated } = useAuth();
   
   const [heroData, setHeroData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const defaultBgImage = "https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg";
 
   useEffect(() => {
@@ -34,6 +35,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         }
       } catch (error) {
         console.error('Ошибка загрузки Hero:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -61,7 +64,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage: `url(${heroData?.image_url || defaultBgImage})`,
+        backgroundImage: isLoading ? 'none' : `url(${heroData?.image_url || defaultBgImage})`,
+        backgroundColor: isLoading ? '#1a1a1a' : 'transparent',
       }}
     >
       {/* Градиентный оверлей с анимацией */}

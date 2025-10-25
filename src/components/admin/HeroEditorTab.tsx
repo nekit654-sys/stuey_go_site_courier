@@ -137,10 +137,23 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
         <div className="space-y-6">
           <div>
             <label className="text-sm font-medium mb-2 block">Фоновое изображение</label>
-            <ImageUploader
-              value={formData.imageUrl}
-              onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-            />
+            <div className="space-y-2">
+              <ImageUploader
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+              />
+              {formData.imageUrl && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                  className="w-full"
+                >
+                  <Icon name="Trash2" className="mr-2" size={16} />
+                  Удалить фоновое изображение
+                </Button>
+              )}
+            </div>
             
             {formData.imageUrl && (
               <div className="mt-4 space-y-4">
@@ -216,15 +229,31 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
             <>
               <div>
                 <label className="text-sm font-medium mb-2 block">Изображение для падения</label>
-                <ImageUploader
-                  value={formData.animationConfig?.fallingImage || ''}
-                  onChange={(url) =>
-                    setFormData({
-                      ...formData,
-                      animationConfig: { ...formData.animationConfig, fallingImage: url },
-                    })
-                  }
-                />
+                <div className="space-y-2">
+                  <ImageUploader
+                    value={formData.animationConfig?.fallingImage || ''}
+                    onChange={(url) =>
+                      setFormData({
+                        ...formData,
+                        animationConfig: { ...formData.animationConfig, fallingImage: url },
+                      })
+                    }
+                  />
+                  {formData.animationConfig?.fallingImage && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => setFormData({
+                        ...formData,
+                        animationConfig: { ...formData.animationConfig, fallingImage: '' },
+                      })}
+                      className="w-full"
+                    >
+                      <Icon name="Trash2" className="mr-2" size={16} />
+                      Удалить эффект падения
+                    </Button>
+                  )}
+                </div>
                 {formData.animationConfig?.fallingImage && (
                   <div className="mt-3 border border-amber-200 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3">
                     <div className="flex items-start gap-2">
