@@ -56,7 +56,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   useEffect(() => {
     const radioScript = document.createElement('script');
     radioScript.defer = true;
-    radioScript.src = 'https://radiopotok.ru/f/script6/2b1fb3af94ad68f53cab22efe829de9a39e3907c4719d7455f86c6871a055c47.js';
+    radioScript.src = 'https://radiopotok.ru/f/script6/01cf0b0a27cfae01e6fb9c10b5e80b9fe92f67b3c22ee3a9e8831cfa3e3b388f.js';
     radioScript.charset = 'UTF-8';
     document.body.appendChild(radioScript);
 
@@ -246,7 +246,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
           <div className="text-center w-full">
             <div className="inline-block rounded-xl md:rounded-2xl overflow-hidden border-2 border-orange-200 shadow-xl max-w-full">
-              <div className="RP-SCRIPT" style={{width: '640px', maxWidth: '100%'}} data-height="2">
+              <div className="RP-SCRIPT" style={{width: '640px', maxWidth: '100%'}} data-height="1">
                 <a className="RP-LINK" href="https://radiopotok.ru/">RadioPotok.ru</a>
               </div>
             </div>
