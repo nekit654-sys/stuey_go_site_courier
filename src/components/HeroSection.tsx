@@ -18,39 +18,27 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
   const { isAuthenticated } = useAuth();
   
   const [heroData, setHeroData] = useState<any>(null);
-  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const defaultBgImage = "https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg";
 
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const timestamp = Date.now();
-        const response = await fetch(`https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba?_t=${timestamp}`, {
-          cache: 'no-store'
+        const response = await fetch(`https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba`, {
+          cache: 'force-cache'
         });
         const data = await response.json();
         if (data.success && data.hero) {
           setHeroData(data.hero);
-          const newBgImage = data.hero.image_url || defaultBgImage;
-          
-          // Предзагрузка изображения перед показом
-          if (newBgImage !== backgroundImage) {
-            const img = new Image();
-            img.onload = () => setBackgroundImage(newBgImage);
-            img.src = newBgImage;
-          }
-          
           console.log('Hero data loaded:', data.hero);
         }
       } catch (error) {
         console.error('Ошибка загрузки Hero:', error);
-        setBackgroundImage(defaultBgImage);
       }
     };
     
     fetchHeroData();
     
-    const interval = setInterval(fetchHeroData, 10000);
+    const interval = setInterval(fetchHeroData, 30000);
     
     return () => clearInterval(interval);
   }, []);
@@ -72,8 +60,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
-        backgroundColor: backgroundImage ? 'transparent' : '#ffffff',
+        backgroundImage: `url(${heroData?.image_url || defaultBgImage})`,
       }}
     >
       {/* Градиентный оверлей с анимацией */}
