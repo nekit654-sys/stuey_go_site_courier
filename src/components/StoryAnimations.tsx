@@ -102,8 +102,10 @@ export default function StoryAnimations({ animationType, animationConfig }: Stor
                 alt="Falling item"
                 className="object-contain"
                 style={{
-                  width: `${item.size * 3}px`,
-                  height: `${item.size * 1.5}px`,
+                  maxWidth: `${item.size * 3}px`,
+                  maxHeight: `${item.size * 3}px`,
+                  width: 'auto',
+                  height: 'auto',
                   filter: 'drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6))',
                 }}
               />

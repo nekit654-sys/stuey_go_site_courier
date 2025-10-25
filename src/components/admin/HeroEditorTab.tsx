@@ -141,6 +141,59 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
               value={formData.imageUrl}
               onChange={(url) => setFormData({ ...formData, imageUrl: url })}
             />
+            
+            {formData.imageUrl && (
+              <div className="mt-4 space-y-4">
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    <Icon name="Info" size={16} />
+                    Предпросмотр на разных устройствах
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">📱 Телефон (375x667)</p>
+                      <div className="border rounded overflow-hidden bg-background">
+                        <div 
+                          className="w-full h-32 bg-cover bg-center"
+                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">💻 Ноутбук (1366x768)</p>
+                      <div className="border rounded overflow-hidden bg-background">
+                        <div 
+                          className="w-full h-32 bg-cover bg-center"
+                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">🖥️ Монитор (1920x1080)</p>
+                      <div className="border rounded overflow-hidden bg-background">
+                        <div 
+                          className="w-full h-32 bg-cover bg-center"
+                          style={{ backgroundImage: `url(${formData.imageUrl})` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border border-blue-200 bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3">
+                  <h5 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Icon name="Lightbulb" size={14} />
+                    Рекомендации
+                  </h5>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Рекомендуемый размер: <strong>1920x1080</strong> (Full HD)</li>
+                    <li>• Формат: <strong>16:9</strong> для лучшей совместимости</li>
+                    <li>• Важные элементы размещайте по центру</li>
+                    <li>• Края могут обрезаться на мобильных устройствах</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -172,6 +225,28 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
                     })
                   }
                 />
+                {formData.animationConfig?.fallingImage && (
+                  <div className="mt-3 border border-amber-200 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Icon name="ImageIcon" size={14} className="mt-0.5 flex-shrink-0" />
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p><strong>Предпросмотр:</strong></p>
+                        <div className="flex gap-2 items-center">
+                          <img 
+                            src={formData.animationConfig.fallingImage} 
+                            alt="Preview" 
+                            className="max-w-[60px] max-h-[60px] object-contain border rounded"
+                          />
+                          <div>
+                            <p>• Изображение будет падать с сохранением пропорций</p>
+                            <p>• Размер автоматически подстраивается</p>
+                            <p>• Лучше использовать PNG с прозрачностью</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
