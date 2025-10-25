@@ -31,9 +31,8 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   }, []);
 
   useEffect(() => {
-    const audio = new Audio('https://radiorecord.hostingradio.ru/rus96.aacp');
-    audio.preload = 'none';
-    audio.crossOrigin = 'anonymous';
+    const audio = new Audio('https://ic7.101.ru:8000/v3_1');
+    audio.preload = 'metadata';
     setAudioElement(audio);
     
     return () => {
@@ -43,17 +42,28 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   }, []);
 
   const toggleRadio = () => {
-    if (!audioElement) return;
+    if (!audioElement) {
+      console.error('Audio element not ready');
+      toast.error('Радио ещё загружается');
+      return;
+    }
     
     if (isPlaying) {
       audioElement.pause();
       setIsPlaying(false);
+      console.log('Radio paused');
     } else {
-      audioElement.play().catch(err => {
-        console.error('Radio play error:', err);
-        toast.error('Не удалось запустить радио');
-      });
-      setIsPlaying(true);
+      console.log('Attempting to play radio...');
+      audioElement.play()
+        .then(() => {
+          setIsPlaying(true);
+          console.log('Radio started successfully');
+          toast.success('Радио запущено!');
+        })
+        .catch(err => {
+          console.error('Radio play error:', err);
+          toast.error('Не удалось запустить радио: ' + err.message);
+        });
     }
   };
 
