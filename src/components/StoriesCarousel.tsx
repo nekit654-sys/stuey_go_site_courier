@@ -30,16 +30,20 @@ interface StoriesCarouselProps {
 
 export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) {
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const animationFrameRef = useRef<number>();
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    fetchStories();
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchStories();
+    }
   }, []);
 
   useEffect(() => {
@@ -101,7 +105,8 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       console.log('📡 Fetching stories for user:', userId);
 
       const response = await fetch(
-        `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`
+        `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`,
+        { priority: 'high' } as RequestInit
       );
       const data = await response.json();
 
@@ -112,8 +117,6 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       setStories(activeStories);
     } catch (error) {
       console.error('❌ Error fetching stories:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
