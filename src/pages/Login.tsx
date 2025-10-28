@@ -8,6 +8,7 @@ import { useAdminData } from '@/components/admin/useAdminData';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { API_URL } from '@/config/api';
+import { useBotProtection } from '@/hooks/useBotProtection';
 
 const Login: React.FC = () => {
   const [activeTab, setActiveTab] = useState('activity');

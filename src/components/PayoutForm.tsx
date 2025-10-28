@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Upload, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useBotProtection } from '@/hooks/useBotProtection';
 
 const API_URL = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858';
 
@@ -15,6 +16,11 @@ interface PayoutFormData {
 export default function PayoutForm() {
   const { isAuthenticated, user, token } = useAuth();
   const navigate = useNavigate();
+  const { isHuman, honeypotProps, trackSubmit, getBotScore } = useBotProtection({
+    minTimeMs: 3000,
+    checkMouseMovement: true,
+    checkBrowserSignals: true,
+  });
   
   const [formData, setFormData] = useState<PayoutFormData>({
     name: '',
@@ -63,10 +69,19 @@ export default function PayoutForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    trackSubmit();
     setIsSubmitting(true);
     setMessage(null);
 
     try {
+      if (!isHuman) {
+        const botScore = getBotScore();
+        console.log('Bot protection triggered. Score:', botScore);
+        setMessage({ type: 'error', text: 'Пожалуйста, подождите несколько секунд перед отправкой' });
+        setIsSubmitting(false);
+        return;
+      }
+
       if (!formData.name.trim() || !formData.phone.trim() || !formData.city.trim()) {
         setMessage({ type: 'error', text: 'Заполните все поля' });
         setIsSubmitting(false);
@@ -143,6 +158,12 @@ export default function PayoutForm() {
         <p className="text-center text-gray-600 mb-6">Получите <span className="font-bold text-green-600">3000₽</span> за первые 30 заказов!</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <input
+            type="text"
+            name="website"
+            {...honeypotProps}
+          />
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               ФИО

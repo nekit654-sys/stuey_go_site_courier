@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
+import { useBotProtection } from '@/hooks/useBotProtection';
 
 interface WithdrawalRequestFormProps {
   userId: number;
@@ -37,6 +38,11 @@ export default function WithdrawalRequestForm({
   const [sbpPhone, setSbpPhone] = useState(formatInitialPhone(userPhone));
   const [sbpBankName, setSbpBankName] = useState(userBankName);
   const [loading, setLoading] = useState(false);
+  const { isHuman, honeypotProps, trackSubmit, getBotScore } = useBotProtection({
+    minTimeMs: 2000,
+    checkMouseMovement: true,
+    checkBrowserSignals: true,
+  });
 
   const formatPhoneInput = useCallback((value: string) => {
     let digits = value.replace(/\D/g, '');
@@ -67,6 +73,14 @@ export default function WithdrawalRequestForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    trackSubmit();
+
+    if (!isHuman) {
+      const botScore = getBotScore();
+      console.log('Bot protection triggered. Score:', botScore);
+      toast.error('Пожалуйста, подождите несколько секунд перед отправкой');
+      return;
+    }
 
     const withdrawAmount = parseFloat(amount);
 
@@ -133,6 +147,12 @@ export default function WithdrawalRequestForm({
         </div>
         <p className="text-xs font-bold text-black/70">Минимальная сумма вывода: 1000₽</p>
       </div>
+
+      <input
+        type="text"
+        name="website"
+        {...honeypotProps}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         <div>
