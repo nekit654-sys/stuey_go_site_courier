@@ -5,6 +5,7 @@ import FinancesTab from './FinancesTab';
 import ContentTab from './ContentTab';
 import ActivityTab from './ActivityTab';
 import AdminsTab from './AdminsTab';
+import VisitAnalytics from './VisitAnalytics';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 import { Courier } from './payments/types';
 
@@ -78,7 +79,7 @@ export default function CompactAdminTabs({
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
-      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
+      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
         <button
           onClick={() => onTabChange('activity')}
           className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
@@ -133,6 +134,17 @@ export default function CompactAdminTabs({
           <Icon name="Image" size={16} />
           <span>Контент</span>
         </button>
+        <button
+          onClick={() => onTabChange('visits')}
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+            activeTab === 'visits'
+              ? 'bg-white text-black shadow-sm border-2 border-black'
+              : 'bg-transparent text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          <Icon name="Eye" size={16} />
+          <span>Посещения</span>
+        </button>
         {isSuperAdmin && (
           <button
             onClick={() => onTabChange('settings')}
@@ -185,6 +197,10 @@ export default function CompactAdminTabs({
 
       {activeTab === 'content' && (
         <ContentTab authToken={authToken} />
+      )}
+
+      {activeTab === 'visits' && (
+        <VisitAnalytics authToken={authToken} />
       )}
 
       {isSuperAdmin && activeTab === 'settings' && (
