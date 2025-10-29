@@ -89,6 +89,7 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <Icon name="Loader2" className="animate-spin" size={32} />
+        <p className="text-sm text-muted-foreground mt-4">Загрузка статистики...</p>
       </div>
     );
   }
@@ -97,7 +98,15 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
     return (
       <Alert variant="destructive">
         <Icon name="AlertCircle" size={20} />
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>
+          {error}
+          <button 
+            onClick={fetchAnalytics} 
+            className="ml-2 underline hover:no-underline"
+          >
+            Повторить попытку
+          </button>
+        </AlertDescription>
       </Alert>
     );
   }
@@ -107,104 +116,104 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
   const { summary, daily_stats, repeat_visitors, bot_patterns } = data;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Статистика посещений</h2>
-        <div className="flex gap-2">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <h2 className="text-xl sm:text-2xl font-bold">Статистика посещений</h2>
+        <div className="flex gap-2 w-full sm:w-auto">
           {[7, 14, 30].map((d) => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium transition-colors ${
                 days === d 
                   ? 'bg-primary text-primary-foreground' 
                   : 'bg-secondary hover:bg-secondary/80'
               }`}
             >
-              {d} дней
+              {d}д
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon name="Users" size={16} />
-              Всего визитов
+          <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Icon name="Users" size={14} className="sm:w-4 sm:h-4" />
+              <span className="truncate">Всего</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.total_visits}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.total_visits}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 hidden sm:block">
               За последние {days} дней
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon name="CheckCircle" size={16} className="text-green-500" />
-              Настоящих
+          <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Icon name="CheckCircle" size={14} className="text-green-500 sm:w-4 sm:h-4" />
+              <span className="truncate">Настоящих</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{summary.real_visits}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{summary.real_visits}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
               {summary.total_visits > 0 
                 ? Math.round((summary.real_visits / summary.total_visits) * 100)
-                : 0}% от общего числа
+                : 0}%
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon name="Bot" size={16} className="text-red-500" />
-              Подозрительных
+          <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Icon name="Bot" size={14} className="text-red-500 sm:w-4 sm:h-4" />
+              <span className="truncate">Боты</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{summary.suspected_bots}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {summary.bot_percentage}% ботов
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{summary.suspected_bots}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+              {summary.bot_percentage.toFixed(0)}%
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon name="Repeat" size={16} />
-              Повторных
+          <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+              <Icon name="Repeat" size={14} className="sm:w-4 sm:h-4" />
+              <span className="truncate">Повторных</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.repeat_visits}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Первых: {summary.first_visits}
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.repeat_visits}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+              <span className="hidden sm:inline">Первых: </span>{summary.first_visits}
             </p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="daily" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="daily">По дням</TabsTrigger>
-          <TabsTrigger value="repeats">Повторные</TabsTrigger>
-          <TabsTrigger value="bots">Боты</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="daily" className="text-xs sm:text-sm py-2">По дням</TabsTrigger>
+          <TabsTrigger value="repeats" className="text-xs sm:text-sm py-2">Повторные</TabsTrigger>
+          <TabsTrigger value="bots" className="text-xs sm:text-sm py-2">Боты</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="daily" className="space-y-4">
+        <TabsContent value="daily" className="space-y-3 sm:space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>График посещений по дням</CardTitle>
+            <CardHeader className="px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">График посещений по дням</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+            <CardContent className="px-2 sm:px-6">
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={daily_stats.slice().reverse()}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
@@ -237,7 +246,7 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Средний балл</CardTitle>
@@ -284,36 +293,36 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
 
         <TabsContent value="repeats">
           <Card>
-            <CardHeader>
-              <CardTitle>Топ повторных посетителей</CardTitle>
+            <CardHeader className="px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">Топ повторных посетителей</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-2 sm:px-6">
               {repeat_visitors.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
+                <p className="text-muted-foreground text-center py-8 text-sm">
                   Нет данных о повторных посещениях
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3 max-h-[500px] overflow-y-auto">
                   {repeat_visitors.map((visitor, idx) => (
                     <div 
                       key={visitor.ip}
-                      className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
+                      className="flex items-center justify-between p-2 sm:p-3 bg-secondary/50 rounded-lg"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0">
                           {idx + 1}
                         </div>
-                        <div>
-                          <div className="font-mono text-sm">{visitor.ip}</div>
-                          <div className="text-xs text-muted-foreground">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs sm:text-sm truncate">{visitor.ip}</div>
+                          <div className="text-[10px] sm:text-xs text-muted-foreground">
                             Балл: {visitor.avg_score.toFixed(0)}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold">{visitor.visits} визитов</div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(visitor.last_visit).toLocaleDateString()}
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <div className="font-bold text-xs sm:text-sm">{visitor.visits}<span className="hidden sm:inline"> визитов</span></div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">
+                          {new Date(visitor.last_visit).toLocaleDateString('ru', { day: 'numeric', month: 'short' })}
                         </div>
                       </div>
                     </div>
@@ -326,36 +335,36 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
 
         <TabsContent value="bots">
           <Card>
-            <CardHeader>
-              <CardTitle>Паттерны ботов</CardTitle>
+            <CardHeader className="px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">Паттерны ботов</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-2 sm:px-6">
               {bot_patterns.length === 0 ? (
                 <div className="text-center py-8">
-                  <Icon name="ShieldCheck" size={48} className="mx-auto text-green-500 mb-2" />
-                  <p className="text-muted-foreground">
+                  <Icon name="ShieldCheck" size={36} className="sm:w-12 sm:h-12 mx-auto text-green-500 mb-2" />
+                  <p className="text-muted-foreground text-sm sm:text-base">
                     Ботов не обнаружено! 🎉
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto">
                   {bot_patterns.map((pattern, idx) => (
-                    <div key={idx} className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
+                    <div key={idx} className="p-3 sm:p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-red-600">
+                        <span className="font-bold text-red-600 text-xs sm:text-sm">
                           Обнаружено: {pattern.count} раз
                         </span>
-                        <Icon name="AlertTriangle" size={20} className="text-red-500" />
+                        <Icon name="AlertTriangle" size={16} className="sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
                       </div>
-                      <div className="text-sm space-y-1">
+                      <div className="text-xs sm:text-sm space-y-1">
                         {Object.entries(pattern.indicators).map(([key, value]) => (
-                          <div key={key} className="flex items-center gap-2">
-                            <Icon name="X" size={14} className="text-red-500" />
-                            <span className="text-muted-foreground">
+                          <div key={key} className="flex items-start gap-2">
+                            <Icon name="X" size={12} className="text-red-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-muted-foreground break-words">
                               {key === 'short_user_agent' && 'Короткий User-Agent'}
-                              {key === 'bot_keyword' && `Ключевое слово бота: ${value}`}
-                              {key === 'too_fast' && 'Слишком быстрый визит'}
-                              {key === 'no_mouse_activity' && 'Нет движений мыши'}
+                              {key === 'bot_keyword' && `Бот: ${value}`}
+                              {key === 'too_fast' && 'Слишком быстро'}
+                              {key === 'no_mouse_activity' && 'Нет мыши'}
                               {key === 'no_scroll' && 'Нет скролла'}
                             </span>
                           </div>

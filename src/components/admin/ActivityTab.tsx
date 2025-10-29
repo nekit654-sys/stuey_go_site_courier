@@ -128,8 +128,8 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
       case 'csv_payment_created':
         return (
           <div className="mt-2 space-y-1">
-            <div className="flex items-center gap-2 text-sm">
-              <Badge variant="outline" className="font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <Badge variant="outline" className="font-mono text-xs">
                 ID: {data.external_id || data.courier_id}
               </Badge>
               <span className="text-gray-600">•</span>
@@ -143,8 +143,8 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
       case 'self_bonus_completed':
         return (
           <div className="mt-2 space-y-1">
-            <div className="flex items-center gap-2 text-sm">
-              <Badge variant="outline" className="font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <Badge variant="outline" className="font-mono text-xs">
                 ID: {data.external_id}
               </Badge>
               <span className="text-gray-600">•</span>
@@ -155,7 +155,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
 
       case 'csv_uploaded':
         return (
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:gap-3 text-xs">
             <div className="bg-blue-50 p-2 rounded border border-blue-200">
               <p className="text-gray-600">Обработано</p>
               <p className="font-bold text-blue-700">{data.processed}</p>
@@ -177,7 +177,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
 
       case 'courier_registered':
         return (
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="text-xs">
               User ID: {data.user_id}
             </Badge>
@@ -191,7 +191,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
       case 'withdrawal_approved':
       case 'withdrawal_rejected':
         return (
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {data.amount && (
               <Badge variant="outline" className="font-bold">
                 {data.amount.toLocaleString('ru-RU')} ₽
@@ -220,7 +220,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
 
   if (activities.length === 0) {
     return (
-      <Card className="p-8 text-center border-3 border-black">
+      <Card className="p-4 sm:p-8 text-center border-3 border-black">
         <Icon name="Activity" size={48} className="mx-auto mb-4 text-gray-400" />
         <p className="text-gray-600 font-bold">Нет событий</p>
         <p className="text-sm text-gray-500 mt-2">События будут появляться здесь автоматически</p>
@@ -229,32 +229,32 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-extrabold flex items-center gap-2">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
           <Icon name="Newspaper" size={24} />
           Лента событий
         </h2>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           <span className="hidden sm:inline">Автообновление</span>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 sm:space-y-4">
         {activities.map((activity) => (
           <Card
             key={activity.id}
-            className="p-4 border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] transition-all"
+            className="p-4 sm:p-6 border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] transition-all"
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-2 sm:gap-4">
               <div className={`p-3 rounded-lg border-2 ${getActivityColor(activity.event_type)}`}>
                 <Icon name={getActivityIcon(activity.event_type)} size={20} />
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 break-words">{activity.message}</p>
-                <p className="text-sm text-gray-500 mt-1">{formatTime(activity.created_at)}</p>
+                <p className="text-xs sm:text-sm font-bold text-gray-900 break-words">{activity.message}</p>
+                <p className="text-xs text-gray-500 mt-1">{formatTime(activity.created_at)}</p>
                 {renderEventDetails(activity)}
               </div>
             </div>

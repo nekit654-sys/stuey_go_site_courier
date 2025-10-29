@@ -86,11 +86,29 @@ export default function VisitTracker({
       metrics.maxScrollDepth, metrics.mouseMovements, metrics.isFirstVisit, debug]);
 
   useEffect(() => {
-    if (metrics.isRealVisit && !hasSentVisit && onRealVisit) {
+    if (metrics.isRealVisit && !hasSentVisit) {
       setHasSentVisit(true);
-      onRealVisit();
+      
+      // Отправка события в Яндекс.Метрику
+      if (window.ym) {
+        window.ym(98832272, 'reachGoal', 'real_visit', {
+          score: metrics.visitScore,
+          duration: Math.round(metrics.sessionDuration),
+          scroll: Math.round(metrics.maxScrollDepth),
+          mouse: metrics.mouseMovements
+        });
+        
+        if (debug) {
+          console.log('Yandex Metrika event sent: real_visit');
+        }
+      }
+      
+      if (onRealVisit) {
+        onRealVisit();
+      }
     }
-  }, [metrics.isRealVisit, hasSentVisit, onRealVisit]);
+  }, [metrics.isRealVisit, hasSentVisit, onRealVisit, metrics.visitScore, 
+      metrics.sessionDuration, metrics.maxScrollDepth, metrics.mouseMovements, debug]);
 
   useEffect(() => {
     if (debug) {

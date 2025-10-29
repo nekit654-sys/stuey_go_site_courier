@@ -127,14 +127,14 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold">Редактор Hero-блока</h2>
-          <p className="text-sm text-muted-foreground">Настройте фон и анимацию главного блока</p>
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+      <Card className="p-4 sm:p-6">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold">Редактор Hero-блока</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">Настройте фон и анимацию главного блока</p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
           <div>
             <label className="text-sm font-medium mb-2 block">Фоновое изображение</label>
             <div className="space-y-2">
@@ -162,7 +162,7 @@ export default function HeroEditorTab({ authToken }: StoriesTabProps) {
                     <Icon name="Monitor" size={16} />
                     Как будет выглядеть на устройствах
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                         <Icon name="Smartphone" size={12} />

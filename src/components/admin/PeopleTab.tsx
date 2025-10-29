@@ -47,7 +47,7 @@ export default function PeopleTab({
   authToken,
 }: PeopleTabProps) {
   return (
-    <Tabs defaultValue="requests" className="space-y-4">
+    <Tabs defaultValue="requests" className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <Icon name="FileText" size={16} />
@@ -63,7 +63,7 @@ export default function PeopleTab({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="requests" className="space-y-4">
+      <TabsContent value="requests" className="space-y-4 sm:space-y-6">
         <ControlPanel
           autoRefresh={autoRefresh}
           lastUpdate={lastUpdate}
@@ -83,7 +83,7 @@ export default function PeopleTab({
         />
       </TabsContent>
 
-      <TabsContent value="couriers" className="space-y-4">
+      <TabsContent value="couriers" className="space-y-4 sm:space-y-6">
         <UnifiedCouriersTab
           couriers={allCouriers}
           isLoading={isLoadingCouriers}
@@ -95,7 +95,7 @@ export default function PeopleTab({
         />
       </TabsContent>
 
-      <TabsContent value="withdrawals" className="space-y-4">
+      <TabsContent value="withdrawals" className="space-y-4 sm:space-y-6">
         <WithdrawalRequestsTab authToken={authToken} />
       </TabsContent>
     </Tabs>

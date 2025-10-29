@@ -243,22 +243,22 @@ export default function StoriesTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold">Истории</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <h2 className="text-xl sm:text-2xl font-extrabold">Истории</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Управление историями на главной странице
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
             onClick={async () => {
               await createInitialStories();
               fetchStories();
               toast.success('3 истории созданы!');
             }}
-            className="bg-green-400 hover:bg-green-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+            className="w-full sm:w-auto bg-green-400 hover:bg-green-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
           >
             <Icon name="Sparkles" size={20} className="mr-2" />
             Создать 3 готовые истории
@@ -272,7 +272,7 @@ export default function StoriesTab() {
                 setShowCreateForm(true);
               }
             }}
-            className="bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+            className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
           >
             <Icon name={showCreateForm ? 'X' : 'Plus'} size={20} className="mr-2" />
             {showCreateForm ? 'Отмена' : 'Создать историю'}
@@ -281,9 +281,9 @@ export default function StoriesTab() {
       </div>
 
       {showCreateForm && (
-        <Card className={`p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] bg-white ${editingStory ? 'ring-4 ring-blue-400' : ''}`}>
+        <Card className={`p-4 sm:p-6 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] bg-white ${editingStory ? 'ring-4 ring-blue-400' : ''}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-extrabold text-gray-900">
+            <h3 className="text-base sm:text-lg font-extrabold text-gray-900">
               {editingStory ? '✏️ Редактировать историю' : '➕ Новая история'}
             </h3>
             {editingStory && (
@@ -292,16 +292,16 @@ export default function StoriesTab() {
               </span>
             )}
           </div>
-          <div className="space-y-6">
+          <div className="space-y-3 sm:space-y-6">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-2 border-black">
-              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+              <h4 className="font-extrabold text-base sm:text-lg mb-4 flex items-center gap-2">
                 <Icon name="FileText" size={20} className="text-purple-600" />
                 Основная информация
               </h4>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                  <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">
                     <Icon name="Heading" size={16} className="inline mr-1" />
                     Заголовок <span className="text-red-500">*</span>
                   </label>
@@ -314,7 +314,7 @@ export default function StoriesTab() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                  <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">
                     <Icon name="AlignLeft" size={16} className="inline mr-1" />
                     Описание
                   </label>
@@ -330,7 +330,7 @@ export default function StoriesTab() {
             </div>
 
             <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg border-2 border-black">
-              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+              <h4 className="font-extrabold text-base sm:text-lg mb-4 flex items-center gap-2">
                 <Icon name="Image" size={20} className="text-green-600" />
                 Главное изображение <span className="text-red-500">*</span>
               </h4>
@@ -349,13 +349,13 @@ export default function StoriesTab() {
             </div>
 
             <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-2 border-black">
-              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+              <h4 className="font-extrabold text-base sm:text-lg mb-4 flex items-center gap-2">
                 <Icon name="MousePointerClick" size={20} className="text-blue-600" />
                 Кнопка внутри истории
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                  <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">
                     <Icon name="Type" size={16} className="inline mr-1" />
                     Надпись на кнопке
                   </label>
@@ -368,7 +368,7 @@ export default function StoriesTab() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">
+                  <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">
                     <Icon name="Link" size={16} className="inline mr-1" />
                     Куда ведёт ссылка
                   </label>
@@ -387,7 +387,7 @@ export default function StoriesTab() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2 text-gray-900">
+              <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">
                 <Icon name="Hash" size={16} className="inline mr-1" />
                 Позиция (порядок показа)
               </label>
@@ -402,14 +402,14 @@ export default function StoriesTab() {
             </div>
 
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg border-2 border-black">
-              <h4 className="font-extrabold text-lg mb-4 flex items-center gap-2">
+              <h4 className="font-extrabold text-base sm:text-lg mb-4 flex items-center gap-2">
                 <Icon name="Sparkles" size={20} className="text-yellow-600" />
                 Анимация (необязательно)
               </h4>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Тип анимации</label>
+                  <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Тип анимации</label>
                   <Select
                     value={formData.animationType}
                     onValueChange={(value) => setFormData({ ...formData, animationType: value })}
@@ -428,7 +428,7 @@ export default function StoriesTab() {
                 {formData.animationType === 'falling' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-gray-900">Изображение падающих элементов</label>
+                      <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Изображение падающих элементов</label>
                       <ImageUploader
                         value={formData.animationConfig.fallingImage || ''}
                         onChange={(url) => setFormData({
@@ -449,9 +449,9 @@ export default function StoriesTab() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
-                        <label className="block text-sm font-bold mb-2 text-gray-900">Количество</label>
+                        <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Количество</label>
                         <Input
                           type="number"
                           value={formData.animationConfig.fallingCount}
@@ -464,7 +464,7 @@ export default function StoriesTab() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-bold mb-2 text-gray-900">Скорость (мс)</label>
+                        <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Скорость (мс)</label>
                         <Input
                           type="number"
                           value={formData.animationConfig.fallingSpeed}
@@ -482,7 +482,7 @@ export default function StoriesTab() {
                 {formData.animationType === 'jumping' && (
                   <>
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-gray-900">Изображение персонажа</label>
+                      <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Изображение персонажа</label>
                       <ImageUploader
                         value={formData.animationConfig.jumpingImage || ''}
                         onChange={(url) => setFormData({
@@ -504,7 +504,7 @@ export default function StoriesTab() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold mb-2 text-gray-900">Позиция персонажа</label>
+                      <label className="block text-xs sm:text-sm font-bold mb-2 text-gray-900">Позиция персонажа</label>
                       <Select
                         value={formData.animationConfig.jumpingPosition}
                         onValueChange={(value) => setFormData({
@@ -527,18 +527,18 @@ export default function StoriesTab() {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4 border-t-3 border-black">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-3 border-black">
               <Button
                 onClick={() => setShowPreview(true)}
                 variant="outline"
-                className="border-3 border-black font-extrabold hover:bg-blue-50"
+                className="w-full sm:w-auto border-3 border-black font-extrabold hover:bg-blue-50"
               >
                 <Icon name="Eye" size={20} className="mr-2" />
                 Предпросмотр
               </Button>
               <Button
                 onClick={editingStory ? handleUpdate : handleCreate}
-                className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                className="w-full sm:flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
               >
                 <Icon name="Check" size={20} className="mr-2" />
                 {editingStory ? '💾 Сохранить изменения' : '✨ Создать историю'}
@@ -546,7 +546,7 @@ export default function StoriesTab() {
               <Button
                 onClick={resetForm}
                 variant="outline"
-                className="border-3 border-black font-extrabold hover:bg-red-50"
+                className="w-full sm:w-auto border-3 border-black font-extrabold hover:bg-red-50"
               >
                 <Icon name="X" size={20} className="mr-2" />
                 Отмена
@@ -561,12 +561,12 @@ export default function StoriesTab() {
           <Icon name="Loader2" className="animate-spin mx-auto" size={32} />
         </div>
       ) : stories.length === 0 ? (
-        <Card className="p-8 text-center border-3 border-black">
+        <Card className="p-4 sm:p-8 text-center border-3 border-black">
           <Icon name="FileQuestion" size={48} className="mx-auto mb-4 text-gray-400" />
           <p className="text-gray-600">Нет историй</p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {stories.map((story) => (
             <Card
               key={story.id}
@@ -591,12 +591,12 @@ export default function StoriesTab() {
               </div>
 
               <div className="p-4">
-                <h3 className="font-extrabold text-lg mb-2">{story.title}</h3>
+                <h3 className="font-extrabold text-base sm:text-lg mb-2 break-words">{story.title}</h3>
                 {story.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 break-words">{story.description}</p>
                 )}
 
-                <div className="flex gap-2 mt-4">
+                <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
                   <Button
                     onClick={() => handleEdit(story)}
                     size="sm"

@@ -20,7 +20,7 @@ export default function FinancesTab({
   onRefreshCouriers
 }: FinancesTabProps) {
   return (
-    <Tabs defaultValue="overview" className="space-y-4">
+    <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="overview" className="flex items-center gap-2">
           <Icon name="BarChart3" size={16} />
@@ -40,12 +40,12 @@ export default function FinancesTab({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="space-y-4">
+      <TabsContent value="overview" className="space-y-4 sm:space-y-6">
         <CompanyStatsCard authToken={authToken} />
         <RevenueChart authToken={authToken} />
       </TabsContent>
 
-      <TabsContent value="payments" className="space-y-4">
+      <TabsContent value="payments" className="space-y-4 sm:space-y-6">
         <FinalPaymentsTab
           authToken={authToken}
           couriers={couriers}
@@ -54,11 +54,11 @@ export default function FinancesTab({
         />
       </TabsContent>
 
-      <TabsContent value="bonus" className="space-y-4">
+      <TabsContent value="bonus" className="space-y-4 sm:space-y-6">
         <BonusManagementTab authToken={authToken} />
       </TabsContent>
 
-      <TabsContent value="analytics" className="space-y-4">
+      <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
         <AdminFinances authToken={authToken} />
       </TabsContent>
     </Tabs>
