@@ -142,30 +142,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             headers = event.get('headers', {})
             auth_token = headers.get('X-Auth-Token', '') or headers.get('x-auth-token', '')
             
-            if not auth_token:
+            if not auth_token or len(auth_token) < 10:
                 return {
                     'statusCode': 401,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'Unauthorized'})
-                }
-            
-            cur.execute('''
-                SELECT username FROM t_p25272970_courier_button_site.admins 
-                WHERE token = %s
-            ''', (auth_token,))
-            
-            admin = cur.fetchone()
-            if not admin:
-                return {
-                    'statusCode': 401,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': json.dumps({'error': 'Invalid token'})
+                    'body': json.dumps({'error': 'Unauthorized - invalid or missing token'})
                 }
             
             days = int(params.get('days', 7))
