@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { useToast } from '@/hooks/use-toast';
 
 const VISIT_TRACKING_URL = 'https://functions.poehali.dev/f52e1a9a-d1cb-41bf-a68f-5a795c41833c';
+const CLEANUP_URL = 'https://functions.poehali.dev/12d56d01-19eb-4b20-9f70-7577f5547597';
 
 interface VisitSummary {
   total_visits: number;
@@ -55,6 +58,8 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [days, setDays] = useState(7);
+  const [isCleaningUp, setIsCleaningUp] = useState(false);
+  const { toast } = useToast();
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -78,6 +83,45 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
       setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    if (!confirm('Удалить все визиты старше 90 дней? Это действие нельзя отменить.')) {
+      return;
+    }
+
+    setIsCleaningUp(true);
+    
+    try {
+      const response = await fetch(CLEANUP_URL, {
+        method: 'POST',
+        headers: {
+          'X-Auth-Token': authToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка очистки данных');
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: 'Очистка завершена',
+        description: `Удалено записей: ${result.deleted_count}. Осталось: ${result.remaining_count}`,
+      });
+
+      fetchAnalytics();
+    } catch (err) {
+      toast({
+        title: 'Ошибка',
+        description: err instanceof Error ? err.message : 'Не удалось очистить данные',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCleaningUp(false);
     }
   };
 
@@ -119,20 +163,41 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="text-xl sm:text-2xl font-bold">Статистика посещений</h2>
-        <div className="flex gap-2 w-full sm:w-auto">
-          {[7, 14, 30].map((d) => (
-            <button
-              key={d}
-              onClick={() => setDays(d)}
-              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium transition-colors ${
-                days === d 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary hover:bg-secondary/80'
-              }`}
-            >
-              {d}д
-            </button>
-          ))}
+        <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+          <div className="flex gap-2 flex-1 sm:flex-none">
+            {[7, 14, 30].map((d) => (
+              <button
+                key={d}
+                onClick={() => setDays(d)}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium transition-colors ${
+                  days === d 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-secondary hover:bg-secondary/80'
+                }`}
+              >
+                {d}д
+              </button>
+            ))}
+          </div>
+          <Button
+            onClick={handleCleanup}
+            disabled={isCleaningUp}
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            {isCleaningUp ? (
+              <>
+                <Icon name="Loader2" className="animate-spin mr-2" size={16} />
+                Очистка...
+              </>
+            ) : (
+              <>
+                <Icon name="Trash2" className="mr-2" size={16} />
+                Очистить старые
+              </>
+            )}
+          </Button>
         </div>
       </div>
 

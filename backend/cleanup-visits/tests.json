@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "Test cleanup without auth",
+      "method": "POST",
+      "expectedStatus": 401,
+      "expectedBody": {
+        "error": "Unauthorized"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test OPTIONS preflight",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
