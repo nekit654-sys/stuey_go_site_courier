@@ -288,6 +288,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
         
     except Exception as e:
+        import traceback
+        error_details = {
+            'error': str(e),
+            'type': type(e).__name__,
+            'traceback': traceback.format_exc()
+        }
+        print(f"Error in visit-tracking: {error_details}")
         return {
             'statusCode': 500,
             'headers': {
