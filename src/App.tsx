@@ -80,7 +80,7 @@ const MaintenanceWrapper = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {!isMaintenanceMode && (
+      {!isMaintenanceMode && location.pathname !== '/login' && (
         <>
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />

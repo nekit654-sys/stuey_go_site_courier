@@ -219,7 +219,7 @@ export default function CompactAdminTabs({
       )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 sm:hidden">
-        <div className={`grid ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
+        <div className={`grid ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} h-16`}>
           <button
             onClick={() => onTabChange('activity')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
@@ -276,6 +276,18 @@ export default function CompactAdminTabs({
           >
             <Icon name="Image" size={20} />
             <span className="text-[10px] font-bold">Контент</span>
+          </button>
+
+          <button
+            onClick={() => onTabChange('visits')}
+            className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
+              activeTab === 'visits' 
+                ? 'bg-yellow-400 text-black' 
+                : 'bg-white text-gray-600 active:bg-gray-100'
+            }`}
+          >
+            <Icon name="Eye" size={20} />
+            <span className="text-[10px] font-bold">Визиты</span>
           </button>
 
           {isSuperAdmin && (
