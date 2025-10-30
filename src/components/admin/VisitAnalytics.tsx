@@ -66,6 +66,7 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
     setError('');
     
     try {
+      console.log('Fetching analytics with token:', authToken ? 'present' : 'missing');
       const response = await fetch(`${VISIT_TRACKING_URL}?days=${days}`, {
         method: 'GET',
         headers: {
@@ -73,13 +74,19 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
         }
       });
 
+      console.log('Analytics response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Ошибка загрузки данных');
+        const errorText = await response.text();
+        console.error('Analytics error response:', errorText);
+        throw new Error(`Ошибка ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('Analytics data received:', result);
       setData(result);
     } catch (err) {
+      console.error('Analytics fetch error:', err);
       setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
     } finally {
       setLoading(false);
