@@ -139,7 +139,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif method == 'GET':
             params = event.get('queryStringParameters', {}) or {}
-            auth_token = event.get('headers', {}).get('X-Auth-Token', '')
+            headers = event.get('headers', {})
+            auth_token = headers.get('X-Auth-Token', '') or headers.get('x-auth-token', '')
             
             if not auth_token:
                 return {
