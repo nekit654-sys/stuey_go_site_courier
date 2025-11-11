@@ -351,7 +351,74 @@ def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         }
     
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Если указан реферальный код, проверяем и устанавливаем реферера
+    referral_code_input = body_data.get('referral_code_input', '').strip().upper()
+    if referral_code_input:
+        # Проверяем, не указал ли курьер свой собственный код
+        cur.execute("""
+            SELECT referral_code FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (courier_id,))
+        self_code = cur.fetchone()
+        
+        if self_code and self_code['referral_code'] == referral_code_input:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Нельзя указать свой собственный реферальный код'}),
+                'isBase64Encoded': False
+            }
+        
+        # Ищем реферера по коду
+        cur.execute("""
+            SELECT id, full_name FROM t_p25272970_courier_button_site.users
+            WHERE referral_code = %s
+        """, (referral_code_input,))
+        referrer = cur.fetchone()
+        
+        if not referrer:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Реферальный код не найден'}),
+                'isBase64Encoded': False
+            }
+        
+        # Устанавливаем реферера
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET invited_by_user_id = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (referrer['id'], courier_id))
+        
+        # Логируем событие
+        cur.execute("""
+            SELECT full_name, phone FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (courier_id,))
+        courier_info = cur.fetchone()
+        
+        referrer_name = referrer['full_name'] if referrer['full_name'] else f'ID {referrer["id"]}'
+        courier_name = courier_info['full_name'] if courier_info and courier_info['full_name'] else f'ID {courier_id}'
+        
+        log_activity(
+            conn, 
+            'referral_assigned', 
+            f'Админ назначил реферера {referrer_name} курьеру {courier_name}',
+            {
+                'referrer_id': referrer['id'],
+                'courier_id': courier_id,
+                'referral_code': referral_code_input
+            }
+        )
+        
+        print(f'>>> Установлен реферер {referrer["id"]} для курьера {courier_id}')
     
     update_fields = []
     values = []
@@ -388,28 +455,20 @@ def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         update_fields.append('is_active = %s')
         values.append(body_data['is_active'])
     
-    if not update_fields:
-        cur.close()
-        conn.close()
-        return {
-            'statusCode': 400,
-            'headers': headers,
-            'body': json.dumps({'success': False, 'error': 'No fields to update'}),
-            'isBase64Encoded': False
-        }
+    if update_fields:
+        update_fields.append('updated_at = NOW()')
+        values.append(courier_id)
+        
+        query = f"""
+            UPDATE t_p25272970_courier_button_site.users
+            SET {', '.join(update_fields)}
+            WHERE id = %s
+        """
+        
+        print(f'>>> UPDATE QUERY: {query}')
+        print(f'>>> UPDATE VALUES: {values}')
+        cur.execute(query, values)
     
-    update_fields.append('updated_at = NOW()')
-    values.append(courier_id)
-    
-    query = f"""
-        UPDATE t_p25272970_courier_button_site.users
-        SET {', '.join(update_fields)}
-        WHERE id = %s
-    """
-    
-    print(f'>>> UPDATE QUERY: {query}')
-    print(f'>>> UPDATE VALUES: {values}')
-    cur.execute(query, values)
     conn.commit()
     print(f'>>> UPDATE SUCCESS for courier_id={courier_id}')
     cur.close()

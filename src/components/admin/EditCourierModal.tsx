@@ -33,15 +33,56 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
     external_id: courier.external_id || '',
     total_orders: courier.total_orders || 0,
     total_earnings: courier.total_earnings || 0,
-    is_active: courier.is_active
+    is_active: courier.is_active,
+    referral_code_input: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isCheckingCode, setIsCheckingCode] = useState(false);
+  const [codeStatus, setCodeStatus] = useState<'valid' | 'invalid' | null>(null);
+  const [referrerName, setReferrerName] = useState<string>('');
+
+  const checkReferralCode = async (code: string) => {
+    if (!code.trim()) {
+      setCodeStatus(null);
+      setReferrerName('');
+      return;
+    }
+
+    setIsCheckingCode(true);
+    try {
+      const response = await fetch(
+        `https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=referrals&action=check_code&code=${encodeURIComponent(code.toUpperCase())}`
+      );
+      const data = await response.json();
+
+      if (data.success && data.exists) {
+        setCodeStatus('valid');
+        setReferrerName(data.referrer_name || 'Курьер');
+        toast.success(`Реферальный код найден: ${data.referrer_name}`);
+      } else {
+        setCodeStatus('invalid');
+        setReferrerName('');
+        toast.error('Реферальный код не найден');
+      }
+    } catch (error) {
+      console.error('Ошибка проверки кода:', error);
+      setCodeStatus('invalid');
+      toast.error('Ошибка проверки кода');
+    } finally {
+      setIsCheckingCode(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.full_name.trim()) {
       toast.error('ФИО обязательно для заполнения');
+      return;
+    }
+
+    if (formData.referral_code_input && codeStatus !== 'valid') {
+      toast.error('Проверьте реферальный код перед сохранением');
       return;
     }
 
@@ -155,6 +196,59 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
               onChange={(e) => setFormData({ ...formData, external_id: e.target.value })}
               className="mt-2 border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px]"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="referral_code_input" className="text-base font-extrabold text-black">
+              Реферальный код (кто пригласил)
+            </Label>
+            <div className="flex gap-2 mt-2">
+              <div className="flex-1 relative">
+                <Input
+                  id="referral_code_input"
+                  type="text"
+                  value={formData.referral_code_input}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    setFormData({ ...formData, referral_code_input: value });
+                    setCodeStatus(null);
+                    setReferrerName('');
+                  }}
+                  placeholder="Введите код реферера"
+                  className={`border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px] ${
+                    codeStatus === 'valid' ? 'bg-green-50 border-green-500' : 
+                    codeStatus === 'invalid' ? 'bg-red-50 border-red-500' : ''
+                  }`}
+                />
+                {codeStatus === 'valid' && referrerName && (
+                  <div className="absolute top-full left-0 mt-1 text-xs text-green-600 font-bold flex items-center gap-1">
+                    <Icon name="CheckCircle" size={12} />
+                    {referrerName}
+                  </div>
+                )}
+                {codeStatus === 'invalid' && (
+                  <div className="absolute top-full left-0 mt-1 text-xs text-red-600 font-bold flex items-center gap-1">
+                    <Icon name="XCircle" size={12} />
+                    Код не найден
+                  </div>
+                )}
+              </div>
+              <Button
+                type="button"
+                onClick={() => checkReferralCode(formData.referral_code_input)}
+                disabled={!formData.referral_code_input.trim() || isCheckingCode}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+              >
+                {isCheckingCode ? (
+                  <Icon name="Loader2" size={18} className="animate-spin" />
+                ) : (
+                  <Icon name="Search" size={18} />
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              Оставьте пустым, если курьер не был приглашён
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
