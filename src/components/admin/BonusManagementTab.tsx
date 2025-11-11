@@ -20,6 +20,7 @@ interface BonusUser {
 export default function BonusManagementTab({ authToken }: BonusManagementTabProps) {
   const [bonusUsers, setBonusUsers] = useState<BonusUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [stats, setStats] = useState({
     total_granted: 0,
     total_used: 0,
@@ -30,19 +31,15 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
   const fetchBonusUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://functions.yandexcloud.net/d4e7hka0qfaobbhk4vj6', {
-        method: 'POST',
+      const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=bonus-users', {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
-          action: 'get_bonus_users'
-        })
+          'X-Auth-Token': authToken
+        }
       });
 
       const data = await response.json();
-      if (data.users) {
+      if (data.success && data.users) {
         setBonusUsers(data.users);
         setStats(data.stats || {
           total_granted: 0,
@@ -50,6 +47,7 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
           total_active: 0,
           total_expired: 0
         });
+        setLastUpdate(new Date());
       }
     } catch (error) {
       console.error('Failed to fetch bonus users:', error);
@@ -60,6 +58,10 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
 
   useEffect(() => {
     fetchBonusUsers();
+    
+    // Автообновление каждые 30 секунд
+    const interval = setInterval(fetchBonusUsers, 30000);
+    return () => clearInterval(interval);
   }, [authToken]);
 
   const formatDate = (dateStr: string) => {
@@ -132,10 +134,12 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Пользователи с бонусом 3000₽</h3>
-          <Button onClick={fetchBonusUsers} variant="outline" size="sm">
-            <Icon name="RefreshCw" size={16} className={isLoading ? 'animate-spin' : ''} />
-            Обновить
-          </Button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Icon name="RefreshCw" size={14} className={isLoading ? 'animate-spin' : ''} />
+            <span>
+              Обновлено: {lastUpdate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
         </div>
 
         {isLoading ? (

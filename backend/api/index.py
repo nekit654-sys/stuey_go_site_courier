@@ -136,6 +136,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_news(event, headers)
     elif route == 'company_stats':
         return handle_company_stats(event, headers)
+    elif route == 'bonus-users':
+        return handle_bonus_users(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -5104,5 +5106,98 @@ def handle_company_stats(event: Dict[str, Any], headers: Dict[str, str]) -> Dict
         'statusCode': 200,
         'headers': headers,
         'body': json.dumps(stats),
+        'isBase64Encoded': False
+    }
+
+
+def handle_bonus_users(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Возвращает список курьеров которые получили самобонус 3000₽'''
+    method = event.get('httpMethod', 'GET')
+    
+    if method != 'GET':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'error': 'Invalid token'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Получаем курьеров с выплаченным самобонусом
+    cur.execute("""
+        SELECT 
+            u.id as user_id,
+            u.full_name as name,
+            u.phone,
+            SUM(pd.amount) as bonus_amount,
+            MIN(pd.created_at) as granted_at,
+            MAX(pd.paid_at) as last_paid_at,
+            BOOL_AND(pd.payment_status = 'paid') as is_used
+        FROM t_p25272970_courier_button_site.users u
+        INNER JOIN t_p25272970_courier_button_site.courier_earnings ce ON ce.courier_id = u.id
+        INNER JOIN t_p25272970_courier_button_site.payment_distributions pd 
+            ON pd.earning_id = ce.id 
+            AND pd.recipient_type = 'courier_self'
+            AND pd.amount > 0
+        GROUP BY u.id, u.full_name, u.phone
+        ORDER BY granted_at DESC
+    """)
+    
+    users = cur.fetchall()
+    
+    # Статистика
+    total_granted = len(users)
+    total_used = sum(1 for u in users if u['is_used'])
+    total_active = total_granted - total_used
+    
+    users_list = []
+    for u in users:
+        users_list.append({
+            'user_id': u['user_id'],
+            'name': u['name'] or 'Неизвестно',
+            'phone': u['phone'] or '—',
+            'bonus_amount': float(u['bonus_amount']),
+            'granted_at': u['granted_at'].isoformat() if u['granted_at'] else None,
+            'expires_at': None,  # У нас нет срока действия
+            'is_used': u['is_used']
+        })
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True,
+            'users': users_list,
+            'stats': {
+                'total_granted': total_granted,
+                'total_used': total_used,
+                'total_active': total_active,
+                'total_expired': 0
+            }
+        }),
         'isBase64Encoded': False
     }
