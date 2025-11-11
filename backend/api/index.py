@@ -865,10 +865,12 @@ def update_referral_orders(user_id: int, body: Dict[str, Any], headers: Dict[str
         WHERE id = %s
     """, (orders_count, user_id))
     
+    # Реферальные связи теперь через invited_by_user_id в таблице users
+    # Данная функция больше не используется, но оставлена для совместимости
     cur.execute("""
-        SELECT id, referrer_id, bonus_amount
-        FROM t_p25272970_courier_button_site.referrals
-        WHERE referred_id = %s
+        SELECT id, invited_by_user_id as referrer_id, 0 as bonus_amount
+        FROM t_p25272970_courier_button_site.users
+        WHERE id = %s AND invited_by_user_id IS NOT NULL
     """, (user_id,))
     
     referral_link = cur.fetchone()
@@ -876,17 +878,9 @@ def update_referral_orders(user_id: int, body: Dict[str, Any], headers: Dict[str
     if referral_link:
         new_bonus = orders_count * bonus_per_order
         
-        cur.execute("""
-            UPDATE t_p25272970_courier_button_site.referrals
-            SET referred_total_orders = %s, bonus_amount = %s, updated_at = NOW()
-            WHERE id = %s
-        """, (orders_count, new_bonus, referral_link['id']))
-        
-        cur.execute("""
-            UPDATE t_p25272970_courier_button_site.users
-            SET referral_earnings = referral_earnings + %s, updated_at = NOW()
-            WHERE id = %s
-        """, (new_bonus - float(referral_link['bonus_amount']), referral_link['referrer_id']))
+        # Реферальные начисления теперь идут через payment_distributions
+        # Эта логика устарела, используется CSV upload для начислений
+        pass
     
     conn.commit()
     cur.close()
@@ -979,11 +973,8 @@ def set_inviter_code(user_id: int, body: Dict[str, Any], headers: Dict[str, str]
         WHERE id = %s
     """, (referrer_id, user_id))
     
-    cur.execute("""
-        INSERT INTO t_p25272970_courier_button_site.referrals 
-        (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-        VALUES (%s, %s, 0, false, 0)
-    """, (referrer_id, user_id))
+    # Реферальные связи теперь через invited_by_user_id в таблице users
+    # Отдельная таблица referrals больше не используется
     
     # Получаем имена курьеров для логирования
     cur.execute("""
@@ -1460,11 +1451,8 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                         WHERE id = %s
                     """, (referrer['id'], user_id))
                     
-                    cur.execute("""
-                        INSERT INTO t_p25272970_courier_button_site.referrals
-                        (referrer_id, referred_id, bonus_amount, bonus_paid, referred_total_orders)
-                        VALUES (%s, %s, 0, false, 0)
-                    """, (referrer['id'], user_id))
+                    # Реферальные связи теперь через invited_by_user_id в таблице users
+                    # Отдельная таблица referrals больше не используется
                     
                     # Получаем имя реферера для логирования
                     cur.execute("""
