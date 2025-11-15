@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GameProvider } from "@/contexts/GameContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -22,7 +22,8 @@ import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
-import Game from "./pages/Game";
+
+const Game = lazy(() => import("./pages/Game"));
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,15 @@ const MaintenanceWrapper = () => {
         <Route path="/career" element={<Career />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/contacts" element={<Contacts />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/game" element={
+          <Suspense fallback={
+            <div className="w-full h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="text-white text-2xl">Загрузка игры...</div>
+            </div>
+          }>
+            <Game />
+          </Suspense>
+        } />
 
         <Route path="/login" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
