@@ -12,6 +12,7 @@ import { usePerformanceSettings, PerformanceMonitor } from './PerformanceManager
 import { MobileControls } from './MobileControls';
 import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
+import { CityAudioEngine } from './CityAudioEngine';
 import Icon from '@/components/ui/icon';
 
 interface GameState {
@@ -316,6 +317,12 @@ export function CityDeliveryRush() {
         musicVolume={musicVolume}
         sfxVolume={sfxVolume}
         currentTrack="day"
+      />
+
+      <CityAudioEngine
+        enabled={soundEnabled}
+        volume={sfxVolume}
+        playerPosition={playerPosition}
       />
 
       <MobileControls

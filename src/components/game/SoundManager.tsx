@@ -53,7 +53,8 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
       coins: 'https://assets.mixkit.co/active_storage/sfx/1995/1995-preview.mp3',
       jump: 'https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3',
       crash: 'https://assets.mixkit.co/active_storage/sfx/2073/2073-preview.mp3',
-      unlock: 'https://assets.mixkit.co/active_storage/sfx/1434/1434-preview.mp3'
+      unlock: 'https://assets.mixkit.co/active_storage/sfx/1434/1434-preview.mp3',
+      footstep: 'https://assets.mixkit.co/active_storage/sfx/2514/2514-preview.mp3'
     };
 
     Object.entries(soundEffects).forEach(([name, url]) => {

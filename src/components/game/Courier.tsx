@@ -22,6 +22,8 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
   const energy = useRef(100);
   const lastJumpRef = useRef(0);
   const cameraRotationRef = useRef({ x: 0, y: 0 });
+  const lastStepTime = useRef(0);
+  const stepSoundInterval = useRef(300);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -115,6 +117,13 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
 
       const angle = Math.atan2(direction.x, direction.z);
       groupRef.current.rotation.y = angle;
+      
+      const now = performance.now();
+      const interval = isSprinting ? 200 : 350;
+      if (now - lastStepTime.current > interval && groupRef.current.position.y < 0.6) {
+        lastStepTime.current = now;
+        (window as any).playSound?.('footstep');
+      }
     } else {
       velocity.current.multiplyScalar(0.9);
     }

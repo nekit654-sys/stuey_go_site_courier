@@ -77,6 +77,7 @@ interface CarProps {
 function Car({ lane, speed, color, isTruck = false, startOffset }: CarProps) {
   const carRef = useRef<THREE.Group>(null);
   const [stopped, setStopped] = useState(false);
+  const lastHornTime = useRef(0);
 
   useFrame((state) => {
     if (carRef.current) {
@@ -86,8 +87,20 @@ function Car({ lane, speed, color, isTruck = false, startOffset }: CarProps) {
       const zPos = carRef.current.position.z;
       const nearIntersection = Math.abs(zPos) < 2 || Math.abs(zPos - 40) < 2 || Math.abs(zPos + 40) < 2;
       
+      const wasStopped = stopped;
+      
       if (isRed && nearIntersection && zPos < (Math.sign(zPos) * Math.abs(zPos) + 5)) {
         setStopped(true);
+        
+        if (!wasStopped && Math.random() > 0.95) {
+          const now = performance.now();
+          if (now - lastHornTime.current > 3000) {
+            lastHornTime.current = now;
+            if ((window as any).playCarHorn) {
+              (window as any).playCarHorn(carRef.current.position.x, carRef.current.position.z);
+            }
+          }
+        }
       } else {
         setStopped(false);
       }
