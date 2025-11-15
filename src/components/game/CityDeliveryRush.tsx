@@ -160,83 +160,95 @@ export function CityDeliveryRush() {
   if (!gameStarted) {
     return (
       <LandscapeOrientation>
-        <div className="w-full h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center overflow-hidden relative p-2 sm:p-4">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.05)_0%,transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(0,0,0,0.03)_0%,transparent_50%)]" />
+        <div className="w-full h-screen bg-gradient-to-br from-yellow-400 via-amber-300 to-orange-200 flex items-center justify-center overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.08)_0%,transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
           
-          <div className="absolute top-0 left-0 w-full h-1 sm:h-2 bg-black"></div>
-          <div className="absolute bottom-0 left-0 w-full h-1 sm:h-2 bg-black"></div>
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute bg-yellow-500/10 rounded-full animate-float"
+                style={{
+                  width: `${20 + Math.random() * 80}px`,
+                  height: `${20 + Math.random() * 80}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 5}s`,
+                  animationDuration: `${10 + Math.random() * 10}s`
+                }}
+              />
+            ))}
+          </div>
+          
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
+          <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
 
-          <div className="relative z-10 bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-3 sm:p-5 md:p-8 max-w-[95%] sm:max-w-md md:max-w-xl lg:max-w-2xl w-full text-black text-center shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)]">
-            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold font-rubik mb-1 sm:mb-3 md:mb-4 leading-tight">
-              <span className="text-black">🚀 City Delivery Rush</span>
+          <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-4 sm:p-6 max-w-[98%] sm:max-w-md w-full text-black text-center shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:translate-y-[4px] transition-all duration-200">
+            <div className="absolute -top-4 -left-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🚀</div>
+            <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🏙️</div>
+            
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-rubik mb-2 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
+              City Delivery Rush
             </h1>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg mb-3 sm:mb-4 md:mb-6 font-bold leading-snug">
-              Доставляй заказы по городу,<br className="sm:hidden" /> зарабатывай монеты<br className="hidden sm:block" />
-              и прокачивай транспорт!
+            <p className="text-xs sm:text-sm mb-3 font-bold leading-snug text-gray-700">
+              Доставляй заказы, зарабатывай<br /> монеты и прокачивай транспорт!
             </p>
             
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 md:gap-3 my-2 sm:my-3 md:my-5">
-              <div className="bg-yellow-50 p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
-                <div className="text-xl sm:text-2xl md:text-3xl mb-0.5 sm:mb-1">🚶</div>
-                <div className="text-[10px] sm:text-xs md:text-sm font-bold">Пешком</div>
-                <div className="text-[8px] sm:text-[10px] md:text-xs opacity-60">3 м/с</div>
+            <div className="grid grid-cols-3 gap-2 my-3">
+              <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
+                <div className="text-2xl mb-1">🚶</div>
+                <div className="text-[10px] sm:text-xs font-extrabold">Пешком</div>
+                <div className="text-[8px] opacity-70">3 м/с</div>
               </div>
-              <div className="bg-yellow-50 p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
-                <div className="text-xl sm:text-2xl md:text-3xl mb-0.5 sm:mb-1">🚲</div>
-                <div className="text-[10px] sm:text-xs md:text-sm font-bold">Велосипед</div>
-                <div className="text-[8px] sm:text-[10px] md:text-xs opacity-60">6 м/с</div>
+              <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
+                <div className="text-2xl mb-1">🚲</div>
+                <div className="text-[10px] sm:text-xs font-extrabold">Велик</div>
+                <div className="text-[8px] opacity-70">6 м/с</div>
               </div>
-              <div className="bg-yellow-50 p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
-                <div className="text-xl sm:text-2xl md:text-3xl mb-0.5 sm:mb-1">🛴</div>
-                <div className="text-[10px] sm:text-xs md:text-sm font-bold">Самокат</div>
-                <div className="text-[8px] sm:text-[10px] md:text-xs opacity-60">9 м/с</div>
+              <div className="bg-gradient-to-br from-green-100 to-green-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
+                <div className="text-2xl mb-1">🛴</div>
+                <div className="text-[10px] sm:text-xs font-extrabold">Самокат</div>
+                <div className="text-[8px] opacity-70">9 м/с</div>
               </div>
             </div>
 
-            <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
+            <div className="space-y-2">
               <button
                 onClick={() => setGameStarted(true)}
-                className="w-full bg-yellow-400 text-black font-extrabold py-2 sm:py-2.5 md:py-4 px-3 sm:px-4 md:px-8 text-sm sm:text-base md:text-lg lg:text-xl rounded-lg sm:rounded-xl border-3 sm:border-4 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[3px] sm:active:translate-y-[4px] active:shadow-none transition-all duration-150"
+                className="w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-white font-extrabold py-3 px-4 text-base rounded-xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 animate-pulse"
               >
-                <Icon name="Rocket" size={16} className="inline mr-1 sm:mr-2" />
-                Начать игру
+                <Icon name="Rocket" size={18} className="inline mr-2" />
+                🎮 Начать игру
               </button>
               
-              <div className="flex gap-1.5 sm:gap-2 md:gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setShowProfile(true)}
-                  className="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-1.5 sm:py-2 md:py-2.5 px-1.5 sm:px-2 md:px-4 rounded-lg sm:rounded-xl border-2 border-black transition-all text-[10px] sm:text-xs md:text-sm"
+                  className="flex-1 bg-white hover:bg-yellow-50 text-black font-bold py-2 px-3 rounded-xl border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-none transition-all text-xs"
                 >
-                  <Icon name="User" size={14} className="inline mr-0.5 sm:mr-1" />
-                  <span className="hidden xs:inline">Профиль</span>
-                  <span className="xs:hidden">👤</span>
+                  👤 Профиль
                 </button>
                 <button
                   onClick={() => setShowLeaderboard(true)}
-                  className="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-1.5 sm:py-2 md:py-2.5 px-1.5 sm:px-2 md:px-4 rounded-lg sm:rounded-xl border-2 border-black transition-all text-[10px] sm:text-xs md:text-sm"
+                  className="flex-1 bg-white hover:bg-yellow-50 text-black font-bold py-2 px-3 rounded-xl border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-none transition-all text-xs"
                 >
-                  <Icon name="Trophy" size={14} className="inline mr-0.5 sm:mr-1" />
-                  <span className="hidden xs:inline">Рейтинг</span>
-                  <span className="xs:hidden">🏆</span>
+                  🏆 Топ
                 </button>
               </div>
             </div>
 
-            <div className="mt-2 sm:mt-3 md:mt-5 text-[10px] sm:text-xs md:text-sm font-bold">
+            <div className="mt-3 text-[10px] font-bold">
               {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-                <div className="bg-yellow-50 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg border-2 border-black leading-tight">
-                  🎮 Джойстик<span className="hidden sm:inline"> - движение</span> | ⚡<span className="hidden sm:inline"> - бег</span> | 🔼<span className="hidden sm:inline"> - прыжок</span>
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1.5 rounded-lg border-2 border-black">
+                  🎮 Джойстик | ⚡ Бег | 🔼 Прыжок
                 </div>
               ) : (
-                <div className="bg-yellow-50 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg border-2 border-black leading-tight">
-                  ⌨️ WASD<span className="hidden sm:inline"> - движение</span> | Shift<span className="hidden sm:inline"> - бег</span> | Space<span className="hidden sm:inline"> - прыжок</span>
+                <div className="bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1.5 rounded-lg border-2 border-black">
+                  ⌨️ WASD | Shift | Space
                 </div>
               )}
             </div>
-            
-            <div className="mt-1.5 sm:mt-2 md:mt-3 text-[8px] sm:text-[10px] md:text-xs opacity-60 font-semibold">
-              📊 Качество: {settings.quality === 'low' ? '🟢 Низкое' : settings.quality === 'medium' ? '🟡 Среднее' : '🔴 Высокое'}
             </div>
           </div>
         </div>
