@@ -1,12 +1,10 @@
-import { Physics } from '@react-three/rapier';
 import { Canvas } from '@react-three/fiber';
-import { Sky, PerspectiveCamera } from '@react-three/drei';
+import { Sky, PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
-import { PhysicsCourier } from './PhysicsCourier';
+import { SimpleCourier } from './SimpleCourier';
 import { CityMap } from './CityMap';
 import { GPSNavigation, MiniMap } from './GPSNavigation';
 import { AdvancedDeliverySystem } from './AdvancedDeliverySystem';
-import { GameHUD } from './GameHUD';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
@@ -118,10 +116,6 @@ export function CityDeliveryRush() {
         
         setLevel(data.courier.level || 1);
         setCurrentExp(data.courier.current_exp || 0);
-        
-        const nextLevelResponse = await fetch(
-          `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=leaderboard&limit=1`
-        );
         setExpToNextLevel(100);
         
         setGameState(prev => ({
@@ -254,23 +248,6 @@ export function CityDeliveryRush() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center p-3 sm:p-4 overflow-hidden relative">
         <LandscapeOrientation />
-        
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(15)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                fontSize: `${Math.random() * 20 + 15}px`
-              }}
-            >
-              {['🍕', '📦', '🚴', '🏙️', '⚡'][Math.floor(Math.random() * 5)]}
-            </div>
-          ))}
-        </div>
 
         <div className="relative z-10 bg-white border-3 border-black rounded-xl p-2.5 sm:p-3 max-w-[96%] sm:max-w-sm w-full text-black text-center shadow-[0_6px_0_0_rgba(0,0,0,1)]">
           <div className="absolute -top-3 -left-3 w-10 h-10 bg-yellow-400 border-2 border-black rounded-full flex items-center justify-center text-xl shadow-lg">🚀</div>
@@ -279,10 +256,10 @@ export function CityDeliveryRush() {
           {!showSettings ? (
             <>
               <h1 className="text-lg sm:text-xl font-extrabold font-rubik mb-0.5 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                City Rush 3D
+                City Rush
               </h1>
               <p className="text-[9px] mb-1.5 font-bold leading-tight text-gray-700">
-                Реалистичная доставка с GPS!
+                Доставляй заказы по городу!
               </p>
               
               <div className="flex gap-1 mb-1.5 justify-center">
@@ -297,24 +274,6 @@ export function CityDeliveryRush() {
                 <div className="bg-green-100 p-1 rounded border border-black flex items-center gap-0.5">
                   <div className="text-sm">🛴</div>
                   <div className="text-[8px] font-bold">Самокат</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-1 mb-1.5">
-                <div className="bg-blue-50 p-1 rounded border border-black">
-                  <div className="text-[8px] font-bold mb-0.5 text-gray-700">🌤️ Погода:</div>
-                  <div className="flex gap-0.5">
-                    <button onClick={() => { setWeather('clear'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-xs ${weather === 'clear' ? 'bg-yellow-400' : 'bg-white'}`}>☀️</button>
-                    <button onClick={() => { setWeather('rain'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-xs ${weather === 'rain' ? 'bg-blue-400' : 'bg-white'}`}>🌧️</button>
-                  </div>
-                </div>
-                
-                <div className="bg-purple-50 p-1 rounded border border-black">
-                  <div className="text-[8px] font-bold mb-0.5 text-gray-700">⚙️ Графика:</div>
-                  <div className="flex gap-0.5">
-                    <button onClick={() => { setGraphicsQuality('low'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'low' ? 'bg-green-400' : 'bg-white'}`}>💚</button>
-                    <button onClick={() => { setGraphicsQuality('high'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'high' ? 'bg-red-400' : 'bg-white'}`}>🔥</button>
-                  </div>
                 </div>
               </div>
 
@@ -338,7 +297,7 @@ export function CityDeliveryRush() {
               </div>
 
               <div className="text-[8px] font-bold bg-gray-100 px-1.5 py-0.5 rounded">
-                {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Джойстик + GPS' : '⌨️ WASD + GPS'}
+                {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Джойстик' : '⌨️ WASD'}
               </div>
             </>
           ) : (
@@ -347,24 +306,6 @@ export function CityDeliveryRush() {
               
               <div className="space-y-2 text-left">
                 <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
-                  <div className="text-[9px] font-bold mb-1 text-gray-700">🎨 Качество графики:</div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button
-                      onClick={() => { setGraphicsQuality('low'); saveSettings(); }}
-                      className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'low' ? 'bg-green-400 border-black' : 'bg-white border-gray-300'}`}
-                    >
-                      💚 Низкое<br/><span className="text-[8px] opacity-70">Макс. FPS</span>
-                    </button>
-                    <button
-                      onClick={() => { setGraphicsQuality('high'); saveSettings(); }}
-                      className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'high' ? 'bg-red-400 border-black' : 'bg-white border-gray-300'}`}
-                    >
-                      🔥 Высокое<br/><span className="text-[8px] opacity-70">Красиво</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
                   <div className="text-[9px] font-bold mb-1 text-gray-700">🔊 Звук:</div>
                   <button
                     onClick={() => { setSoundEnabled(!soundEnabled); saveSettings(); }}
@@ -372,16 +313,6 @@ export function CityDeliveryRush() {
                   >
                     {soundEnabled ? '🔊 Включен' : '🔇 Выключен'}
                   </button>
-                </div>
-
-                <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
-                  <div className="text-[9px] font-bold mb-1 text-gray-700">🌤️ Погода:</div>
-                  <div className="grid grid-cols-4 gap-1">
-                    <button onClick={() => { setWeather('clear'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-300'}`}>☀️</button>
-                    <button onClick={() => { setWeather('rain'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-300'}`}>🌧️</button>
-                    <button onClick={() => { setWeather('snow'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-300'}`}>❄️</button>
-                    <button onClick={() => { setWeather('fog'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-300'}`}>🌫️</button>
-                  </div>
                 </div>
               </div>
 
@@ -409,48 +340,41 @@ export function CityDeliveryRush() {
     <div className="w-full h-screen relative overflow-hidden bg-black">
       <Canvas shadows>
         <PerspectiveCamera makeDefault position={[0, 15, 20]} fov={60} />
+        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.5} minDistance={10} maxDistance={50} />
         
         <ambientLight intensity={0.5} />
         <directionalLight
           position={[50, 50, 25]}
           intensity={1}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-left={-100}
-          shadow-camera-right={100}
-          shadow-camera-top={100}
-          shadow-camera-bottom={-100}
         />
         
         <Sky sunPosition={[100, 20, 100]} />
         
         <Suspense fallback={null}>
-          <Physics gravity={[0, -20, 0]}>
-            <CityMap />
-            
-            <PhysicsCourier
-              vehicle={gameState.currentVehicle}
-              onPositionChange={(x, z) => setPlayerPosition({ x, z })}
-              mobileInput={mobileInput}
-              mobileSprint={mobileSprint}
-              onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
+          <CityMap />
+          
+          <SimpleCourier
+            vehicle={gameState.currentVehicle}
+            onPositionChange={(x, z) => setPlayerPosition({ x, z })}
+            mobileInput={mobileInput}
+            mobileSprint={mobileSprint}
+            onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
+          />
+          
+          {currentOrder && (
+            <GPSNavigation
+              from={playerPosition}
+              to={targetLocation}
+              currentPosition={playerPosition}
             />
-            
-            {currentOrder && (
-              <GPSNavigation
-                from={playerPosition}
-                to={targetLocation}
-                currentPosition={playerPosition}
-              />
-            )}
-          </Physics>
+          )}
           
           <Weather type={weather} />
         </Suspense>
       </Canvas>
 
-      <div className="absolute top-4 left-4 z-50 space-y-2">
+      <div className="absolute top-4 left-4 z-40 space-y-2">
         <ExperienceBar
           currentExp={currentExp}
           level={level}
@@ -466,15 +390,26 @@ export function CityDeliveryRush() {
         </button>
       </div>
       
-      <GameHUD
-        score={gameState.score}
-        deliveries={gameState.deliveries}
-        time={gameState.time}
-        energy={gameState.energy}
-        vehicle={gameState.currentVehicle}
-        hasPackage={gameState.hasPackage}
-        currentFps={currentFps}
-      />
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 p-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="bg-yellow-400 text-black px-3 py-1 rounded font-bold text-sm">
+            💰 {gameState.score}
+          </div>
+          <div className="bg-green-400 text-black px-3 py-1 rounded font-bold text-sm">
+            📦 {gameState.deliveries}
+          </div>
+          <div className="bg-blue-400 text-black px-3 py-1 rounded font-bold text-sm">
+            ⚡ {Math.round(gameState.energy)}%
+          </div>
+        </div>
+        
+        <button
+          onClick={() => setGameStarted(false)}
+          className="bg-red-500 text-white px-3 py-1 rounded font-bold"
+        >
+          ✕
+        </button>
+      </div>
       
       <AdvancedDeliverySystem
         playerPosition={playerPosition}
@@ -502,13 +437,6 @@ export function CityDeliveryRush() {
           onJump={setMobileJump}
         />
       )}
-
-      <button
-        onClick={() => setGameStarted(false)}
-        className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full shadow-lg z-50"
-      >
-        <Icon name="X" size={20} />
-      </button>
       
       {showLevelUp && (
         <LevelUpNotification
