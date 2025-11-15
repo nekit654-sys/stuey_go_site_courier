@@ -7,7 +7,7 @@ import { GameHUD } from './GameHUD';
 import { DeliverySystem } from './DeliverySystem';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
-import { SoundManager, playSound } from './SoundManager';
+import { SoundManager } from './SoundManager';
 
 interface GameState {
   score: number;
@@ -76,8 +76,8 @@ export function CityDeliveryRush() {
   const handleDeliveryComplete = async (coins: number, timeToken: number) => {
     if (!gameState.courierId) return;
 
-    playSound('delivery');
-    playSound('coins');
+    (window as any).playSound?.('delivery');
+    (window as any).playSound?.('coins');
 
     try {
       const response = await fetch(
@@ -118,7 +118,7 @@ export function CityDeliveryRush() {
         onClose={() => setShowProfile(false)}
         onVehicleChange={(vehicle) => {
           setGameState(prev => ({ ...prev, currentVehicle: vehicle }));
-          playSound('unlock');
+          (window as any).playSound?.('unlock');
         }}
       />
     );
@@ -215,7 +215,7 @@ export function CityDeliveryRush() {
             courierId={gameState.courierId}
             onPickup={() => {
               setGameState(prev => ({ ...prev, hasPackage: true }));
-              playSound('pickup');
+              (window as any).playSound?.('pickup');
             }}
             onDelivery={handleDeliveryComplete}
             hasPackage={gameState.hasPackage}

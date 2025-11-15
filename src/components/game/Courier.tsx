@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { playSound } from './SoundManager';
+
 
 interface CourierProps {
   position: [number, number, number];
@@ -98,7 +98,7 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange }: Couri
     if (keys.current.space && groupRef.current.position.y < 1) {
       velocity.current.y = 5;
       keys.current.space = false;
-      playSound('jump');
+      (window as any).playSound?.('jump');
     }
 
     velocity.current.y -= 20 * delta;
