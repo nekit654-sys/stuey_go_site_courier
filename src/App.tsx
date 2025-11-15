@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
+import GameSelect from "./pages/GameSelect";
 
 const Game = lazy(() => import("./pages/Game"));
 
@@ -46,23 +47,7 @@ const YandexMetrika = () => {
 };
 
 const MaintenanceWrapper = () => {
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(true);
   const location = useLocation();
-
-  useEffect(() => {
-    const bypass = localStorage.getItem('maintenance_bypass');
-    const authToken = localStorage.getItem('auth_token');
-    
-    if (bypass === 'true' || authToken) {
-      setIsMaintenanceMode(false);
-    }
-  }, []);
-
-  const isAdminRoute = location.pathname === '/login' || location.pathname === '/auth' || location.pathname === '/dashboard' || location.pathname === '/reset-admin-password' || location.pathname === '/admin-reset';
-
-  if (isMaintenanceMode && !isAdminRoute) {
-    return <Maintenance onUnlock={() => setIsMaintenanceMode(false)} />;
-  }
 
   return (
     <>
@@ -71,6 +56,7 @@ const MaintenanceWrapper = () => {
         <Route path="/career" element={<Career />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/contacts" element={<Contacts />} />
+        <Route path="/games" element={<GameSelect />} />
         <Route path="/game" element={
           <Suspense fallback={
             <div className="w-full h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
@@ -91,7 +77,7 @@ const MaintenanceWrapper = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {!isMaintenanceMode && location.pathname !== '/login' && (
+      {location.pathname !== '/login' && (
         <>
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />

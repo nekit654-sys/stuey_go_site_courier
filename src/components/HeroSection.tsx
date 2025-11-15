@@ -148,11 +148,11 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
             </Button>
             
             <Button
-              onClick={() => navigate('/game')}
+              onClick={() => navigate('/games')}
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-extrabold py-6 px-8 sm:px-12 text-lg sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full sm:w-auto"
             >
               <Icon name="Gamepad2" size={24} className="mr-2" />
-              <span className="whitespace-nowrap">Играть в City Delivery Rush</span>
+              <span className="whitespace-nowrap">Играть</span>
             </Button>
             
             {!isAuthenticated && (
