@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { playVibration } from './VibrationManager';
 
 
 interface CourierProps {
@@ -114,6 +115,7 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
       keys.current.space = false;
       lastJumpRef.current = now;
       (window as any).playSound?.('jump');
+      playVibration('jump');
     }
 
     velocity.current.y -= 20 * delta;

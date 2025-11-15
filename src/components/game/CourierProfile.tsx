@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { playVibration } from './VibrationManager';
 
 
 interface Vehicle {
@@ -79,6 +80,7 @@ export function CourierProfile({ courierId, onClose, onVehicleChange }: CourierP
 
       if (response.ok) {
         (window as any).playSound?.('unlock');
+        playVibration('unlock');
         setVehicles(prev =>
           prev.map(v =>
             v.vehicle_type === vehicleType ? { ...v, unlocked: true } : v

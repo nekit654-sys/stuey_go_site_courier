@@ -10,6 +10,9 @@ import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
 import { usePerformanceSettings, PerformanceMonitor } from './PerformanceManager';
 import { MobileControls } from './MobileControls';
+import { playVibration } from './VibrationManager';
+import { LandscapeOrientation } from './LandscapeOrientation';
+import Icon from '@/components/ui/icon';
 
 interface GameState {
   score: number;
@@ -84,6 +87,8 @@ export function CityDeliveryRush() {
 
     (window as any).playSound?.('delivery');
     (window as any).playSound?.('coins');
+    playVibration('delivery');
+    playVibration('coins');
 
     try {
       const response = await fetch(
@@ -125,6 +130,7 @@ export function CityDeliveryRush() {
         onVehicleChange={(vehicle) => {
           setGameState(prev => ({ ...prev, currentVehicle: vehicle }));
           (window as any).playSound?.('unlock');
+          playVibration('unlock');
         }}
       />
     );
@@ -136,70 +142,92 @@ export function CityDeliveryRush() {
 
   if (!gameStarted) {
     return (
-      <div className="w-full h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 max-w-2xl text-white text-center space-y-6">
-          <h1 className="text-6xl font-bold mb-4">🚀 City Delivery Rush</h1>
-          <p className="text-xl opacity-90">
-            Доставляй заказы по городу, зарабатывай монеты и прокачивай транспорт!
-          </p>
+      <LandscapeOrientation>
+        <div className="w-full h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent" />
           
-          <div className="grid grid-cols-3 gap-4 my-8">
-            <div className="bg-white/10 p-4 rounded-xl">
-              <div className="text-4xl mb-2">🚶</div>
-              <div className="text-sm">Пешком</div>
-            </div>
-            <div className="bg-white/10 p-4 rounded-xl">
-              <div className="text-4xl mb-2">🚲</div>
-              <div className="text-sm">Велосипед</div>
-            </div>
-            <div className="bg-white/10 p-4 rounded-xl">
-              <div className="text-4xl mb-2">🛴</div>
-              <div className="text-sm">Самокат</div>
-            </div>
-          </div>
+          <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse" />
+          <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse" />
 
-          <div className="space-y-3">
-            <button
-              onClick={() => setGameStarted(true)}
-              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all transform hover:scale-105"
-            >
-              Начать игру
-            </button>
+          <div className="relative z-10 backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-8 md:p-12 max-w-2xl text-white text-center shadow-[0_8px_0_0_rgba(0,0,0,0.8)] mx-4">
+            <h1 className="text-4xl md:text-6xl font-extrabold font-rubik mb-4 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
+              <span className="text-yellow-400">🚀 City Delivery Rush</span>
+            </h1>
+            <p className="text-lg md:text-xl mb-6 font-bold drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
+              Доставляй заказы по городу, зарабатывай монеты<br className="hidden md:block" />
+              и прокачивай транспорт!
+            </p>
             
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowProfile(true)}
-                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all"
-              >
-                Профиль
-              </button>
-              <button
-                onClick={() => setShowLeaderboard(true)}
-                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all"
-              >
-                Рейтинг
-              </button>
+            <div className="grid grid-cols-3 gap-3 md:gap-4 my-6 md:my-8">
+              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
+                <div className="text-3xl md:text-4xl mb-2">🚶</div>
+                <div className="text-xs md:text-sm font-semibold">Пешком</div>
+                <div className="text-xs opacity-75">3 м/с</div>
+              </div>
+              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
+                <div className="text-3xl md:text-4xl mb-2">🚲</div>
+                <div className="text-xs md:text-sm font-semibold">Велосипед</div>
+                <div className="text-xs opacity-75">6 м/с</div>
+              </div>
+              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
+                <div className="text-3xl md:text-4xl mb-2">🛴</div>
+                <div className="text-xs md:text-sm font-semibold">Самокат</div>
+                <div className="text-xs opacity-75">9 м/с</div>
+              </div>
             </div>
-          </div>
 
-          <div className="text-sm opacity-75">
-            {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-              <>Управление: Джойстик - движение, ⚡ - бег, 🔼 - прыжок</>
-            ) : (
-              <>Управление: WASD - движение, Shift - бег, Пробел - прыжок</>
-            )}
-          </div>
-          
-          <div className="text-xs opacity-60 mt-2">
-            Качество графики: {settings.quality === 'low' ? 'Низкое' : settings.quality === 'medium' ? 'Среднее' : 'Высокое'}
+            <div className="space-y-3">
+              <button
+                onClick={() => setGameStarted(true)}
+                className="w-full bg-yellow-400 text-black font-extrabold py-4 px-8 text-lg md:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
+              >
+                <Icon name="Rocket" size={24} className="inline mr-2" />
+                Начать игру
+              </button>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowProfile(true)}
+                  className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl border-2 border-white/40 transition-all"
+                >
+                  <Icon name="User" size={18} className="inline mr-1" />
+                  Профиль
+                </button>
+                <button
+                  onClick={() => setShowLeaderboard(true)}
+                  className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl border-2 border-white/40 transition-all"
+                >
+                  <Icon name="Trophy" size={18} className="inline mr-1" />
+                  Рейтинг
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 text-sm font-bold drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
+              {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
+                <div className="bg-black/30 px-4 py-2 rounded-lg border border-yellow-400/50">
+                  🎮 Джойстик - движение | ⚡ - бег | 🔼 - прыжок
+                </div>
+              ) : (
+                <div className="bg-black/30 px-4 py-2 rounded-lg border border-yellow-400/50">
+                  ⌨️ WASD - движение | Shift - бег | Пробел - прыжок
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-3 text-xs opacity-75">
+              📊 Качество: {settings.quality === 'low' ? '🟢 Низкое' : settings.quality === 'medium' ? '🟡 Среднее' : '🔴 Высокое'}
+            </div>
           </div>
         </div>
-      </div>
+      </LandscapeOrientation>
     );
   }
 
   return (
-    <div className="w-full h-screen relative bg-gray-900">
+    <LandscapeOrientation>
+      <div className="w-full h-screen relative bg-gray-900">
       <Canvas
         camera={{ position: [20, 20, 20], fov: 50 }}
         shadows={settings.shadows}
@@ -235,6 +263,7 @@ export function CityDeliveryRush() {
             onPickup={() => {
               setGameState(prev => ({ ...prev, hasPackage: true }));
               (window as any).playSound?.('pickup');
+              playVibration('pickup');
             }}
             onDelivery={handleDeliveryComplete}
             hasPackage={gameState.hasPackage}
@@ -274,10 +303,12 @@ export function CityDeliveryRush() {
         onMove={setMobileInput}
         onJump={() => {
           setMobileJump(true);
+          playVibration('jump');
           setTimeout(() => setMobileJump(false), 100);
         }}
         onSprint={setMobileSprint}
       />
-    </div>
+      </div>
+    </LandscapeOrientation>
   );
 }
