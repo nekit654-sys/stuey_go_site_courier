@@ -73,15 +73,15 @@ function Cloud({ position, size }: { position: [number, number, number], size: n
   return (
     <group ref={cloudRef} position={position}>
       <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[size, 16, 16]} />
+        <sphereGeometry args={[size, 8, 8]} />
         <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
       <mesh position={[size * 0.8, 0.2, 0]}>
-        <sphereGeometry args={[size * 0.7, 16, 16]} />
+        <sphereGeometry args={[size * 0.7, 8, 8]} />
         <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
       <mesh position={[-size * 0.8, -0.1, 0]}>
-        <sphereGeometry args={[size * 0.6, 16, 16]} />
+        <sphereGeometry args={[size * 0.6, 8, 8]} />
         <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
     </group>
@@ -91,34 +91,34 @@ function Cloud({ position, size }: { position: [number, number, number], size: n
 export function Weather({ type }: WeatherProps) {
   const rainParticles = useMemo(() => {
     if (type !== 'rain') return [];
-    return Array.from({ length: 500 }, () => ({
+    return Array.from({ length: 150 }, () => ({
       pos: [
-        (Math.random() - 0.5) * 100,
-        Math.random() * 40,
-        (Math.random() - 0.5) * 100
+        (Math.random() - 0.5) * 80,
+        Math.random() * 30,
+        (Math.random() - 0.5) * 80
       ] as [number, number, number]
     }));
   }, [type]);
 
   const snowParticles = useMemo(() => {
     if (type !== 'snow') return [];
-    return Array.from({ length: 300 }, () => ({
+    return Array.from({ length: 100 }, () => ({
       pos: [
-        (Math.random() - 0.5) * 100,
-        Math.random() * 40,
-        (Math.random() - 0.5) * 100
+        (Math.random() - 0.5) * 80,
+        Math.random() * 30,
+        (Math.random() - 0.5) * 80
       ] as [number, number, number]
     }));
   }, [type]);
 
   const clouds = useMemo(() => {
-    return Array.from({ length: 8 }, (_, i) => ({
+    return Array.from({ length: 5 }, (_, i) => ({
       pos: [
-        (Math.random() - 0.5) * 120,
-        25 + Math.random() * 10,
-        (Math.random() - 0.5) * 120
+        (Math.random() - 0.5) * 100,
+        25 + Math.random() * 8,
+        (Math.random() - 0.5) * 100
       ] as [number, number, number],
-      size: 3 + Math.random() * 4
+      size: 3 + Math.random() * 3
     }));
   }, []);
 

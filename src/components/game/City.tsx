@@ -384,13 +384,13 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
     const collisionData: Array<{ x: number; z: number; size: number }> = [];
     
     const grid = [
-      [1, 1, 0, 3, 0, 1, 1],
-      [1, 1, 0, 0, 0, 1, 3],
+      [1, 1, 1, 0, 1, 1, 1],
+      [1, 3, 1, 0, 1, 3, 1],
+      [1, 1, 1, 0, 1, 1, 1],
       [0, 0, 0, 0, 0, 0, 0],
-      [3, 1, 0, 1, 0, 1, 1],
-      [0, 0, 0, 0, 0, 0, 0],
-      [1, 3, 0, 1, 0, 3, 1],
-      [1, 1, 0, 1, 0, 1, 1],
+      [1, 1, 1, 0, 1, 1, 1],
+      [1, 3, 1, 0, 1, 3, 1],
+      [1, 1, 1, 0, 1, 1, 1],
     ];
 
     for (let row = 0; row < grid.length; row++) {
@@ -557,25 +557,18 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
               </mesh>
               {Array.from({ length: Math.floor(item.height / 3) }).map((_, floor) => (
                 <group key={floor}>
-                  {[-3, -1, 1, 3].map((xPos, i) => (
+                  {[-2, 2].map((xPos, i) => (
                     <Window 
                       key={i} 
                       position={[xPos, (floor - Math.floor(item.height / 6)) * 3, BUILDING_SIZE / 2 + 0.05]} 
                       isLit={(i + floor) % 2 === 0}
                     />
                   ))}
-                  {[-3, -1, 1, 3].map((zPos, i) => (
+                  {[-2, 2].map((zPos, i) => (
                     <Window 
                       key={`side${i}`} 
                       position={[BUILDING_SIZE / 2 + 0.05, (floor - Math.floor(item.height / 6)) * 3, zPos]} 
                       isLit={(i + floor + 1) % 2 === 0}
-                    />
-                  ))}
-                  {[-3, -1, 1, 3].map((zPos, i) => (
-                    <Window 
-                      key={`back${i}`} 
-                      position={[-BUILDING_SIZE / 2 - 0.05, (floor - Math.floor(item.height / 6)) * 3, zPos]} 
-                      isLit={(i + floor) % 3 === 0}
                     />
                   ))}
                 </group>
@@ -587,8 +580,8 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
 
       {showDetails && (
         <>
-          {Array.from({ length: 12 }).map((_, i) => {
-            const isTruck = i % 5 === 0;
+          {Array.from({ length: 6 }).map((_, i) => {
+            const isTruck = i % 4 === 0;
             return (
               <Car 
                 key={`car1-${i}`}
@@ -596,13 +589,13 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
                 speed={0.08 + (i % 3) * 0.02}
                 color={carColors[i % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 6) * 10}
+                startOffset={(i - 3) * 20}
               />
             );
           })}
 
-          {Array.from({ length: 12 }).map((_, i) => {
-            const isTruck = i % 6 === 0;
+          {Array.from({ length: 6 }).map((_, i) => {
+            const isTruck = i % 5 === 0;
             return (
               <Car 
                 key={`car2-${i}`}
@@ -610,13 +603,13 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
                 speed={-0.08 - (i % 3) * 0.02}
                 color={carColors[(i + 2) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 6) * 10}
+                startOffset={(i - 3) * 20}
               />
             );
           })}
 
-          {Array.from({ length: 12 }).map((_, i) => {
-            const isTruck = i % 5 === 0;
+          {Array.from({ length: 6 }).map((_, i) => {
+            const isTruck = i % 4 === 0;
             return (
               <Car 
                 key={`car3-${i}`}
@@ -624,13 +617,13 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
                 speed={0.08 + (i % 3) * 0.02}
                 color={carColors[(i + 3) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 6) * 10}
+                startOffset={(i - 3) * 20}
               />
             );
           })}
 
-          {Array.from({ length: 12 }).map((_, i) => {
-            const isTruck = i % 6 === 0;
+          {Array.from({ length: 6 }).map((_, i) => {
+            const isTruck = i % 5 === 0;
             return (
               <Car 
                 key={`car4-${i}`}
@@ -638,45 +631,45 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
                 speed={-0.08 - (i % 3) * 0.02}
                 color={carColors[(i + 4) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 6) * 10}
+                startOffset={(i - 3) * 20}
               />
             );
           })}
 
-          {Array.from({ length: 12 }).map((_, i) => {
-            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'walking', 'walking', 'cafe', 'phone'];
+          {Array.from({ length: 6 }).map((_, i) => {
+            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'walking', 'cafe'];
             const behavior = behaviors[i % behaviors.length];
             return (
               <Pedestrian 
                 key={`ped1-${i}`} 
                 sidewalk={-BLOCK_SIZE - 4} 
-                startZ={(i - 6) * 15} 
+                startZ={(i - 3) * 20} 
                 behavior={behavior}
               />
             );
           })}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'walking', 'cafe', 'phone', 'walking'];
+          {Array.from({ length: 6 }).map((_, i) => {
+            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'phone', 'walking'];
             const behavior = behaviors[i % behaviors.length];
             return (
               <Pedestrian 
                 key={`ped2-${i}`} 
                 sidewalk={BLOCK_SIZE + 4} 
-                startZ={(i - 6) * 15} 
+                startZ={(i - 3) * 20} 
                 behavior={behavior}
               />
             );
           })}
 
-          {Array.from({ length: 12 }).map((_, i) => {
-            const radius = 30 + Math.random() * 30;
-            const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.5;
+          {Array.from({ length: 6 }).map((_, i) => {
+            const radius = 30 + Math.random() * 20;
+            const angle = (i / 6) * Math.PI * 2;
             return (
               <Bird 
                 key={i} 
                 startPos={[
                   Math.cos(angle) * radius, 
-                  15 + Math.random() * 15, 
+                  15 + Math.random() * 10, 
                   Math.sin(angle) * radius
                 ]} 
               />

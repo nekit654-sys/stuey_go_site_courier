@@ -100,9 +100,9 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
 
     const direction = new THREE.Vector3();
     
-    if (mobileInput) {
+    if (mobileInput && (Math.abs(mobileInput.x) > 0.1 || Math.abs(mobileInput.y) > 0.1)) {
       direction.x = mobileInput.x;
-      direction.z = mobileInput.y;
+      direction.z = -mobileInput.y;
     } else {
       if (keys.current.w) direction.z -= 1;
       if (keys.current.s) direction.z += 1;
@@ -110,7 +110,7 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
       if (keys.current.d) direction.x += 1;
     }
 
-    if (direction.length() > 0) {
+    if (direction.length() > 0.1) {
       direction.normalize();
       velocity.current.x = direction.x * speed;
       velocity.current.z = direction.z * speed;

@@ -167,17 +167,17 @@ export function CityDeliveryRush() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
           
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 20 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
                 className="absolute bg-yellow-500/10 rounded-full animate-float"
                 style={{
-                  width: `${20 + Math.random() * 80}px`,
-                  height: `${20 + Math.random() * 80}px`,
+                  width: `${30 + Math.random() * 50}px`,
+                  height: `${30 + Math.random() * 50}px`,
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 5}s`,
-                  animationDuration: `${10 + Math.random() * 10}s`
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${8 + Math.random() * 6}s`
                 }}
               />
             ))}
@@ -186,97 +186,93 @@ export function CityDeliveryRush() {
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
           <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
 
-          <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-4 sm:p-6 max-w-[98%] sm:max-w-md w-full text-black text-center shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:translate-y-[4px] transition-all duration-200">
+          <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-3 sm:p-4 max-w-[95%] sm:max-w-sm w-full max-h-[95vh] overflow-y-auto text-black text-center shadow-[0_8px_0_0_rgba(0,0,0,1)]">
             <div className="absolute -top-4 -left-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🚀</div>
             <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🏙️</div>
             
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-rubik mb-2 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
-              City Delivery Rush
+            <h1 className="text-xl sm:text-2xl font-extrabold font-rubik mb-1 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
+              City Rush
             </h1>
-            <p className="text-xs sm:text-sm mb-3 font-bold leading-snug text-gray-700">
-              Доставляй заказы, зарабатывай<br /> монеты и прокачивай транспорт!
+            <p className="text-[10px] sm:text-xs mb-2 font-bold leading-tight text-gray-700">
+              Доставляй заказы и зарабатывай!
             </p>
             
-            <div className="grid grid-cols-3 gap-2 my-3">
-              <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
-                <div className="text-2xl mb-1">🚶</div>
-                <div className="text-[10px] sm:text-xs font-extrabold">Пешком</div>
-                <div className="text-[8px] opacity-70">3 м/с</div>
+            <div className="grid grid-cols-3 gap-1.5 my-2">
+              <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-1.5 rounded-lg border-2 border-black">
+                <div className="text-lg mb-0.5">🚶</div>
+                <div className="text-[9px] font-extrabold">Пешком</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
-                <div className="text-2xl mb-1">🚲</div>
-                <div className="text-[10px] sm:text-xs font-extrabold">Велик</div>
-                <div className="text-[8px] opacity-70">6 м/с</div>
+              <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-1.5 rounded-lg border-2 border-black">
+                <div className="text-lg mb-0.5">🚲</div>
+                <div className="text-[9px] font-extrabold">Велик</div>
               </div>
-              <div className="bg-gradient-to-br from-green-100 to-green-200 p-2 rounded-xl border-3 border-black hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
-                <div className="text-2xl mb-1">🛴</div>
-                <div className="text-[10px] sm:text-xs font-extrabold">Самокат</div>
-                <div className="text-[8px] opacity-70">9 м/с</div>
+              <div className="bg-gradient-to-br from-green-100 to-green-200 p-1.5 rounded-lg border-2 border-black">
+                <div className="text-lg mb-0.5">🛴</div>
+                <div className="text-[9px] font-extrabold">Самокат</div>
               </div>
             </div>
 
-            <div className="mb-3 bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-xl border-3 border-black">
-              <div className="text-[10px] font-bold mb-2 text-gray-700">🌤️ Погода:</div>
-              <div className="grid grid-cols-4 gap-1.5">
+            <div className="mb-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-1.5 rounded-lg border-2 border-black">
+              <div className="text-[9px] font-bold mb-1 text-gray-700">🌤️ Погода:</div>
+              <div className="grid grid-cols-4 gap-1">
                 <button
                   onClick={() => setWeather('clear')}
-                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'clear' ? 'bg-yellow-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-400'}`}
                 >
                   ☀️
                 </button>
                 <button
                   onClick={() => setWeather('rain')}
-                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'rain' ? 'bg-blue-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-400'}`}
                 >
                   🌧️
                 </button>
                 <button
                   onClick={() => setWeather('snow')}
-                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'snow' ? 'bg-white border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-400'}`}
                 >
                   ❄️
                 </button>
                 <button
                   onClick={() => setWeather('fog')}
-                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'fog' ? 'bg-gray-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-400'}`}
                 >
                   🌫️
                 </button>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <button
                 onClick={() => setGameStarted(true)}
-                className="w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-white font-extrabold py-3 px-4 text-base rounded-xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 animate-pulse"
+                className="w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-white font-extrabold py-2.5 px-3 text-sm rounded-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:shadow-none transition-all animate-pulse"
               >
-                <Icon name="Rocket" size={18} className="inline mr-2" />
                 🎮 Начать игру
               </button>
               
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => setShowProfile(true)}
-                  className="flex-1 bg-white hover:bg-yellow-50 text-black font-bold py-2 px-3 rounded-xl border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-none transition-all text-xs"
+                  className="flex-1 bg-white text-black font-bold py-2 px-2 rounded-lg border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all text-[10px]"
                 >
                   👤 Профиль
                 </button>
                 <button
                   onClick={() => setShowLeaderboard(true)}
-                  className="flex-1 bg-white hover:bg-yellow-50 text-black font-bold py-2 px-3 rounded-xl border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-none transition-all text-xs"
+                  className="flex-1 bg-white text-black font-bold py-2 px-2 rounded-lg border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all text-[10px]"
                 >
                   🏆 Топ
                 </button>
               </div>
             </div>
 
-            <div className="mt-3 text-[10px] font-bold">
+            <div className="mt-2 text-[9px] font-bold">
               {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1.5 rounded-lg border-2 border-black">
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-2 py-1 rounded-md border border-black">
                   🎮 Джойстик | ⚡ Бег | 🔼 Прыжок
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1.5 rounded-lg border-2 border-black">
+                <div className="bg-gradient-to-r from-blue-100 to-cyan-100 px-2 py-1 rounded-md border border-black">
                   ⌨️ WASD | Shift | Space
                 </div>
               )}
