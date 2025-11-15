@@ -243,7 +243,7 @@ export function CityDeliveryRush() {
     <LandscapeOrientation>
       <div className="w-full h-screen relative bg-gray-900">
       <Canvas
-        camera={{ position: [10, 8, 10], fov: 60 }}
+        camera={{ position: [6, 4, 6], fov: 70 }}
         shadows={settings.shadows}
         dpr={settings.pixelRatio}
         gl={{ antialias: settings.antialias }}
@@ -285,10 +285,13 @@ export function CityDeliveryRush() {
           
           <OrbitControls
             enablePan={false}
-            minDistance={5}
-            maxDistance={30}
-            maxPolarAngle={Math.PI / 2.2}
+            minDistance={3}
+            maxDistance={25}
+            maxPolarAngle={Math.PI / 2.1}
+            minPolarAngle={Math.PI / 6}
             enableDamping={settings.quality === 'high'}
+            enableRotate={true}
+            rotateSpeed={0.5}
           />
         </Suspense>
       </Canvas>
