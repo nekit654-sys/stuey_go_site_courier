@@ -1,3 +1,6 @@
+import { useNavigate } from 'react-router-dom';
+import Icon from '@/components/ui/icon';
+
 interface GameHUDProps {
   score: number;
   deliveries: number;
@@ -10,6 +13,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soundEnabled, onSoundToggle }: GameHUDProps) {
+  const navigate = useNavigate();
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 
@@ -69,9 +73,18 @@ export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soun
 
             <button
               onClick={onExit}
-              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold transition-all"
+              className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg font-semibold transition-all"
+              title="Вернуться в меню"
             >
-              Выход
+              <Icon name="Menu" size={20} />
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[3px] active:shadow-none transition-all"
+              title="На главную"
+            >
+              <Icon name="Home" size={20} />
             </button>
           </div>
         </div>
