@@ -16,6 +16,9 @@ import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
 import { Weather } from './Weather';
+import { LevelUpNotification } from './LevelUpNotification';
+import { SkillTree } from './SkillTree';
+import { ExperienceBar } from './ExperienceBar';
 import Icon from '@/components/ui/icon';
 
 interface GameState {
@@ -61,6 +64,12 @@ export function CityDeliveryRush() {
   const [graphicsQuality, setGraphicsQuality] = useState<'low' | 'medium' | 'high'>('medium');
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [deliveryStage, setDeliveryStage] = useState<'none' | 'pickup' | 'delivery'>('none');
+  const [level, setLevel] = useState(1);
+  const [currentExp, setCurrentExp] = useState(0);
+  const [expToNextLevel, setExpToNextLevel] = useState(100);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpData, setLevelUpData] = useState({ level: 1, skillPoints: 0 });
+  const [showSkillTree, setShowSkillTree] = useState(false);
   
   const saveSettings = async () => {
     if (!gameState.courierId) return;
@@ -106,6 +115,14 @@ export function CityDeliveryRush() {
           setSoundEnabled(data.settings.sound_enabled !== false);
           setWeather(data.settings.weather_preference || 'clear');
         }
+        
+        setLevel(data.courier.level || 1);
+        setCurrentExp(data.courier.current_exp || 0);
+        
+        const nextLevelResponse = await fetch(
+          `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=leaderboard&limit=1`
+        );
+        setExpToNextLevel(100);
         
         setGameState(prev => ({
           ...prev,
@@ -199,10 +216,25 @@ export function CityDeliveryRush() {
 
       setGameState(prev => ({
         ...prev,
-        score: prev.score + coins,
+        score: prev.score + data.coins_earned,
         deliveries: prev.deliveries + 1,
         hasPackage: false
       }));
+      
+      if (data.exp_gained) {
+        setCurrentExp(prev => prev + data.exp_gained);
+      }
+      
+      if (data.leveled_up && data.new_level) {
+        setLevel(data.new_level);
+        setLevelUpData({
+          level: data.new_level,
+          skillPoints: data.skill_points_gained
+        });
+        setShowLevelUp(true);
+        (window as any).playSound?.('levelUp');
+        playVibration('levelUp');
+      }
       
       setCurrentOrder(null);
       setDeliveryStage('none');
@@ -418,6 +450,22 @@ export function CityDeliveryRush() {
         </Suspense>
       </Canvas>
 
+      <div className="absolute top-4 left-4 z-50 space-y-2">
+        <ExperienceBar
+          currentExp={currentExp}
+          level={level}
+          expToNextLevel={expToNextLevel}
+        />
+        
+        <button
+          onClick={() => setShowSkillTree(true)}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-bold text-sm border-2 border-purple-400 flex items-center gap-2 shadow-lg"
+        >
+          <span>🌟</span>
+          <span>Навыки</span>
+        </button>
+      </div>
+      
       <GameHUD
         score={gameState.score}
         deliveries={gameState.deliveries}
@@ -461,6 +509,21 @@ export function CityDeliveryRush() {
       >
         <Icon name="X" size={20} />
       </button>
+      
+      {showLevelUp && (
+        <LevelUpNotification
+          level={levelUpData.level}
+          skillPoints={levelUpData.skillPoints}
+          onClose={() => setShowLevelUp(false)}
+        />
+      )}
+      
+      {showSkillTree && gameState.courierId && (
+        <SkillTree
+          courierId={gameState.courierId}
+          onClose={() => setShowSkillTree(false)}
+        />
+      )}
     </div>
   );
 }

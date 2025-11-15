@@ -233,14 +233,50 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                  distance, vehicle, weather, time_of_day)
             )
             
+            exp_gained = coins // 10
+            
+            cur.execute(
+                "SELECT level, current_exp FROM couriers WHERE id = %s",
+                (courier_id,)
+            )
+            courier_data = cur.fetchone()
+            current_level = courier_data['level']
+            current_exp = courier_data['current_exp']
+            new_exp = current_exp + exp_gained
+            
+            cur.execute(
+                "SELECT exp_required FROM level_rewards WHERE level = %s",
+                (current_level + 1,)
+            )
+            next_level_data = cur.fetchone()
+            
+            leveled_up = False
+            new_level = current_level
+            skill_points_gained = 0
+            
+            if next_level_data and new_exp >= next_level_data['exp_required']:
+                new_level = current_level + 1
+                leveled_up = True
+                
+                cur.execute(
+                    "SELECT skill_points_reward, coins_reward FROM level_rewards WHERE level = %s",
+                    (new_level,)
+                )
+                reward_data = cur.fetchone()
+                skill_points_gained = reward_data['skill_points_reward']
+                coins += reward_data['coins_reward']
+            
             cur.execute(
                 """UPDATE couriers 
                    SET total_deliveries = total_deliveries + 1,
                        total_coins = total_coins + %s,
                        total_distance = total_distance + %s,
-                       experience = experience + %s
+                       experience = experience + %s,
+                       current_exp = %s,
+                       level = %s,
+                       skill_points = skill_points + %s
                    WHERE id = %s""",
-                (coins, distance, coins // 10, courier_id)
+                (coins, distance, exp_gained, new_exp, new_level, skill_points_gained, courier_id)
             )
             
             cur.execute(
@@ -265,7 +301,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'success': True,
                     'coins_earned': coins,
-                    'bonus_speed': bonus_speed
+                    'bonus_speed': bonus_speed,
+                    'exp_gained': exp_gained,
+                    'leveled_up': leveled_up,
+                    'new_level': new_level if leveled_up else None,
+                    'skill_points_gained': skill_points_gained
                 }),
                 'isBase64Encoded': False
             }
@@ -333,6 +373,78 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'statusCode': 200,
                 'headers': headers,
                 'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+        
+        elif action == 'upgrade_skill':
+            courier_id = body_data.get('courier_id')
+            skill_name = body_data.get('skill_name')
+            
+            cur.execute(
+                "SELECT skill_points FROM couriers WHERE id = %s",
+                (courier_id,)
+            )
+            courier = cur.fetchone()
+            
+            if courier['skill_points'] < 1:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Not enough skill points'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                """INSERT INTO courier_skills (courier_id, skill_name, skill_level)
+                   VALUES (%s, %s, 1)
+                   ON CONFLICT (courier_id, skill_name)
+                   DO UPDATE SET skill_level = courier_skills.skill_level + 1""",
+                (courier_id, skill_name)
+            )
+            
+            cur.execute(
+                "UPDATE couriers SET skill_points = skill_points - 1 WHERE id = %s",
+                (courier_id,)
+            )
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+        
+        elif action == 'get_skills':
+            courier_id = body_data.get('courier_id')
+            
+            cur.execute(
+                "SELECT * FROM courier_skills WHERE courier_id = %s",
+                (courier_id,)
+            )
+            skills = cur.fetchall()
+            
+            cur.execute(
+                "SELECT skill_points FROM couriers WHERE id = %s",
+                (courier_id,)
+            )
+            courier = cur.fetchone()
+            
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'skills': [dict(s) for s in skills],
+                    'available_points': courier['skill_points']
+                }),
                 'isBase64Encoded': False
             }
     
