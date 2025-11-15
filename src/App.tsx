@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
+import Game from "./pages/Game";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const MaintenanceWrapper = () => {
         <Route path="/career" element={<Career />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/contacts" element={<Contacts />} />
+        <Route path="/game" element={<Game />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/auth" element={<Auth />} />

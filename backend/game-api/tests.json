@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get courier profile",
+      "method": "GET",
+      "path": "/?action=profile&username=testuser999",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get leaderboard",
+      "method": "GET",
+      "path": "/?action=leaderboard&period=all&limit=10",
+      "expectedStatus": 200
+    }
+  ]
+}
