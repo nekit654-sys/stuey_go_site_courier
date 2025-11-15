@@ -42,6 +42,8 @@ export function CityDeliveryRush() {
   const [buildingPositions, setBuildingPositions] = useState<Array<{ x: number; z: number; size: number }>>([]);
   const [playerPosition, setPlayerPosition] = useState<{ x: number; z: number }>({ x: 0, z: 0 });
   const [weather, setWeather] = useState<'clear' | 'rain' | 'snow' | 'fog'>('clear');
+  const [showSettings, setShowSettings] = useState(false);
+  const [graphicsQuality, setGraphicsQuality] = useState<'low' | 'medium' | 'high'>('medium');
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -164,119 +166,131 @@ export function CityDeliveryRush() {
       <LandscapeOrientation>
         <div className="w-full h-screen bg-gradient-to-br from-yellow-400 via-amber-300 to-orange-200 flex items-center justify-center overflow-hidden relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.08)_0%,transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
           
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute bg-yellow-500/10 rounded-full animate-float"
-                style={{
-                  width: `${30 + Math.random() * 50}px`,
-                  height: `${30 + Math.random() * 50}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${8 + Math.random() * 6}s`
-                }}
-              />
-            ))}
-          </div>
-          
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
-          <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-black via-yellow-400 to-black"></div>
 
-          <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-3 sm:p-4 max-w-[95%] sm:max-w-sm w-full max-h-[95vh] overflow-y-auto text-black text-center shadow-[0_8px_0_0_rgba(0,0,0,1)]">
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🚀</div>
-            <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-2xl shadow-lg">🏙️</div>
+          <div className="relative z-10 bg-white border-3 border-black rounded-xl p-2.5 sm:p-3 max-w-[96%] sm:max-w-sm w-full text-black text-center shadow-[0_6px_0_0_rgba(0,0,0,1)]">
+            <div className="absolute -top-3 -left-3 w-10 h-10 bg-yellow-400 border-2 border-black rounded-full flex items-center justify-center text-xl shadow-lg">🚀</div>
+            <div className="absolute -top-3 -right-3 w-10 h-10 bg-yellow-400 border-2 border-black rounded-full flex items-center justify-center text-xl shadow-lg">🏙️</div>
             
-            <h1 className="text-xl sm:text-2xl font-extrabold font-rubik mb-1 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
-              City Rush
-            </h1>
-            <p className="text-[10px] sm:text-xs mb-2 font-bold leading-tight text-gray-700">
-              Доставляй заказы и зарабатывай!
-            </p>
-            
-            <div className="grid grid-cols-3 gap-1.5 my-2">
-              <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-1.5 rounded-lg border-2 border-black">
-                <div className="text-lg mb-0.5">🚶</div>
-                <div className="text-[9px] font-extrabold">Пешком</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-1.5 rounded-lg border-2 border-black">
-                <div className="text-lg mb-0.5">🚲</div>
-                <div className="text-[9px] font-extrabold">Велик</div>
-              </div>
-              <div className="bg-gradient-to-br from-green-100 to-green-200 p-1.5 rounded-lg border-2 border-black">
-                <div className="text-lg mb-0.5">🛴</div>
-                <div className="text-[9px] font-extrabold">Самокат</div>
-              </div>
-            </div>
-
-            <div className="mb-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-1.5 rounded-lg border-2 border-black">
-              <div className="text-[9px] font-bold mb-1 text-gray-700">🌤️ Погода:</div>
-              <div className="grid grid-cols-4 gap-1">
-                <button
-                  onClick={() => setWeather('clear')}
-                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-400'}`}
-                >
-                  ☀️
-                </button>
-                <button
-                  onClick={() => setWeather('rain')}
-                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-400'}`}
-                >
-                  🌧️
-                </button>
-                <button
-                  onClick={() => setWeather('snow')}
-                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-400'}`}
-                >
-                  ❄️
-                </button>
-                <button
-                  onClick={() => setWeather('fog')}
-                  className={`p-1 rounded-md border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-400'}`}
-                >
-                  🌫️
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <button
-                onClick={() => setGameStarted(true)}
-                className="w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-white font-extrabold py-2.5 px-3 text-sm rounded-lg border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:shadow-none transition-all animate-pulse"
-              >
-                🎮 Начать игру
-              </button>
-              
-              <div className="flex gap-1.5">
-                <button
-                  onClick={() => setShowProfile(true)}
-                  className="flex-1 bg-white text-black font-bold py-2 px-2 rounded-lg border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all text-[10px]"
-                >
-                  👤 Профиль
-                </button>
-                <button
-                  onClick={() => setShowLeaderboard(true)}
-                  className="flex-1 bg-white text-black font-bold py-2 px-2 rounded-lg border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all text-[10px]"
-                >
-                  🏆 Топ
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-2 text-[9px] font-bold">
-              {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-2 py-1 rounded-md border border-black">
-                  🎮 Джойстик | ⚡ Бег | 🔼 Прыжок
+            {!showSettings ? (
+              <>
+                <h1 className="text-lg sm:text-xl font-extrabold font-rubik mb-0.5 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                  City Rush
+                </h1>
+                <p className="text-[9px] mb-1.5 font-bold leading-tight text-gray-700">
+                  Доставляй и зарабатывай!
+                </p>
+                
+                <div className="flex gap-1 mb-1.5 justify-center">
+                  <div className="bg-yellow-100 p-1 rounded border border-black flex items-center gap-0.5">
+                    <div className="text-sm">🚶</div>
+                    <div className="text-[8px] font-bold">Пешком</div>
+                  </div>
+                  <div className="bg-blue-100 p-1 rounded border border-black flex items-center gap-0.5">
+                    <div className="text-sm">🚲</div>
+                    <div className="text-[8px] font-bold">Велик</div>
+                  </div>
+                  <div className="bg-green-100 p-1 rounded border border-black flex items-center gap-0.5">
+                    <div className="text-sm">🛴</div>
+                    <div className="text-[8px] font-bold">Самокат</div>
+                  </div>
                 </div>
-              ) : (
-                <div className="bg-gradient-to-r from-blue-100 to-cyan-100 px-2 py-1 rounded-md border border-black">
-                  ⌨️ WASD | Shift | Space
+
+                <div className="grid grid-cols-2 gap-1 mb-1.5">
+                  <div className="bg-blue-50 p-1 rounded border border-black">
+                    <div className="text-[8px] font-bold mb-0.5 text-gray-700">🌤️ Погода:</div>
+                    <div className="flex gap-0.5">
+                      <button onClick={() => setWeather('clear')} className={`flex-1 p-0.5 rounded text-xs ${weather === 'clear' ? 'bg-yellow-400' : 'bg-white'}`}>☀️</button>
+                      <button onClick={() => setWeather('rain')} className={`flex-1 p-0.5 rounded text-xs ${weather === 'rain' ? 'bg-blue-400' : 'bg-white'}`}>🌧️</button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-purple-50 p-1 rounded border border-black">
+                    <div className="text-[8px] font-bold mb-0.5 text-gray-700">⚙️ Графика:</div>
+                    <div className="flex gap-0.5">
+                      <button onClick={() => setGraphicsQuality('low')} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'low' ? 'bg-green-400' : 'bg-white'}`}>💚</button>
+                      <button onClick={() => setGraphicsQuality('high')} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'high' ? 'bg-red-400' : 'bg-white'}`}>🔥</button>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
+
+                <button
+                  onClick={() => setGameStarted(true)}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-extrabold py-2 text-sm rounded-lg border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] active:translate-y-[3px] active:shadow-none transition-all mb-1"
+                >
+                  🎮 Играть
+                </button>
+                
+                <div className="flex gap-1 mb-1">
+                  <button onClick={() => setShowProfile(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
+                    👤
+                  </button>
+                  <button onClick={() => setShowLeaderboard(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
+                    🏆
+                  </button>
+                  <button onClick={() => setShowSettings(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
+                    ⚙️
+                  </button>
+                </div>
+
+                <div className="text-[8px] font-bold bg-gray-100 px-1.5 py-0.5 rounded">
+                  {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Джойстик' : '⌨️ WASD'}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-extrabold mb-2">⚙️ Настройки</h2>
+                
+                <div className="space-y-2 text-left">
+                  <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
+                    <div className="text-[9px] font-bold mb-1 text-gray-700">🎨 Качество графики:</div>
+                    <div className="grid grid-cols-2 gap-1">
+                      <button
+                        onClick={() => setGraphicsQuality('low')}
+                        className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'low' ? 'bg-green-400 border-black' : 'bg-white border-gray-300'}`}
+                      >
+                        💚 Низкое<br/><span className="text-[8px] opacity-70">Макс. FPS</span>
+                      </button>
+                      <button
+                        onClick={() => setGraphicsQuality('high')}
+                        className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'high' ? 'bg-red-400 border-black' : 'bg-white border-gray-300'}`}
+                      >
+                        🔥 Высокое<br/><span className="text-[8px] opacity-70">Красиво</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
+                    <div className="text-[9px] font-bold mb-1 text-gray-700">🔊 Звук:</div>
+                    <button
+                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      className={`w-full p-1.5 rounded border-2 font-bold text-[10px] ${soundEnabled ? 'bg-green-400 border-black' : 'bg-gray-300 border-gray-400'}`}
+                    >
+                      {soundEnabled ? '🔊 Включен' : '🔇 Выключен'}
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
+                    <div className="text-[9px] font-bold mb-1 text-gray-700">🌤️ Погода:</div>
+                    <div className="grid grid-cols-4 gap-1">
+                      <button onClick={() => setWeather('clear')} className={`p-1 rounded border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-300'}`}>☀️</button>
+                      <button onClick={() => setWeather('rain')} className={`p-1 rounded border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-300'}`}>🌧️</button>
+                      <button onClick={() => setWeather('snow')} className={`p-1 rounded border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-300'}`}>❄️</button>
+                      <button onClick={() => setWeather('fog')} className={`p-1 rounded border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-300'}`}>🌫️</button>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="w-full mt-2 bg-gray-800 text-white font-bold py-2 rounded-lg border-2 border-black text-sm"
+                >
+                  ← Назад
+                </button>
+              </>
+            )}
           </div>
         </div>
       </LandscapeOrientation>
@@ -311,11 +325,11 @@ export function CityDeliveryRush() {
           
           <City 
             gridSize={settings.citySize} 
-            quality={settings.quality}
+            quality={graphicsQuality === 'low' ? 'low' : 'high'}
             onBuildingsReady={setBuildingPositions}
           />
 
-          <Weather type={weather} />
+          {graphicsQuality === 'high' && <Weather type={weather} />}
           
           <Courier
             position={[0, 0.5, 0]}
