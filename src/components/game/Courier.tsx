@@ -8,13 +8,17 @@ interface CourierProps {
   vehicle: 'walk' | 'bicycle' | 'scooter';
   hasPackage: boolean;
   onEnergyChange: (energy: number) => void;
+  mobileInput?: { x: number; y: number };
+  mobileSprint?: boolean;
+  mobileJump?: boolean;
 }
 
-export function Courier({ position, vehicle, hasPackage, onEnergyChange }: CourierProps) {
+export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileInput, mobileSprint, mobileJump }: CourierProps) {
   const groupRef = useRef<THREE.Group>(null);
   const velocity = useRef(new THREE.Vector3());
   const keys = useRef({ w: false, a: false, s: false, d: false, shift: false, space: false });
   const energy = useRef(100);
+  const lastJumpRef = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +61,9 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange }: Couri
 
     let speed = speeds[vehicle];
     
-    if (keys.current.shift && energy.current > 0) {
+    const isSprinting = keys.current.shift || mobileSprint;
+    
+    if (isSprinting && energy.current > 0) {
       speed *= 1.5;
       energy.current = Math.max(0, energy.current - delta * 10);
       onEnergyChange(energy.current);
@@ -68,10 +74,15 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange }: Couri
 
     const direction = new THREE.Vector3();
     
-    if (keys.current.w) direction.z -= 1;
-    if (keys.current.s) direction.z += 1;
-    if (keys.current.a) direction.x -= 1;
-    if (keys.current.d) direction.x += 1;
+    if (mobileInput) {
+      direction.x = mobileInput.x;
+      direction.z = mobileInput.y;
+    } else {
+      if (keys.current.w) direction.z -= 1;
+      if (keys.current.s) direction.z += 1;
+      if (keys.current.a) direction.x -= 1;
+      if (keys.current.d) direction.x += 1;
+    }
 
     if (direction.length() > 0) {
       direction.normalize();
@@ -95,9 +106,13 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange }: Couri
     state.camera.position.z = groupRef.current.position.z + 20;
     state.camera.lookAt(groupRef.current.position);
 
-    if (keys.current.space && groupRef.current.position.y < 1) {
+    const shouldJump = (keys.current.space || mobileJump) && groupRef.current.position.y < 1;
+    const now = performance.now();
+    
+    if (shouldJump && now - lastJumpRef.current > 300) {
       velocity.current.y = 5;
       keys.current.space = false;
+      lastJumpRef.current = now;
       (window as any).playSound?.('jump');
     }
 

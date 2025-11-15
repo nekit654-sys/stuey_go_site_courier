@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 
-const GRID_SIZE = 15;
+interface CityProps {
+  gridSize?: number;
+  quality?: 'low' | 'medium' | 'high';
+}
+
 const BLOCK_SIZE = 10;
 
 const cityLayout = [
@@ -30,12 +34,13 @@ const buildingColors = [
   '#EC4899'
 ];
 
-export function City() {
+export function City({ gridSize = 15, quality = 'high' }: CityProps = {}) {
   const buildings = useMemo(() => {
     const result = [];
+    const size = Math.min(gridSize, cityLayout.length);
     
-    for (let x = 0; x < cityLayout.length; x++) {
-      for (let z = 0; z < cityLayout[x].length; z++) {
+    for (let x = 0; x < size; x++) {
+      for (let z = 0; z < Math.min(size, cityLayout[x].length); z++) {
         const cellType = cityLayout[x][z];
         
         if (cellType === 1) {
@@ -44,9 +49,9 @@ export function City() {
           
           result.push({
             position: [
-              (x - GRID_SIZE / 2) * BLOCK_SIZE,
+              (x - size / 2) * BLOCK_SIZE,
               height * 2.5,
-              (z - GRID_SIZE / 2) * BLOCK_SIZE
+              (z - size / 2) * BLOCK_SIZE
             ] as [number, number, number],
             height: height * 5,
             color
@@ -54,9 +59,9 @@ export function City() {
         } else if (cellType === 2) {
           result.push({
             position: [
-              (x - GRID_SIZE / 2) * BLOCK_SIZE,
+              (x - size / 2) * BLOCK_SIZE,
               2.5,
-              (z - GRID_SIZE / 2) * BLOCK_SIZE
+              (z - size / 2) * BLOCK_SIZE
             ] as [number, number, number],
             height: 5,
             color: '#22C55E',
@@ -67,12 +72,14 @@ export function City() {
     }
     
     return result;
-  }, []);
+  }, [gridSize]);
+  
+  const showWindows = quality !== 'low';
 
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-        <planeGeometry args={[GRID_SIZE * BLOCK_SIZE, GRID_SIZE * BLOCK_SIZE]} />
+        <planeGeometry args={[gridSize * BLOCK_SIZE, gridSize * BLOCK_SIZE]} />
         <meshStandardMaterial color="#475569" />
       </mesh>
 
@@ -96,7 +103,7 @@ export function City() {
                 <meshStandardMaterial color={building.color} />
               </mesh>
               
-              {Array.from({ length: Math.floor(building.height / 3) }).map((_, floor) => (
+              {showWindows && Array.from({ length: Math.floor(building.height / 3) }).map((_, floor) => (
                 <group key={floor}>
                   {[0, 1, 2, 3].map((side) => {
                     const angle = (Math.PI / 2) * side;

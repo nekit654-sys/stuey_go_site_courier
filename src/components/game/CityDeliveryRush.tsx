@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stats, Sky } from '@react-three/drei';
+import { OrbitControls, Sky } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { City } from './City';
 import { Courier } from './Courier';
@@ -8,6 +8,8 @@ import { DeliverySystem } from './DeliverySystem';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
+import { usePerformanceSettings, PerformanceMonitor } from './PerformanceManager';
+import { MobileControls } from './MobileControls';
 
 interface GameState {
   score: number;
@@ -21,12 +23,16 @@ interface GameState {
 }
 
 export function CityDeliveryRush() {
+  const { settings, currentFps } = usePerformanceSettings();
   const [gameStarted, setGameStarted] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState(0.3);
   const [sfxVolume, setSfxVolume] = useState(0.5);
+  const [mobileInput, setMobileInput] = useState({ x: 0, y: 0 });
+  const [mobileSprint, setMobileSprint] = useState(false);
+  const [mobileJump, setMobileJump] = useState(false);
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -177,7 +183,15 @@ export function CityDeliveryRush() {
           </div>
 
           <div className="text-sm opacity-75">
-            Управление: WASD - движение, Shift - бег, Пробел - прыжок
+            {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
+              <>Управление: Джойстик - движение, ⚡ - бег, 🔼 - прыжок</>
+            ) : (
+              <>Управление: WASD - движение, Shift - бег, Пробел - прыжок</>
+            )}
+          </div>
+          
+          <div className="text-xs opacity-60 mt-2">
+            Качество графики: {settings.quality === 'low' ? 'Низкое' : settings.quality === 'medium' ? 'Среднее' : 'Высокое'}
           </div>
         </div>
       </div>
@@ -188,7 +202,9 @@ export function CityDeliveryRush() {
     <div className="w-full h-screen relative bg-gray-900">
       <Canvas
         camera={{ position: [20, 20, 20], fov: 50 }}
-        shadows
+        shadows={settings.shadows}
+        dpr={settings.pixelRatio}
+        gl={{ antialias: settings.antialias }}
       >
         <Suspense fallback={null}>
           <Sky sunPosition={[100, 20, 100]} />
@@ -197,18 +213,21 @@ export function CityDeliveryRush() {
           <directionalLight
             position={[50, 50, 25]}
             intensity={1}
-            castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
+            castShadow={settings.shadows}
+            shadow-mapSize-width={settings.shadowMapSize}
+            shadow-mapSize-height={settings.shadowMapSize}
           />
           
-          <City />
+          <City gridSize={settings.citySize} quality={settings.quality} />
           
           <Courier
             position={[0, 0.5, 0]}
             vehicle={gameState.currentVehicle}
             hasPackage={gameState.hasPackage}
             onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
+            mobileInput={mobileInput}
+            mobileSprint={mobileSprint}
+            mobileJump={mobileJump}
           />
           
           <DeliverySystem
@@ -226,11 +245,12 @@ export function CityDeliveryRush() {
             minDistance={10}
             maxDistance={50}
             maxPolarAngle={Math.PI / 2.5}
+            enableDamping={settings.quality === 'high'}
           />
-          
-          <Stats />
         </Suspense>
       </Canvas>
+
+      <PerformanceMonitor fps={currentFps} />
 
       <GameHUD
         score={gameState.score}
@@ -248,6 +268,15 @@ export function CityDeliveryRush() {
         musicVolume={musicVolume}
         sfxVolume={sfxVolume}
         currentTrack="day"
+      />
+
+      <MobileControls
+        onMove={setMobileInput}
+        onJump={() => {
+          setMobileJump(true);
+          setTimeout(() => setMobileJump(false), 100);
+        }}
+        onSprint={setMobileSprint}
       />
     </div>
   );
