@@ -11,6 +11,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
   const audioContextRef = useRef<AudioContext | null>(null);
   const soundsRef = useRef<Map<string, { oscillator: OscillatorNode; gain: GainNode; panner: PannerNode }>>(new Map());
   const ambientGainRef = useRef<GainNode | null>(null);
+  const birdPositionsRef = useRef<Array<{ x: number; y: number; z: number }>>([]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -119,7 +120,96 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       };
     };
 
+    const createWindSound = () => {
+      const windNoise = ctx.createBufferSource();
+      const bufferSize = ctx.sampleRate * 4;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.03 * Math.sin(i / 5000);
+      }
+      
+      windNoise.buffer = buffer;
+      windNoise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+
+      const windGain = ctx.createGain();
+      windGain.gain.value = volume * 0.15;
+
+      windNoise.connect(filter);
+      filter.connect(windGain);
+      windGain.connect(ctx.destination);
+      windNoise.start();
+
+      return windGain;
+    };
+
+    const createBirdChirp = (x: number, y: number, z: number) => {
+      const chirp = ctx.createOscillator();
+      const chirpGain = ctx.createGain();
+      const panner = ctx.createPanner();
+
+      panner.panningModel = 'HRTF';
+      panner.distanceModel = 'exponential';
+      panner.setPosition(x, y, z);
+      panner.refDistance = 20;
+      panner.maxDistance = 100;
+      panner.rolloffFactor = 1.5;
+
+      chirp.frequency.value = 1500 + Math.random() * 1000;
+      chirpGain.gain.value = volume * 0.08;
+
+      chirp.connect(chirpGain);
+      chirpGain.connect(panner);
+      panner.connect(ctx.destination);
+
+      chirp.start();
+      chirp.frequency.exponentialRampToValueAtTime(2000 + Math.random() * 500, ctx.currentTime + 0.2);
+      chirpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      
+      setTimeout(() => chirp.stop(), 350);
+
+      return panner;
+    };
+
+    const initBirdPositions = () => {
+      birdPositionsRef.current = Array.from({ length: 8 }).map(() => ({
+        x: (Math.random() - 0.5) * 100,
+        y: 15 + Math.random() * 15,
+        z: (Math.random() - 0.5) * 100
+      }));
+    };
+
+    const updateBirdPosition = (index: number, time: number) => {
+      const bird = birdPositionsRef.current[index];
+      if (!bird) return bird;
+
+      const speed = 0.3;
+      const offset = index * 1.57;
+      return {
+        x: Math.sin(time * speed + offset) * 50,
+        y: 15 + Math.sin(time * speed * 2 + offset) * 5,
+        z: Math.cos(time * speed + offset) * 50
+      };
+    };
+
     createAmbientSound();
+    const windGain = createWindSound();
+    initBirdPositions();
+
+    const birdChirpInterval = setInterval(() => {
+      if (enabled && Math.random() > 0.7) {
+        const birdIndex = Math.floor(Math.random() * birdPositionsRef.current.length);
+        const bird = birdPositionsRef.current[birdIndex];
+        if (bird) {
+          createBirdChirp(bird.x, bird.y, bird.z);
+        }
+      }
+    }, 2000 + Math.random() * 3000);
 
     const carPositions = [
       { x: -20 - 1.5, z: 0 },
@@ -162,6 +252,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
     };
 
     return () => {
+      clearInterval(birdChirpInterval);
       lightCleanups.forEach(cleanup => cleanup());
       
       soundsRef.current.forEach(({ oscillator }) => {
@@ -180,6 +271,14 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
 
   useEffect(() => {
     if (!audioContextRef.current || !enabled) return;
+
+    const updateInterval = setInterval(() => {
+      const time = performance.now() / 1000;
+      
+      birdPositionsRef.current = birdPositionsRef.current.map((_, index) => 
+        updateBirdPosition(index, time)
+      );
+    }, 100);
 
     soundsRef.current.forEach(({ panner }, id) => {
       if (id.startsWith('ambient-car')) {
@@ -203,6 +302,8 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       audioContextRef.current.listener.positionZ.value = playerPosition.z;
       audioContextRef.current.listener.positionY.value = 1.5;
     }
+
+    return () => clearInterval(updateInterval);
   }, [playerPosition, enabled]);
 
   useEffect(() => {

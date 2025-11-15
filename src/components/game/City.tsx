@@ -529,9 +529,20 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
             <Pedestrian key={`ped2-${i}`} sidewalk={BLOCK_SIZE + 4} startZ={(i - 3) * 20} />
           ))}
 
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Bird key={i} startPos={[Math.random() * 40 - 20, 15 + Math.random() * 10, Math.random() * 40 - 20]} />
-          ))}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const radius = 30 + Math.random() * 30;
+            const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.5;
+            return (
+              <Bird 
+                key={i} 
+                startPos={[
+                  Math.cos(angle) * radius, 
+                  15 + Math.random() * 15, 
+                  Math.sin(angle) * radius
+                ]} 
+              />
+            );
+          })}
         </>
       )}
 
