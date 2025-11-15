@@ -3,7 +3,6 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { playVibration } from './VibrationManager';
 
-
 interface CourierProps {
   position: [number, number, number];
   vehicle: 'walk' | 'bicycle' | 'scooter';
@@ -12,14 +11,16 @@ interface CourierProps {
   mobileInput?: { x: number; y: number };
   mobileSprint?: boolean;
   mobileJump?: boolean;
+  buildingPositions?: Array<{ x: number; z: number; size: number }>;
 }
 
-export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileInput, mobileSprint, mobileJump }: CourierProps) {
+export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileInput, mobileSprint, mobileJump, buildingPositions = [] }: CourierProps) {
   const groupRef = useRef<THREE.Group>(null);
   const velocity = useRef(new THREE.Vector3());
   const keys = useRef({ w: false, a: false, s: false, d: false, shift: false, space: false });
   const energy = useRef(100);
   const lastJumpRef = useRef(0);
+  const cameraRotationRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,6 +51,27 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+
+  const checkCollision = (newX: number, newZ: number): boolean => {
+    const courierRadius = 0.5;
+    
+    for (const building of buildingPositions) {
+      const halfSize = building.size / 2;
+      
+      const closestX = Math.max(building.x - halfSize, Math.min(newX, building.x + halfSize));
+      const closestZ = Math.max(building.z - halfSize, Math.min(newZ, building.z + halfSize));
+      
+      const distanceX = newX - closestX;
+      const distanceZ = newZ - closestZ;
+      const distance = Math.sqrt(distanceX * distanceX + distanceZ * distanceZ);
+      
+      if (distance < courierRadius) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -96,16 +118,34 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
       velocity.current.multiplyScalar(0.9);
     }
 
-    groupRef.current.position.x += velocity.current.x * delta;
-    groupRef.current.position.z += velocity.current.z * delta;
+    const newX = groupRef.current.position.x + velocity.current.x * delta;
+    const newZ = groupRef.current.position.z + velocity.current.z * delta;
+    
+    if (!checkCollision(newX, groupRef.current.position.z)) {
+      groupRef.current.position.x = newX;
+    }
+    
+    if (!checkCollision(groupRef.current.position.x, newZ)) {
+      groupRef.current.position.z = newZ;
+    }
 
-    const maxDist = 60;
+    const maxDist = 70;
     groupRef.current.position.x = Math.max(-maxDist, Math.min(maxDist, groupRef.current.position.x));
     groupRef.current.position.z = Math.max(-maxDist, Math.min(maxDist, groupRef.current.position.z));
 
-    state.camera.position.x = groupRef.current.position.x + 20;
-    state.camera.position.z = groupRef.current.position.z + 20;
-    state.camera.lookAt(groupRef.current.position);
+    const cameraDistance = 2;
+    const cameraHeight = 1.5;
+    
+    const cameraOffsetX = -Math.sin(groupRef.current.rotation.y) * cameraDistance;
+    const cameraOffsetZ = -Math.cos(groupRef.current.rotation.y) * cameraDistance;
+    
+    state.camera.position.x = groupRef.current.position.x + cameraOffsetX;
+    state.camera.position.y = groupRef.current.position.y + cameraHeight;
+    state.camera.position.z = groupRef.current.position.z + cameraOffsetZ;
+    
+    const lookAtX = groupRef.current.position.x + Math.sin(groupRef.current.rotation.y) * 5;
+    const lookAtZ = groupRef.current.position.z + Math.cos(groupRef.current.rotation.y) * 5;
+    state.camera.lookAt(lookAtX, groupRef.current.position.y + 1, lookAtZ);
 
     const shouldJump = (keys.current.space || mobileJump) && groupRef.current.position.y < 1;
     const now = performance.now();

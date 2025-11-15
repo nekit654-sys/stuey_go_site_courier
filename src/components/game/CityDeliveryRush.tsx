@@ -37,6 +37,7 @@ export function CityDeliveryRush() {
   const [mobileSprint, setMobileSprint] = useState(false);
   const [mobileJump, setMobileJump] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [buildingPositions, setBuildingPositions] = useState<Array<{ x: number; z: number; size: number }>>([]);
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -260,7 +261,11 @@ export function CityDeliveryRush() {
             shadow-mapSize-height={settings.shadowMapSize}
           />
           
-          <City gridSize={settings.citySize} quality={settings.quality} />
+          <City 
+            gridSize={settings.citySize} 
+            quality={settings.quality}
+            onBuildingsReady={setBuildingPositions}
+          />
           
           <Courier
             position={[0, 0.5, 0]}
@@ -270,6 +275,7 @@ export function CityDeliveryRush() {
             mobileInput={mobileInput}
             mobileSprint={mobileSprint}
             mobileJump={mobileJump}
+            buildingPositions={buildingPositions}
           />
           
           <DeliverySystem
@@ -284,14 +290,7 @@ export function CityDeliveryRush() {
           />
           
           <OrbitControls
-            enablePan={false}
-            minDistance={3}
-            maxDistance={25}
-            maxPolarAngle={Math.PI / 2.1}
-            minPolarAngle={Math.PI / 6}
-            enableDamping={settings.quality === 'high'}
-            enableRotate={true}
-            rotateSpeed={0.5}
+            enabled={false}
           />
         </Suspense>
       </Canvas>
