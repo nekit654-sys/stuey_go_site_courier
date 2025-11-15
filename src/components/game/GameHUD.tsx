@@ -11,9 +11,11 @@ interface GameHUDProps {
   soundEnabled: boolean;
   onSoundToggle: () => void;
   playerPosition?: { x: number; z: number };
+  weather?: 'clear' | 'rain' | 'snow' | 'fog';
+  onWeatherChange?: (weather: 'clear' | 'rain' | 'snow' | 'fog') => void;
 }
 
-export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soundEnabled, onSoundToggle, playerPosition }: GameHUDProps) {
+export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soundEnabled, onSoundToggle, playerPosition, weather = 'clear', onWeatherChange }: GameHUDProps) {
   const navigate = useNavigate();
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
@@ -52,6 +54,21 @@ export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soun
             <div className="bg-yellow-400 text-black px-1.5 py-0.5 sm:px-2 sm:py-1 rounded font-bold text-sm sm:text-lg border border-black">
               {vehicleIcons[vehicle]}
             </div>
+
+            {onWeatherChange && (
+              <button
+                onClick={() => {
+                  const weathers: ('clear' | 'rain' | 'snow' | 'fog')[] = ['clear', 'rain', 'snow', 'fog'];
+                  const currentIndex = weathers.indexOf(weather);
+                  const nextWeather = weathers[(currentIndex + 1) % weathers.length];
+                  onWeatherChange(nextWeather);
+                }}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black p-1 sm:p-1.5 rounded font-bold border border-black active:scale-95 transition-transform text-sm sm:text-base"
+                title="Сменить погоду"
+              >
+                {weather === 'clear' ? '☀️' : weather === 'rain' ? '🌧️' : weather === 'snow' ? '❄️' : '🌫️'}
+              </button>
+            )}
 
             <button
               onClick={onSoundToggle}

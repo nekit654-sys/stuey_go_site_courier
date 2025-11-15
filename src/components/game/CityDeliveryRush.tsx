@@ -13,6 +13,7 @@ import { MobileControls } from './MobileControls';
 import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
+import { Weather } from './Weather';
 import Icon from '@/components/ui/icon';
 
 interface GameState {
@@ -40,6 +41,7 @@ export function CityDeliveryRush() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [buildingPositions, setBuildingPositions] = useState<Array<{ x: number; z: number; size: number }>>([]);
   const [playerPosition, setPlayerPosition] = useState<{ x: number; z: number }>({ x: 0, z: 0 });
+  const [weather, setWeather] = useState<'clear' | 'rain' | 'snow' | 'fog'>('clear');
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -213,6 +215,36 @@ export function CityDeliveryRush() {
               </div>
             </div>
 
+            <div className="mb-3 bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-xl border-3 border-black">
+              <div className="text-[10px] font-bold mb-2 text-gray-700">🌤️ Погода:</div>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button
+                  onClick={() => setWeather('clear')}
+                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'clear' ? 'bg-yellow-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                >
+                  ☀️
+                </button>
+                <button
+                  onClick={() => setWeather('rain')}
+                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'rain' ? 'bg-blue-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                >
+                  🌧️
+                </button>
+                <button
+                  onClick={() => setWeather('snow')}
+                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'snow' ? 'bg-white border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                >
+                  ❄️
+                </button>
+                <button
+                  onClick={() => setWeather('fog')}
+                  className={`p-1.5 rounded-lg border-2 font-bold text-xs transition-all ${weather === 'fog' ? 'bg-gray-400 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)]' : 'bg-white border-gray-400 hover:bg-gray-100'}`}
+                >
+                  🌫️
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <button
                 onClick={() => setGameStarted(true)}
@@ -282,6 +314,8 @@ export function CityDeliveryRush() {
             quality={settings.quality}
             onBuildingsReady={setBuildingPositions}
           />
+
+          <Weather type={weather} />
           
           <Courier
             position={[0, 0.5, 0]}
@@ -324,6 +358,8 @@ export function CityDeliveryRush() {
         soundEnabled={soundEnabled}
         onSoundToggle={() => setSoundEnabled(!soundEnabled)}
         playerPosition={playerPosition}
+        weather={weather}
+        onWeatherChange={setWeather}
       />
 
       <SoundManager
