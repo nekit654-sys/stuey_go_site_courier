@@ -7,6 +7,7 @@ import { GameHUD } from './GameHUD';
 import { DeliverySystem } from './DeliverySystem';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
+import { SoundManager, playSound } from './SoundManager';
 
 interface GameState {
   score: number;
@@ -23,6 +24,9 @@ export function CityDeliveryRush() {
   const [gameStarted, setGameStarted] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [musicVolume, setMusicVolume] = useState(0.3);
+  const [sfxVolume, setSfxVolume] = useState(0.5);
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -72,6 +76,9 @@ export function CityDeliveryRush() {
   const handleDeliveryComplete = async (coins: number, timeToken: number) => {
     if (!gameState.courierId) return;
 
+    playSound('delivery');
+    playSound('coins');
+
     try {
       const response = await fetch(
         'https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4',
@@ -109,7 +116,10 @@ export function CityDeliveryRush() {
       <CourierProfile 
         courierId={gameState.courierId} 
         onClose={() => setShowProfile(false)}
-        onVehicleChange={(vehicle) => setGameState(prev => ({ ...prev, currentVehicle: vehicle }))}
+        onVehicleChange={(vehicle) => {
+          setGameState(prev => ({ ...prev, currentVehicle: vehicle }));
+          playSound('unlock');
+        }}
       />
     );
   }
@@ -203,7 +213,10 @@ export function CityDeliveryRush() {
           
           <DeliverySystem
             courierId={gameState.courierId}
-            onPickup={() => setGameState(prev => ({ ...prev, hasPackage: true }))}
+            onPickup={() => {
+              setGameState(prev => ({ ...prev, hasPackage: true }));
+              playSound('pickup');
+            }}
             onDelivery={handleDeliveryComplete}
             hasPackage={gameState.hasPackage}
           />
@@ -226,6 +239,15 @@ export function CityDeliveryRush() {
         energy={gameState.energy}
         vehicle={gameState.currentVehicle}
         onExit={() => setGameStarted(false)}
+        soundEnabled={soundEnabled}
+        onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+      />
+
+      <SoundManager
+        enabled={soundEnabled}
+        musicVolume={musicVolume}
+        sfxVolume={sfxVolume}
+        currentTrack="day"
       />
     </div>
   );

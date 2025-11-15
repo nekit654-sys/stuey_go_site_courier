@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { playSound } from './SoundManager';
 
 interface Vehicle {
   id: number;
@@ -77,6 +78,7 @@ export function CourierProfile({ courierId, onClose, onVehicleChange }: CourierP
       );
 
       if (response.ok) {
+        playSound('unlock');
         setVehicles(prev =>
           prev.map(v =>
             v.vehicle_type === vehicleType ? { ...v, unlocked: true } : v

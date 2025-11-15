@@ -5,9 +5,11 @@ interface GameHUDProps {
   energy: number;
   vehicle: 'walk' | 'bicycle' | 'scooter';
   onExit: () => void;
+  soundEnabled: boolean;
+  onSoundToggle: () => void;
 }
 
-export function GameHUD({ score, deliveries, time, energy, vehicle, onExit }: GameHUDProps) {
+export function GameHUD({ score, deliveries, time, energy, vehicle, onExit, soundEnabled, onSoundToggle }: GameHUDProps) {
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 
@@ -56,6 +58,14 @@ export function GameHUD({ score, deliveries, time, energy, vehicle, onExit }: Ga
             <div className="bg-black/50 backdrop-blur px-4 py-2 rounded-lg text-3xl">
               {vehicleIcons[vehicle]}
             </div>
+
+            <button
+              onClick={onSoundToggle}
+              className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg font-semibold transition-all"
+              title={soundEnabled ? 'Выключить звук' : 'Включить звук'}
+            >
+              {soundEnabled ? '🔊' : '🔇'}
+            </button>
 
             <button
               onClick={onExit}
