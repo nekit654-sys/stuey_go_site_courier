@@ -16,6 +16,15 @@ export function LandscapeOrientation({ children }: { children: React.ReactNode }
       const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
       setIsLandscape(isCurrentlyLandscape);
       setShowRotatePrompt(!isCurrentlyLandscape);
+      
+      if (isCurrentlyLandscape) {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen && !document.fullscreenElement) {
+          elem.requestFullscreen().catch(() => {});
+        } else if ((elem as any).webkitRequestFullscreen && !(document as any).webkitFullscreenElement) {
+          (elem as any).webkitRequestFullscreen();
+        }
+      }
     };
 
     checkOrientation();

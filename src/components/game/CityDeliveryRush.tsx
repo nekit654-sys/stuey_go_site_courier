@@ -250,7 +250,7 @@ export function CityDeliveryRush() {
         gl={{ antialias: settings.antialias }}
       >
         <Suspense fallback={null}>
-          <Sky sunPosition={[100, 20, 100]} />
+          <color attach="background" args={['#87CEEB']} />
           
           <ambientLight intensity={0.5} />
           <directionalLight
