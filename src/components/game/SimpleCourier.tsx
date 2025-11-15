@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -10,6 +10,8 @@ interface SimpleCourierProps {
   onEnergyChange?: (energy: number) => void;
 }
 
+const keys: { [key: string]: boolean } = {};
+
 export function SimpleCourier({ 
   vehicle, 
   onPositionChange, 
@@ -18,14 +20,14 @@ export function SimpleCourier({
   onEnergyChange 
 }: SimpleCourierProps) {
   const meshRef = useRef<THREE.Group>(null);
-  const velocity = useRef(new THREE.Vector3());
   const rotation = useRef(0);
   const position = useRef(new THREE.Vector3(0, 1, 0));
+  const energy = useRef(100);
   
   const vehicleStats = {
-    walk: { speed: 3, turnSpeed: 0.08 },
-    bicycle: { speed: 8, turnSpeed: 0.12 },
-    scooter: { speed: 12, turnSpeed: 0.15 }
+    walk: { speed: 5, turnSpeed: 0.1, energyCost: 0.05 },
+    bicycle: { speed: 10, turnSpeed: 0.15, energyCost: 0.1 },
+    scooter: { speed: 15, turnSpeed: 0.2, energyCost: 0.15 }
   };
   
   const stats = vehicleStats[vehicle];
@@ -33,28 +35,34 @@ export function SimpleCourier({
   useFrame((state, delta) => {
     if (!meshRef.current) return;
     
-    const keys: any = (state as any).keys || {};
-    
     let forward = 0;
     let turn = 0;
     
-    if (mobileInput) {
+    if (mobileInput && (mobileInput.x !== 0 || mobileInput.y !== 0)) {
       forward = -mobileInput.y;
       turn = -mobileInput.x;
     } else {
-      if (keys.KeyW || keys.ArrowUp) forward = 1;
-      if (keys.KeyS || keys.ArrowDown) forward = -1;
-      if (keys.KeyA || keys.ArrowLeft) turn = 1;
-      if (keys.KeyD || keys.ArrowRight) turn = -1;
+      if (keys['KeyW'] || keys['ArrowUp']) forward = 1;
+      if (keys['KeyS'] || keys['ArrowDown']) forward = -1;
+      if (keys['KeyA'] || keys['ArrowLeft']) turn = 1;
+      if (keys['KeyD'] || keys['ArrowRight']) turn = -1;
     }
     
-    rotation.current += turn * stats.turnSpeed;
-    
-    const moveX = Math.sin(rotation.current) * forward * stats.speed * delta;
-    const moveZ = Math.cos(rotation.current) * forward * stats.speed * delta;
-    
-    position.current.x += moveX;
-    position.current.z += moveZ;
+    if (forward !== 0 && energy.current > 0) {
+      rotation.current += turn * stats.turnSpeed;
+      
+      const moveX = Math.sin(rotation.current) * forward * stats.speed * delta;
+      const moveZ = Math.cos(rotation.current) * forward * stats.speed * delta;
+      
+      position.current.x += moveX;
+      position.current.z += moveZ;
+      
+      energy.current = Math.max(0, energy.current - stats.energyCost * delta * 10);
+      onEnergyChange?.(energy.current);
+    } else {
+      energy.current = Math.min(100, energy.current + 2 * delta);
+      onEnergyChange?.(energy.current);
+    }
     
     meshRef.current.position.copy(position.current);
     meshRef.current.rotation.y = rotation.current;
@@ -63,24 +71,20 @@ export function SimpleCourier({
   });
   
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const state: any = {};
-      state.keys = state.keys || {};
-      state.keys[e.code] = true;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keys[e.code] = true;
     };
     
-    const handleKeyRelease = (e: KeyboardEvent) => {
-      const state: any = {};
-      state.keys = state.keys || {};
-      state.keys[e.code] = false;
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keys[e.code] = false;
     };
     
-    window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('keyup', handleKeyRelease);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-      window.removeEventListener('keyup', handleKeyRelease);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
   

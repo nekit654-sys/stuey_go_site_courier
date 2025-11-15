@@ -116,11 +116,11 @@ export function AdvancedDeliverySystem({
   return (
     <>
       {!currentOrder && (
-        <div className="absolute left-4 top-4 bg-black/80 text-white rounded-lg p-3 max-w-xs max-h-96 overflow-y-auto">
-          <div className="text-sm font-bold mb-2 flex items-center gap-2">
+        <div className="absolute left-4 bottom-20 bg-black/90 text-white rounded-lg p-3 max-w-sm shadow-2xl border-2 border-green-500">
+          <div className="text-sm font-bold mb-3 flex items-center gap-2">
             <span>📋</span>
             <span>Доступные заказы</span>
-            <span className="ml-auto text-xs bg-green-500 px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-green-500 px-2 py-1 rounded-full">
               {availableOrders.length}
             </span>
           </div>
@@ -130,40 +130,43 @@ export function AdvancedDeliverySystem({
               const orderTypeData = orderTypes.find(t => t.type === order.type);
               
               return (
-                <div key={order.id} className={`${orderTypeData?.color} rounded-lg p-2 text-xs`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{orderTypeData?.icon}</span>
+                <div key={order.id} className="bg-gray-800 rounded-lg p-3 border-2 border-gray-600 hover:border-white transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">{orderTypeData?.icon}</span>
                     <div className="flex-1">
-                      <div className="font-bold">{order.customerName}</div>
-                      <div className="text-[10px] opacity-90">
-                        {order.pickupLocation.name} → {order.deliveryLocation.name}
+                      <div className="font-bold text-white">{order.customerName}</div>
+                      <div className="text-xs text-gray-300">
+                        {order.pickupLocation.name}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        → {order.deliveryLocation.name}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-1 mb-2 text-[10px]">
-                    <div className="bg-black/20 rounded px-1 py-0.5">
-                      💰 {order.reward}₽
+                  <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
+                    <div className="bg-yellow-500 text-black rounded px-2 py-1 font-bold text-center">
+                      💰 {order.reward}
                     </div>
-                    <div className="bg-black/20 rounded px-1 py-0.5">
+                    <div className="bg-blue-500 text-white rounded px-2 py-1 font-bold text-center">
                       ⏱️ {order.timeLimit}с
                     </div>
-                    <div className="bg-black/20 rounded px-1 py-0.5">
+                    <div className="bg-purple-500 text-white rounded px-2 py-1 font-bold text-center">
                       📍 {order.distanceToPlayer}м
                     </div>
                   </div>
                   
                   {order.fragile && (
-                    <div className="bg-yellow-500 text-black rounded px-1 py-0.5 text-[9px] mb-1 font-bold">
-                      ⚠️ ХРУПКОЕ
+                    <div className="bg-yellow-500 text-black rounded px-2 py-1 text-xs mb-2 font-bold text-center">
+                      ⚠️ ХРУПКОЕ - АККУРАТНО!
                     </div>
                   )}
                   
                   <button
                     onClick={() => handleAcceptOrder(order)}
-                    className="w-full bg-white text-black font-bold rounded py-1 text-xs hover:bg-gray-200"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg py-2 text-sm transition-colors"
                   >
-                    Принять заказ
+                    ✅ Принять заказ
                   </button>
                 </div>
               );
@@ -173,36 +176,40 @@ export function AdvancedDeliverySystem({
       )}
       
       {currentOrder && (
-        <div className="absolute left-4 top-4 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-3 max-w-xs shadow-lg">
-          <div className="text-sm font-bold mb-2 flex items-center gap-2">
-            <span>{orderTypes.find(t => t.type === currentOrder.type)?.icon}</span>
-            <span>Активный заказ</span>
+        <div className="absolute left-4 bottom-20 bg-gradient-to-br from-green-600 to-blue-600 text-white rounded-lg p-4 max-w-sm shadow-2xl border-4 border-yellow-400 animate-pulse">
+          <div className="text-lg font-bold mb-3 flex items-center gap-2">
+            <span className="text-3xl">{orderTypes.find(t => t.type === currentOrder.type)?.icon}</span>
+            <span>🎯 АКТИВНЫЙ ЗАКАЗ</span>
           </div>
           
-          <div className="space-y-2 text-xs">
-            <div className="bg-white/20 rounded p-2">
-              <div className="font-bold">{currentOrder.customerName}</div>
-              <div className="text-[10px]">
+          <div className="space-y-2 text-sm bg-black/30 rounded-lg p-3">
+            <div className="bg-white/20 rounded-lg p-2">
+              <div className="font-bold text-lg">{currentOrder.customerName}</div>
+              <div className="text-sm text-yellow-300">
                 📍 {currentOrder.deliveryLocation.name}
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-white/20 rounded p-1.5">
-                <div className="text-[9px] opacity-80">Награда</div>
-                <div className="font-bold">💰 {currentOrder.reward}₽</div>
+              <div className="bg-yellow-500 text-black rounded-lg p-2 text-center">
+                <div className="text-xs font-bold">Награда</div>
+                <div className="font-bold text-lg">💰 {currentOrder.reward}</div>
               </div>
-              <div className="bg-white/20 rounded p-1.5">
-                <div className="text-[9px] opacity-80">Дистанция</div>
-                <div className="font-bold">📏 {currentOrder.distance}м</div>
+              <div className="bg-purple-500 rounded-lg p-2 text-center">
+                <div className="text-xs font-bold">Дистанция</div>
+                <div className="font-bold text-lg">📏 {currentOrder.distance}м</div>
               </div>
             </div>
             
             {currentOrder.fragile && (
-              <div className="bg-yellow-500 text-black rounded px-2 py-1 text-[10px] font-bold">
-                ⚠️ ОСТОРОЖНО! ХРУПКИЙ ГРУЗ
+              <div className="bg-red-500 text-white rounded-lg px-3 py-2 text-sm font-bold text-center animate-pulse">
+                ⚠️ ХРУПКОЕ! БУДЬ АККУРАТЕН!
               </div>
             )}
+            
+            <div className="bg-green-500 text-white rounded-lg px-3 py-2 text-center font-bold">
+              🧭 Следуй по зелёным меткам!
+            </div>
           </div>
         </div>
       )}

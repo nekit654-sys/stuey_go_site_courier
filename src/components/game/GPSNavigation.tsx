@@ -64,47 +64,47 @@ export function GPSNavigation({ from, to, currentPosition }: GPSNavigationProps)
   
   return (
     <group>
-      <line geometry={lineGeometry}>
-        <lineBasicMaterial color="#00ff00" linewidth={3} />
-      </line>
-      
       {path.map((node, idx) => (
-        <mesh key={idx} position={[node.x, 0.3, node.z]}>
-          <cylinderGeometry args={[0.5, 0.5, 0.1, 16]} />
+        <mesh key={idx} position={[node.x, 0.2, node.z]}>
+          <cylinderGeometry args={[0.8, 0.8, 0.3, 16]} />
           <meshStandardMaterial 
             color="#00ff00" 
             emissive="#00ff00" 
-            emissiveIntensity={0.5}
+            emissiveIntensity={1}
             transparent
-            opacity={0.7}
+            opacity={0.8}
           />
         </mesh>
       ))}
       
-      <mesh position={[to.x, 0.8, to.z]}>
-        <coneGeometry args={[1, 2, 4]} />
+      <mesh position={[to.x, 1.5, to.z]}>
+        <coneGeometry args={[1.5, 3, 4]} />
+        <meshStandardMaterial 
+          color="#ff0000"
+          emissive="#ff0000"
+          emissiveIntensity={1.5}
+        />
+      </mesh>
+      
+      <mesh position={[to.x, 0.2, to.z]}>
+        <cylinderGeometry args={[2, 2, 0.1, 32]} />
         <meshStandardMaterial 
           color="#ff0000"
           emissive="#ff0000"
           emissiveIntensity={0.8}
+          transparent
+          opacity={0.5}
         />
       </mesh>
       
-      <mesh position={[currentPosition.x, 3, currentPosition.z]} rotation={[0, direction, 0]}>
-        <coneGeometry args={[0.5, 1.5, 3]} />
+      <mesh position={[currentPosition.x, 4, currentPosition.z]} rotation={[0, direction, 0]}>
+        <coneGeometry args={[0.7, 2, 3]} />
         <meshStandardMaterial 
           color="#ffeb3b"
           emissive="#ffeb3b"
-          emissiveIntensity={0.9}
+          emissiveIntensity={1.2}
         />
       </mesh>
-      
-      <group position={[currentPosition.x, 5, currentPosition.z]}>
-        <mesh>
-          <ringGeometry args={[2, 2.2, 32]} />
-          <meshBasicMaterial color="#00ff00" transparent opacity={0.6} />
-        </mesh>
-      </group>
     </group>
   );
 }
@@ -120,11 +120,15 @@ export function MiniMap({
 }) {
   const scale = 100 / mapSize;
   
+  const dx = targetPos.x - playerPos.x;
+  const dz = targetPos.z - playerPos.z;
+  const distance = Math.sqrt(dx * dx + dz * dz);
+  
   return (
-    <div className="absolute top-4 right-4 w-32 h-32 bg-black/70 border-2 border-green-500 rounded-lg overflow-hidden">
+    <div className="absolute top-20 right-4 w-48 h-48 bg-black/90 border-4 border-green-500 rounded-xl overflow-hidden shadow-2xl">
       <div className="relative w-full h-full">
         <div 
-          className="absolute w-2 h-2 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2"
+          className="absolute w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-lg border-2 border-white z-10"
           style={{
             left: `${50 + (playerPos.x * scale)}%`,
             top: `${50 + (playerPos.z * scale)}%`
@@ -132,7 +136,7 @@ export function MiniMap({
         />
         
         <div 
-          className="absolute w-2 h-2 bg-red-500 rounded-full transform -translate-x-1/2 -translate-y-1/2"
+          className="absolute w-4 h-4 bg-red-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 animate-pulse shadow-lg border-2 border-white z-10"
           style={{
             left: `${50 + (targetPos.x * scale)}%`,
             top: `${50 + (targetPos.z * scale)}%`
@@ -141,13 +145,17 @@ export function MiniMap({
         
         <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 opacity-20">
           {Array.from({ length: 16 }).map((_, i) => (
-            <div key={i} className="border border-green-500/30" />
+            <div key={i} className="border border-green-500/50" />
           ))}
         </div>
       </div>
       
-      <div className="absolute bottom-1 left-1 text-[8px] text-green-400 font-mono">
-        GPS
+      <div className="absolute top-2 left-2 text-xs text-green-400 font-bold bg-black/70 px-2 py-1 rounded">
+        🗺️ GPS
+      </div>
+      
+      <div className="absolute bottom-2 left-2 right-2 text-xs text-white font-bold bg-black/70 px-2 py-1 rounded text-center">
+        📍 {Math.round(distance)}м до цели
       </div>
     </div>
   );

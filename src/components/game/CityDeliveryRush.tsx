@@ -145,18 +145,17 @@ export function CityDeliveryRush() {
   }, [gameStarted]);
 
   useEffect(() => {
-    if (!gameStarted || gameState.time <= 0) return;
+    if (!gameStarted) return;
 
     const timer = setInterval(() => {
       setGameState(prev => ({
         ...prev,
-        time: Math.max(0, prev.time - 1),
-        energy: Math.min(100, prev.energy + 0.1)
+        time: prev.time > 0 ? prev.time - 1 : prev.time
       }));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, gameState.time]);
+  }, [gameStarted]);
 
   useEffect(() => {
     if (!currentOrder || deliveryStage === 'none') return;
@@ -374,41 +373,38 @@ export function CityDeliveryRush() {
         </Suspense>
       </Canvas>
 
-      <div className="absolute top-4 left-4 z-40 space-y-2">
-        <ExperienceBar
-          currentExp={currentExp}
-          level={level}
-          expToNextLevel={expToNextLevel}
-        />
-        
-        <button
-          onClick={() => setShowSkillTree(true)}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-bold text-sm border-2 border-purple-400 flex items-center gap-2 shadow-lg"
-        >
-          <span>🌟</span>
-          <span>Навыки</span>
-        </button>
-      </div>
+
       
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 p-2 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 p-3 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2">
-          <div className="bg-yellow-400 text-black px-3 py-1 rounded font-bold text-sm">
+          <div className="bg-yellow-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
             💰 {gameState.score}
           </div>
-          <div className="bg-green-400 text-black px-3 py-1 rounded font-bold text-sm">
+          <div className="bg-green-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
             📦 {gameState.deliveries}
           </div>
-          <div className="bg-blue-400 text-black px-3 py-1 rounded font-bold text-sm">
+          <div className="bg-blue-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
             ⚡ {Math.round(gameState.energy)}%
+          </div>
+          <div className="bg-purple-500 text-white px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
+            ⭐ Ур.{level}
           </div>
         </div>
         
-        <button
-          onClick={() => setGameStarted(false)}
-          className="bg-red-500 text-white px-3 py-1 rounded font-bold"
-        >
-          ✕
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowSkillTree(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-bold text-sm"
+          >
+            🌟 Навыки
+          </button>
+          <button
+            onClick={() => setGameStarted(false)}
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold"
+          >
+            ✕ Выход
+          </button>
+        </div>
       </div>
       
       <AdvancedDeliverySystem
@@ -452,6 +448,10 @@ export function CityDeliveryRush() {
           onClose={() => setShowSkillTree(false)}
         />
       )}
+      
+      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
+        {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Используй джойстик' : '⌨️ WASD для движения'}
+      </div>
     </div>
   );
 }
