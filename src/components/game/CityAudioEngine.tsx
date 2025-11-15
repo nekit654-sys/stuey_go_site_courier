@@ -51,7 +51,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       lfo.connect(lfoGain);
       lfoGain.connect(oscillator.frequency);
 
-      gainNode.gain.value = volume * 0.15;
+      gainNode.gain.value = volume * 0.08;
 
       oscillator.connect(gainNode);
       gainNode.connect(panner);
@@ -138,7 +138,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       filter.frequency.value = 800;
 
       const windGain = ctx.createGain();
-      windGain.gain.value = volume * 0.15;
+      windGain.gain.value = volume * 0.08;
 
       windNoise.connect(filter);
       filter.connect(windGain);
@@ -161,7 +161,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       panner.rolloffFactor = 1.5;
 
       chirp.frequency.value = 1500 + Math.random() * 1000;
-      chirpGain.gain.value = volume * 0.08;
+      chirpGain.gain.value = volume * 0.04;
 
       chirp.connect(chirpGain);
       chirpGain.connect(panner);
@@ -202,14 +202,14 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
     initBirdPositions();
 
     const birdChirpInterval = setInterval(() => {
-      if (enabled && Math.random() > 0.7) {
+      if (enabled && Math.random() > 0.8) {
         const birdIndex = Math.floor(Math.random() * birdPositionsRef.current.length);
         const bird = birdPositionsRef.current[birdIndex];
         if (bird) {
           createBirdChirp(bird.x, bird.y, bird.z);
         }
       }
-    }, 2000 + Math.random() * 3000);
+    }, 4000 + Math.random() * 4000);
 
     const carPositions = [
       { x: -20 - 1.5, z: 0 },

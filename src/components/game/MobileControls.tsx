@@ -8,7 +8,9 @@ interface MobileControlsProps {
 
 export function MobileControls({ onMove, onJump, onSprint }: MobileControlsProps) {
   const joystickRef = useRef<HTMLDivElement>(null);
+  const knobRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
+  const centerRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
 
   useEffect(() => {
@@ -25,30 +27,38 @@ export function MobileControls({ onMove, onJump, onSprint }: MobileControlsProps
         touch.clientY <= rect.bottom
       ) {
         isDraggingRef.current = true;
-        touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        centerRef.current = { x: centerX, y: centerY };
         e.preventDefault();
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current || !joystickRef.current) return;
+      if (!isDraggingRef.current || !joystickRef.current || !knobRef.current) return;
 
       const touch = e.touches[0];
-      const deltaX = touch.clientX - touchStartRef.current.x;
-      const deltaY = touch.clientY - touchStartRef.current.y;
+      const deltaX = touch.clientX - centerRef.current.x;
+      const deltaY = touch.clientY - centerRef.current.y;
 
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const maxDistance = 50;
+      const maxDistance = 60;
 
-      if (distance > 5) {
-        const normalizedX = deltaX / maxDistance;
-        const normalizedY = deltaY / maxDistance;
-        
-        onMove({
-          x: Math.max(-1, Math.min(1, normalizedX)),
-          y: Math.max(-1, Math.min(1, -normalizedY))
-        });
-      }
+      const clampedDistance = Math.min(distance, maxDistance);
+      const angle = Math.atan2(deltaY, deltaX);
+      
+      const clampedX = Math.cos(angle) * clampedDistance;
+      const clampedY = Math.sin(angle) * clampedDistance;
+      
+      knobRef.current.style.transform = `translate(-50%, -50%) translate(${clampedX}px, ${clampedY}px)`;
+
+      const normalizedX = clampedX / maxDistance;
+      const normalizedY = -clampedY / maxDistance;
+      
+      onMove({
+        x: normalizedX,
+        y: normalizedY
+      });
 
       e.preventDefault();
     };
@@ -56,6 +66,9 @@ export function MobileControls({ onMove, onJump, onSprint }: MobileControlsProps
     const handleTouchEnd = () => {
       isDraggingRef.current = false;
       onMove({ x: 0, y: 0 });
+      if (knobRef.current) {
+        knobRef.current.style.transform = 'translate(-50%, -50%)';
+      }
     };
 
     document.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -77,34 +90,37 @@ export function MobileControls({ onMove, onJump, onSprint }: MobileControlsProps
     <div className="fixed inset-0 pointer-events-none z-40">
       <div
         ref={joystickRef}
-        className="absolute bottom-24 left-8 w-32 h-32 bg-white/20 rounded-full border-4 border-white/40 pointer-events-auto"
+        className="absolute bottom-8 left-8 w-36 h-36 bg-black/40 backdrop-blur-sm rounded-full border-4 border-yellow-400/60 pointer-events-auto shadow-lg"
+        style={{ touchAction: 'none' }}
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white/60 rounded-full" />
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-white text-xs">↑</div>
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-white text-xs">↓</div>
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-white text-xs">←</div>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-white text-xs">→</div>
+        <div 
+          ref={knobRef}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-400/90 rounded-full border-3 border-white shadow-xl transition-none"
+          style={{ willChange: 'transform' }}
+        />
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow-lg">↑</div>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow-lg">↓</div>
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white font-bold text-sm drop-shadow-lg">←</div>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white font-bold text-sm drop-shadow-lg">→</div>
       </div>
 
-      <div className="absolute bottom-24 right-8 flex flex-col gap-4 pointer-events-auto">
+      <div className="absolute bottom-8 right-8 flex flex-col gap-3 pointer-events-auto">
         <button
           onTouchStart={() => onSprint(true)}
           onTouchEnd={() => onSprint(false)}
-          className="w-20 h-20 bg-yellow-500/80 rounded-full border-4 border-white/40 flex items-center justify-center text-2xl active:scale-95 transition-transform"
+          className="w-20 h-20 bg-yellow-400/90 backdrop-blur-sm rounded-full border-4 border-white shadow-xl flex items-center justify-center text-3xl active:scale-90 transition-transform"
+          style={{ touchAction: 'none' }}
         >
           ⚡
         </button>
         
         <button
           onTouchStart={onJump}
-          className="w-20 h-20 bg-green-500/80 rounded-full border-4 border-white/40 flex items-center justify-center text-2xl active:scale-95 transition-transform"
+          className="w-20 h-20 bg-green-500/90 backdrop-blur-sm rounded-full border-4 border-white shadow-xl flex items-center justify-center text-3xl active:scale-90 transition-transform"
+          style={{ touchAction: 'none' }}
         >
           🔼
         </button>
-      </div>
-
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg text-sm pointer-events-none">
-        Джойстик - движение | ⚡ - бег | 🔼 - прыжок
       </div>
     </div>
   );

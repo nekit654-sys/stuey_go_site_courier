@@ -2,6 +2,35 @@ import { useMemo, useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+interface WindowProps {
+  position: [number, number, number];
+  isLit: boolean;
+}
+
+function Window({ position, isLit }: WindowProps) {
+  const [currentLit, setCurrentLit] = useState(isLit);
+  const lastChangeRef = useRef(0);
+
+  useFrame(() => {
+    const now = performance.now();
+    if (now - lastChangeRef.current > 3000 && Math.random() > 0.95) {
+      setCurrentLit(prev => !prev);
+      lastChangeRef.current = now;
+    }
+  });
+
+  return (
+    <mesh position={position}>
+      <planeGeometry args={[0.8, 1]} />
+      <meshStandardMaterial 
+        color="#1E293B" 
+        emissive={currentLit ? "#FBBF24" : "#000000"} 
+        emissiveIntensity={currentLit ? 0.6 : 0} 
+      />
+    </mesh>
+  );
+}
+
 interface CityProps {
   gridSize?: number;
   quality?: 'low' | 'medium' | 'high';
@@ -148,24 +177,30 @@ function Car({ lane, speed, color, isTruck = false, startOffset }: CarProps) {
   );
 }
 
-function Pedestrian({ sidewalk, startZ }: { sidewalk: number, startZ: number }) {
+function Pedestrian({ sidewalk, startZ, behavior }: { sidewalk: number, startZ: number, behavior: 'walking' | 'cafe' | 'phone' }) {
   const pedRef = useRef<THREE.Group>(null);
   const legRef1 = useRef<THREE.Mesh>(null);
   const legRef2 = useRef<THREE.Mesh>(null);
+  const armRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (pedRef.current) {
       const time = state.clock.getElapsedTime();
-      pedRef.current.position.z = startZ + Math.sin(time * 0.4) * 15;
       
-      if (legRef1.current && legRef2.current) {
-        legRef1.current.rotation.x = Math.sin(time * 4) * 0.5;
-        legRef2.current.rotation.x = -Math.sin(time * 4) * 0.5;
+      if (behavior === 'walking') {
+        pedRef.current.position.z = startZ + Math.sin(time * 0.3) * 20;
+        
+        if (legRef1.current && legRef2.current) {
+          legRef1.current.rotation.x = Math.sin(time * 3) * 0.4;
+          legRef2.current.rotation.x = -Math.sin(time * 3) * 0.4;
+        }
+      } else if (behavior === 'phone' && armRef.current) {
+        armRef.current.rotation.x = -Math.PI / 3 + Math.sin(time * 2) * 0.1;
       }
     }
   });
 
-  const colors = ['#3B82F6', '#EF4444', '#22C55E', '#A855F7'];
+  const colors = ['#3B82F6', '#EF4444', '#22C55E', '#A855F7', '#EC4899', '#F97316'];
   const shirtColor = colors[Math.floor(Math.random() * colors.length)];
 
   return (
@@ -186,6 +221,24 @@ function Pedestrian({ sidewalk, startZ }: { sidewalk: number, startZ: number }) 
         <cylinderGeometry args={[0.08, 0.08, 0.5]} />
         <meshStandardMaterial color="#1F2937" />
       </mesh>
+      {behavior === 'phone' && (
+        <>
+          <mesh ref={armRef} position={[0.2, 1, 0.2]} castShadow>
+            <cylinderGeometry args={[0.06, 0.06, 0.4]} />
+            <meshStandardMaterial color={shirtColor} />
+          </mesh>
+          <mesh position={[0.2, 1.2, 0.3]}>
+            <boxGeometry args={[0.1, 0.15, 0.02]} />
+            <meshStandardMaterial color="#1F2937" emissive="#60A5FA" emissiveIntensity={0.5} />
+          </mesh>
+        </>
+      )}
+      {behavior === 'cafe' && (
+        <mesh position={[0.3, 1, 0.2]}>
+          <cylinderGeometry args={[0.08, 0.06, 0.15]} />
+          <meshStandardMaterial color="#78350F" />
+        </mesh>
+      )}
     </group>
   );
 }
@@ -229,6 +282,60 @@ function Bird({ startPos }: { startPos: [number, number, number] }) {
   );
 }
 
+function Bench({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.3, 0]} castShadow>
+        <boxGeometry args={[1.2, 0.1, 0.4]} />
+        <meshStandardMaterial color="#78350F" />
+      </mesh>
+      <mesh position={[0, 0.4, -0.15]} castShadow>
+        <boxGeometry args={[1.2, 0.3, 0.1]} />
+        <meshStandardMaterial color="#78350F" />
+      </mesh>
+      <mesh position={[-0.5, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[0.05, 0.05, 0.3]} />
+        <meshStandardMaterial color="#1F2937" />
+      </mesh>
+      <mesh position={[0.5, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[0.05, 0.05, 0.3]} />
+        <meshStandardMaterial color="#1F2937" />
+      </mesh>
+    </group>
+  );
+}
+
+function TrashBin({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.25, 0.3, 0.6, 8]} />
+        <meshStandardMaterial color="#374151" />
+      </mesh>
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.28, 0.28, 0.1, 8]} />
+        <meshStandardMaterial color="#1F2937" />
+      </mesh>
+    </group>
+  );
+}
+
+function StreetLamp({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.08, 0.08, 4]} />
+        <meshStandardMaterial color="#1F2937" />
+      </mesh>
+      <mesh position={[0, 2.2, 0]} castShadow>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshStandardMaterial color="#FBBF24" emissive="#FBBF24" emissiveIntensity={0.8} />
+      </mesh>
+      <pointLight position={[0, 2.2, 0]} color="#FBBF24" intensity={5} distance={15} />
+    </group>
+  );
+}
+
 function Restaurant({ position, name, color }: { position: [number, number, number], name: string, color: string }) {
   return (
     <group position={position}>
@@ -263,6 +370,10 @@ function Restaurant({ position, name, color }: { position: [number, number, numb
           ))}
         </group>
       ))}
+      
+      <Bench position={[BUILDING_SIZE / 2 + 1, 0, 2]} />
+      <Bench position={[BUILDING_SIZE / 2 + 1, 0, -2]} />
+      <TrashBin position={[BUILDING_SIZE / 2 + 2, 0, 0]} />
     </group>
   );
 }
@@ -407,6 +518,15 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
         <meshStandardMaterial color="#78350F" />
       </mesh>
 
+      {[-50, -30, -10, 10, 30, 50].map((z, i) => (
+        <group key={`street-furniture-${i}`}>
+          <StreetLamp position={[-BLOCK_SIZE - 5, 0, z]} />
+          <StreetLamp position={[BLOCK_SIZE + 5, 0, z]} />
+          {i % 2 === 0 && <TrashBin position={[-BLOCK_SIZE - 3.5, 0, z + 5]} />}
+          {i % 2 === 1 && <TrashBin position={[BLOCK_SIZE + 3.5, 0, z - 5]} />}
+        </group>
+      ))}
+
       {[-40, 0, 40].map((z, idx) => (
         <group key={idx}>
           <TrafficLight position={[-BLOCK_SIZE - 4, 0, z + 3]} rotation={Math.PI} id={idx * 2} />
@@ -437,25 +557,26 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
               </mesh>
               {Array.from({ length: Math.floor(item.height / 3) }).map((_, floor) => (
                 <group key={floor}>
-                  {[-2.5, 2.5].map((xPos, i) => (
-                    <mesh key={i} position={[xPos, (floor - Math.floor(item.height / 6)) * 3, BUILDING_SIZE / 2 + 0.05]}>
-                      <planeGeometry args={[1.2, 1.2]} />
-                      <meshStandardMaterial 
-                        color="#1E293B" 
-                        emissive={Math.random() > 0.5 ? "#FBBF24" : "#000000"} 
-                        emissiveIntensity={0.4} 
-                      />
-                    </mesh>
+                  {[-3, -1, 1, 3].map((xPos, i) => (
+                    <Window 
+                      key={i} 
+                      position={[xPos, (floor - Math.floor(item.height / 6)) * 3, BUILDING_SIZE / 2 + 0.05]} 
+                      isLit={(i + floor) % 2 === 0}
+                    />
                   ))}
-                  {[-2.5, 2.5].map((zPos, i) => (
-                    <mesh key={`side${i}`} position={[BUILDING_SIZE / 2 + 0.05, (floor - Math.floor(item.height / 6)) * 3, zPos]}>
-                      <planeGeometry args={[1.2, 1.2]} />
-                      <meshStandardMaterial 
-                        color="#1E293B" 
-                        emissive={Math.random() > 0.5 ? "#FBBF24" : "#000000"} 
-                        emissiveIntensity={0.4} 
-                      />
-                    </mesh>
+                  {[-3, -1, 1, 3].map((zPos, i) => (
+                    <Window 
+                      key={`side${i}`} 
+                      position={[BUILDING_SIZE / 2 + 0.05, (floor - Math.floor(item.height / 6)) * 3, zPos]} 
+                      isLit={(i + floor + 1) % 2 === 0}
+                    />
+                  ))}
+                  {[-3, -1, 1, 3].map((zPos, i) => (
+                    <Window 
+                      key={`back${i}`} 
+                      position={[-BUILDING_SIZE / 2 - 0.05, (floor - Math.floor(item.height / 6)) * 3, zPos]} 
+                      isLit={(i + floor) % 3 === 0}
+                    />
                   ))}
                 </group>
               ))}
@@ -466,68 +587,86 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
 
       {showDetails && (
         <>
-          {Array.from({ length: 15 }).map((_, i) => {
-            const isTruck = Math.random() > 0.7;
+          {Array.from({ length: 12 }).map((_, i) => {
+            const isTruck = i % 5 === 0;
             return (
               <Car 
                 key={`car1-${i}`}
                 lane={-BLOCK_SIZE - 1.5}
-                speed={0.08 + Math.random() * 0.04}
-                color={carColors[Math.floor(Math.random() * carColors.length)]}
+                speed={0.08 + (i % 3) * 0.02}
+                color={carColors[i % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 7) * 8}
+                startOffset={(i - 6) * 10}
               />
             );
           })}
 
-          {Array.from({ length: 15 }).map((_, i) => {
-            const isTruck = Math.random() > 0.7;
+          {Array.from({ length: 12 }).map((_, i) => {
+            const isTruck = i % 6 === 0;
             return (
               <Car 
                 key={`car2-${i}`}
                 lane={-BLOCK_SIZE + 1.5}
-                speed={-0.08 - Math.random() * 0.04}
-                color={carColors[Math.floor(Math.random() * carColors.length)]}
+                speed={-0.08 - (i % 3) * 0.02}
+                color={carColors[(i + 2) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 7) * 8}
+                startOffset={(i - 6) * 10}
               />
             );
           })}
 
-          {Array.from({ length: 15 }).map((_, i) => {
-            const isTruck = Math.random() > 0.7;
+          {Array.from({ length: 12 }).map((_, i) => {
+            const isTruck = i % 5 === 0;
             return (
               <Car 
                 key={`car3-${i}`}
                 lane={BLOCK_SIZE - 1.5}
-                speed={0.08 + Math.random() * 0.04}
-                color={carColors[Math.floor(Math.random() * carColors.length)]}
+                speed={0.08 + (i % 3) * 0.02}
+                color={carColors[(i + 3) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 7) * 8}
+                startOffset={(i - 6) * 10}
               />
             );
           })}
 
-          {Array.from({ length: 15 }).map((_, i) => {
-            const isTruck = Math.random() > 0.7;
+          {Array.from({ length: 12 }).map((_, i) => {
+            const isTruck = i % 6 === 0;
             return (
               <Car 
                 key={`car4-${i}`}
                 lane={BLOCK_SIZE + 1.5}
-                speed={-0.08 - Math.random() * 0.04}
-                color={carColors[Math.floor(Math.random() * carColors.length)]}
+                speed={-0.08 - (i % 3) * 0.02}
+                color={carColors[(i + 4) % carColors.length]}
                 isTruck={isTruck}
-                startOffset={(i - 7) * 8}
+                startOffset={(i - 6) * 10}
               />
             );
           })}
 
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Pedestrian key={`ped1-${i}`} sidewalk={-BLOCK_SIZE - 4} startZ={(i - 3) * 20} />
-          ))}
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Pedestrian key={`ped2-${i}`} sidewalk={BLOCK_SIZE + 4} startZ={(i - 3) * 20} />
-          ))}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'walking', 'walking', 'cafe', 'phone'];
+            const behavior = behaviors[i % behaviors.length];
+            return (
+              <Pedestrian 
+                key={`ped1-${i}`} 
+                sidewalk={-BLOCK_SIZE - 4} 
+                startZ={(i - 6) * 15} 
+                behavior={behavior}
+              />
+            );
+          })}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const behaviors: ('walking' | 'cafe' | 'phone')[] = ['walking', 'walking', 'cafe', 'phone', 'walking'];
+            const behavior = behaviors[i % behaviors.length];
+            return (
+              <Pedestrian 
+                key={`ped2-${i}`} 
+                sidewalk={BLOCK_SIZE + 4} 
+                startZ={(i - 6) * 15} 
+                behavior={behavior}
+              />
+            );
+          })}
 
           {Array.from({ length: 12 }).map((_, i) => {
             const radius = 30 + Math.random() * 30;
