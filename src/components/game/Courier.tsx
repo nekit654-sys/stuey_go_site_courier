@@ -12,9 +12,10 @@ interface CourierProps {
   mobileSprint?: boolean;
   mobileJump?: boolean;
   buildingPositions?: Array<{ x: number; z: number; size: number }>;
+  onPositionChange?: (position: { x: number; z: number }) => void;
 }
 
-export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileInput, mobileSprint, mobileJump, buildingPositions = [] }: CourierProps) {
+export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileInput, mobileSprint, mobileJump, buildingPositions = [], onPositionChange }: CourierProps) {
   const groupRef = useRef<THREE.Group>(null);
   const velocity = useRef(new THREE.Vector3());
   const keys = useRef({ w: false, a: false, s: false, d: false, shift: false, space: false });
@@ -129,9 +130,13 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
       groupRef.current.position.z = newZ;
     }
 
-    const maxDist = 70;
+    const maxDist = 65;
     groupRef.current.position.x = Math.max(-maxDist, Math.min(maxDist, groupRef.current.position.x));
     groupRef.current.position.z = Math.max(-maxDist, Math.min(maxDist, groupRef.current.position.z));
+    
+    if (onPositionChange) {
+      onPositionChange({ x: groupRef.current.position.x, z: groupRef.current.position.z });
+    }
 
     const cameraDistance = 2;
     const cameraHeight = 1.5;

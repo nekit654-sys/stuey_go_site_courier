@@ -38,6 +38,7 @@ export function CityDeliveryRush() {
   const [mobileJump, setMobileJump] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [buildingPositions, setBuildingPositions] = useState<Array<{ x: number; z: number; size: number }>>([]);
+  const [playerPosition, setPlayerPosition] = useState<{ x: number; z: number }>({ x: 0, z: 0 });
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -158,80 +159,80 @@ export function CityDeliveryRush() {
   if (!gameStarted) {
     return (
       <LandscapeOrientation>
-        <div className="w-full h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent" />
+        <div className="w-full h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.05)_0%,transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(0,0,0,0.03)_0%,transparent_50%)]" />
           
-          <div className="absolute top-6 right-6 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl animate-pulse" />
-          <div className="absolute bottom-6 left-6 w-32 h-32 bg-yellow-300/5 rounded-full blur-2xl animate-pulse" />
+          <div className="absolute top-0 left-0 w-full h-2 bg-black"></div>
+          <div className="absolute bottom-0 left-0 w-full h-2 bg-black"></div>
 
-          <div className="relative z-10 backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-8 md:p-12 max-w-2xl text-white text-center shadow-[0_8px_0_0_rgba(0,0,0,0.8)] mx-4">
-            <h1 className="text-4xl md:text-6xl font-extrabold font-rubik mb-4 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
-              <span className="text-yellow-400">🚀 City Delivery Rush</span>
+          <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-4 sm:p-6 md:p-8 max-w-md sm:max-w-xl md:max-w-2xl text-black text-center shadow-[0_6px_0_0_rgba(0,0,0,1)] mx-2 sm:mx-4">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold font-rubik mb-2 sm:mb-4">
+              <span className="text-black">🚀 City Delivery Rush</span>
             </h1>
-            <p className="text-lg md:text-xl mb-6 font-bold drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
-              Доставляй заказы по городу, зарабатывай монеты<br className="hidden md:block" />
+            <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 font-bold">
+              Доставляй заказы по городу, зарабатывай монеты<br className="hidden sm:block" />
               и прокачивай транспорт!
             </p>
             
-            <div className="grid grid-cols-3 gap-3 md:gap-4 my-6 md:my-8">
-              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
-                <div className="text-3xl md:text-4xl mb-2">🚶</div>
-                <div className="text-xs md:text-sm font-semibold">Пешком</div>
-                <div className="text-xs opacity-75">3 м/с</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 my-3 sm:my-4 md:my-6">
+              <div className="bg-yellow-50 p-2 sm:p-3 rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
+                <div className="text-2xl sm:text-3xl mb-1">🚶</div>
+                <div className="text-xs sm:text-sm font-bold">Пешком</div>
+                <div className="text-[10px] sm:text-xs opacity-60">3 м/с</div>
               </div>
-              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
-                <div className="text-3xl md:text-4xl mb-2">🚲</div>
-                <div className="text-xs md:text-sm font-semibold">Велосипед</div>
-                <div className="text-xs opacity-75">6 м/с</div>
+              <div className="bg-yellow-50 p-2 sm:p-3 rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
+                <div className="text-2xl sm:text-3xl mb-1">🚲</div>
+                <div className="text-xs sm:text-sm font-bold">Велосипед</div>
+                <div className="text-[10px] sm:text-xs opacity-60">6 м/с</div>
               </div>
-              <div className="bg-white/10 p-3 md:p-4 rounded-xl border-2 border-white/20 hover:border-yellow-400 transition-all">
-                <div className="text-3xl md:text-4xl mb-2">🛴</div>
-                <div className="text-xs md:text-sm font-semibold">Самокат</div>
-                <div className="text-xs opacity-75">9 м/с</div>
+              <div className="bg-yellow-50 p-2 sm:p-3 rounded-xl border-2 border-black hover:bg-yellow-100 transition-all">
+                <div className="text-2xl sm:text-3xl mb-1">🛴</div>
+                <div className="text-xs sm:text-sm font-bold">Самокат</div>
+                <div className="text-[10px] sm:text-xs opacity-60">9 м/с</div>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <button
                 onClick={() => setGameStarted(true)}
-                className="w-full bg-yellow-400 text-black font-extrabold py-4 px-8 text-lg md:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
+                className="w-full bg-yellow-400 text-black font-extrabold py-2.5 sm:py-3 md:py-4 px-4 sm:px-6 md:px-8 text-base sm:text-lg md:text-xl rounded-xl border-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
               >
-                <Icon name="Rocket" size={24} className="inline mr-2" />
+                <Icon name="Rocket" size={20} className="inline mr-1 sm:mr-2" />
                 Начать игру
               </button>
               
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button
                   onClick={() => setShowProfile(true)}
-                  className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl border-2 border-white/40 transition-all"
+                  className="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-2 sm:py-2.5 px-2 sm:px-4 rounded-xl border-2 border-black transition-all text-xs sm:text-sm"
                 >
-                  <Icon name="User" size={18} className="inline mr-1" />
+                  <Icon name="User" size={16} className="inline mr-0.5 sm:mr-1" />
                   Профиль
                 </button>
                 <button
                   onClick={() => setShowLeaderboard(true)}
-                  className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl border-2 border-white/40 transition-all"
+                  className="flex-1 bg-white hover:bg-gray-100 text-black font-bold py-2 sm:py-2.5 px-2 sm:px-4 rounded-xl border-2 border-black transition-all text-xs sm:text-sm"
                 >
-                  <Icon name="Trophy" size={18} className="inline mr-1" />
+                  <Icon name="Trophy" size={16} className="inline mr-0.5 sm:mr-1" />
                   Рейтинг
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 text-sm font-bold drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
+            <div className="mt-3 sm:mt-4 md:mt-6 text-xs sm:text-sm font-bold">
               {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-                <div className="bg-black/30 px-4 py-2 rounded-lg border border-yellow-400/50">
+                <div className="bg-yellow-50 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 border-black">
                   🎮 Джойстик - движение | ⚡ - бег | 🔼 - прыжок
                 </div>
               ) : (
-                <div className="bg-black/30 px-4 py-2 rounded-lg border border-yellow-400/50">
+                <div className="bg-yellow-50 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 border-black">
                   ⌨️ WASD - движение | Shift - бег | Пробел - прыжок
                 </div>
               )}
             </div>
             
-            <div className="mt-3 text-xs opacity-75">
+            <div className="mt-2 sm:mt-3 text-[10px] sm:text-xs opacity-60 font-semibold">
               📊 Качество: {settings.quality === 'low' ? '🟢 Низкое' : settings.quality === 'medium' ? '🟡 Среднее' : '🔴 Высокое'}
             </div>
           </div>
@@ -276,6 +277,7 @@ export function CityDeliveryRush() {
             mobileSprint={mobileSprint}
             mobileJump={mobileJump}
             buildingPositions={buildingPositions}
+            onPositionChange={setPlayerPosition}
           />
           
           <DeliverySystem
@@ -306,6 +308,7 @@ export function CityDeliveryRush() {
         onExit={() => setGameStarted(false)}
         soundEnabled={soundEnabled}
         onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+        playerPosition={playerPosition}
       />
 
       <SoundManager
