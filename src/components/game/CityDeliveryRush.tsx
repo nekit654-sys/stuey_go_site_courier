@@ -36,6 +36,7 @@ export function CityDeliveryRush() {
   const [mobileInput, setMobileInput] = useState({ x: 0, y: 0 });
   const [mobileSprint, setMobileSprint] = useState(false);
   const [mobileJump, setMobileJump] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
@@ -67,6 +68,19 @@ export function CityDeliveryRush() {
 
     fetchProfile();
   }, [gameState.username]);
+
+  useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile && gameStarted && !isFullscreen) {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      } else if ((elem as any).webkitRequestFullscreen) {
+        (elem as any).webkitRequestFullscreen();
+        setIsFullscreen(true);
+      }
+    }
+  }, [gameStarted]);
 
   useEffect(() => {
     if (!gameStarted || gameState.time <= 0) return;
@@ -229,7 +243,7 @@ export function CityDeliveryRush() {
     <LandscapeOrientation>
       <div className="w-full h-screen relative bg-gray-900">
       <Canvas
-        camera={{ position: [20, 20, 20], fov: 50 }}
+        camera={{ position: [10, 8, 10], fov: 60 }}
         shadows={settings.shadows}
         dpr={settings.pixelRatio}
         gl={{ antialias: settings.antialias }}
@@ -271,9 +285,9 @@ export function CityDeliveryRush() {
           
           <OrbitControls
             enablePan={false}
-            minDistance={10}
-            maxDistance={50}
-            maxPolarAngle={Math.PI / 2.5}
+            minDistance={5}
+            maxDistance={30}
+            maxPolarAngle={Math.PI / 2.2}
             enableDamping={settings.quality === 'high'}
           />
         </Suspense>
