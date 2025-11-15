@@ -45,6 +45,26 @@ export function CityDeliveryRush() {
   const [showSettings, setShowSettings] = useState(false);
   const [graphicsQuality, setGraphicsQuality] = useState<'low' | 'medium' | 'high'>('medium');
   
+  const saveSettings = async () => {
+    if (!gameState.courierId) return;
+    
+    try {
+      await fetch('https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_settings',
+          courier_id: gameState.courierId,
+          graphics_quality: graphicsQuality,
+          sound_enabled: soundEnabled,
+          weather_preference: weather
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
+  };
+  
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
     deliveries: 0,
@@ -63,6 +83,13 @@ export function CityDeliveryRush() {
           `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&username=${gameState.username}`
         );
         const data = await response.json();
+        
+        if (data.settings) {
+          setGraphicsQuality(data.settings.graphics_quality || 'medium');
+          setSoundEnabled(data.settings.sound_enabled !== false);
+          setWeather(data.settings.weather_preference || 'clear');
+        }
+        
         setGameState(prev => ({
           ...prev,
           courierId: data.courier.id,
@@ -202,16 +229,16 @@ export function CityDeliveryRush() {
                   <div className="bg-blue-50 p-1 rounded border border-black">
                     <div className="text-[8px] font-bold mb-0.5 text-gray-700">🌤️ Погода:</div>
                     <div className="flex gap-0.5">
-                      <button onClick={() => setWeather('clear')} className={`flex-1 p-0.5 rounded text-xs ${weather === 'clear' ? 'bg-yellow-400' : 'bg-white'}`}>☀️</button>
-                      <button onClick={() => setWeather('rain')} className={`flex-1 p-0.5 rounded text-xs ${weather === 'rain' ? 'bg-blue-400' : 'bg-white'}`}>🌧️</button>
+                      <button onClick={() => { setWeather('clear'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-xs ${weather === 'clear' ? 'bg-yellow-400' : 'bg-white'}`}>☀️</button>
+                      <button onClick={() => { setWeather('rain'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-xs ${weather === 'rain' ? 'bg-blue-400' : 'bg-white'}`}>🌧️</button>
                     </div>
                   </div>
                   
                   <div className="bg-purple-50 p-1 rounded border border-black">
                     <div className="text-[8px] font-bold mb-0.5 text-gray-700">⚙️ Графика:</div>
                     <div className="flex gap-0.5">
-                      <button onClick={() => setGraphicsQuality('low')} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'low' ? 'bg-green-400' : 'bg-white'}`}>💚</button>
-                      <button onClick={() => setGraphicsQuality('high')} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'high' ? 'bg-red-400' : 'bg-white'}`}>🔥</button>
+                      <button onClick={() => { setGraphicsQuality('low'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'low' ? 'bg-green-400' : 'bg-white'}`}>💚</button>
+                      <button onClick={() => { setGraphicsQuality('high'); saveSettings(); }} className={`flex-1 p-0.5 rounded text-[8px] font-bold ${graphicsQuality === 'high' ? 'bg-red-400' : 'bg-white'}`}>🔥</button>
                     </div>
                   </div>
                 </div>
@@ -248,13 +275,13 @@ export function CityDeliveryRush() {
                     <div className="text-[9px] font-bold mb-1 text-gray-700">🎨 Качество графики:</div>
                     <div className="grid grid-cols-2 gap-1">
                       <button
-                        onClick={() => setGraphicsQuality('low')}
+                        onClick={() => { setGraphicsQuality('low'); saveSettings(); }}
                         className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'low' ? 'bg-green-400 border-black' : 'bg-white border-gray-300'}`}
                       >
                         💚 Низкое<br/><span className="text-[8px] opacity-70">Макс. FPS</span>
                       </button>
                       <button
-                        onClick={() => setGraphicsQuality('high')}
+                        onClick={() => { setGraphicsQuality('high'); saveSettings(); }}
                         className={`p-1.5 rounded border-2 font-bold text-[10px] ${graphicsQuality === 'high' ? 'bg-red-400 border-black' : 'bg-white border-gray-300'}`}
                       >
                         🔥 Высокое<br/><span className="text-[8px] opacity-70">Красиво</span>
@@ -265,7 +292,7 @@ export function CityDeliveryRush() {
                   <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
                     <div className="text-[9px] font-bold mb-1 text-gray-700">🔊 Звук:</div>
                     <button
-                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      onClick={() => { setSoundEnabled(!soundEnabled); saveSettings(); }}
                       className={`w-full p-1.5 rounded border-2 font-bold text-[10px] ${soundEnabled ? 'bg-green-400 border-black' : 'bg-gray-300 border-gray-400'}`}
                     >
                       {soundEnabled ? '🔊 Включен' : '🔇 Выключен'}
@@ -275,10 +302,10 @@ export function CityDeliveryRush() {
                   <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
                     <div className="text-[9px] font-bold mb-1 text-gray-700">🌤️ Погода:</div>
                     <div className="grid grid-cols-4 gap-1">
-                      <button onClick={() => setWeather('clear')} className={`p-1 rounded border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-300'}`}>☀️</button>
-                      <button onClick={() => setWeather('rain')} className={`p-1 rounded border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-300'}`}>🌧️</button>
-                      <button onClick={() => setWeather('snow')} className={`p-1 rounded border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-300'}`}>❄️</button>
-                      <button onClick={() => setWeather('fog')} className={`p-1 rounded border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-300'}`}>🌫️</button>
+                      <button onClick={() => { setWeather('clear'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'clear' ? 'bg-yellow-400 border-black' : 'bg-white border-gray-300'}`}>☀️</button>
+                      <button onClick={() => { setWeather('rain'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'rain' ? 'bg-blue-400 border-black' : 'bg-white border-gray-300'}`}>🌧️</button>
+                      <button onClick={() => { setWeather('snow'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'snow' ? 'bg-white border-black' : 'bg-white border-gray-300'}`}>❄️</button>
+                      <button onClick={() => { setWeather('fog'); saveSettings(); }} className={`p-1 rounded border font-bold text-xs ${weather === 'fog' ? 'bg-gray-400 border-black' : 'bg-white border-gray-300'}`}>🌫️</button>
                     </div>
                   </div>
                 </div>

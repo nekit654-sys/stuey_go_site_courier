@@ -88,12 +88,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur.close()
             conn.close()
             
+            settings = {
+                'graphics_quality': courier.get('graphics_quality', 'medium'),
+                'sound_enabled': courier.get('sound_enabled', True),
+                'weather_preference': courier.get('weather_preference', 'clear')
+            }
+            
             return {
                 'statusCode': 200,
                 'headers': headers,
                 'body': json.dumps({
                     'courier': dict(courier),
-                    'vehicles': [dict(v) for v in vehicles]
+                    'vehicles': [dict(v) for v in vehicles],
+                    'settings': settings
                 }, default=json_serial),
                 'isBase64Encoded': False
             }
@@ -303,6 +310,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Not enough coins'}),
                     'isBase64Encoded': False
                 }
+        
+        elif action == 'update_settings':
+            courier_id = body_data.get('courier_id')
+            graphics_quality = body_data.get('graphics_quality')
+            sound_enabled = body_data.get('sound_enabled')
+            weather_preference = body_data.get('weather_preference')
+            
+            cur.execute(
+                """UPDATE couriers 
+                   SET graphics_quality = %s,
+                       sound_enabled = %s,
+                       weather_preference = %s
+                   WHERE id = %s""",
+                (graphics_quality, sound_enabled, weather_preference, courier_id)
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
     
     cur.close()
     conn.close()
