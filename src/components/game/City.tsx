@@ -69,26 +69,26 @@ function TrafficLight({ position, rotation, id }: { position: [number, number, n
 
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 2.5, 0]} castShadow>
+      <mesh position={[0, 2.5, 0]}>
         <boxGeometry args={[0.3, 1.5, 0.3]} />
-        <meshStandardMaterial color="#1F2937" />
+        <meshBasicMaterial color="#1F2937" />
       </mesh>
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <cylinderGeometry args={[0.1, 0.1, 3]} />
-        <meshStandardMaterial color="#374151" />
+      <mesh position={[0, 1.5, 0]}>
+        <cylinderGeometry args={[0.1, 0.1, 3, 6]} />
+        <meshBasicMaterial color="#374151" />
       </mesh>
       <group ref={lightRef} position={[0, 3, 0]}>
         <mesh position={[0, 0.4, 0]}>
-          <sphereGeometry args={[0.15, 16, 16]} />
-          <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={state.red ? 1.5 : 0.1} />
+          <sphereGeometry args={[0.15, 8, 8]} />
+          <meshBasicMaterial color={state.red ? "#EF4444" : "#7F1D1D"} />
         </mesh>
         <mesh position={[0, 0, 0]}>
-          <sphereGeometry args={[0.15, 16, 16]} />
-          <meshStandardMaterial color="#FBBF24" emissive="#FBBF24" emissiveIntensity={state.yellow ? 1.5 : 0.1} />
+          <sphereGeometry args={[0.15, 8, 8]} />
+          <meshBasicMaterial color={state.yellow ? "#FBBF24" : "#78350F"} />
         </mesh>
         <mesh position={[0, -0.4, 0]}>
-          <sphereGeometry args={[0.15, 16, 16]} />
-          <meshStandardMaterial color="#22C55E" emissive="#22C55E" emissiveIntensity={state.green ? 1.5 : 0.1} />
+          <sphereGeometry args={[0.15, 8, 8]} />
+          <meshBasicMaterial color={state.green ? "#22C55E" : "#14532D"} />
         </mesh>
       </group>
     </group>
@@ -148,31 +148,20 @@ function Car({ lane, speed, color, isTruck = false, startOffset }: CarProps) {
 
   return (
     <group ref={carRef} position={[lane, 0.5, startOffset]}>
-      <mesh position={[0, 0, 0]} castShadow>
+      <mesh position={[0, 0, 0]}>
         <boxGeometry args={[width, height, length]} />
-        <meshStandardMaterial color={color} metalness={0.6} roughness={0.3} />
+        <meshLambertMaterial color={color} />
       </mesh>
       {!isTruck && (
-        <>
-          <mesh position={[0, height + 0.3, -0.3]} castShadow>
-            <boxGeometry args={[1.2, 0.5, 1.2]} />
-            <meshStandardMaterial color={color} metalness={0.6} roughness={0.3} />
-          </mesh>
-          <mesh position={[width / 2, height + 0.3, -0.3]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.5, 0.4]} />
-            <meshStandardMaterial color="#60A5FA" transparent opacity={0.5} />
-          </mesh>
-          <mesh position={[-width / 2, height + 0.3, -0.3]} rotation={[0, -Math.PI / 2, 0]}>
-            <planeGeometry args={[0.5, 0.4]} />
-            <meshStandardMaterial color="#60A5FA" transparent opacity={0.5} />
-          </mesh>
-        </>
+        <mesh position={[0, height + 0.3, -0.3]}>
+          <boxGeometry args={[1.2, 0.5, 1.2]} />
+          <meshLambertMaterial color={color} />
+        </mesh>
       )}
       <mesh position={[0, 0.2, length / 2 + 0.1]}>
-        <sphereGeometry args={[0.06, 8, 8]} />
-        <meshStandardMaterial color="#FBBF24" emissive="#FBBF24" emissiveIntensity={1} />
+        <sphereGeometry args={[0.06, 6, 6]} />
+        <meshBasicMaterial color="#FBBF24" />
       </mesh>
-      <pointLight position={[0, 0.2, length / 2 + 0.1]} color="#FBBF24" intensity={2} distance={5} />
     </group>
   );
 }
@@ -205,40 +194,22 @@ function Pedestrian({ sidewalk, startZ, behavior }: { sidewalk: number, startZ: 
 
   return (
     <group ref={pedRef} position={[sidewalk, 0, startZ]}>
-      <mesh position={[0, 1.3, 0]} castShadow>
-        <sphereGeometry args={[0.25, 16, 16]} />
-        <meshStandardMaterial color="#FFD1A4" />
+      <mesh position={[0, 1.3, 0]}>
+        <sphereGeometry args={[0.25, 8, 8]} />
+        <meshLambertMaterial color="#FFD1A4" />
       </mesh>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <capsuleGeometry args={[0.2, 0.5, 8, 16]} />
-        <meshStandardMaterial color={shirtColor} />
+      <mesh position={[0, 0.7, 0]}>
+        <boxGeometry args={[0.4, 0.6, 0.3]} />
+        <meshLambertMaterial color={shirtColor} />
       </mesh>
-      <mesh ref={legRef1} position={[-0.12, 0.25, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 0.5]} />
-        <meshStandardMaterial color="#1F2937" />
+      <mesh ref={legRef1} position={[-0.12, 0.25, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 0.5, 6]} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
-      <mesh ref={legRef2} position={[0.12, 0.25, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 0.5]} />
-        <meshStandardMaterial color="#1F2937" />
+      <mesh ref={legRef2} position={[0.12, 0.25, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 0.5, 6]} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
-      {behavior === 'phone' && (
-        <>
-          <mesh ref={armRef} position={[0.2, 1, 0.2]} castShadow>
-            <cylinderGeometry args={[0.06, 0.06, 0.4]} />
-            <meshStandardMaterial color={shirtColor} />
-          </mesh>
-          <mesh position={[0.2, 1.2, 0.3]}>
-            <boxGeometry args={[0.1, 0.15, 0.02]} />
-            <meshStandardMaterial color="#1F2937" emissive="#60A5FA" emissiveIntensity={0.5} />
-          </mesh>
-        </>
-      )}
-      {behavior === 'cafe' && (
-        <mesh position={[0.3, 1, 0.2]}>
-          <cylinderGeometry args={[0.08, 0.06, 0.15]} />
-          <meshStandardMaterial color="#78350F" />
-        </mesh>
-      )}
     </group>
   );
 }
@@ -266,17 +237,17 @@ function Bird({ startPos }: { startPos: [number, number, number] }) {
 
   return (
     <group ref={birdRef} position={startPos}>
-      <mesh castShadow>
-        <sphereGeometry args={[0.15, 8, 8]} />
-        <meshStandardMaterial color="#1F2937" />
+      <mesh>
+        <sphereGeometry args={[0.15, 6, 6]} />
+        <meshBasicMaterial color="#1F2937" />
       </mesh>
-      <mesh ref={wingRef1} rotation={[0, 0, Math.PI / 6]} castShadow>
+      <mesh ref={wingRef1} rotation={[0, 0, Math.PI / 6]}>
         <boxGeometry args={[0.5, 0.05, 0.15]} />
-        <meshStandardMaterial color="#374151" />
+        <meshBasicMaterial color="#374151" />
       </mesh>
-      <mesh ref={wingRef2} rotation={[0, 0, -Math.PI / 6]} castShadow>
+      <mesh ref={wingRef2} rotation={[0, 0, -Math.PI / 6]}>
         <boxGeometry args={[0.5, 0.05, 0.15]} />
-        <meshStandardMaterial color="#374151" />
+        <meshBasicMaterial color="#374151" />
       </mesh>
     </group>
   );
@@ -285,21 +256,13 @@ function Bird({ startPos }: { startPos: [number, number, number] }) {
 function Bench({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh position={[0, 0.3, 0]} castShadow>
+      <mesh position={[0, 0.3, 0]}>
         <boxGeometry args={[1.2, 0.1, 0.4]} />
-        <meshStandardMaterial color="#78350F" />
+        <meshLambertMaterial color="#78350F" />
       </mesh>
-      <mesh position={[0, 0.4, -0.15]} castShadow>
+      <mesh position={[0, 0.4, -0.15]}>
         <boxGeometry args={[1.2, 0.3, 0.1]} />
-        <meshStandardMaterial color="#78350F" />
-      </mesh>
-      <mesh position={[-0.5, 0.15, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 0.3]} />
-        <meshStandardMaterial color="#1F2937" />
-      </mesh>
-      <mesh position={[0.5, 0.15, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 0.3]} />
-        <meshStandardMaterial color="#1F2937" />
+        <meshLambertMaterial color="#78350F" />
       </mesh>
     </group>
   );
@@ -308,13 +271,13 @@ function Bench({ position }: { position: [number, number, number] }) {
 function TrashBin({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.25, 0.3, 0.6, 8]} />
-        <meshStandardMaterial color="#374151" />
+      <mesh>
+        <cylinderGeometry args={[0.25, 0.3, 0.6, 6]} />
+        <meshLambertMaterial color="#374151" />
       </mesh>
-      <mesh position={[0, 0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.28, 0.1, 8]} />
-        <meshStandardMaterial color="#1F2937" />
+      <mesh position={[0, 0.35, 0]}>
+        <cylinderGeometry args={[0.28, 0.28, 0.1, 6]} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
     </group>
   );
@@ -323,15 +286,14 @@ function TrashBin({ position }: { position: [number, number, number] }) {
 function StreetLamp({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 4]} />
-        <meshStandardMaterial color="#1F2937" />
+      <mesh>
+        <cylinderGeometry args={[0.08, 0.08, 4, 6]} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
-      <mesh position={[0, 2.2, 0]} castShadow>
-        <sphereGeometry args={[0.2, 16, 16]} />
-        <meshStandardMaterial color="#FBBF24" emissive="#FBBF24" emissiveIntensity={0.8} />
+      <mesh position={[0, 2.2, 0]}>
+        <sphereGeometry args={[0.2, 8, 8]} />
+        <meshBasicMaterial color="#FBBF24" />
       </mesh>
-      <pointLight position={[0, 2.2, 0]} color="#FBBF24" intensity={5} distance={15} />
     </group>
   );
 }
@@ -339,40 +301,22 @@ function StreetLamp({ position }: { position: [number, number, number] }) {
 function Restaurant({ position, name, color }: { position: [number, number, number], name: string, color: string }) {
   return (
     <group position={position}>
-      <mesh castShadow receiveShadow>
+      <mesh>
         <boxGeometry args={[BUILDING_SIZE, 8, BUILDING_SIZE]} />
-        <meshStandardMaterial color={color} roughness={0.7} />
+        <meshLambertMaterial color={color} />
       </mesh>
       
       <mesh position={[0, -3.5, BUILDING_SIZE / 2 + 0.1]}>
         <boxGeometry args={[2, 3, 0.2]} />
-        <meshStandardMaterial color="#78350F" />
-      </mesh>
-      <mesh position={[0, -3.5, BUILDING_SIZE / 2 + 0.15]}>
-        <planeGeometry args={[1.8, 2.8]} />
-        <meshStandardMaterial color="#0EA5E9" transparent opacity={0.6} />
+        <meshLambertMaterial color="#78350F" />
       </mesh>
 
-      <mesh position={[0, 5, BUILDING_SIZE / 2 + 0.1]} castShadow>
+      <mesh position={[0, 5, BUILDING_SIZE / 2 + 0.1]}>
         <boxGeometry args={[7, 1.5, 0.3]} />
-        <meshStandardMaterial color="#FEE2E2" emissive="#FEE2E2" emissiveIntensity={0.6} />
+        <meshBasicMaterial color="#FEE2E2" />
       </mesh>
       
-      <pointLight position={[0, 5, BUILDING_SIZE / 2 + 1]} color="#FEE2E2" intensity={3} distance={10} />
-      
-      {Array.from({ length: 2 }).map((_, floor) => (
-        <group key={floor}>
-          {[-2.5, 2.5].map((xPos, i) => (
-            <mesh key={i} position={[xPos, floor * 3 - 1, BUILDING_SIZE / 2 + 0.05]}>
-              <planeGeometry args={[1.2, 1.2]} />
-              <meshStandardMaterial color="#1E293B" emissive="#FBBF24" emissiveIntensity={0.4} />
-            </mesh>
-          ))}
-        </group>
-      ))}
-      
       <Bench position={[BUILDING_SIZE / 2 + 1, 0, 2]} />
-      <Bench position={[BUILDING_SIZE / 2 + 1, 0, -2]} />
       <TrashBin position={[BUILDING_SIZE / 2 + 2, 0, 0]} />
     </group>
   );
@@ -448,46 +392,46 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
         <planeGeometry args={[300, 300]} />
-        <meshStandardMaterial color="#15803D" roughness={0.9} />
+        <meshLambertMaterial color="#15803D" />
       </mesh>
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE, 0, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE, 0, 0]}>
         <planeGeometry args={[ROAD_WIDTH, 300]} />
-        <meshStandardMaterial color="#1F2937" roughness={0.8} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE, 0, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE, 0, 0]}>
         <planeGeometry args={[ROAD_WIDTH, 300]} />
-        <meshStandardMaterial color="#1F2937" roughness={0.8} />
+        <meshLambertMaterial color="#1F2937" />
       </mesh>
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE, 0.01, 0]}>
         <planeGeometry args={[0.2, 300]} />
-        <meshStandardMaterial color="#FBBF24" />
+        <meshBasicMaterial color="#FBBF24" />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE, 0.01, 0]}>
         <planeGeometry args={[0.2, 300]} />
-        <meshStandardMaterial color="#FBBF24" />
+        <meshBasicMaterial color="#FBBF24" />
       </mesh>
 
       {Array.from({ length: 25 }).map((_, i) => (
         <group key={i}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE - 2.5, 0.02, (i - 12) * 8]}>
             <planeGeometry args={[0.8, 0.3]} />
-            <meshStandardMaterial color="#FFFFFF" />
+            <meshBasicMaterial color="#FFFFFF" />
           </mesh>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE + 2.5, 0.02, (i - 12) * 8]}>
             <planeGeometry args={[0.8, 0.3]} />
-            <meshStandardMaterial color="#FFFFFF" />
+            <meshBasicMaterial color="#FFFFFF" />
           </mesh>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE - 2.5, 0.02, (i - 12) * 8]}>
             <planeGeometry args={[0.8, 0.3]} />
-            <meshStandardMaterial color="#FFFFFF" />
+            <meshBasicMaterial color="#FFFFFF" />
           </mesh>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE + 2.5, 0.02, (i - 12) * 8]}>
             <planeGeometry args={[0.8, 0.3]} />
-            <meshStandardMaterial color="#FFFFFF" />
+            <meshBasicMaterial color="#FFFFFF" />
           </mesh>
         </group>
       ))}
@@ -497,13 +441,13 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
           {Array.from({ length: 8 }).map((_, i) => (
             <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[-BLOCK_SIZE + (i - 3.5) * 0.7, 0.03, z]}>
               <planeGeometry args={[0.5, 1.5]} />
-              <meshStandardMaterial color="#FFFFFF" />
+              <meshBasicMaterial color="#FFFFFF" />
             </mesh>
           ))}
           {Array.from({ length: 8 }).map((_, i) => (
             <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[BLOCK_SIZE + (i - 3.5) * 0.7, 0.03, z]}>
               <planeGeometry args={[0.5, 1.5]} />
-              <meshStandardMaterial color="#FFFFFF" />
+              <meshBasicMaterial color="#FFFFFF" />
             </mesh>
           ))}
         </group>
@@ -511,11 +455,11 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
 
       <mesh position={[-BLOCK_SIZE - 4.5, 1, 0]}>
         <boxGeometry args={[0.1, 2, 300]} />
-        <meshStandardMaterial color="#78350F" />
+        <meshLambertMaterial color="#78350F" />
       </mesh>
       <mesh position={[BLOCK_SIZE + 4.5, 1, 0]}>
         <boxGeometry args={[0.1, 2, 300]} />
-        <meshStandardMaterial color="#78350F" />
+        <meshLambertMaterial color="#78350F" />
       </mesh>
 
       {[-50, -30, -10, 10, 30, 50].map((z, i) => (
@@ -538,22 +482,22 @@ export function City({ gridSize = 15, quality = 'high', onBuildingsReady }: City
         <group key={i} position={item.position}>
           {item.type === 'tree' ? (
             <>
-              <mesh castShadow position={[0, -2, 0]}>
-                <cylinderGeometry args={[0.3, 0.4, 4]} />
-                <meshStandardMaterial color="#78350F" />
+              <mesh position={[0, -2, 0]}>
+                <cylinderGeometry args={[0.3, 0.4, 4, 6]} />
+                <meshLambertMaterial color="#78350F" />
               </mesh>
-              <mesh castShadow position={[0, 1, 0]}>
-                <sphereGeometry args={[2, 16, 16]} />
-                <meshStandardMaterial color={item.color} />
+              <mesh position={[0, 1, 0]}>
+                <sphereGeometry args={[2, 8, 8]} />
+                <meshLambertMaterial color={item.color} />
               </mesh>
             </>
           ) : item.type === 'restaurant' ? (
             <Restaurant position={[0, 0, 0]} name="" color={item.color} />
           ) : (
             <>
-              <mesh castShadow receiveShadow>
+              <mesh>
                 <boxGeometry args={[BUILDING_SIZE, item.height, BUILDING_SIZE]} />
-                <meshStandardMaterial color={item.color} roughness={0.7} />
+                <meshLambertMaterial color={item.color} />
               </mesh>
               {Array.from({ length: Math.floor(item.height / 3) }).map((_, floor) => (
                 <group key={floor}>

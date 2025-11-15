@@ -288,20 +288,25 @@ export function CityDeliveryRush() {
       <div className="w-full h-screen relative bg-gray-900">
       <Canvas
         camera={{ position: [6, 4, 6], fov: 70 }}
-        shadows={settings.shadows}
-        dpr={settings.pixelRatio}
-        gl={{ antialias: settings.antialias }}
+        shadows={false}
+        dpr={Math.min(settings.pixelRatio, 1)}
+        gl={{ 
+          antialias: false,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true
+        }}
+        performance={{ min: 0.5 }}
       >
         <Suspense fallback={null}>
           <color attach="background" args={['#87CEEB']} />
+          <fog attach="fog" args={['#87CEEB', 30, 70]} />
           
-          <ambientLight intensity={0.5} />
+          <ambientLight intensity={0.7} />
           <directionalLight
             position={[50, 50, 25]}
-            intensity={1}
-            castShadow={settings.shadows}
-            shadow-mapSize-width={settings.shadowMapSize}
-            shadow-mapSize-height={settings.shadowMapSize}
+            intensity={0.8}
+            castShadow={false}
           />
           
           <City 

@@ -186,56 +186,52 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
 
   return (
     <group ref={groupRef} position={position}>
-      <mesh castShadow position={[0, 1.3, 0]}>
-        <sphereGeometry args={[0.3, 16, 16]} />
-        <meshStandardMaterial color="#FFD1A4" />
+      <mesh position={[0, 1.3, 0]}>
+        <sphereGeometry args={[0.3, 8, 8]} />
+        <meshLambertMaterial color="#FFD1A4" />
       </mesh>
 
-      <mesh castShadow position={[0, 0.7, 0]}>
+      <mesh position={[0, 0.7, 0]}>
         <boxGeometry args={[0.5, 0.7, 0.3]} />
-        <meshStandardMaterial color={courierColor} />
+        <meshLambertMaterial color={courierColor} />
       </mesh>
 
-      <mesh castShadow position={[0, 0.7, -0.2]}>
+      <mesh position={[0, 0.7, -0.2]}>
         <boxGeometry args={[0.4, 0.5, 0.2]} />
-        <meshStandardMaterial
-          color={backpackColor}
-          emissive={hasPackage ? '#FBBF24' : '#000000'}
-          emissiveIntensity={hasPackage ? 0.5 : 0}
-        />
+        <meshBasicMaterial color={backpackColor} />
       </mesh>
 
-      <mesh castShadow position={[-0.25, 0.5, 0]}>
-        <cylinderGeometry args={[0.08, 0.08, 0.6]} />
-        <meshStandardMaterial color={courierColor} />
+      <mesh position={[-0.25, 0.5, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 0.6, 6]} />
+        <meshLambertMaterial color={courierColor} />
       </mesh>
-      <mesh castShadow position={[0.25, 0.5, 0]}>
-        <cylinderGeometry args={[0.08, 0.08, 0.6]} />
-        <meshStandardMaterial color={courierColor} />
+      <mesh position={[0.25, 0.5, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 0.6, 6]} />
+        <meshLambertMaterial color={courierColor} />
       </mesh>
 
-      <mesh castShadow position={[-0.15, 0.1, 0]}>
-        <cylinderGeometry args={[0.1, 0.1, 0.6]} />
-        <meshStandardMaterial color="#3B82F6" />
+      <mesh position={[-0.15, 0.1, 0]}>
+        <cylinderGeometry args={[0.1, 0.1, 0.6, 6]} />
+        <meshLambertMaterial color="#3B82F6" />
       </mesh>
-      <mesh castShadow position={[0.15, 0.1, 0]}>
-        <cylinderGeometry args={[0.1, 0.1, 0.6]} />
-        <meshStandardMaterial color="#3B82F6" />
+      <mesh position={[0.15, 0.1, 0]}>
+        <cylinderGeometry args={[0.1, 0.1, 0.6, 6]} />
+        <meshLambertMaterial color="#3B82F6" />
       </mesh>
 
       {vehicle === 'bicycle' && (
         <group position={[0, -0.2, 0]}>
           <mesh position={[-0.5, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.3, 0.05, 8, 16]} />
-            <meshStandardMaterial color="#1F2937" />
+            <torusGeometry args={[0.3, 0.05, 6, 12]} />
+            <meshLambertMaterial color="#1F2937" />
           </mesh>
           <mesh position={[0.5, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.3, 0.05, 8, 16]} />
-            <meshStandardMaterial color="#1F2937" />
+            <torusGeometry args={[0.3, 0.05, 6, 12]} />
+            <meshLambertMaterial color="#1F2937" />
           </mesh>
           <mesh position={[0, 0.2, 0]}>
             <boxGeometry args={[0.8, 0.05, 0.05]} />
-            <meshStandardMaterial color="#71717A" />
+            <meshLambertMaterial color="#71717A" />
           </mesh>
         </group>
       )}
@@ -244,22 +240,20 @@ export function Courier({ position, vehicle, hasPackage, onEnergyChange, mobileI
         <group position={[0, -0.1, 0]}>
           <mesh position={[0, 0, 0]}>
             <boxGeometry args={[0.6, 0.05, 0.2]} />
-            <meshStandardMaterial color="#0F172A" />
+            <meshLambertMaterial color="#0F172A" />
           </mesh>
           <mesh position={[0, 0.4, 0.2]}>
-            <cylinderGeometry args={[0.05, 0.05, 0.4]} />
-            <meshStandardMaterial color="#71717A" />
+            <cylinderGeometry args={[0.05, 0.05, 0.4, 6]} />
+            <meshLambertMaterial color="#71717A" />
           </mesh>
           <mesh position={[-0.3, -0.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.15, 0.04, 8, 12]} />
-            <meshStandardMaterial color="#1F2937" />
+            <torusGeometry args={[0.15, 0.04, 6, 8]} />
+            <meshLambertMaterial color="#1F2937" />
           </mesh>
           <mesh position={[0.3, -0.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.15, 0.04, 8, 12]} />
-            <meshStandardMaterial color="#1F2937" />
+            <torusGeometry args={[0.15, 0.04, 6, 8]} />
+            <meshLambertMaterial color="#1F2937" />
           </mesh>
-          
-          <pointLight position={[0, -0.1, 0]} color="#00FF88" intensity={2} distance={3} />
         </group>
       )}
 
