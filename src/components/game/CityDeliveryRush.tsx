@@ -281,7 +281,6 @@ export function CityDeliveryRush() {
                 </div>
               )}
             </div>
-            </div>
           </div>
         </div>
       </LandscapeOrientation>
