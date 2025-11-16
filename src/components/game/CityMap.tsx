@@ -25,7 +25,7 @@ export function CityMap({ playerPosition }: CityMapProps) {
     const buildingsList: BuildingData[] = [];
     const sidewalkSegments: RoadSegment[] = [];
     
-    const gridSize = 8;
+    const gridSize = 6;
     const blockSize = 30;
     const roadWidth = 8;
     const sidewalkWidth = 2;
@@ -49,7 +49,7 @@ export function CityMap({ playerPosition }: CityMapProps) {
         const centerX = x * blockSize + blockSize / 2;
         const centerZ = z * blockSize + blockSize / 2;
         
-        const numBuildings = Math.floor(Math.random() * 2) + 2;
+        const numBuildings = Math.floor(Math.random() * 1) + 1;
         
         for (let b = 0; b < numBuildings; b++) {
           const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
@@ -108,18 +108,18 @@ export function CityMap({ playerPosition }: CityMapProps) {
               <meshStandardMaterial color={road.type === 'main' ? '#404040' : '#4a4a4a'} />
             </mesh>
             
-            {Array.from({ length: Math.floor(length / 4) }).map((_, i) => (
+            {road.type === 'main' && idx % 3 === 0 && Array.from({ length: Math.floor(length / 8) }).map((_, i) => (
               <mesh
                 key={i}
                 position={[
-                  centerX + Math.cos(angle) * (i * 4 - length / 2 + 2),
+                  centerX + Math.cos(angle) * (i * 8 - length / 2 + 4),
                   0.02,
-                  centerZ + Math.sin(angle) * (i * 4 - length / 2 + 2)
+                  centerZ + Math.sin(angle) * (i * 8 - length / 2 + 4)
                 ]}
                 rotation={[-Math.PI / 2, 0, angle]}
               >
-                <planeGeometry args={[2, 0.3]} />
-                <meshStandardMaterial color="#ffeb3b" emissive="#ffeb3b" emissiveIntensity={0.2} />
+                <planeGeometry args={[3, 0.3]} />
+                <meshStandardMaterial color="#ffeb3b" />
               </mesh>
             ))}
           </group>
@@ -127,8 +127,8 @@ export function CityMap({ playerPosition }: CityMapProps) {
       })}
       
       {buildings.map((building, idx) => {
-        const floors = Math.floor(building.size[1] / 3);
-        const windowsPerFloor = Math.floor(building.size[0] / 2);
+        const floors = Math.min(Math.floor(building.size[1] / 3), 6);
+        const windowsPerFloor = Math.min(Math.floor(building.size[0] / 2), 3);
         
         return (
           <group key={idx} position={building.position}>
@@ -140,52 +140,28 @@ export function CityMap({ playerPosition }: CityMapProps) {
             {Array.from({ length: floors }).map((_, floor) => (
               <group key={floor}>
                 {Array.from({ length: windowsPerFloor }).map((_, win) => {
-                  const isLit = Math.random() > 0.3;
+                  const isLit = Math.random() > 0.5;
                   const xOffset = (win - windowsPerFloor / 2) * 1.5;
                   const yOffset = -building.size[1] / 2 + floor * 3 + 1.5;
                   
                   return (
-                    <group key={win}>
-                      <mesh position={[xOffset, yOffset, building.size[2] / 2 + 0.02]}>
-                        <planeGeometry args={[1, 1.5]} />
-                        <meshStandardMaterial 
-                          color={isLit ? '#ffffcc' : '#333333'}
-                          emissive={isLit ? '#ffff88' : '#000000'}
-                          emissiveIntensity={isLit ? 0.6 : 0}
-                        />
-                      </mesh>
-                      
-                      <mesh position={[xOffset, yOffset, -building.size[2] / 2 - 0.02]} rotation={[0, Math.PI, 0]}>
-                        <planeGeometry args={[1, 1.5]} />
-                        <meshStandardMaterial 
-                          color={isLit ? '#ffffcc' : '#333333'}
-                          emissive={isLit ? '#ffff88' : '#000000'}
-                          emissiveIntensity={isLit ? 0.6 : 0}
-                        />
-                      </mesh>
-                    </group>
+                    <mesh key={win} position={[xOffset, yOffset, building.size[2] / 2 + 0.02]}>
+                      <planeGeometry args={[1, 1.5]} />
+                      <meshStandardMaterial 
+                        color={isLit ? '#ffffcc' : '#333333'}
+                        emissive={isLit ? '#ffff88' : '#000000'}
+                        emissiveIntensity={isLit ? 0.4 : 0}
+                      />
+                    </mesh>
                   );
                 })}
               </group>
             ))}
             
-            {building.type === 'commercial' && (
-              <group position={[0, -building.size[1] / 2 + 2, building.size[2] / 2 + 0.05]}>
-                <mesh>
-                  <planeGeometry args={[building.size[0] * 0.6, 1.5]} />
-                  <meshStandardMaterial 
-                    color="#ff6600"
-                    emissive="#ff6600"
-                    emissiveIntensity={0.8}
-                  />
-                </mesh>
-              </group>
-            )}
-            
             {building.type === 'office' && (
               <mesh position={[0, building.size[1] / 2 + 0.5, 0]}>
-                <boxGeometry args={[2, 1, 2]} />
-                <meshStandardMaterial color="#999999" metalness={0.9} roughness={0.1} />
+                <boxGeometry args={[1.5, 0.8, 1.5]} />
+                <meshStandardMaterial color="#999999" />
               </mesh>
             )}
           </group>

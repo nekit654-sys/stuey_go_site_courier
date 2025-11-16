@@ -127,8 +127,8 @@ export function AdvancedDeliverySystem({
   return (
     <>
       {!currentOrder && (
-        <div className="absolute left-4 bottom-20 bg-black/90 text-white rounded-lg p-3 max-w-sm shadow-2xl border-2 border-green-500">
-          <div className="text-sm font-bold mb-3 flex items-center gap-2">
+        <div className="fixed left-2 sm:left-4 bottom-16 sm:bottom-20 bg-black/90 text-white rounded-lg p-2 sm:p-3 w-64 sm:w-80 max-w-[90vw] shadow-2xl border-2 border-green-500 z-30">
+          <div className="text-xs sm:text-sm font-bold mb-2 flex items-center gap-2">
             <span>📋</span>
             <span>Доступные заказы</span>
             <span className="ml-auto text-xs bg-green-500 px-2 py-1 rounded-full">
@@ -136,16 +136,16 @@ export function AdvancedDeliverySystem({
             </span>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1.5 max-h-[40vh] overflow-y-auto">
             {nearbyOrders.slice(0, 3).map(order => {
               const orderTypeData = orderTypes.find(t => t.type === order.type);
               
               return (
-                <div key={order.id} className="bg-gray-800 rounded-lg p-3 border-2 border-gray-600 hover:border-white transition-colors">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{orderTypeData?.icon}</span>
+                <div key={order.id} className="bg-gray-800 rounded-lg p-2 border-2 border-gray-600 hover:border-white transition-colors">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-xl">{orderTypeData?.icon}</span>
                     <div className="flex-1">
-                      <div className="font-bold text-white">{order.customerName}</div>
+                      <div className="font-bold text-white text-sm">{order.customerName}</div>
                       <div className="text-xs text-gray-300">
                         {order.pickupLocation.name}
                       </div>
@@ -155,7 +155,7 @@ export function AdvancedDeliverySystem({
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
+                  <div className="grid grid-cols-3 gap-1.5 mb-1.5 text-xs">
                     <div className="bg-yellow-500 text-black rounded px-2 py-1 font-bold text-center">
                       💰 {order.reward}
                     </div>
@@ -175,7 +175,7 @@ export function AdvancedDeliverySystem({
                   
                   <button
                     onClick={() => handleAcceptOrder(order)}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg py-2 text-sm transition-colors"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg py-1.5 text-xs transition-colors"
                   >
                     ✅ Принять заказ
                   </button>
@@ -187,39 +187,39 @@ export function AdvancedDeliverySystem({
       )}
       
       {currentOrder && (
-        <div className="absolute left-4 bottom-20 bg-gradient-to-br from-green-600 to-blue-600 text-white rounded-lg p-4 max-w-sm shadow-2xl border-4 border-yellow-400 animate-pulse">
-          <div className="text-lg font-bold mb-3 flex items-center gap-2">
-            <span className="text-3xl">{orderTypes.find(t => t.type === currentOrder.type)?.icon}</span>
-            <span>🎯 АКТИВНЫЙ ЗАКАЗ</span>
+        <div className="fixed left-2 sm:left-4 bottom-16 sm:bottom-20 bg-gradient-to-br from-green-600 to-blue-600 text-white rounded-lg p-2 sm:p-3 w-64 sm:w-72 max-w-[90vw] shadow-2xl border-2 sm:border-4 border-yellow-400 z-30">
+          <div className="text-sm sm:text-base font-bold mb-2 flex items-center gap-1.5">
+            <span className="text-xl sm:text-2xl">{orderTypes.find(t => t.type === currentOrder.type)?.icon}</span>
+            <span className="text-xs sm:text-sm">🎯 АКТИВНЫЙ ЗАКАЗ</span>
           </div>
           
-          <div className="space-y-2 text-sm bg-black/30 rounded-lg p-3">
-            <div className="bg-white/20 rounded-lg p-2">
-              <div className="font-bold text-lg">{currentOrder.customerName}</div>
-              <div className="text-sm text-yellow-300">
+          <div className="space-y-1.5 text-xs sm:text-sm bg-black/30 rounded-lg p-2">
+            <div className="bg-white/20 rounded-lg p-1.5">
+              <div className="font-bold text-sm sm:text-base">{currentOrder.customerName}</div>
+              <div className="text-xs text-yellow-300">
                 📍 {currentOrder.deliveryLocation.name}
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-yellow-500 text-black rounded-lg p-2 text-center">
-                <div className="text-xs font-bold">Награда</div>
-                <div className="font-bold text-lg">💰 {currentOrder.reward}</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="bg-yellow-500 text-black rounded-lg p-1.5 text-center">
+                <div className="text-[10px] font-bold">Награда</div>
+                <div className="font-bold text-sm">💰 {currentOrder.reward}</div>
               </div>
-              <div className="bg-purple-500 rounded-lg p-2 text-center">
-                <div className="text-xs font-bold">Дистанция</div>
-                <div className="font-bold text-lg">📏 {currentOrder.distance}м</div>
+              <div className="bg-purple-500 rounded-lg p-1.5 text-center">
+                <div className="text-[10px] font-bold">Дистанция</div>
+                <div className="font-bold text-sm">📏 {currentOrder.distance}м</div>
               </div>
             </div>
             
             {currentOrder.fragile && (
-              <div className="bg-red-500 text-white rounded-lg px-3 py-2 text-sm font-bold text-center animate-pulse">
-                ⚠️ ХРУПКОЕ! БУДЬ АККУРАТЕН!
+              <div className="bg-red-500 text-white rounded-lg px-2 py-1 text-xs font-bold text-center">
+                ⚠️ ХРУПКОЕ!
               </div>
             )}
             
-            <div className="bg-green-500 text-white rounded-lg px-3 py-2 text-center font-bold">
-              🧭 Следуй по зелёным меткам!
+            <div className="bg-green-500 text-white rounded-lg px-2 py-1 text-center font-bold text-xs">
+              🧭 Следуй по меткам!
             </div>
           </div>
         </div>

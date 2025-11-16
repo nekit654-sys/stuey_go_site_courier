@@ -14,7 +14,7 @@ import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
 import { Weather } from './Weather';
-import { TrafficSystem } from './TrafficSystem';
+import { OptimizedTrafficSystem } from './OptimizedTrafficSystem';
 import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
 import Icon from '@/components/ui/icon';
@@ -71,6 +71,29 @@ export function CityDeliveryRush() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpData, setLevelUpData] = useState({ level: 1, skillPoints: 0 });
   const [showSkillTree, setShowSkillTree] = useState(false);
+  const [fpsHistory, setFpsHistory] = useState<number[]>([]);
+  
+  useEffect(() => {
+    if (gameStarted && sceneLoaded && currentFps > 0) {
+      setFpsHistory(prev => {
+        const newHistory = [...prev, currentFps].slice(-30);
+        
+        if (newHistory.length >= 20) {
+          const avgFps = newHistory.reduce((a, b) => a + b, 0) / newHistory.length;
+          
+          if (avgFps < 25 && graphicsQuality !== 'low') {
+            console.log('⚠️ FPS низкий, переключение на низкое качество');
+            setGraphicsQuality('low');
+          } else if (avgFps >= 50 && avgFps < 55 && graphicsQuality === 'high') {
+            console.log('⚠️ FPS средний, переключение на среднее качество');
+            setGraphicsQuality('medium');
+          }
+        }
+        
+        return newHistory;
+      });
+    }
+  }, [currentFps, gameStarted, sceneLoaded]);
   
   useEffect(() => {
     if (gameStarted && !sceneLoaded) {
@@ -415,14 +438,15 @@ export function CityDeliveryRush() {
   return (
     <div className="w-full h-screen relative overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600">
       <Canvas 
-        shadows 
-        dpr={[1, 1.5]} 
+        shadows={graphicsQuality === 'high'}
+        dpr={graphicsQuality === 'low' ? [0.5, 1] : [1, 1.5]} 
         gl={{ 
-          antialias: graphicsQuality !== 'low',
+          antialias: graphicsQuality === 'high',
           powerPreference: 'high-performance',
           alpha: false,
           stencil: false,
-          depth: true
+          depth: true,
+          logarithmicDepthBuffer: false
         }} 
         onCreated={({ gl }) => {
           console.log('🎨 Canvas создан успешно');
@@ -438,8 +462,8 @@ export function CityDeliveryRush() {
         <directionalLight
           position={[50, 50, 25]}
           intensity={1}
-          castShadow={graphicsQuality !== 'low'}
-          shadow-mapSize={graphicsQuality === 'high' ? [2048, 2048] : [1024, 1024]}
+          castShadow={graphicsQuality === 'high'}
+          shadow-mapSize={graphicsQuality === 'high' ? [1024, 1024] : [512, 512]}
         />
         
         <Sky sunPosition={[100, 20, 100]} />
@@ -458,7 +482,7 @@ export function CityDeliveryRush() {
         }>
           <CityMap playerPosition={playerPosition} />
           
-          <TrafficSystem />
+          {graphicsQuality !== 'low' && <OptimizedTrafficSystem />}
           
           <SimpleCourier
             vehicle={gameState.currentVehicle}
@@ -478,7 +502,7 @@ export function CityDeliveryRush() {
             />
           )}
           
-          {graphicsQuality !== 'low' && <Weather type={weather} />}
+          {graphicsQuality === 'high' && <Weather type={weather} />}
         </Suspense>
       </Canvas>
 

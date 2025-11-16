@@ -27,7 +27,7 @@ export function TrafficSystem() {
   const carColors = ['#ff0000', '#0000ff', '#ffff00', '#00ff00', '#ff00ff', '#00ffff', '#ffa500'];
   
   useMemo(() => {
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 10; i++) {
       const isHorizontal = Math.random() > 0.5;
       const lane = Math.floor(Math.random() * 6) - 3;
       
@@ -50,10 +50,7 @@ export function TrafficSystem() {
       { x: 0, z: 0 },
       { x: 60, z: 0 },
       { x: -60, z: 0 },
-      { x: 0, z: 60 },
-      { x: 0, z: -60 },
-      { x: 60, z: 60 },
-      { x: -60, z: -60 }
+      { x: 0, z: 60 }
     ];
 
     intersections.forEach((pos, idx) => {
@@ -112,82 +109,62 @@ export function TrafficSystem() {
           </mesh>
           
           <mesh position={[0.7, -0.4, 1.2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 8]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
           <mesh position={[-0.7, -0.4, 1.2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 8]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
           <mesh position={[0.7, -0.4, -1.2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 8]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
           <mesh position={[-0.7, -0.4, -1.2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+            <cylinderGeometry args={[0.3, 0.3, 0.2, 8]} />
             <meshStandardMaterial color="#1a1a1a" />
-          </mesh>
-          
-          <mesh position={[0, 0.2, 1.9]}>
-            <boxGeometry args={[1.5, 0.4, 0.1]} />
-            <meshStandardMaterial color="#ffff00" emissive="#ffff00" emissiveIntensity={0.5} />
-          </mesh>
-          
-          <mesh position={[0, 0.2, -1.9]}>
-            <boxGeometry args={[1.5, 0.4, 0.1]} />
-            <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.8} />
           </mesh>
         </group>
       ))}
 
       {trafficLightsRef.current.map((light, idx) => (
         <group key={idx} position={light.position}>
-          <mesh position={[0, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.2, 0.2, 4, 16]} />
-            <meshStandardMaterial color="#333333" metalness={0.8} />
+          <mesh position={[0, 0, 0]}>
+            <cylinderGeometry args={[0.2, 0.2, 4, 8]} />
+            <meshStandardMaterial color="#333333" />
           </mesh>
           
-          <mesh position={[0, 2.5, 0]} castShadow>
+          <mesh position={[0, 2.5, 0]}>
             <boxGeometry args={[0.6, 1.8, 0.4]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
           
           <mesh position={[0, 3, 0]}>
-            <sphereGeometry args={[0.25, 16, 16]} />
+            <sphereGeometry args={[0.25, 8, 8]} />
             <meshStandardMaterial 
               color={light.state === 'red' ? '#ff0000' : '#330000'}
               emissive={light.state === 'red' ? '#ff0000' : '#000000'}
-              emissiveIntensity={light.state === 'red' ? 1.5 : 0}
+              emissiveIntensity={light.state === 'red' ? 1 : 0}
             />
           </mesh>
           
           <mesh position={[0, 2.5, 0]}>
-            <sphereGeometry args={[0.25, 16, 16]} />
+            <sphereGeometry args={[0.25, 8, 8]} />
             <meshStandardMaterial 
               color={light.state === 'yellow' ? '#ffff00' : '#333300'}
               emissive={light.state === 'yellow' ? '#ffff00' : '#000000'}
-              emissiveIntensity={light.state === 'yellow' ? 1.5 : 0}
+              emissiveIntensity={light.state === 'yellow' ? 1 : 0}
             />
           </mesh>
           
           <mesh position={[0, 2, 0]}>
-            <sphereGeometry args={[0.25, 16, 16]} />
+            <sphereGeometry args={[0.25, 8, 8]} />
             <meshStandardMaterial 
               color={light.state === 'green' ? '#00ff00' : '#003300'}
               emissive={light.state === 'green' ? '#00ff00' : '#000000'}
-              emissiveIntensity={light.state === 'green' ? 1.5 : 0}
+              emissiveIntensity={light.state === 'green' ? 1 : 0}
             />
           </mesh>
-
-          {light.state === 'red' && (
-            <pointLight position={[0, 3, 0]} color="#ff0000" intensity={2} distance={10} />
-          )}
-          {light.state === 'yellow' && (
-            <pointLight position={[0, 2.5, 0]} color="#ffff00" intensity={2} distance={10} />
-          )}
-          {light.state === 'green' && (
-            <pointLight position={[0, 2, 0]} color="#00ff00" intensity={2} distance={10} />
-          )}
         </group>
       ))}
     </group>

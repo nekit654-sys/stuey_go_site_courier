@@ -101,12 +101,6 @@ export function usePerformanceSettings() {
   return { settings, currentFps };
 }
 
-export function PerformanceMonitor({ fps }: { fps: number }) {
-  const color = fps >= 50 ? '#22c55e' : fps >= 30 ? '#eab308' : '#ef4444';
-  
-  return (
-    <div className="fixed top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs font-mono z-50">
-      FPS: <span style={{ color }}>{fps}</span>
-    </div>
-  );
+export function PerformanceMonitor() {
+  return null;
 }
