@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { Sky, PerspectiveCamera, OrbitControls } from '@react-three/drei';
+import { Sky, PerspectiveCamera } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { SimpleCourier } from './SimpleCourier';
 import { CityMap } from './CityMap';
@@ -14,9 +14,9 @@ import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
 import { Weather } from './Weather';
+import { TrafficSystem } from './TrafficSystem';
 import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
-import { ExperienceBar } from './ExperienceBar';
 import Icon from '@/components/ui/icon';
 
 interface GameState {
@@ -64,6 +64,7 @@ export function CityDeliveryRush() {
   const [graphicsQuality, setGraphicsQuality] = useState<'low' | 'medium' | 'high'>('medium');
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [deliveryStage, setDeliveryStage] = useState<'none' | 'pickup' | 'delivery'>('none');
+  const [autoAcceptOrders, setAutoAcceptOrders] = useState(true);
   const [level, setLevel] = useState(1);
   const [currentExp, setCurrentExp] = useState(0);
   const [expToNextLevel, setExpToNextLevel] = useState(100);
@@ -348,6 +349,17 @@ export function CityDeliveryRush() {
                     {soundEnabled ? '🔊 Включен' : '🔇 Выключен'}
                   </button>
                 </div>
+                
+                <div className="bg-gray-50 p-4 rounded-xl border-3 border-black">
+                  <div className="text-sm font-bold mb-2 text-gray-700">🤖 Автоприем заказов:</div>
+                  <button
+                    onClick={() => setAutoAcceptOrders(!autoAcceptOrders)}
+                    className={`w-full p-3 rounded-lg border-3 font-bold text-base transition-colors ${autoAcceptOrders ? 'bg-green-400 border-black hover:bg-green-500' : 'bg-gray-300 border-gray-400 hover:bg-gray-400'}`}
+                  >
+                    {autoAcceptOrders ? '✅ Включен' : '❌ Выключен'}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2">Автоматически принимает ближайшие заказы</p>
+                </div>
               </div>
 
               <button
@@ -420,8 +432,7 @@ export function CityDeliveryRush() {
           console.error('❌ Ошибка Canvas:', error);
         }}
       >
-        <PerspectiveCamera makeDefault position={[0, 15, 20]} fov={60} />
-        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.5} minDistance={10} maxDistance={50} />
+        <PerspectiveCamera makeDefault position={[0, 8, 15]} fov={60} />
         
         <ambientLight intensity={0.7} />
         <directionalLight
@@ -445,7 +456,9 @@ export function CityDeliveryRush() {
             </mesh>
           </group>
         }>
-          <CityMap />
+          <CityMap playerPosition={playerPosition} />
+          
+          <TrafficSystem />
           
           <SimpleCourier
             vehicle={gameState.currentVehicle}
@@ -508,6 +521,7 @@ export function CityDeliveryRush() {
         onOrderAccept={handleOrderAccept}
         onOrderComplete={(order) => handleDeliveryComplete(order.reward, 0)}
         currentOrder={currentOrder}
+        autoAccept={autoAcceptOrders}
       />
       
       {currentOrder && (

@@ -19,13 +19,15 @@ interface AdvancedDeliverySystemProps {
   onOrderAccept: (order: Order) => void;
   onOrderComplete: (order: Order) => void;
   currentOrder: Order | null;
+  autoAccept?: boolean;
 }
 
 export function AdvancedDeliverySystem({
   playerPosition,
   onOrderAccept,
   onOrderComplete,
-  currentOrder
+  currentOrder,
+  autoAccept = false
 }: AdvancedDeliverySystemProps) {
   const [availableOrders, setAvailableOrders] = useState<Order[]>([]);
   const [orderHistory, setOrderHistory] = useState<Order[]>([]);
@@ -112,6 +114,15 @@ export function AdvancedDeliverySystem({
       return { ...order, distanceToPlayer: Math.floor(distance) };
     }).sort((a, b) => a.distanceToPlayer - b.distanceToPlayer);
   }, [availableOrders, playerPosition]);
+  
+  useEffect(() => {
+    if (autoAccept && !currentOrder && nearbyOrders.length > 0) {
+      const closestOrder = nearbyOrders[0];
+      if (closestOrder.distanceToPlayer < 100) {
+        handleAcceptOrder(closestOrder);
+      }
+    }
+  }, [autoAccept, currentOrder, nearbyOrders]);
   
   return (
     <>

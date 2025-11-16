@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 interface SimpleCourierProps {
@@ -12,6 +12,42 @@ interface SimpleCourierProps {
 
 const keys: { [key: string]: boolean } = {};
 
+function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
+  const { camera } = useThree();
+  const currentPosition = useRef(new THREE.Vector3(0, 8, 15));
+  const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
+
+  useFrame(() => {
+    if (!target.current) return;
+
+    const targetPosition = target.current.position;
+    const targetRotation = target.current.rotation;
+
+    const cameraOffset = new THREE.Vector3(0, 8, 15);
+    cameraOffset.applyEuler(new THREE.Euler(0, targetRotation.y, 0));
+    
+    const desiredPosition = new THREE.Vector3(
+      targetPosition.x + cameraOffset.x,
+      targetPosition.y + cameraOffset.y,
+      targetPosition.z + cameraOffset.z
+    );
+
+    currentPosition.current.lerp(desiredPosition, 0.1);
+    camera.position.copy(currentPosition.current);
+
+    const lookAtTarget = new THREE.Vector3(
+      targetPosition.x,
+      targetPosition.y + 2,
+      targetPosition.z
+    );
+    
+    currentLookAt.current.lerp(lookAtTarget, 0.1);
+    camera.lookAt(currentLookAt.current);
+  });
+
+  return null;
+}
+
 export function SimpleCourier({ 
   vehicle, 
   onPositionChange, 
@@ -20,6 +56,7 @@ export function SimpleCourier({
   onEnergyChange 
 }: SimpleCourierProps) {
   const meshRef = useRef<THREE.Group>(null);
+  const cameraTargetRef = useRef<THREE.Group>(null);
   const rotation = useRef(0);
   const position = useRef(new THREE.Vector3(0, 1, 0));
   const energy = useRef(100);
@@ -146,8 +183,15 @@ export function SimpleCourier({
   };
   
   return (
-    <group ref={meshRef} position={[0, 1, 0]}>
-      {getVehicleMesh()}
-    </group>
+    <>
+      <group ref={meshRef} position={[0, 1, 0]}>
+        {getVehicleMesh()}
+        <group ref={cameraTargetRef} />
+      </group>
+      
+      {meshRef.current && (
+        <CameraFollower target={meshRef} />
+      )}
+    </>
   );
 }

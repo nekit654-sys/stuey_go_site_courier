@@ -14,16 +14,20 @@ interface BuildingData {
   color: string;
 }
 
-export function CityMap() {
+interface CityMapProps {
+  playerPosition?: { x: number; z: number };
+}
+
+export function CityMap({ playerPosition }: CityMapProps) {
   const { roads, buildings, sidewalks } = useMemo(() => {
     console.log('🏗️ Генерация карты города...');
     const roadSegments: RoadSegment[] = [];
     const buildingsList: BuildingData[] = [];
     const sidewalkSegments: RoadSegment[] = [];
     
-    const gridSize = 6;
+    const gridSize = 8;
     const blockSize = 30;
-    const roadWidth = 6;
+    const roadWidth = 8;
     const sidewalkWidth = 2;
     
     for (let i = -gridSize; i <= gridSize; i++) {
@@ -45,15 +49,15 @@ export function CityMap() {
         const centerX = x * blockSize + blockSize / 2;
         const centerZ = z * blockSize + blockSize / 2;
         
-        const numBuildings = Math.floor(Math.random() * 1) + 1;
+        const numBuildings = Math.floor(Math.random() * 2) + 2;
         
         for (let b = 0; b < numBuildings; b++) {
           const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
           const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
           
-          const width = Math.random() * 5 + 3;
-          const depth = Math.random() * 5 + 3;
-          const height = Math.random() * 15 + 8;
+          const width = Math.random() * 6 + 4;
+          const depth = Math.random() * 6 + 4;
+          const height = Math.random() * 20 + 10;
           
           const types: Array<'residential' | 'commercial' | 'office'> = ['residential', 'commercial', 'office'];
           const type = types[Math.floor(Math.random() * types.length)];
@@ -104,39 +108,89 @@ export function CityMap() {
               <meshStandardMaterial color={road.type === 'main' ? '#404040' : '#4a4a4a'} />
             </mesh>
             
-            <mesh
-              position={[centerX, 0.01, centerZ]}
-              rotation={[-Math.PI / 2, 0, angle]}
-            >
-              <planeGeometry args={[length, 0.2]} />
-              <meshStandardMaterial color="#ffeb3b" />
-            </mesh>
+            {Array.from({ length: Math.floor(length / 4) }).map((_, i) => (
+              <mesh
+                key={i}
+                position={[
+                  centerX + Math.cos(angle) * (i * 4 - length / 2 + 2),
+                  0.02,
+                  centerZ + Math.sin(angle) * (i * 4 - length / 2 + 2)
+                ]}
+                rotation={[-Math.PI / 2, 0, angle]}
+              >
+                <planeGeometry args={[2, 0.3]} />
+                <meshStandardMaterial color="#ffeb3b" emissive="#ffeb3b" emissiveIntensity={0.2} />
+              </mesh>
+            ))}
           </group>
         );
       })}
       
-      {buildings.map((building, idx) => (
-        <mesh
-          key={idx}
-          position={building.position}
-          castShadow
-          receiveShadow
-        >
-          <boxGeometry args={building.size} />
-          <meshStandardMaterial color={building.color} />
-          
-          {building.type === 'office' && (
-            <>
-              {Array.from({ length: Math.floor(building.size[1] / 3) }).map((_, floor) => (
-                <mesh key={floor} position={[0, -building.size[1] / 2 + floor * 3 + 1.5, building.size[2] / 2 + 0.01]}>
-                  <planeGeometry args={[building.size[0] * 0.8, 2]} />
-                  <meshStandardMaterial color="#87CEEB" emissive="#87CEEB" emissiveIntensity={0.3} />
+      {buildings.map((building, idx) => {
+        const floors = Math.floor(building.size[1] / 3);
+        const windowsPerFloor = Math.floor(building.size[0] / 2);
+        
+        return (
+          <group key={idx} position={building.position}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={building.size} />
+              <meshStandardMaterial color={building.color} roughness={0.8} metalness={0.2} />
+            </mesh>
+            
+            {Array.from({ length: floors }).map((_, floor) => (
+              <group key={floor}>
+                {Array.from({ length: windowsPerFloor }).map((_, win) => {
+                  const isLit = Math.random() > 0.3;
+                  const xOffset = (win - windowsPerFloor / 2) * 1.5;
+                  const yOffset = -building.size[1] / 2 + floor * 3 + 1.5;
+                  
+                  return (
+                    <group key={win}>
+                      <mesh position={[xOffset, yOffset, building.size[2] / 2 + 0.02]}>
+                        <planeGeometry args={[1, 1.5]} />
+                        <meshStandardMaterial 
+                          color={isLit ? '#ffffcc' : '#333333'}
+                          emissive={isLit ? '#ffff88' : '#000000'}
+                          emissiveIntensity={isLit ? 0.6 : 0}
+                        />
+                      </mesh>
+                      
+                      <mesh position={[xOffset, yOffset, -building.size[2] / 2 - 0.02]} rotation={[0, Math.PI, 0]}>
+                        <planeGeometry args={[1, 1.5]} />
+                        <meshStandardMaterial 
+                          color={isLit ? '#ffffcc' : '#333333'}
+                          emissive={isLit ? '#ffff88' : '#000000'}
+                          emissiveIntensity={isLit ? 0.6 : 0}
+                        />
+                      </mesh>
+                    </group>
+                  );
+                })}
+              </group>
+            ))}
+            
+            {building.type === 'commercial' && (
+              <group position={[0, -building.size[1] / 2 + 2, building.size[2] / 2 + 0.05]}>
+                <mesh>
+                  <planeGeometry args={[building.size[0] * 0.6, 1.5]} />
+                  <meshStandardMaterial 
+                    color="#ff6600"
+                    emissive="#ff6600"
+                    emissiveIntensity={0.8}
+                  />
                 </mesh>
-              ))}
-            </>
-          )}
-        </mesh>
-      ))}
+              </group>
+            )}
+            
+            {building.type === 'office' && (
+              <mesh position={[0, building.size[1] / 2 + 0.5, 0]}>
+                <boxGeometry args={[2, 1, 2]} />
+                <meshStandardMaterial color="#999999" metalness={0.9} roughness={0.1} />
+              </mesh>
+            )}
+          </group>
+        );
+      })}
     </group>
   );
 }
