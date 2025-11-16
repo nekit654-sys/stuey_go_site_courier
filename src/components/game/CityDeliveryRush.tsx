@@ -518,8 +518,16 @@ export function CityDeliveryRush() {
         />
       )}
 
-      <SoundManager enabled={soundEnabled} musicVolume={musicVolume} sfxVolume={sfxVolume} />
-      <CityAudioEngine position={playerPosition} vehicle={gameState.currentVehicle} enabled={soundEnabled} />
+      {soundEnabled && (
+        <>
+          <SoundManager enabled={soundEnabled} musicVolume={musicVolume} sfxVolume={sfxVolume} />
+          <CityAudioEngine 
+            enabled={soundEnabled} 
+            volume={sfxVolume} 
+            playerPosition={playerPosition} 
+          />
+        </>
+      )}
       <PerformanceMonitor />
 
       {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (

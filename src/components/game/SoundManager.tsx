@@ -11,6 +11,11 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const soundsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
 
+  const safeVolume = (val: number) => {
+    if (!isFinite(val) || isNaN(val)) return 0.5;
+    return Math.max(0, Math.min(1, val));
+  };
+
   useEffect(() => {
     if (!musicRef.current) {
       musicRef.current = new Audio();
@@ -18,7 +23,8 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
     }
 
     const music = musicRef.current;
-    music.volume = enabled ? musicVolume : 0;
+    const safeMusicVol = safeVolume(musicVolume);
+    music.volume = enabled ? safeMusicVol : 0;
 
     const tracks = {
       day: 'https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3',
@@ -47,6 +53,8 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
   }, [enabled, musicVolume, currentTrack]);
 
   useEffect(() => {
+    const safeSfxVol = safeVolume(sfxVolume);
+    
     const soundEffects = {
       pickup: 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3',
       delivery: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
@@ -59,7 +67,7 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
 
     Object.entries(soundEffects).forEach(([name, url]) => {
       const audio = new Audio(url);
-      audio.volume = sfxVolume;
+      audio.volume = safeSfxVol;
       soundsRef.current.set(name, audio);
     });
 
@@ -69,7 +77,7 @@ export function SoundManager({ enabled, musicVolume, sfxVolume, currentTrack = '
       const sound = soundsRef.current.get(soundName);
       if (sound) {
         sound.currentTime = 0;
-        sound.volume = sfxVolume;
+        sound.volume = safeSfxVol;
         sound.play().catch(() => {});
       }
     };

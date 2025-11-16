@@ -13,19 +13,33 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
   const ambientGainRef = useRef<GainNode | null>(null);
   const birdPositionsRef = useRef<Array<{ x: number; y: number; z: number }>>([]);
 
+  const safeVolume = (val: number) => {
+    if (!isFinite(val) || isNaN(val)) return 0.5;
+    return Math.max(0, Math.min(1, val));
+  };
+
   useEffect(() => {
     if (!enabled) return;
 
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
+    try {
+      const safeVol = safeVolume(volume);
 
-    const ctx = audioContextRef.current;
+      if (!audioContextRef.current) {
+        try {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        } catch (e) {
+          console.warn('⚠️ AudioContext не поддерживается браузером');
+          return;
+        }
+      }
+
+      const ctx = audioContextRef.current;
+      if (!ctx) return;
 
     if (!ambientGainRef.current) {
       ambientGainRef.current = ctx.createGain();
       ambientGainRef.current.connect(ctx.destination);
-      ambientGainRef.current.gain.value = volume * 0.3;
+      ambientGainRef.current.gain.value = safeVol * 0.3;
     }
 
     const createCarSound = (x: number, z: number, id: string) => {
@@ -51,7 +65,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       lfo.connect(lfoGain);
       lfoGain.connect(oscillator.frequency);
 
-      gainNode.gain.value = volume * 0.08;
+      gainNode.gain.value = safeVol * 0.08;
 
       oscillator.connect(gainNode);
       gainNode.connect(panner);
@@ -109,7 +123,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
 
       const beepInterval = setInterval(() => {
         if (enabled) {
-          beepGain.gain.setValueAtTime(volume * 0.1, ctx.currentTime);
+          beepGain.gain.setValueAtTime(safeVol * 0.1, ctx.currentTime);
           beepGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
         }
       }, 1000);
@@ -138,7 +152,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       filter.frequency.value = 800;
 
       const windGain = ctx.createGain();
-      windGain.gain.value = volume * 0.08;
+      windGain.gain.value = safeVol * 0.08;
 
       windNoise.connect(filter);
       filter.connect(windGain);
@@ -161,7 +175,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       panner.rolloffFactor = 1.5;
 
       chirp.frequency.value = 1500 + Math.random() * 1000;
-      chirpGain.gain.value = volume * 0.04;
+      chirpGain.gain.value = safeVol * 0.04;
 
       chirp.connect(chirpGain);
       chirpGain.connect(panner);
@@ -239,7 +253,7 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       panner.maxDistance = 50;
 
       horn.frequency.value = 400;
-      hornGain.gain.value = volume * 0.3;
+      hornGain.gain.value = safeVol * 0.3;
 
       horn.connect(hornGain);
       hornGain.connect(panner);
@@ -251,22 +265,25 @@ export function CityAudioEngine({ enabled, volume, playerPosition }: CityAudioEn
       setTimeout(() => horn.stop(), 350);
     };
 
-    return () => {
-      clearInterval(birdChirpInterval);
-      lightCleanups.forEach(cleanup => cleanup());
-      
-      soundsRef.current.forEach(({ oscillator }) => {
-        try {
-          oscillator.stop();
-        } catch (e) {}
-      });
-      soundsRef.current.clear();
+      return () => {
+        clearInterval(birdChirpInterval);
+        lightCleanups.forEach(cleanup => cleanup());
+        
+        soundsRef.current.forEach(({ oscillator }) => {
+          try {
+            oscillator.stop();
+          } catch (e) {}
+        });
+        soundsRef.current.clear();
 
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-    };
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
+      };
+    } catch (error) {
+      console.error('❌ Ошибка аудио движка:', error);
+    }
   }, [enabled, volume]);
 
   useEffect(() => {
