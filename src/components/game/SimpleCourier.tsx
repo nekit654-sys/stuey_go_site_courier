@@ -23,6 +23,15 @@ export function SimpleCourier({
   const rotation = useRef(0);
   const position = useRef(new THREE.Vector3(0, 1, 0));
   const energy = useRef(100);
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    console.log('🚶 SimpleCourier монтирован');
+    setMounted(true);
+    return () => {
+      console.log('👋 SimpleCourier размонтирован');
+    };
+  }, []);
   
   const vehicleStats = {
     walk: { speed: 5, turnSpeed: 0.1, energyCost: 0.05 },

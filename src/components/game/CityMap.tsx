@@ -16,11 +16,12 @@ interface BuildingData {
 
 export function CityMap() {
   const { roads, buildings, sidewalks } = useMemo(() => {
+    console.log('🏗️ Генерация карты города...');
     const roadSegments: RoadSegment[] = [];
     const buildingsList: BuildingData[] = [];
     const sidewalkSegments: RoadSegment[] = [];
     
-    const gridSize = 8;
+    const gridSize = 6;
     const blockSize = 30;
     const roadWidth = 6;
     const sidewalkWidth = 2;
@@ -44,15 +45,15 @@ export function CityMap() {
         const centerX = x * blockSize + blockSize / 2;
         const centerZ = z * blockSize + blockSize / 2;
         
-        const numBuildings = Math.floor(Math.random() * 2) + 2;
+        const numBuildings = Math.floor(Math.random() * 1) + 1;
         
         for (let b = 0; b < numBuildings; b++) {
           const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
           const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
           
-          const width = Math.random() * 6 + 4;
-          const depth = Math.random() * 6 + 4;
-          const height = Math.random() * 20 + 10;
+          const width = Math.random() * 5 + 3;
+          const depth = Math.random() * 5 + 3;
+          const height = Math.random() * 15 + 8;
           
           const types: Array<'residential' | 'commercial' | 'office'> = ['residential', 'commercial', 'office'];
           const type = types[Math.floor(Math.random() * types.length)];
@@ -73,6 +74,7 @@ export function CityMap() {
       }
     }
     
+    console.log(`✅ Карта готова: ${roadSegments.length} дорог, ${buildingsList.length} зданий`);
     return { roads: roadSegments, buildings: buildingsList, sidewalks: sidewalkSegments };
   }, []);
 

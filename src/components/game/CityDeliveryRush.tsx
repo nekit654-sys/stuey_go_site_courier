@@ -47,6 +47,8 @@ interface Order {
 export function CityDeliveryRush() {
   const { settings, currentFps } = usePerformanceSettings();
   const [gameStarted, setGameStarted] = useState(false);
+  const [sceneLoaded, setSceneLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -68,6 +70,24 @@ export function CityDeliveryRush() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpData, setLevelUpData] = useState({ level: 1, skillPoints: 0 });
   const [showSkillTree, setShowSkillTree] = useState(false);
+  
+  useEffect(() => {
+    if (gameStarted && !sceneLoaded) {
+      console.log('🎮 Начало загрузки сцены...');
+      const timer = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(timer);
+            setSceneLoaded(true);
+            console.log('✅ Сцена загружена!');
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 100);
+      return () => clearInterval(timer);
+    }
+  }, [gameStarted, sceneLoaded]);
   
   const saveSettings = async () => {
     if (!gameState.courierId) return;
@@ -346,39 +366,92 @@ export function CityDeliveryRush() {
     );
   }
 
+  if (gameStarted && !sceneLoaded) {
+    return (
+      <div className="w-full h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 border-4 border-black shadow-2xl">
+          <div className="text-center mb-6">
+            <div className="text-6xl mb-4 animate-bounce">🚀</div>
+            <h2 className="text-2xl font-bold text-black mb-2">Загрузка игры...</h2>
+            <p className="text-gray-600">Создаём 3D город для тебя</p>
+          </div>
+          
+          <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden border-2 border-black">
+            <div 
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full transition-all duration-300 flex items-center justify-center text-xs font-bold"
+              style={{ width: `${loadingProgress}%` }}
+            >
+              {loadingProgress > 10 && `${loadingProgress}%`}
+            </div>
+          </div>
+          
+          <div className="mt-4 text-center text-sm text-gray-500">
+            {loadingProgress < 30 && '🏗️ Строим здания...'}
+            {loadingProgress >= 30 && loadingProgress < 60 && '🛣️ Прокладываем дороги...'}
+            {loadingProgress >= 60 && loadingProgress < 90 && '🚗 Готовим транспорт...'}
+            {loadingProgress >= 90 && '✨ Почти готово...'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const targetLocation = currentOrder 
     ? (deliveryStage === 'pickup' ? currentOrder.pickupLocation : currentOrder.deliveryLocation)
     : { x: 0, z: 0 };
 
   return (
     <div className="w-full h-screen relative overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600">
-      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true }} onCreated={({ gl }) => {
-        gl.setClearColor('#87CEEB');
-      }}>
+      <Canvas 
+        shadows 
+        dpr={[1, 1.5]} 
+        gl={{ 
+          antialias: graphicsQuality !== 'low',
+          powerPreference: 'high-performance',
+          alpha: false,
+          stencil: false,
+          depth: true
+        }} 
+        onCreated={({ gl }) => {
+          console.log('🎨 Canvas создан успешно');
+          gl.setClearColor('#87CEEB');
+        }}
+        onError={(error) => {
+          console.error('❌ Ошибка Canvas:', error);
+        }}
+      >
         <PerspectiveCamera makeDefault position={[0, 15, 20]} fov={60} />
         <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.5} minDistance={10} maxDistance={50} />
         
-        <ambientLight intensity={0.6} />
+        <ambientLight intensity={0.7} />
         <directionalLight
           position={[50, 50, 25]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
+          intensity={1}
+          castShadow={graphicsQuality !== 'low'}
+          shadow-mapSize={graphicsQuality === 'high' ? [2048, 2048] : [1024, 1024]}
         />
         
         <Sky sunPosition={[100, 20, 100]} />
         
         <Suspense fallback={
-          <mesh>
-            <boxGeometry args={[2, 2, 2]} />
-            <meshStandardMaterial color="orange" />
-          </mesh>
+          <group>
+            <mesh position={[0, 1, 0]}>
+              <boxGeometry args={[2, 2, 2]} />
+              <meshStandardMaterial color="orange" emissive="orange" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+              <planeGeometry args={[100, 100]} />
+              <meshStandardMaterial color="#90EE90" />
+            </mesh>
+          </group>
         }>
           <CityMap />
           
           <SimpleCourier
             vehicle={gameState.currentVehicle}
-            onPositionChange={(x, z) => setPlayerPosition({ x, z })}
+            onPositionChange={(x, z) => {
+              setPlayerPosition({ x, z });
+            }}
             mobileInput={mobileInput}
             mobileSprint={mobileSprint}
             onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
@@ -392,7 +465,7 @@ export function CityDeliveryRush() {
             />
           )}
           
-          <Weather type={weather} />
+          {graphicsQuality !== 'low' && <Weather type={weather} />}
         </Suspense>
       </Canvas>
 

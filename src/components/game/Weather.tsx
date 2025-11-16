@@ -91,34 +91,34 @@ function Cloud({ position, size }: { position: [number, number, number], size: n
 export function Weather({ type }: WeatherProps) {
   const rainParticles = useMemo(() => {
     if (type !== 'rain') return [];
-    return Array.from({ length: 150 }, () => ({
+    return Array.from({ length: 50 }, () => ({
       pos: [
-        (Math.random() - 0.5) * 80,
-        Math.random() * 30,
-        (Math.random() - 0.5) * 80
+        (Math.random() - 0.5) * 60,
+        Math.random() * 20,
+        (Math.random() - 0.5) * 60
       ] as [number, number, number]
     }));
   }, [type]);
 
   const snowParticles = useMemo(() => {
     if (type !== 'snow') return [];
-    return Array.from({ length: 100 }, () => ({
+    return Array.from({ length: 40 }, () => ({
       pos: [
-        (Math.random() - 0.5) * 80,
-        Math.random() * 30,
-        (Math.random() - 0.5) * 80
+        (Math.random() - 0.5) * 60,
+        Math.random() * 20,
+        (Math.random() - 0.5) * 60
       ] as [number, number, number]
     }));
   }, [type]);
 
   const clouds = useMemo(() => {
-    return Array.from({ length: 5 }, (_, i) => ({
+    return Array.from({ length: 3 }, (_, i) => ({
       pos: [
-        (Math.random() - 0.5) * 100,
-        25 + Math.random() * 8,
-        (Math.random() - 0.5) * 100
+        (Math.random() - 0.5) * 80,
+        22 + Math.random() * 5,
+        (Math.random() - 0.5) * 80
       ] as [number, number, number],
-      size: 3 + Math.random() * 3
+      size: 2 + Math.random() * 2
     }));
   }, []);
 
