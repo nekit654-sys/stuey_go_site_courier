@@ -244,71 +244,86 @@ export function CityDeliveryRush() {
   };
 
   if (!gameStarted) {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center p-3 sm:p-4 overflow-hidden relative">
-        <LandscapeOrientation />
+      <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center p-4 overflow-hidden relative">
+        {isMobile && <LandscapeOrientation />}
 
-        <div className="relative z-10 bg-white border-3 border-black rounded-xl p-2.5 sm:p-3 max-w-[96%] sm:max-w-sm w-full text-black text-center shadow-[0_6px_0_0_rgba(0,0,0,1)]">
-          <div className="absolute -top-3 -left-3 w-10 h-10 bg-yellow-400 border-2 border-black rounded-full flex items-center justify-center text-xl shadow-lg">🚀</div>
-          <div className="absolute -top-3 -right-3 w-10 h-10 bg-yellow-400 border-2 border-black rounded-full flex items-center justify-center text-xl shadow-lg">🏙️</div>
+        <div className="relative z-10 bg-white border-4 border-black rounded-2xl p-6 max-w-md w-full text-black text-center shadow-[0_8px_0_0_rgba(0,0,0,1)]">
+          <div className="absolute -top-5 -left-5 w-16 h-16 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-3xl shadow-lg">🚀</div>
+          <div className="absolute -top-5 -right-5 w-16 h-16 bg-yellow-400 border-3 border-black rounded-full flex items-center justify-center text-3xl shadow-lg">🏙️</div>
           
           {!showSettings ? (
             <>
-              <h1 className="text-lg sm:text-xl font-extrabold font-rubik mb-0.5 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-extrabold font-rubik mb-2 leading-tight bg-gradient-to-r from-yellow-600 via-orange-500 to-red-500 bg-clip-text text-transparent">
                 City Rush
               </h1>
-              <p className="text-[9px] mb-1.5 font-bold leading-tight text-gray-700">
+              <p className="text-sm mb-4 font-bold leading-tight text-gray-700">
                 Доставляй заказы по городу!
               </p>
               
-              <div className="flex gap-1 mb-1.5 justify-center">
-                <div className="bg-yellow-100 p-1 rounded border border-black flex items-center gap-0.5">
-                  <div className="text-sm">🚶</div>
-                  <div className="text-[8px] font-bold">Пешком</div>
+              <div className="flex gap-2 mb-4 justify-center">
+                <div className="bg-yellow-100 p-2 rounded-lg border-2 border-black flex items-center gap-1">
+                  <div className="text-2xl">🚶</div>
+                  <div className="text-xs font-bold">Пешком</div>
                 </div>
-                <div className="bg-blue-100 p-1 rounded border border-black flex items-center gap-0.5">
-                  <div className="text-sm">🚲</div>
-                  <div className="text-[8px] font-bold">Велик</div>
+                <div className="bg-blue-100 p-2 rounded-lg border-2 border-black flex items-center gap-1">
+                  <div className="text-2xl">🚲</div>
+                  <div className="text-xs font-bold">Велик</div>
                 </div>
-                <div className="bg-green-100 p-1 rounded border border-black flex items-center gap-0.5">
-                  <div className="text-sm">🛴</div>
-                  <div className="text-[8px] font-bold">Самокат</div>
+                <div className="bg-green-100 p-2 rounded-lg border-2 border-black flex items-center gap-1">
+                  <div className="text-2xl">🛴</div>
+                  <div className="text-xs font-bold">Самокат</div>
                 </div>
               </div>
 
               <button
-                onClick={() => setGameStarted(true)}
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-extrabold py-2 text-sm rounded-lg border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] active:translate-y-[3px] active:shadow-none transition-all mb-1"
+                onClick={() => {
+                  console.log('🎮 Запуск игры...');
+                  setGameStarted(true);
+                }}
+                className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-extrabold py-4 text-lg rounded-xl border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] active:translate-y-[5px] active:shadow-none transition-all mb-3"
               >
                 🎮 Играть
               </button>
               
-              <div className="flex gap-1 mb-1">
-                <button onClick={() => setShowProfile(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
-                  👤
+              <div className="flex gap-2 mb-3">
+                <button 
+                  onClick={() => setShowProfile(true)} 
+                  className="flex-1 bg-white text-black font-bold py-3 rounded-lg border-3 border-black text-base hover:bg-gray-100 transition-colors"
+                >
+                  👤 Профиль
                 </button>
-                <button onClick={() => setShowLeaderboard(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
-                  🏆
-                </button>
-                <button onClick={() => setShowSettings(true)} className="flex-1 bg-white text-black font-bold py-1.5 rounded border-2 border-black text-[9px]">
-                  ⚙️
+                <button 
+                  onClick={() => setShowLeaderboard(true)} 
+                  className="flex-1 bg-white text-black font-bold py-3 rounded-lg border-3 border-black text-base hover:bg-gray-100 transition-colors"
+                >
+                  🏆 Рейтинг
                 </button>
               </div>
 
-              <div className="text-[8px] font-bold bg-gray-100 px-1.5 py-0.5 rounded">
-                {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Джойстик' : '⌨️ WASD'}
+              <button 
+                onClick={() => setShowSettings(true)} 
+                className="w-full bg-gray-200 text-black font-bold py-2 rounded-lg border-2 border-black text-sm hover:bg-gray-300 transition-colors"
+              >
+                ⚙️ Настройки
+              </button>
+
+              <div className="text-xs font-bold bg-gray-100 px-3 py-2 rounded-lg mt-3 border border-black">
+                {isMobile ? '🎮 Управление джойстиком' : '⌨️ Управление: WASD + Shift'}
               </div>
             </>
           ) : (
             <>
-              <h2 className="text-lg font-extrabold mb-2">⚙️ Настройки</h2>
+              <h2 className="text-2xl font-extrabold mb-4">⚙️ Настройки</h2>
               
-              <div className="space-y-2 text-left">
-                <div className="bg-gray-50 p-2 rounded-lg border-2 border-black">
-                  <div className="text-[9px] font-bold mb-1 text-gray-700">🔊 Звук:</div>
+              <div className="space-y-3 text-left">
+                <div className="bg-gray-50 p-4 rounded-xl border-3 border-black">
+                  <div className="text-sm font-bold mb-2 text-gray-700">🔊 Звук:</div>
                   <button
                     onClick={() => { setSoundEnabled(!soundEnabled); saveSettings(); }}
-                    className={`w-full p-1.5 rounded border-2 font-bold text-[10px] ${soundEnabled ? 'bg-green-400 border-black' : 'bg-gray-300 border-gray-400'}`}
+                    className={`w-full p-3 rounded-lg border-3 font-bold text-base transition-colors ${soundEnabled ? 'bg-green-400 border-black hover:bg-green-500' : 'bg-gray-300 border-gray-400 hover:bg-gray-400'}`}
                   >
                     {soundEnabled ? '🔊 Включен' : '🔇 Выключен'}
                   </button>
@@ -317,7 +332,7 @@ export function CityDeliveryRush() {
 
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-full bg-blue-500 text-white font-bold py-1.5 rounded-lg border-2 border-black mt-2"
+                className="w-full bg-blue-500 text-white font-bold py-3 rounded-xl border-3 border-black mt-4 hover:bg-blue-600 transition-colors"
               >
                 ← Назад
               </button>
@@ -336,21 +351,29 @@ export function CityDeliveryRush() {
     : { x: 0, z: 0 };
 
   return (
-    <div className="w-full h-screen relative overflow-hidden bg-black">
-      <Canvas shadows>
+    <div className="w-full h-screen relative overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600">
+      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true }} onCreated={({ gl }) => {
+        gl.setClearColor('#87CEEB');
+      }}>
         <PerspectiveCamera makeDefault position={[0, 15, 20]} fov={60} />
         <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.5} minDistance={10} maxDistance={50} />
         
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.6} />
         <directionalLight
           position={[50, 50, 25]}
-          intensity={1}
+          intensity={1.2}
           castShadow
+          shadow-mapSize={[1024, 1024]}
         />
         
         <Sky sunPosition={[100, 20, 100]} />
         
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <mesh>
+            <boxGeometry args={[2, 2, 2]} />
+            <meshStandardMaterial color="orange" />
+          </mesh>
+        }>
           <CityMap />
           
           <SimpleCourier
@@ -375,34 +398,34 @@ export function CityDeliveryRush() {
 
 
       
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 p-3 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-2">
-          <div className="bg-yellow-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-black/95 to-black/70 p-2 sm:p-3 flex items-center justify-between shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+          <div className="bg-yellow-400 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-yellow-600">
             💰 {gameState.score}
           </div>
-          <div className="bg-green-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
+          <div className="bg-green-400 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-green-600">
             📦 {gameState.deliveries}
           </div>
-          <div className="bg-blue-400 text-black px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
+          <div className="bg-blue-400 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-blue-600">
             ⚡ {Math.round(gameState.energy)}%
           </div>
-          <div className="bg-purple-500 text-white px-3 py-1.5 rounded-lg font-bold text-sm shadow-md">
+          <div className="bg-purple-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-purple-700">
             ⭐ Ур.{level}
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
           <button
             onClick={() => setShowSkillTree(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-bold text-sm"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-purple-800 transition-colors"
           >
-            🌟 Навыки
+            🌟
           </button>
           <button
             onClick={() => setGameStarted(false)}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold"
+            className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-red-700 transition-colors"
           >
-            ✕ Выход
+            ✕
           </button>
         </div>
       </div>
@@ -449,8 +472,8 @@ export function CityDeliveryRush() {
         />
       )}
       
-      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
-        {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '🎮 Используй джойстик' : '⌨️ WASD для движения'}
+      <div className="absolute bottom-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-bold border-2 border-white/20 shadow-lg">
+        FPS: {Math.round(currentFps)}
       </div>
     </div>
   );

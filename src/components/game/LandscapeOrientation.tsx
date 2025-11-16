@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function LandscapeOrientation({ children }: { children: React.ReactNode }) {
+export function LandscapeOrientation({ children }: { children?: React.ReactNode }) {
   const [isLandscape, setIsLandscape] = useState(true);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
 
