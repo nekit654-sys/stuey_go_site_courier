@@ -62,6 +62,7 @@ export function OptimizedTrafficSystem({ playerPosition }: OptimizedTrafficSyste
 
     carsRef.current.forEach((car, i) => {
       let shouldStop = false;
+      const wasMoving = car.currentSpeed > 5;
 
       if (playerPosition) {
         const distanceToPlayer = Math.sqrt(
@@ -76,6 +77,10 @@ export function OptimizedTrafficSystem({ playerPosition }: OptimizedTrafficSyste
 
       if (shouldStop) {
         car.currentSpeed = Math.max(0, car.currentSpeed - 30 * delta);
+        
+        if (wasMoving && car.currentSpeed <= 1 && (window as any).playCarHorn) {
+          (window as any).playCarHorn(car.position.x, car.position.z);
+        }
       } else {
         car.currentSpeed = Math.min(car.maxSpeed, car.currentSpeed + 20 * delta);
       }

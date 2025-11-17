@@ -231,7 +231,7 @@ export function CityDeliveryRush() {
       if (deliveryStage === 'pickup' || deliveryStage === 'none') {
         setDeliveryStage('delivery');
         setGameState(prev => ({ ...prev, hasPackage: true }));
-        (window as any).playSound?.('pickup');
+        (window as any).playPickupSound?.();
         playVibration('pickup');
       } else if (deliveryStage === 'delivery') {
         handleFoodDeliveryComplete();
@@ -242,8 +242,7 @@ export function CityDeliveryRush() {
   const handleFoodDeliveryComplete = async () => {
     if (!gameState.courierId || !activeOrder) return;
 
-    (window as any).playSound?.('delivery');
-    (window as any).playSound?.('coins');
+    (window as any).playDeliverySound?.();
     playVibration('delivery');
     playVibration('coins');
 
@@ -621,6 +620,12 @@ export function CityDeliveryRush() {
             🌟
           </button>
           <button
+            onClick={() => setShowLeaderboard(true)}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-yellow-700 transition-colors"
+          >
+            🏆
+          </button>
+          <button
             onClick={() => setGameStarted(false)}
             className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-red-700 transition-colors"
           >
@@ -686,6 +691,10 @@ export function CityDeliveryRush() {
           courierId={gameState.courierId}
           onClose={() => setShowSkillTree(false)}
         />
+      )}
+      
+      {showLeaderboard && (
+        <Leaderboard onClose={() => setShowLeaderboard(false)} />
       )}
       
       <div className="absolute bottom-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-bold border-2 border-white/20 shadow-lg">

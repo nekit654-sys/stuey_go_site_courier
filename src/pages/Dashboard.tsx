@@ -9,7 +9,7 @@ import { API_URL } from '@/config/api';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import WithdrawalRequestForm from '@/components/WithdrawalRequestForm';
 import WithdrawalRequestsList from '@/components/WithdrawalRequestsList';
-import GameTab from '@/components/GameTab';
+import GamesTab from '@/components/GamesTab';
 import StartupPayoutModal from '@/components/StartupPayoutModal';
 import StartupBonusNotification from '@/components/StartupBonusNotification';
 import InviterCard from '@/components/InviterCard';
@@ -458,7 +458,7 @@ export default function Dashboard() {
 
             {/* Game Tab */}
             {activeTab === 'game' && user?.id && (
-              <GameTab userId={user.id} />
+              <GamesTab userId={user.id} />
             )}
 
             {/* Profile Tab */}
