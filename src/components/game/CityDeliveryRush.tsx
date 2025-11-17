@@ -3,8 +3,7 @@ import { Sky, PerspectiveCamera } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { SimpleCourier } from './SimpleCourier';
 import { CityMap } from './CityMap';
-import { GPSNavigation, MiniMap } from './GPSNavigation';
-import { AdvancedDeliverySystem } from './AdvancedDeliverySystem';
+import { MiniMap } from './GPSNavigation';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
@@ -505,8 +504,8 @@ export function CityDeliveryRush() {
     );
   }
 
-  const targetLocation = currentOrder 
-    ? (deliveryStage === 'pickup' ? currentOrder.pickupLocation : currentOrder.deliveryLocation)
+  const targetLocation = activeOrder 
+    ? (deliveryStage === 'pickup' ? activeOrder.pickupLocation : activeOrder.deliveryLocation)
     : { x: 0, z: 0 };
 
   return (
@@ -582,14 +581,6 @@ export function CityDeliveryRush() {
             onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
           />
           
-          {currentOrder && (
-            <GPSNavigation
-              from={playerPosition}
-              to={targetLocation}
-              currentPosition={playerPosition}
-            />
-          )}
-          
           {graphicsQuality === 'high' && <Weather type={weather} />}
         </Suspense>
       </Canvas>
@@ -642,15 +633,7 @@ export function CityDeliveryRush() {
         />
       )}
       
-      <AdvancedDeliverySystem
-        playerPosition={playerPosition}
-        onOrderAccept={handleOrderAccept}
-        onOrderComplete={(order) => handleDeliveryComplete(order.reward, 0)}
-        currentOrder={currentOrder}
-        autoAccept={autoAcceptOrders}
-      />
-      
-      {currentOrder && (
+      {activeOrder && (
         <MiniMap
           playerPos={playerPosition}
           targetPos={targetLocation}
