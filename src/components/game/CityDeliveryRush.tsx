@@ -17,6 +17,10 @@ import { Weather } from './Weather';
 import { OptimizedTrafficSystem } from './OptimizedTrafficSystem';
 import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
+import { useFoodOrders } from './FoodOrderSystem';
+import { NavigationArrow } from './NavigationArrow';
+import { ActiveOrderDisplay } from './ActiveOrderDisplay';
+import { DeliveryMarkers } from './DeliveryMarkers';
 import Icon from '@/components/ui/icon';
 
 interface GameState {
@@ -46,6 +50,7 @@ interface Order {
 
 export function CityDeliveryRush() {
   const { settings, currentFps } = usePerformanceSettings();
+  const { orders, activeOrder, acceptOrder, completeOrder, cancelOrder } = useFoodOrders();
   const [gameStarted, setGameStarted] = useState(false);
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -202,11 +207,20 @@ export function CityDeliveryRush() {
   }, [gameStarted]);
 
   useEffect(() => {
-    if (!currentOrder || deliveryStage === 'none') return;
+    if (gameStarted && sceneLoaded && !activeOrder && orders.length > 0) {
+      setTimeout(() => {
+        acceptOrder(orders[0].id);
+        setDeliveryStage('pickup');
+      }, 1000);
+    }
+  }, [gameStarted, sceneLoaded, activeOrder, orders]);
+
+  useEffect(() => {
+    if (!activeOrder) return;
     
     const targetLocation = deliveryStage === 'pickup' 
-      ? currentOrder.pickupLocation 
-      : currentOrder.deliveryLocation;
+      ? activeOrder.pickupLocation 
+      : activeOrder.deliveryLocation;
     
     const distance = Math.sqrt(
       Math.pow(targetLocation.x - playerPosition.x, 2) +
@@ -214,16 +228,77 @@ export function CityDeliveryRush() {
     );
     
     if (distance < 5) {
-      if (deliveryStage === 'pickup') {
+      if (deliveryStage === 'pickup' || deliveryStage === 'none') {
         setDeliveryStage('delivery');
         setGameState(prev => ({ ...prev, hasPackage: true }));
         (window as any).playSound?.('pickup');
         playVibration('pickup');
-      } else {
-        handleDeliveryComplete(currentOrder.reward, 0);
+      } else if (deliveryStage === 'delivery') {
+        handleFoodDeliveryComplete();
       }
     }
-  }, [playerPosition, currentOrder, deliveryStage]);
+  }, [playerPosition, activeOrder, deliveryStage]);
+
+  const handleFoodDeliveryComplete = async () => {
+    if (!gameState.courierId || !activeOrder) return;
+
+    (window as any).playSound?.('delivery');
+    (window as any).playSound?.('coins');
+    playVibration('delivery');
+    playVibration('coins');
+
+    try {
+      const response = await fetch(
+        'https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'complete_delivery',
+            courier_id: gameState.courierId,
+            delivery_type: 'food',
+            distance: activeOrder.distance,
+            time_taken: 0
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      setGameState(prev => ({
+        ...prev,
+        score: prev.score + activeOrder.reward,
+        deliveries: prev.deliveries + 1,
+        hasPackage: false
+      }));
+      
+      const expGained = Math.floor(activeOrder.reward / 10);
+      setCurrentExp(prev => {
+        const newExp = prev + expGained;
+        if (newExp >= expToNextLevel) {
+          const newLevel = level + 1;
+          setLevel(newLevel);
+          setLevelUpData({
+            level: newLevel,
+            skillPoints: 1
+          });
+          setShowLevelUp(true);
+          setExpToNextLevel(prev => prev + 50);
+          (window as any).playSound?.('levelUp');
+          playVibration('levelUp');
+          return 0;
+        }
+        return newExp;
+      });
+      
+      completeOrder();
+      setDeliveryStage('none');
+    } catch (error) {
+      console.error('Delivery completion failed:', error);
+      completeOrder();
+      setDeliveryStage('none');
+    }
+  };
 
   const handleDeliveryComplete = async (coins: number, timeToken: number) => {
     if (!gameState.courierId || !currentOrder) return;
@@ -482,7 +557,21 @@ export function CityDeliveryRush() {
         }>
           <CityMap playerPosition={playerPosition} />
           
-          {graphicsQuality !== 'low' && <OptimizedTrafficSystem />}
+          {graphicsQuality !== 'low' && <OptimizedTrafficSystem playerPosition={playerPosition} />}
+          
+          {activeOrder && (
+            <>
+              <NavigationArrow
+                playerPosition={playerPosition}
+                targetPosition={
+                  deliveryStage === 'pickup' 
+                    ? activeOrder.pickupLocation 
+                    : activeOrder.deliveryLocation
+                }
+              />
+              <DeliveryMarkers order={activeOrder} stage={deliveryStage} />
+            </>
+          )}
           
           <SimpleCourier
             vehicle={gameState.currentVehicle}
@@ -539,6 +628,14 @@ export function CityDeliveryRush() {
           </button>
         </div>
       </div>
+      
+      {activeOrder && (
+        <ActiveOrderDisplay
+          order={activeOrder}
+          stage={deliveryStage}
+          onCancel={cancelOrder}
+        />
+      )}
       
       <AdvancedDeliverySystem
         playerPosition={playerPosition}

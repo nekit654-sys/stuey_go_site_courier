@@ -7,11 +7,17 @@ interface Car {
   position: THREE.Vector3;
   rotation: number;
   speed: number;
+  maxSpeed: number;
+  currentSpeed: number;
   direction: 'horizontal' | 'vertical';
   color: THREE.Color;
 }
 
-export function OptimizedTrafficSystem() {
+interface OptimizedTrafficSystemProps {
+  playerPosition?: { x: number; z: number };
+}
+
+export function OptimizedTrafficSystem({ playerPosition }: OptimizedTrafficSystemProps) {
   const carsRef = useRef<Car[]>([]);
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -23,13 +29,16 @@ export function OptimizedTrafficSystem() {
     new THREE.Color('#ffff00'),
     new THREE.Color('#00ff00'),
     new THREE.Color('#ff00ff'),
-    new THREE.Color('#ffa500')
+    new THREE.Color('#ffa500'),
+    new THREE.Color('#ffffff'),
+    new THREE.Color('#000000')
   ], []);
 
   useEffect(() => {
     for (let i = 0; i < carCount; i++) {
       const isHorizontal = Math.random() > 0.5;
       const lane = Math.floor(Math.random() * 4) - 2;
+      const maxSpeed = 15 + Math.random() * 10;
       
       carsRef.current.push({
         id: i,
@@ -39,7 +48,9 @@ export function OptimizedTrafficSystem() {
           isHorizontal ? lane * 30 : (Math.random() - 0.5) * 200
         ),
         rotation: isHorizontal ? 0 : Math.PI / 2,
-        speed: 4 + Math.random() * 2,
+        speed: maxSpeed,
+        maxSpeed,
+        currentSpeed: maxSpeed,
         direction: isHorizontal ? 'horizontal' : 'vertical',
         color: carColors[Math.floor(Math.random() * carColors.length)]
       });
@@ -50,16 +61,38 @@ export function OptimizedTrafficSystem() {
     if (!meshRef.current) return;
 
     carsRef.current.forEach((car, i) => {
-      if (car.direction === 'horizontal') {
-        car.position.x += car.speed * delta;
-        if (car.position.x > 150) car.position.x = -150;
+      let shouldStop = false;
+
+      if (playerPosition) {
+        const distanceToPlayer = Math.sqrt(
+          Math.pow(car.position.x - playerPosition.x, 2) +
+          Math.pow(car.position.z - playerPosition.z, 2)
+        );
+
+        if (distanceToPlayer < 10) {
+          shouldStop = true;
+        }
+      }
+
+      if (shouldStop) {
+        car.currentSpeed = Math.max(0, car.currentSpeed - 30 * delta);
       } else {
-        car.position.z += car.speed * delta;
+        car.currentSpeed = Math.min(car.maxSpeed, car.currentSpeed + 20 * delta);
+      }
+
+      if (car.direction === 'horizontal') {
+        car.position.x += car.currentSpeed * delta;
+        if (car.position.x > 150) car.position.x = -150;
+        if (car.position.x < -150) car.position.x = 150;
+      } else {
+        car.position.z += car.currentSpeed * delta;
         if (car.position.z > 150) car.position.z = -150;
+        if (car.position.z < -150) car.position.z = 150;
       }
 
       dummy.position.copy(car.position);
       dummy.rotation.y = car.rotation;
+      dummy.scale.set(1, 1, 1);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
       meshRef.current.setColorAt(i, car.color);
@@ -72,9 +105,9 @@ export function OptimizedTrafficSystem() {
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, carCount]} castShadow>
-      <boxGeometry args={[2, 1.2, 4]} />
-      <meshStandardMaterial />
+    <instancedMesh ref={meshRef} args={[undefined, undefined, carCount]} castShadow receiveShadow>
+      <boxGeometry args={[2.5, 1.5, 4.5]} />
+      <meshStandardMaterial metalness={0.8} roughness={0.2} />
     </instancedMesh>
   );
 }
