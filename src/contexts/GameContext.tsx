@@ -142,7 +142,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const openGame = (gameType: GameType = '2d') => {
     setCurrentGame(gameType);
     setIsGameOpen(true);
-    setIsGameLoading(true);
+    // Для 3D игры индикатор загрузки не нужен - у неё свой встроенный
+    setIsGameLoading(gameType === '2d');
     setIsGameOver(false);
     setShowRegisterPrompt(false);
     document.body.style.overflow = 'hidden';
@@ -243,7 +244,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     </div>
                   </div>
                 }>
-                  <div className="w-full h-full" onLoad={() => setIsGameLoading(false)}>
+                  <div className="w-full h-full">
                     <CityDeliveryRush />
                   </div>
                 </Suspense>

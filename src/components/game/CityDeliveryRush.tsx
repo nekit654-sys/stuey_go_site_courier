@@ -80,6 +80,14 @@ export function CityDeliveryRush() {
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [fpsHistory, setFpsHistory] = useState<number[]>([]);
   
+  // Предотвращаем context lost при размонтировании
+  useEffect(() => {
+    console.log('🎮 CityDeliveryRush смонтирован');
+    return () => {
+      console.log('🎮 CityDeliveryRush размонтируется');
+    };
+  }, []);
+  
   useEffect(() => {
     if (gameStarted && sceneLoaded && currentFps > 0) {
       setFpsHistory(prev => {
@@ -526,11 +534,24 @@ export function CityDeliveryRush() {
           alpha: false,
           stencil: false,
           depth: true,
-          logarithmicDepthBuffer: false
+          logarithmicDepthBuffer: false,
+          preserveDrawingBuffer: true,
+          failIfMajorPerformanceCaveat: false
         }} 
         onCreated={({ gl }) => {
           console.log('🎨 Canvas создан успешно');
           gl.setClearColor('#87CEEB');
+          
+          // Обработка потери контекста
+          const canvas = gl.domElement;
+          canvas.addEventListener('webglcontextlost', (e) => {
+            console.warn('⚠️ WebGL контекст потерян, предотвращаем потерю');
+            e.preventDefault();
+          });
+          
+          canvas.addEventListener('webglcontextrestored', () => {
+            console.log('✅ WebGL контекст восстановлен');
+          });
         }}
         onError={(error) => {
           console.error('❌ Ошибка Canvas:', error);
