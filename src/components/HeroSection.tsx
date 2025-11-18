@@ -25,29 +25,25 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     const fetchHeroData = async () => {
       try {
         const response = await fetch(`https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba`, {
-          cache: 'default'
+          cache: 'force-cache'
         });
         const data = await response.json();
         if (data.success && data.hero) {
           setHeroData(data.hero);
           
-          // Предзагрузка картинки с высоким приоритетом
           if (data.hero.image_url) {
             const img = new Image();
+            img.loading = 'eager';
             img.fetchPriority = 'high';
             img.decoding = 'async';
             img.onload = () => {
               setImageLoaded(true);
-              console.log('Hero image preloaded');
             };
             img.onerror = () => {
-              console.error('Failed to load hero image');
               setImageLoaded(true);
             };
             img.src = data.hero.image_url;
           }
-          
-          console.log('Hero data loaded:', data.hero);
         }
       } catch (error) {
         console.error('Ошибка загрузки Hero:', error);
@@ -78,8 +74,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
     <section
       className="relative bg-cover bg-center bg-no-repeat text-white border-b-4 border-yellow-400 mx-0 mt-0 mb-8 overflow-hidden shadow-2xl py-[49px] pt-20"
       style={{
-        backgroundImage: (heroData?.image_url && imageLoaded) ? `url(${heroData.image_url})` : 'none',
-        backgroundColor: (heroData?.image_url && imageLoaded) ? 'transparent' : '#ffffff',
+        backgroundImage: (heroData?.image_url && imageLoaded) ? `url(${heroData.image_url})` : 'linear-gradient(to bottom right, #fbbf24, #facc15, #fde047)',
         transition: 'background-image 0.3s ease-in-out',
       }}
     >
