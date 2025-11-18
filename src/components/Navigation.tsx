@@ -118,9 +118,6 @@ const Navigation = () => {
                         <div className="flex-1">
                           <div className="font-extrabold text-black text-sm mb-1">City Delivery Rush</div>
                           <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
-                          {!isAuthenticated && (
-                            <div className="text-xs text-orange-600 font-bold mt-1">⚠️ Нужна авторизация</div>
-                          )}
                         </div>
                       </div>
                     </button>

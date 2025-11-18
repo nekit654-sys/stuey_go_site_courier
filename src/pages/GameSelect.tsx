@@ -60,12 +60,6 @@ export default function GameSelect() {
                 </span>
               </div>
 
-              {!isAuthenticated && (
-                <div className="mt-3 sm:mt-4 bg-orange-100 border-2 border-orange-400 text-orange-700 font-bold py-2 px-3 rounded-lg text-xs sm:text-sm">
-                  ⚠️ Сохранение только при авторизации
-                </div>
-              )}
-
               <div className="mt-4 sm:mt-6 bg-yellow-400 text-black font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl border-2 border-black inline-flex items-center gap-2 text-sm sm:text-base">
                 <Icon name="Play" size={18} />
                 Играть
