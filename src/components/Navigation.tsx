@@ -249,44 +249,42 @@ const Navigation = () => {
 
               {/* Mobile Game Selection Dropdown */}
               {isMobileGameMenuOpen && (
-                <div className="mt-2 space-y-2 pl-3">
+                <div className="mt-2 space-y-2">
                   {/* 3D Game */}
-                  <button
+                  <Button
                     onClick={() => {
                       playSound('whoosh');
                       openGame();
                       setIsMobileGameMenuOpen(false);
                       handleMenuItemClick();
                     }}
-                    className="w-full text-left bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] transition-all"
+                    variant="ghost"
+                    className="w-full justify-start bg-gradient-to-b from-purple-400 to-purple-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-purple-500 hover:to-purple-600"
                   >
-                    <div className="flex items-start gap-2">
-                      <div className="text-2xl">🏙️</div>
-                      <div className="flex-1">
-                        <div className="font-extrabold text-black text-sm mb-1">City Delivery Rush</div>
-                        <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
-                      </div>
+                    <span className="text-2xl mr-3">🏙️</span>
+                    <div className="text-left">
+                      <div className="font-extrabold">City Rush</div>
+                      <div className="text-xs font-semibold opacity-90">3D доставки</div>
                     </div>
-                  </button>
+                  </Button>
 
                   {/* 2D Game */}
-                  <button
+                  <Button
                     onClick={() => {
                       playSound('whoosh');
                       openGame();
                       setIsMobileGameMenuOpen(false);
                       handleMenuItemClick();
                     }}
-                    className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] transition-all"
+                    variant="ghost"
+                    className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
                   >
-                    <div className="flex items-start gap-2">
-                      <div className="text-2xl">🎯</div>
-                      <div className="flex-1">
-                        <div className="font-extrabold text-black text-sm mb-1">Delivery Master</div>
-                        <div className="text-xs text-gray-700 font-semibold">Классическая аркада</div>
-                      </div>
+                    <span className="text-2xl mr-3">🎯</span>
+                    <div className="text-left">
+                      <div className="font-extrabold">Delivery Master</div>
+                      <div className="text-xs font-semibold opacity-90">Аркада</div>
                     </div>
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
