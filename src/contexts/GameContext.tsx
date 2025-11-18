@@ -149,6 +149,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.body.style.overflow = 'hidden';
     document.body.classList.add('game-modal-open');
     
+    // Автоматический полный экран для 3D игры на мобильных
+    if (gameType === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch(err => {
+            console.log('Не удалось войти в полноэкранный режим:', err);
+          });
+        }
+      }, 500);
+    }
+    
     // Показываем уведомление для 3D игры если пользователь не авторизован
     if (gameType === '3d' && !isAuthenticated) {
       setTimeout(() => {
@@ -175,6 +187,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsGameOver(false);
     document.body.style.overflow = '';
     document.body.classList.remove('game-modal-open');
+    
+    // Выход из полноэкранного режима
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
   };
 
   const toggleLeaderboard = () => {
@@ -189,31 +206,49 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
       
       {isGameOpen && (
-        <div className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="relative w-full max-w-7xl h-[90vh] flex gap-4">
-            <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden relative">
-              {/* 3D кнопка закрытия игры */}
-              <button
-                onClick={() => {
-                  playSound('click');
-                  closeGame();
-                }}
-                onMouseEnter={() => playSound('hover')}
-                className="absolute top-4 right-4 z-[100] 
-                           w-12 h-12
-                           bg-red-500 hover:bg-red-600 active:bg-red-700
-                           text-white rounded-xl 
-                           flex items-center justify-center 
-                           transition-all duration-150
-                           border-3 border-black
-                           shadow-[0_4px_0_0_rgba(0,0,0,1)] 
-                           hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
+        <div className={`fixed inset-0 z-[999999] ${
+          currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+            ? 'bg-black' 
+            : 'bg-black/95 backdrop-blur-sm'
+        } flex items-center justify-center ${
+          currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+            ? 'p-0'
+            : 'p-4'
+        }`}>
+          <div className={`relative w-full flex gap-4 ${
+            currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+              ? 'h-full'
+              : 'max-w-7xl h-[90vh]'
+          }`}>
+            <div className={`flex-1 overflow-hidden relative ${
+              currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                ? 'bg-black'
+                : 'bg-white rounded-2xl shadow-2xl'
+            }`}>
+              {/* 3D кнопка закрытия игры (скрыта для 3D на мобильных) */}
+              {!(currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) && (
+                <button
+                  onClick={() => {
+                    playSound('click');
+                    closeGame();
+                  }}
+                  onMouseEnter={() => playSound('hover')}
+                  className="absolute top-4 right-4 z-[100] 
+                             w-12 h-12
+                             bg-red-500 hover:bg-red-600 active:bg-red-700
+                             text-white rounded-xl 
+                             flex items-center justify-center 
+                             transition-all duration-150
+                             border-3 border-black
+                             shadow-[0_4px_0_0_rgba(0,0,0,1)] 
+                             hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] 
                            hover:translate-y-[2px] 
                            active:translate-y-[4px] 
                            active:shadow-none"
-              >
-                <Icon name="X" size={24} />
-              </button>
+                >
+                  <Icon name="X" size={24} />
+                </button>
+              )}
 
               {isGameLoading && (
                 <div className="absolute inset-0 bg-black flex items-center justify-center z-10">

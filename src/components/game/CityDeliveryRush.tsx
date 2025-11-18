@@ -79,12 +79,31 @@ export function CityDeliveryRush() {
   const [levelUpData, setLevelUpData] = useState({ level: 1, skillPoints: 0 });
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [fpsHistory, setFpsHistory] = useState<number[]>([]);
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+  const [isMobile, setIsMobile] = useState(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   
   // Предотвращаем context lost при размонтировании
   useEffect(() => {
     console.log('🎮 CityDeliveryRush смонтирован');
     return () => {
       console.log('🎮 CityDeliveryRush размонтируется');
+    };
+  }, []);
+  
+  // Отслеживание ориентации экрана
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      const landscape = window.innerWidth > window.innerHeight;
+      setIsLandscape(landscape);
+      console.log(`📱 Ориентация: ${landscape ? 'горизонтальная' : 'вертикальная'}`);
+    };
+    
+    window.addEventListener('resize', handleOrientationChange);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    return () => {
+      window.removeEventListener('resize', handleOrientationChange);
+      window.removeEventListener('orientationchange', handleOrientationChange);
     };
   }, []);
   
@@ -615,8 +634,12 @@ export function CityDeliveryRush() {
 
 
       
-      <div className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-black/95 to-black/70 p-2 sm:p-3 flex items-center justify-between shadow-2xl backdrop-blur-sm">
-        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+      <div className={`fixed z-40 bg-gradient-to-b from-black/95 to-black/70 flex items-center justify-between shadow-2xl backdrop-blur-sm ${
+        isMobile && !isLandscape 
+          ? 'top-0 left-0 right-0 p-2 flex-col gap-2' 
+          : 'top-0 left-0 right-0 p-2 sm:p-3'
+      }`}>
+        <div className={`flex items-center gap-1 sm:gap-2 ${isMobile && !isLandscape ? 'w-full justify-center' : 'flex-wrap'}`}>
           <div className="bg-yellow-400 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-yellow-600">
             💰 {gameState.score}
           </div>
@@ -631,7 +654,7 @@ export function CityDeliveryRush() {
           </div>
         </div>
         
-        <div className="flex gap-1 sm:gap-2">
+        <div className={`flex gap-1 sm:gap-2 ${isMobile && !isLandscape ? 'w-full justify-center' : ''}`}>
           <button
             onClick={() => setShowSkillTree(true)}
             className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-purple-800 transition-colors"
@@ -654,18 +677,20 @@ export function CityDeliveryRush() {
       </div>
       
       {activeOrder && (
-        <ActiveOrderDisplay
-          order={activeOrder}
-          stage={deliveryStage}
-          onCancel={cancelOrder}
-        />
+        <div className={isMobile && !isLandscape ? 'mt-24' : ''}>
+          <ActiveOrderDisplay
+            order={activeOrder}
+            stage={deliveryStage}
+            onCancel={cancelOrder}
+          />
+        </div>
       )}
       
       {activeOrder && (
         <MiniMap
           playerPos={playerPosition}
           targetPos={targetLocation}
-          mapSize={200}
+          mapSize={isMobile && !isLandscape ? 150 : 200}
         />
       )}
 
@@ -708,7 +733,16 @@ export function CityDeliveryRush() {
         <Leaderboard onClose={() => setShowLeaderboard(false)} />
       )}
       
-      <div className="absolute bottom-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-bold border-2 border-white/20 shadow-lg">
+      {/* Подсказка об ориентации для мобильных устройств */}
+      {isMobile && !isLandscape && gameStarted && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-blue-500/90 text-white px-4 py-2 rounded-lg text-xs font-bold border-2 border-white/30 shadow-lg backdrop-blur-sm animate-pulse z-50">
+          📱 Поверните устройство для лучшего опыта
+        </div>
+      )}
+      
+      <div className={`absolute bg-black/80 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-bold border-2 border-white/20 shadow-lg ${
+        isMobile && !isLandscape ? 'bottom-20 right-2' : 'bottom-4 right-4'
+      }`}>
         FPS: {Math.round(currentFps)}
       </div>
     </div>
