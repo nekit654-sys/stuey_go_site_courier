@@ -15,6 +15,7 @@ const Navigation = () => {
   const { openGame } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameMenuOpen, setIsGameMenuOpen] = useState(false);
+  const [isMobileGameMenuOpen, setIsMobileGameMenuOpen] = useState(false);
 
 
   const menuItems = [
@@ -222,25 +223,73 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Game Button */}
-            <Button
-              onClick={() => {
-                playSound('whoosh');
-                openGame();
-                handleMenuItemClick();
-              }}
-              onMouseEnter={() => playSound('hover')}
-              className="
-                w-full justify-start bg-gradient-to-b from-green-400 to-green-500
-                text-black font-extrabold transition-all duration-150
-                shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
-                py-6 text-base rounded-xl border-3 border-black
-                hover:from-green-500 hover:to-green-600
-              "
-            >
-              <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
-              Игра
-            </Button>
+            {/* Mobile Game Button with Dropdown */}
+            <div>
+              <Button
+                onClick={() => {
+                  playSound('click');
+                  setIsMobileGameMenuOpen(!isMobileGameMenuOpen);
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className="
+                  w-full justify-start bg-gradient-to-b from-green-400 to-green-500
+                  text-black font-extrabold transition-all duration-150
+                  shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                  py-6 text-base rounded-xl border-3 border-black
+                  hover:from-green-500 hover:to-green-600
+                  flex items-center justify-between
+                "
+              >
+                <div className="flex items-center">
+                  <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
+                  Игра
+                </div>
+                <Icon name="ChevronDown" size={20} className={`transition-transform text-black ${isMobileGameMenuOpen ? 'rotate-180' : ''}`} />
+              </Button>
+
+              {/* Mobile Game Selection Dropdown */}
+              {isMobileGameMenuOpen && (
+                <div className="mt-2 space-y-2 pl-3">
+                  {/* 3D Game */}
+                  <button
+                    onClick={() => {
+                      playSound('whoosh');
+                      openGame();
+                      setIsMobileGameMenuOpen(false);
+                      handleMenuItemClick();
+                    }}
+                    className="w-full text-left bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="text-2xl">🏙️</div>
+                      <div className="flex-1">
+                        <div className="font-extrabold text-black text-sm mb-1">City Delivery Rush</div>
+                        <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* 2D Game */}
+                  <button
+                    onClick={() => {
+                      playSound('whoosh');
+                      openGame();
+                      setIsMobileGameMenuOpen(false);
+                      handleMenuItemClick();
+                    }}
+                    className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="text-2xl">🎯</div>
+                      <div className="flex-1">
+                        <div className="font-extrabold text-black text-sm mb-1">Delivery Master</div>
+                        <div className="text-xs text-gray-700 font-semibold">Классическая аркада</div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Login/Profile Button */}
             <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>
