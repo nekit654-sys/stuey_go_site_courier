@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { API_URL } from '@/config/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGame } from '@/contexts/GameContext';
 import { useNavigate } from 'react-router-dom';
 
 interface Game2DStats {
@@ -30,7 +31,8 @@ interface GamesTabProps {
 }
 
 export default function GamesTab({ userId }: GamesTabProps) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { openGame } = useGame();
   const navigate = useNavigate();
   const [activeGame, setActiveGame] = useState<'2d' | '3d'>('2d');
   const [stats2D, setStats2D] = useState<Game2DStats | null>(null);
@@ -155,7 +157,7 @@ export default function GamesTab({ userId }: GamesTabProps) {
               </p>
             </div>
             <Button
-              onClick={() => navigate('/games')}
+              onClick={() => openGame('2d')}
               size="lg"
               className="bg-yellow-400 text-black hover:bg-yellow-500 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
             >
@@ -247,14 +249,27 @@ export default function GamesTab({ userId }: GamesTabProps) {
                 Доставляй заказы еды по городу!
               </p>
             </div>
-            <Button
-              onClick={() => navigate('/games')}
-              size="lg"
-              className="bg-white text-green-600 hover:bg-gray-100 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
-            >
-              <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-              Играть сейчас
-            </Button>
+            <div className="space-y-3">
+              {!isAuthenticated && (
+                <div className="bg-orange-100 border-2 border-orange-400 rounded-xl p-4 text-center">
+                  <Icon name="AlertCircle" className="h-6 w-6 mx-auto mb-2 text-orange-600" />
+                  <p className="text-sm font-bold text-orange-700 mb-2">
+                    ⚠️ Результаты сохраняются только при авторизации
+                  </p>
+                  <p className="text-xs text-orange-600 font-semibold">
+                    Войдите в личный кабинет, чтобы сохранять прогресс
+                  </p>
+                </div>
+              )}
+              <Button
+                onClick={() => openGame('3d')}
+                size="lg"
+                className="w-full bg-white text-green-600 hover:bg-gray-100 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+              >
+                <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                Играть сейчас
+              </Button>
+            </div>
           </div>
 
           <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">

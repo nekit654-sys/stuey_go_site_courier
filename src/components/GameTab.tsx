@@ -102,12 +102,12 @@ export default function GameTab({ userId }: GameTabProps) {
           </p>
         </div>
         <Button
-          onClick={openGame}
+          onClick={() => openGame('2d')}
           size="lg"
           className="bg-yellow-400 text-black hover:bg-yellow-500 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
         >
           <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-          Играть сейчас
+          Играть в 2D
         </Button>
       </div>
 

@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
+import { useGame } from '@/contexts/GameContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function GameSelect() {
   const navigate = useNavigate();
+  const { openGame } = useGame();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
@@ -27,7 +31,7 @@ export default function GameSelect() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
           <button
-            onClick={() => navigate('/game')}
+            onClick={() => openGame('3d')}
             className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-10 group-hover:opacity-20 transition-opacity" />
@@ -56,6 +60,12 @@ export default function GameSelect() {
                 </span>
               </div>
 
+              {!isAuthenticated && (
+                <div className="mt-3 sm:mt-4 bg-orange-100 border-2 border-orange-400 text-orange-700 font-bold py-2 px-3 rounded-lg text-xs sm:text-sm">
+                  ⚠️ Сохранение только при авторизации
+                </div>
+              )}
+
               <div className="mt-4 sm:mt-6 bg-yellow-400 text-black font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl border-2 border-black inline-flex items-center gap-2 text-sm sm:text-base">
                 <Icon name="Play" size={18} />
                 Играть
@@ -64,7 +74,7 @@ export default function GameSelect() {
           </button>
 
           <button
-            onClick={() => navigate('/game')}
+            onClick={() => openGame('2d')}
             className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 opacity-10 group-hover:opacity-20 transition-opacity" />

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import { useSound } from '@/hooks/useSound';
+import { CityDeliveryRush } from '@/components/game/CityDeliveryRush';
 
 interface LeaderboardEntry {
   id: number;
@@ -14,10 +15,13 @@ interface LeaderboardEntry {
   game_total_plays: number;
 }
 
+type GameType = '2d' | '3d';
+
 interface GameContextType {
-  openGame: () => void;
+  openGame: (gameType?: GameType) => void;
   closeGame: () => void;
   isGameOpen: boolean;
+  currentGame: GameType;
   showLeaderboard: boolean;
   toggleLeaderboard: () => void;
 }
@@ -29,6 +33,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const { playSound } = useSound();
   const [isGameOpen, setIsGameOpen] = useState(false);
+  const [currentGame, setCurrentGame] = useState<GameType>('2d');
   const [isGameLoading, setIsGameLoading] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -134,13 +139,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const openGame = () => {
+  const openGame = (gameType: GameType = '2d') => {
+    setCurrentGame(gameType);
     setIsGameOpen(true);
     setIsGameLoading(true);
     setIsGameOver(false);
     setShowRegisterPrompt(false);
     document.body.style.overflow = 'hidden';
     document.body.classList.add('game-modal-open');
+    
+    // Показываем уведомление для 3D игры если пользователь не авторизован
+    if (gameType === '3d' && !isAuthenticated) {
+      setTimeout(() => {
+        toast.info('💡 Результаты в 3D игре сохраняются только при авторизации', {
+          description: 'Войдите в личный кабинет, чтобы сохранять прогресс',
+          duration: 5000,
+          action: {
+            label: 'Войти',
+            onClick: () => {
+              closeGame();
+              navigate('/auth');
+            }
+          }
+        });
+      }, 1000);
+    }
   };
 
   const closeGame = () => {
@@ -161,7 +184,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <GameContext.Provider value={{ openGame, closeGame, isGameOpen, showLeaderboard, toggleLeaderboard }}>
+    <GameContext.Provider value={{ openGame, closeGame, isGameOpen, currentGame, showLeaderboard, toggleLeaderboard }}>
       {children}
       
       {isGameOpen && (
@@ -200,16 +223,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 </div>
               )}
 
-              <iframe
-                ref={iframeRef}
-                src="/game.html"
-                className="w-full h-full border-0"
-                title="Игра Приключения курьера Stuey.Go"
-                allow="fullscreen"
-                onLoad={() => {
-                  setTimeout(() => setIsGameLoading(false), 500);
-                }}
-              />
+              {currentGame === '2d' ? (
+                <iframe
+                  ref={iframeRef}
+                  src="/game.html"
+                  className="w-full h-full border-0"
+                  title="Delivery Master - 2D игра"
+                  allow="fullscreen"
+                  onLoad={() => {
+                    setTimeout(() => setIsGameLoading(false), 500);
+                  }}
+                />
+              ) : (
+                <Suspense fallback={
+                  <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <Icon name="Loader2" size={64} className="mx-auto mb-4 animate-spin" />
+                      <p className="text-xl font-bold">3D игра загружается...</p>
+                    </div>
+                  </div>
+                }>
+                  <div className="w-full h-full" onLoad={() => setIsGameLoading(false)}>
+                    <CityDeliveryRush />
+                  </div>
+                </Suspense>
+              )}
 
               {showRegisterPrompt && !isAuthenticated && (
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-r from-yellow-400 to-orange-500 border-t-4 border-black p-6 text-center">
