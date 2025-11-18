@@ -73,7 +73,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto border-3 sm:border-4 border-black bg-white rounded-xl sm:rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
+      <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto border-3 sm:border-4 border-black bg-white rounded-xl sm:rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] p-4 sm:p-6 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-3xl font-extrabold text-black flex items-center gap-2 sm:gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center flex-shrink-0">
