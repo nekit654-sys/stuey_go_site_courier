@@ -57,7 +57,7 @@ export default function GamesTab({ userId }: GamesTabProps) {
         fetch(`${API_URL}?route=game&action=my_stats`, {
           headers: { 'X-User-Id': userId.toString() },
         }),
-        fetch(`https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&username=${user?.full_name || 'Guest'}`)
+        fetch(`https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&user_id=${userId}&username=${user?.full_name || 'Guest'}`)
       ]);
 
       const data2D = await response2D.json();

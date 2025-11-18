@@ -21,6 +21,7 @@ import { NavigationArrow } from './NavigationArrow';
 import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
 import Icon from '@/components/ui/icon';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GameState {
   score: number;
@@ -31,6 +32,7 @@ interface GameState {
   hasPackage: boolean;
   courierId: number | null;
   username: string;
+  userId: number | null;
 }
 
 interface Order {
@@ -48,6 +50,7 @@ interface Order {
 }
 
 export function CityDeliveryRush() {
+  const { user } = useAuth();
   const { settings, currentFps } = usePerformanceSettings();
   const { orders, activeOrder, acceptOrder, completeOrder, cancelOrder } = useFoodOrders();
   const [gameStarted, setGameStarted] = useState(false);
@@ -145,15 +148,18 @@ export function CityDeliveryRush() {
     currentVehicle: 'walk',
     hasPackage: false,
     courierId: null,
-    username: 'Guest' + Math.floor(Math.random() * 1000)
+    username: user?.full_name || 'Guest' + Math.floor(Math.random() * 1000),
+    userId: user?.id || null
   });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(
-          `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&username=${gameState.username}`
-        );
+        const url = gameState.userId 
+          ? `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&user_id=${gameState.userId}&username=${gameState.username}`
+          : `https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&username=${gameState.username}`;
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.settings) {
@@ -254,6 +260,7 @@ export function CityDeliveryRush() {
           body: JSON.stringify({
             action: 'complete_delivery',
             courier_id: gameState.courierId,
+            user_id: gameState.userId,
             delivery_type: 'food',
             distance: activeOrder.distance,
             time_taken: 0

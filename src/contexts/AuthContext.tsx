@@ -30,6 +30,12 @@ interface User {
   agreed_to_terms?: boolean;
   sbp_phone?: string;
   sbp_bank_name?: string;
+  // 3D Game stats
+  game_3d_total_deliveries?: number;
+  game_3d_total_coins?: number;
+  game_3d_level?: number;
+  game_3d_experience?: number;
+  game_3d_current_vehicle?: string;
 }
 
 interface AuthContextType {

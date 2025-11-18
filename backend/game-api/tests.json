@@ -1,9 +1,15 @@
 {
   "tests": [
     {
-      "name": "Get courier profile",
+      "name": "Get courier profile by username (legacy)",
       "method": "GET",
       "path": "/?action=profile&username=testuser999",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get courier profile by user_id (new way)",
+      "method": "GET",
+      "path": "/?action=profile&user_id=1&username=testuser",
       "expectedStatus": 200
     },
     {

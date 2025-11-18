@@ -53,23 +53,46 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     if method == 'GET':
         if action == 'profile':
+            # Приоритет: user_id > username (для обратной совместимости)
+            user_id = params.get('user_id')
             username = params.get('username', 'guest')
-            cur.execute(
-                "SELECT * FROM couriers WHERE username = %s",
-                (username,)
-            )
-            courier = cur.fetchone()
             
-            if not courier:
+            # Ищем по user_id (новый способ) или username (старый способ)
+            if user_id:
                 cur.execute(
-                    """INSERT INTO couriers (username) 
-                       VALUES (%s) 
-                       RETURNING *""",
+                    "SELECT * FROM couriers WHERE user_id = %s",
+                    (int(user_id),)
+                )
+            else:
+                cur.execute(
+                    "SELECT * FROM couriers WHERE username = %s",
                     (username,)
                 )
+            
+            courier = cur.fetchone()
+            
+            # Если профиль не найден - создаем новый
+            if not courier:
+                if user_id:
+                    # Новый способ: с привязкой к user_id
+                    cur.execute(
+                        """INSERT INTO couriers (username, user_id) 
+                           VALUES (%s, %s) 
+                           RETURNING *""",
+                        (username, int(user_id))
+                    )
+                else:
+                    # Старый способ: только username (для обратной совместимости)
+                    cur.execute(
+                        """INSERT INTO couriers (username) 
+                           VALUES (%s) 
+                           RETURNING *""",
+                        (username,)
+                    )
                 courier = cur.fetchone()
                 conn.commit()
                 
+                # Создаем начальные транспорты
                 for vehicle in ['walk', 'bicycle', 'scooter']:
                     unlocked = vehicle == 'walk'
                     cur.execute(
@@ -78,6 +101,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         (courier['id'], vehicle, unlocked)
                     )
                 conn.commit()
+            elif user_id and not courier.get('user_id'):
+                # Если профиль существует, но user_id еще не привязан - привязываем
+                cur.execute(
+                    "UPDATE couriers SET user_id = %s WHERE id = %s",
+                    (int(user_id), courier['id'])
+                )
+                conn.commit()
+                courier['user_id'] = int(user_id)
             
             cur.execute(
                 "SELECT * FROM courier_vehicles WHERE courier_id = %s",
@@ -197,6 +228,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif action == 'complete_delivery':
             courier_id = body_data.get('courier_id')
+            user_id = body_data.get('user_id')  # Добавляем поддержку user_id
             delivery_type = body_data.get('delivery_type', 'food')
             time_taken = body_data.get('time_taken', 0)
             distance = body_data.get('distance', 0)
@@ -274,10 +306,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                        experience = experience + %s,
                        current_exp = %s,
                        level = %s,
-                       skill_points = skill_points + %s
-                   WHERE id = %s""",
-                (coins, distance, exp_gained, new_exp, new_level, skill_points_gained, courier_id)
+                       skill_points = skill_points + %s,
+                       current_vehicle = %s
+                   WHERE id = %s
+                   RETURNING user_id, total_deliveries, total_coins, level, experience""",
+                (coins, distance, exp_gained, new_exp, new_level, skill_points_gained, vehicle, courier_id)
             )
+            
+            updated_courier = cur.fetchone()
+            
+            # Синхронизируем статистику с основным аккаунтом users
+            if user_id or (updated_courier and updated_courier.get('user_id')):
+                sync_user_id = user_id or updated_courier.get('user_id')
+                cur.execute(
+                    """UPDATE users
+                       SET game_3d_total_deliveries = %s,
+                           game_3d_total_coins = %s,
+                           game_3d_level = %s,
+                           game_3d_experience = %s,
+                           game_3d_current_vehicle = %s,
+                           updated_at = NOW()
+                       WHERE id = %s""",
+                    (updated_courier['total_deliveries'], updated_courier['total_coins'], 
+                     updated_courier['level'], updated_courier['experience'], vehicle, sync_user_id)
+                )
             
             cur.execute(
                 """INSERT INTO leaderboard (courier_id, period, score, deliveries, avg_time, date)
