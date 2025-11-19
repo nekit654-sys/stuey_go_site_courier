@@ -41,23 +41,28 @@ const NAMES = [
 ];
 
 function generateBuildingLocation() {
-  const { gridSize, blockSize, roadWidth } = CITY_CONFIG;
+  const { gridSize, spacing } = CITY_CONFIG;
   
   let attempts = 0;
   let finalX = 0, finalZ = 0;
   
   do {
-    const x = Math.floor(Math.random() * gridSize * 2) - gridSize;
-    const z = Math.floor(Math.random() * gridSize * 2) - gridSize;
+    const row = Math.floor(Math.random() * gridSize) - gridSize / 2;
+    const col = Math.floor(Math.random() * gridSize) - gridSize / 2;
     
-    const centerX = x * blockSize + blockSize / 2;
-    const centerZ = z * blockSize + blockSize / 2;
+    if (row === 0 && col === 0) {
+      attempts++;
+      continue;
+    }
     
-    const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 10);
-    const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 10);
+    const x = col * spacing;
+    const z = row * spacing;
     
-    finalX = centerX + offsetX;
-    finalZ = centerZ + offsetZ;
+    const offsetX = (Math.random() - 0.5) * 8;
+    const offsetZ = (Math.random() - 0.5) * 8;
+    
+    finalX = x + offsetX;
+    finalZ = z + offsetZ;
     
     attempts++;
   } while (!isPositionInBounds(finalX, finalZ) && attempts < 20);

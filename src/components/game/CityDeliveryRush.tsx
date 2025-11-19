@@ -25,6 +25,7 @@ import { SessionStats } from './SessionStats';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateCityBuildings, type BuildingData } from './CityData';
+import { collisionSystem } from './CollisionSystem';
 
 interface GameState {
   score: number;
@@ -96,8 +97,26 @@ export function CityDeliveryRush() {
     levelUps: 0
   });
   const [lastPosition, setLastPosition] = useState<{ x: number; z: number } | null>(null);
+  const [cityBuildings, setCityBuildings] = useState<Array<{ 
+    x: number; 
+    z: number; 
+    size: number;
+    position: [number, number, number];
+    dimensions: [number, number, number];
+  }>>([]);
   
-  const cityBuildings = useMemo(() => generateCityBuildings(), []);
+  const legacyBuildings = useMemo(() => generateCityBuildings(), []);
+  
+  useEffect(() => {
+    if (cityBuildings.length > 0) {
+      const collisionData = cityBuildings.map(b => ({
+        position: b.position,
+        size: b.dimensions
+      }));
+      collisionSystem.setBuildingsFromCityMap(collisionData);
+      console.log(`🔲 Коллизии инициализированы для ${cityBuildings.length} зданий`);
+    }
+  }, [cityBuildings]);
   
   // Предотвращаем context lost при размонтировании
   useEffect(() => {
@@ -754,6 +773,7 @@ export function CityDeliveryRush() {
             gridSize={8} 
             quality={graphicsQuality}
             onBuildingsReady={(buildings) => {
+              console.log(`🏗️ ModernCity готов: ${buildings.length} зданий`);
               setCityBuildings(buildings);
             }}
           />

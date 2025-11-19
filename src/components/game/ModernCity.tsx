@@ -5,7 +5,13 @@ import * as THREE from 'three';
 interface ModernCityProps {
   gridSize?: number;
   quality?: 'low' | 'medium' | 'high';
-  onBuildingsReady?: (buildings: Array<{ x: number; z: number; size: number }>) => void;
+  onBuildingsReady?: (buildings: Array<{ 
+    x: number; 
+    z: number; 
+    size: number;
+    position: [number, number, number];
+    dimensions: [number, number, number];
+  }>) => void;
 }
 
 interface BuildingData {
@@ -596,7 +602,9 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
       const buildingData = buildings.map(b => ({
         x: b.x,
         z: b.z,
-        size: Math.max(b.width, b.depth)
+        size: Math.max(b.width, b.depth),
+        position: [b.x, b.height / 2, b.z] as [number, number, number],
+        dimensions: [b.width, b.height, b.depth] as [number, number, number]
       }));
       onBuildingsReady(buildingData);
     }

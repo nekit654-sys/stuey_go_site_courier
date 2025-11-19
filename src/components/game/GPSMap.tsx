@@ -3,7 +3,7 @@ import type { BuildingData } from './CityData';
 
 interface GPSMapProps {
   playerPosition: { x: number; z: number };
-  buildings: BuildingData[];
+  buildings: Array<{ x: number; z: number; size: number } | BuildingData>;
   targetPosition?: { x: number; z: number; name: string } | null;
   pickupPosition?: { x: number; z: number; name: string } | null;
 }
@@ -51,15 +51,27 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
     }
     
     buildings.forEach(building => {
-      const bx = centerX + (building.position[0] - playerPosition.x) * scale;
-      const by = centerY + (building.position[2] - playerPosition.z) * scale;
+      const isLegacy = 'position' in building && Array.isArray(building.position);
+      
+      let bx, by, bw, bh;
+      if (isLegacy) {
+        const legacyBuilding = building as BuildingData;
+        bx = centerX + (legacyBuilding.position[0] - playerPosition.x) * scale;
+        by = centerY + (legacyBuilding.position[2] - playerPosition.z) * scale;
+        bw = legacyBuilding.size[0] * scale;
+        bh = legacyBuilding.size[2] * scale;
+      } else {
+        const modernBuilding = building as { x: number; z: number; size: number };
+        bx = centerX + (modernBuilding.x - playerPosition.x) * scale;
+        by = centerY + (modernBuilding.z - playerPosition.z) * scale;
+        bw = modernBuilding.size * scale * 0.7;
+        bh = modernBuilding.size * scale * 0.7;
+      }
       
       if (bx < -20 || bx > width + 20 || by < -20 || by > height + 20) return;
       
-      const bw = building.size[0] * scale;
-      const bh = building.size[2] * scale;
-      
-      ctx.fillStyle = building.type === 'restaurant' ? '#FF8C00' : '#666';
+      const buildingType = isLegacy ? (building as BuildingData).type : 'residential';
+      ctx.fillStyle = buildingType === 'restaurant' ? '#FF8C00' : '#666';
       ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
       
       ctx.strokeStyle = '#333';
