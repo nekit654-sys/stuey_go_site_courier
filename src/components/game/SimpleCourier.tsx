@@ -14,7 +14,7 @@ const keys: { [key: string]: boolean } = {};
 
 function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
   const { camera } = useThree();
-  const currentPosition = useRef(new THREE.Vector3(0, 8, 15));
+  const currentPosition = useRef(new THREE.Vector3(0, 8, -15));
   const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame(() => {
@@ -23,7 +23,7 @@ function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
     const targetPosition = target.current.position;
     const targetRotation = target.current.rotation;
 
-    const cameraOffset = new THREE.Vector3(0, 8, 15);
+    const cameraOffset = new THREE.Vector3(0, 8, -15);
     cameraOffset.applyEuler(new THREE.Euler(0, targetRotation.y, 0));
     
     const desiredPosition = new THREE.Vector3(
@@ -98,7 +98,7 @@ export function SimpleCourier({
       rotation.current += turn * stats.turnSpeed;
       
       const moveX = Math.sin(rotation.current) * forward * stats.speed * delta;
-      const moveZ = Math.cos(rotation.current) * forward * stats.speed * delta;
+      const moveZ = -Math.cos(rotation.current) * forward * stats.speed * delta;
       
       position.current.x += moveX;
       position.current.z += moveZ;
