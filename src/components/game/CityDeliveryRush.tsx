@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useMemo } from 'react';
 import { SimpleCourier } from './SimpleCourier';
 import { CityMap } from './CityMap';
 import { MiniMap } from './GPSNavigation';
+import { GPSMap } from './GPSMap';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
@@ -13,7 +14,7 @@ import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
 import { Weather } from './Weather';
-import { OptimizedTrafficSystem } from './OptimizedTrafficSystem';
+
 import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
 import { useFoodOrders } from './FoodOrderSystem';
@@ -703,9 +704,7 @@ export function CityDeliveryRush() {
             </mesh>
           </group>
         }>
-          <CityMap playerPosition={playerPosition} />
-          
-          {graphicsQuality !== 'low' && <OptimizedTrafficSystem playerPosition={playerPosition} />}
+          <CityMap playerPosition={playerPosition} buildings={cityBuildings} />
           
           {activeOrder && (
             <>
@@ -802,13 +801,12 @@ export function CityDeliveryRush() {
         </div>
       )}
       
-      {activeOrder && (
-        <MiniMap
-          playerPos={playerPosition}
-          targetPos={targetLocation}
-          mapSize={isMobile && !isLandscape ? 150 : 200}
-        />
-      )}
+      <GPSMap
+        playerPosition={playerPosition}
+        buildings={cityBuildings}
+        targetPosition={deliveryStage === 'delivery' ? activeOrder?.deliveryLocation : null}
+        pickupPosition={deliveryStage === 'pickup' ? activeOrder?.pickupLocation : null}
+      />
 
       {soundEnabled && (
         <>

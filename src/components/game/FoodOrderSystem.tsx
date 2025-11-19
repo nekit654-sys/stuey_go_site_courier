@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isPositionInBounds, CITY_CONFIG } from './CityData';
 
 export interface FoodOrder {
   id: string;
@@ -40,22 +41,30 @@ const NAMES = [
 ];
 
 function generateBuildingLocation() {
-  const gridSize = 6;
-  const blockSize = 30;
-  const roadWidth = 8;
+  const { gridSize, blockSize, roadWidth } = CITY_CONFIG;
   
-  const x = Math.floor(Math.random() * gridSize * 2) - gridSize;
-  const z = Math.floor(Math.random() * gridSize * 2) - gridSize;
+  let attempts = 0;
+  let finalX = 0, finalZ = 0;
   
-  const centerX = x * blockSize + blockSize / 2;
-  const centerZ = z * blockSize + blockSize / 2;
-  
-  const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
-  const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
+  do {
+    const x = Math.floor(Math.random() * gridSize * 2) - gridSize;
+    const z = Math.floor(Math.random() * gridSize * 2) - gridSize;
+    
+    const centerX = x * blockSize + blockSize / 2;
+    const centerZ = z * blockSize + blockSize / 2;
+    
+    const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 10);
+    const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 10);
+    
+    finalX = centerX + offsetX;
+    finalZ = centerZ + offsetZ;
+    
+    attempts++;
+  } while (!isPositionInBounds(finalX, finalZ) && attempts < 20);
   
   return {
-    x: centerX + offsetX,
-    z: centerZ + offsetZ
+    x: finalX,
+    z: finalZ
   };
 }
 
