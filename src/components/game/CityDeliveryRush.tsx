@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { Sky, PerspectiveCamera } from '@react-three/drei';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useMemo } from 'react';
 import { SimpleCourier } from './SimpleCourier';
 import { CityMap } from './CityMap';
 import { MiniMap } from './GPSNavigation';
@@ -22,6 +22,7 @@ import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
+import { generateCityBuildings, type BuildingData } from './CityData';
 
 interface GameState {
   score: number;
@@ -546,7 +547,7 @@ export function CityDeliveryRush() {
     <div className="w-full h-screen relative overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600">
       <Canvas 
         shadows={graphicsQuality === 'high'}
-        dpr={graphicsQuality === 'low' ? [0.5, 1] : [1, 1.5]} 
+        dpr={graphicsQuality === 'low' ? [0.5, 0.75] : graphicsQuality === 'medium' ? [0.75, 1] : [1, 1.5]} 
         gl={{ 
           antialias: graphicsQuality === 'high',
           powerPreference: 'high-performance',
