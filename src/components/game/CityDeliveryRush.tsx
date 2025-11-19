@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, PerspectiveCamera } from '@react-three/drei';
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import { SimpleCourier } from './SimpleCourier';
-import { CityMap } from './CityMap';
+import { ModernCity } from './ModernCity';
 import { MiniMap } from './GPSNavigation';
 import { GPSMap } from './GPSMap';
 import { Leaderboard } from './Leaderboard';
@@ -717,17 +717,26 @@ export function CityDeliveryRush() {
           console.error('❌ Ошибка Canvas:', error);
         }}
       >
-        <PerspectiveCamera makeDefault position={[0, 8, 15]} fov={60} />
+        <PerspectiveCamera makeDefault position={[0, 25, 30]} fov={65} />
         
-        <ambientLight intensity={0.7} />
+        <ambientLight intensity={0.4} />
         <directionalLight
-          position={[50, 50, 25]}
-          intensity={1}
-          castShadow={graphicsQuality === 'high'}
-          shadow-mapSize={graphicsQuality === 'high' ? [1024, 1024] : [512, 512]}
+          position={[50, 80, 30]}
+          intensity={1.2}
+          castShadow={graphicsQuality !== 'low'}
+          shadow-mapSize={graphicsQuality === 'high' ? [2048, 2048] : [1024, 1024]}
+          shadow-camera-left={-100}
+          shadow-camera-right={100}
+          shadow-camera-top={100}
+          shadow-camera-bottom={-100}
         />
+        <hemisphereLight args={['#87CEEB', '#86EFAC', 0.3]} />
         
-        <Sky sunPosition={[100, 20, 100]} />
+        <Sky 
+          sunPosition={[100, 30, 100]} 
+          inclination={0.6}
+          azimuth={0.25}
+        />
         
         <Suspense fallback={
           <group>
@@ -741,7 +750,13 @@ export function CityDeliveryRush() {
             </mesh>
           </group>
         }>
-          <CityMap playerPosition={playerPosition} buildings={cityBuildings} />
+          <ModernCity 
+            gridSize={8} 
+            quality={graphicsQuality}
+            onBuildingsReady={(buildings) => {
+              setCityBuildings(buildings);
+            }}
+          />
           
           {activeOrder && (
             <>
