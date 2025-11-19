@@ -82,6 +82,8 @@ export function CityDeliveryRush() {
   const [fpsHistory, setFpsHistory] = useState<number[]>([]);
   const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
   const [isMobile, setIsMobile] = useState(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  const [cameraRotation, setCameraRotation] = useState({ horizontal: 0, vertical: 0 });
+  const [isPointerLocked, setIsPointerLocked] = useState(false);
   
   const cityBuildings = useMemo(() => generateCityBuildings(), []);
   
@@ -93,6 +95,93 @@ export function CityDeliveryRush() {
     };
   }, []);
   
+  // Управление камерой мышкой (ПК)
+  useEffect(() => {
+    if (!gameStarted || isMobile) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (document.pointerLockElement) {
+        setCameraRotation(prev => ({
+          horizontal: prev.horizontal - e.movementX * 0.002,
+          vertical: prev.vertical - e.movementY * 0.002
+        }));
+      }
+    };
+
+    const handleClick = () => {
+      if (!document.pointerLockElement) {
+        document.body.requestPointerLock();
+      }
+    };
+
+    const handlePointerLockChange = () => {
+      setIsPointerLocked(!!document.pointerLockElement);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('click', handleClick);
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
+    };
+  }, [gameStarted, isMobile]);
+
+  // Управление камерой пальцами (мобильные)
+  useEffect(() => {
+    if (!gameStarted || !isMobile) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isCameraTouch = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (touch.clientX > window.innerWidth / 2) {
+          isCameraTouch = true;
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isCameraTouch && e.touches.length === 1) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        setCameraRotation(prev => ({
+          horizontal: prev.horizontal - deltaX * 0.01,
+          vertical: prev.vertical - deltaY * 0.01
+        }));
+
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isCameraTouch = false;
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gameStarted, isMobile]);
+
   // Отслеживание ориентации экрана
   useEffect(() => {
     const handleOrientationChange = () => {
@@ -629,14 +718,26 @@ export function CityDeliveryRush() {
             mobileInput={mobileInput}
             mobileSprint={mobileSprint}
             onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
-            buildings={cityBuildings}
+            cameraRotation={cameraRotation}
           />
           
           {graphicsQuality === 'high' && <Weather type={weather} />}
         </Suspense>
       </Canvas>
 
+      {!isMobile && !isPointerLocked && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none">
+          <div className="bg-black/80 text-white px-8 py-4 rounded-xl text-lg font-semibold animate-pulse">
+            🖱️ Кликни для управления камерой | ESC для выхода
+          </div>
+        </div>
+      )}
 
+      {isMobile && (
+        <div className="fixed top-20 right-4 z-30 bg-black/80 text-white px-3 py-2 rounded-lg text-xs">
+          👆 Правая часть экрана - камера
+        </div>
+      )}
       
       <div className={`fixed z-40 bg-gradient-to-b from-black/95 to-black/70 flex items-center justify-between shadow-2xl backdrop-blur-sm ${
         isMobile && !isLandscape 

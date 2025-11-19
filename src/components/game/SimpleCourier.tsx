@@ -8,11 +8,18 @@ interface SimpleCourierProps {
   mobileInput?: { x: number; y: number };
   mobileSprint?: boolean;
   onEnergyChange?: (energy: number) => void;
+  cameraRotation?: { horizontal: number; vertical: number };
 }
 
 const keys: { [key: string]: boolean } = {};
 
-function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
+function CameraFollower({ 
+  target, 
+  cameraRotation 
+}: { 
+  target: React.RefObject<THREE.Group>;
+  cameraRotation: { horizontal: number; vertical: number };
+}) {
   const { camera } = useThree();
   const currentPosition = useRef(new THREE.Vector3(0, 8, -15));
   const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
@@ -22,12 +29,17 @@ function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
 
     const targetPosition = target.current.position;
     
-    // Камера всегда сзади на фиксированном расстоянии
-    const desiredPosition = new THREE.Vector3(
-      targetPosition.x,
-      targetPosition.y + 8,
-      targetPosition.z - 15
-    );
+    const distance = 15;
+    const height = 8;
+    
+    const horizontalAngle = cameraRotation.horizontal;
+    const verticalAngle = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, cameraRotation.vertical));
+    
+    const cameraX = targetPosition.x + distance * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
+    const cameraY = targetPosition.y + height + distance * Math.sin(verticalAngle);
+    const cameraZ = targetPosition.z + distance * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
+    
+    const desiredPosition = new THREE.Vector3(cameraX, cameraY, cameraZ);
 
     currentPosition.current.lerp(desiredPosition, 0.1);
     camera.position.copy(currentPosition.current);
@@ -50,7 +62,8 @@ export function SimpleCourier({
   onPositionChange, 
   mobileInput,
   mobileSprint,
-  onEnergyChange 
+  onEnergyChange,
+  cameraRotation = { horizontal: 0, vertical: 0 }
 }: SimpleCourierProps) {
   const meshRef = useRef<THREE.Group>(null);
   const cameraTargetRef = useRef<THREE.Group>(null);
@@ -78,48 +91,38 @@ export function SimpleCourier({
   useFrame((state, delta) => {
     if (!meshRef.current) return;
     
-    const { camera } = state;
+    const horizontalAngle = cameraRotation.horizontal;
     
-    // Получаем направление камеры
-    const cameraDirection = new THREE.Vector3();
-    camera.getWorldDirection(cameraDirection);
-    cameraDirection.y = 0;
-    cameraDirection.normalize();
-    
-    // Вектор вправо от камеры
-    const cameraRight = new THREE.Vector3();
-    cameraRight.crossVectors(camera.up, cameraDirection);
-    cameraRight.normalize();
+    const cameraForward = new THREE.Vector3(
+      -Math.sin(horizontalAngle),
+      0,
+      -Math.cos(horizontalAngle)
+    );
+    const cameraRight = new THREE.Vector3(
+      Math.cos(horizontalAngle),
+      0,
+      -Math.sin(horizontalAngle)
+    );
     
     let moveX = 0;
     let moveZ = 0;
     let isMoving = false;
     
     if (mobileInput && (mobileInput.x !== 0 || mobileInput.y !== 0)) {
-      // Мобильное управление
-      const forward = new THREE.Vector3(
-        cameraDirection.x * mobileInput.y,
-        0,
-        cameraDirection.z * mobileInput.y
-      );
-      const right = new THREE.Vector3(
-        cameraRight.x * mobileInput.x,
-        0,
-        cameraRight.z * mobileInput.x
-      );
+      const forward = cameraForward.clone().multiplyScalar(mobileInput.y);
+      const right = cameraRight.clone().multiplyScalar(mobileInput.x);
       moveX = forward.x + right.x;
       moveZ = forward.z + right.z;
       isMoving = true;
     } else {
-      // Клавиатурное управление
       if (keys['KeyW'] || keys['ArrowUp']) {
-        moveX += cameraDirection.x;
-        moveZ += cameraDirection.z;
+        moveX += cameraForward.x;
+        moveZ += cameraForward.z;
         isMoving = true;
       }
       if (keys['KeyS'] || keys['ArrowDown']) {
-        moveX -= cameraDirection.x;
-        moveZ -= cameraDirection.z;
+        moveX -= cameraForward.x;
+        moveZ -= cameraForward.z;
         isMoving = true;
       }
       if (keys['KeyA'] || keys['ArrowLeft']) {
@@ -135,18 +138,15 @@ export function SimpleCourier({
     }
     
     if (isMoving && energy.current > 0) {
-      // Нормализуем вектор движения
       const moveLength = Math.sqrt(moveX * moveX + moveZ * moveZ);
       if (moveLength > 0) {
         moveX /= moveLength;
         moveZ /= moveLength;
       }
       
-      // Применяем движение
       position.current.x += moveX * stats.speed * delta;
       position.current.z += moveZ * stats.speed * delta;
       
-      // Поворачиваем персонажа в сторону движения
       rotation.current = Math.atan2(moveX, moveZ);
       
       energy.current = Math.max(0, energy.current - stats.energyCost * delta * 10);
@@ -236,7 +236,7 @@ export function SimpleCourier({
       </group>
       
       {meshRef.current && (
-        <CameraFollower target={meshRef} />
+        <CameraFollower target={meshRef} cameraRotation={cameraRotation} />
       )}
     </>
   );
