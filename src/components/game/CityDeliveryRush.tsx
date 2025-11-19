@@ -83,6 +83,8 @@ export function CityDeliveryRush() {
   const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
   const [isMobile, setIsMobile] = useState(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   
+  const cityBuildings = useMemo(() => generateCityBuildings(), []);
+  
   // Предотвращаем context lost при размонтировании
   useEffect(() => {
     console.log('🎮 CityDeliveryRush смонтирован');
@@ -627,6 +629,7 @@ export function CityDeliveryRush() {
             mobileInput={mobileInput}
             mobileSprint={mobileSprint}
             onEnergyChange={(energy) => setGameState(prev => ({ ...prev, energy }))}
+            buildings={cityBuildings}
           />
           
           {graphicsQuality === 'high' && <Weather type={weather} />}
