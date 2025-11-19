@@ -50,7 +50,7 @@ function ModernBuilding({ building }: { building: BuildingData }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (Math.random() > 0.9) {
+      if (Math.random() > 0.95) {
         setWindowStates(prev => {
           const newStates = [...prev];
           const floor = Math.floor(Math.random() * newStates.length);
@@ -59,7 +59,7 @@ function ModernBuilding({ building }: { building: BuildingData }) {
           return newStates;
         });
       }
-    }, 2000);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, []);
@@ -114,18 +114,14 @@ function ModernBuilding({ building }: { building: BuildingData }) {
             <group key={`${floorIdx}-${winIdx}`}>
               <mesh position={[x, y, building.depth / 2 + 0.01]}>
                 <planeGeometry args={[0.6, 0.8]} />
-                <meshStandardMaterial 
+                <meshBasicMaterial 
                   color={isLit ? "#FCD34D" : "#1E293B"}
-                  emissive={isLit ? "#FCD34D" : "#000000"}
-                  emissiveIntensity={isLit ? 0.5 : 0}
                 />
               </mesh>
               <mesh position={[x, y, -building.depth / 2 - 0.01]} rotation={[0, Math.PI, 0]}>
                 <planeGeometry args={[0.6, 0.8]} />
-                <meshStandardMaterial 
+                <meshBasicMaterial 
                   color={isLit ? "#FCD34D" : "#1E293B"}
-                  emissive={isLit ? "#FCD34D" : "#000000"}
-                  emissiveIntensity={isLit ? 0.5 : 0}
                 />
               </mesh>
               
@@ -168,20 +164,16 @@ function Cloud({ position }: { position: [number, number, number] }) {
   return (
     <group ref={cloudRef} position={position}>
       <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[3, 8, 8]} />
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} />
+        <sphereGeometry args={[3, 6, 6]} />
+        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
       <mesh position={[2, 0.5, 0]}>
-        <sphereGeometry args={[2.5, 8, 8]} />
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} />
+        <sphereGeometry args={[2.5, 6, 6]} />
+        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
       <mesh position={[-2, 0.3, 0]}>
-        <sphereGeometry args={[2.2, 8, 8]} />
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} />
-      </mesh>
-      <mesh position={[0, 1, 1]}>
-        <sphereGeometry args={[2, 8, 8]} />
-        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.8} />
+        <sphereGeometry args={[2.2, 6, 6]} />
+        <meshStandardMaterial color="#FFFFFF" transparent opacity={0.7} />
       </mesh>
     </group>
   );
@@ -196,19 +188,15 @@ function Tree({ position, scale = 1 }: { position: [number, number, number], sca
   return (
     <group position={position}>
       <mesh position={[0, 1 * scale, 0]}>
-        <cylinderGeometry args={[0.2 * scale, 0.3 * scale, 2 * scale, 8]} />
+        <cylinderGeometry args={[0.2 * scale, 0.3 * scale, 2 * scale, 6]} />
         <meshStandardMaterial color="#78350F" />
       </mesh>
       <mesh position={[0, 2.5 * scale, 0]}>
-        <coneGeometry args={[1.2 * scale, 2.5 * scale, 8]} />
+        <coneGeometry args={[1.2 * scale, 2.5 * scale, 6]} />
         <meshStandardMaterial color={leaves} />
       </mesh>
       <mesh position={[0, 3.5 * scale, 0]}>
-        <coneGeometry args={[1 * scale, 2 * scale, 8]} />
-        <meshStandardMaterial color={leaves} />
-      </mesh>
-      <mesh position={[0, 4.2 * scale, 0]}>
-        <coneGeometry args={[0.7 * scale, 1.5 * scale, 8]} />
+        <coneGeometry args={[1 * scale, 2 * scale, 6]} />
         <meshStandardMaterial color={leaves} />
       </mesh>
     </group>
@@ -218,7 +206,7 @@ function Tree({ position, scale = 1 }: { position: [number, number, number], sca
 function ParkArea({ x, z, size }: { x: number, z: number, size: number }) {
   const trees = useMemo(() => {
     const treePositions: Array<[number, number, number]> = [];
-    const treeCount = Math.floor(size / 3);
+    const treeCount = Math.min(4, Math.floor(size / 4));
     
     for (let i = 0; i < treeCount; i++) {
       const angle = (i / treeCount) * Math.PI * 2;
@@ -234,12 +222,12 @@ function ParkArea({ x, z, size }: { x: number, z: number, size: number }) {
   return (
     <group>
       <mesh position={[x, 0.02, z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[size * 0.5, 32]} />
+        <circleGeometry args={[size * 0.5, 16]} />
         <meshStandardMaterial color="#86EFAC" roughness={0.9} />
       </mesh>
       
       <mesh position={[x, 0.03, z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[size * 0.2, size * 0.25, 32]} />
+        <ringGeometry args={[size * 0.2, size * 0.25, 16]} />
         <meshStandardMaterial color="#FCD34D" />
       </mesh>
 
@@ -296,7 +284,7 @@ function TrafficSystem() {
     
     const roads = [-60, -40, -20, 0, 20, 40, 60];
     
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 25; i++) {
       const path = Math.random() > 0.5 ? 'horizontal' : 'vertical';
       const direction = Math.random() > 0.5 ? 1 : -1;
       const roadIndex = Math.floor(Math.random() * roads.length);

@@ -190,51 +190,83 @@ export function SimpleCourier({
   }, []);
   
   const getVehicleMesh = () => {
-    switch (vehicle) {
-      case 'bicycle':
-        return (
-          <group>
-            <mesh position={[0, 0, 0]} castShadow>
-              <capsuleGeometry args={[0.3, 1, 8, 16]} />
-              <meshStandardMaterial color="#3498db" />
-            </mesh>
-            <mesh position={[0, -0.5, 0.6]} castShadow>
-              <torusGeometry args={[0.3, 0.1, 8, 16]} />
-              <meshStandardMaterial color="#2c3e50" />
-            </mesh>
-            <mesh position={[0, -0.5, -0.6]} castShadow>
-              <torusGeometry args={[0.3, 0.1, 8, 16]} />
-              <meshStandardMaterial color="#2c3e50" />
-            </mesh>
-          </group>
-        );
-      case 'scooter':
-        return (
-          <group>
-            <mesh position={[0, 0, 0]} castShadow>
-              <boxGeometry args={[0.5, 1.2, 0.3]} />
-              <meshStandardMaterial color="#e74c3c" />
-            </mesh>
-            <mesh position={[0, -0.6, 0.4]} castShadow>
-              <cylinderGeometry args={[0.2, 0.2, 0.1, 16]} />
-              <meshStandardMaterial color="#34495e" />
-            </mesh>
-          </group>
-        );
-      default:
-        return (
-          <group>
-            <mesh position={[0, 0.3, 0]} castShadow>
-              <sphereGeometry args={[0.3, 16, 16]} />
-              <meshStandardMaterial color="#f39c12" />
-            </mesh>
-            <mesh position={[0, 0, 0]} castShadow>
-              <capsuleGeometry args={[0.25, 0.8, 8, 16]} />
-              <meshStandardMaterial color="#2ecc71" />
-            </mesh>
-          </group>
-        );
-    }
+    return (
+      <group>
+        {/* Ноги */}
+        <mesh position={[-0.15, -0.5, 0]} castShadow>
+          <capsuleGeometry args={[0.12, 0.7, 8, 16]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0.15, -0.5, 0]} castShadow>
+          <capsuleGeometry args={[0.12, 0.7, 8, 16]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        
+        {/* Тело в желтой форме */}
+        <mesh position={[0, 0.2, 0]} castShadow>
+          <capsuleGeometry args={[0.35, 0.9, 8, 16]} />
+          <meshStandardMaterial color="#FFD700" />
+        </mesh>
+        
+        {/* Голова */}
+        <mesh position={[0, 1, 0]} castShadow>
+          <sphereGeometry args={[0.25, 16, 16]} />
+          <meshStandardMaterial color="#FDB777" />
+        </mesh>
+        
+        {/* Желтая сумка для доставки на спине */}
+        <mesh position={[0, 0.5, -0.4]} castShadow receiveShadow>
+          <boxGeometry args={[0.6, 0.7, 0.35]} />
+          <meshStandardMaterial 
+            color="#FFD700" 
+            roughness={0.3}
+            metalness={0.1}
+          />
+        </mesh>
+        
+        {/* Верхняя часть сумки (крышка) */}
+        <mesh position={[0, 0.9, -0.4]} castShadow>
+          <boxGeometry args={[0.65, 0.15, 0.38]} />
+          <meshStandardMaterial color="#FFA500" />
+        </mesh>
+        
+        {/* Черная окантовка сумки */}
+        <mesh position={[0, 0.5, -0.57]} castShadow>
+          <boxGeometry args={[0.62, 0.72, 0.02]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        
+        {/* Лямки сумки */}
+        <mesh position={[-0.2, 0.7, -0.15]} rotation={[0.3, 0, 0]} castShadow>
+          <boxGeometry args={[0.08, 0.6, 0.05]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0.2, 0.7, -0.15]} rotation={[0.3, 0, 0]} castShadow>
+          <boxGeometry args={[0.08, 0.6, 0.05]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        
+        {/* Руки */}
+        <mesh position={[-0.45, 0.3, 0]} rotation={[0, 0, 0.3]} castShadow>
+          <capsuleGeometry args={[0.1, 0.5, 8, 16]} />
+          <meshStandardMaterial color="#FFD700" />
+        </mesh>
+        <mesh position={[0.45, 0.3, 0]} rotation={[0, 0, -0.3]} castShadow>
+          <capsuleGeometry args={[0.1, 0.5, 8, 16]} />
+          <meshStandardMaterial color="#FFD700" />
+        </mesh>
+        
+        {/* Детали на сумке - полоски */}
+        <mesh position={[0, 0.5, -0.58]} castShadow>
+          <boxGeometry args={[0.5, 0.05, 0.01]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        <mesh position={[0, 0.3, -0.58]} castShadow>
+          <boxGeometry args={[0.5, 0.05, 0.01]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+      </group>
+    );
   };
   
   return (

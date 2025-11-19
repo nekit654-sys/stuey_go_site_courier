@@ -6,10 +6,21 @@ interface GPSMapProps {
   buildings: Array<{ x: number; z: number; size: number } | BuildingData>;
   targetPosition?: { x: number; z: number; name: string } | null;
   pickupPosition?: { x: number; z: number; name: string } | null;
+  isMobile?: boolean;
+  isLandscape?: boolean;
 }
 
-export function GPSMap({ playerPosition, buildings, targetPosition, pickupPosition }: GPSMapProps) {
+export function GPSMap({ 
+  playerPosition, 
+  buildings, 
+  targetPosition, 
+  pickupPosition,
+  isMobile = false,
+  isLandscape = false
+}: GPSMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  const mapSize = isMobile && !isLandscape ? 160 : 240;
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -17,6 +28,13 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    console.log('🗺️ GPSMap рендер:', {
+      buildingsCount: buildings.length,
+      playerPos: playerPosition,
+      hasTarget: !!targetPosition,
+      hasPickup: !!pickupPosition
+    });
     
     const width = canvas.width;
     const height = canvas.height;
@@ -142,15 +160,23 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
   }, [playerPosition, buildings, targetPosition, pickupPosition]);
   
   return (
-    <div className="absolute top-4 right-4 z-10">
-      <div className="bg-black/90 p-3 rounded-lg border-2 border-cyan-500/70 shadow-xl">
+    <div className={`fixed z-10 ${
+      isMobile && !isLandscape 
+        ? 'top-4 right-2' 
+        : 'top-4 right-4'
+    }`}>
+      <div className={`bg-black/90 rounded-lg border-2 border-cyan-500/70 shadow-xl ${
+        isMobile && !isLandscape ? 'p-2' : 'p-3'
+      }`}>
         <canvas 
           ref={canvasRef} 
-          width={240} 
-          height={240}
+          width={mapSize} 
+          height={mapSize}
           className="rounded"
         />
-        <div className="mt-2 text-xs text-white space-y-1">
+        <div className={`mt-2 text-white space-y-1 ${
+          isMobile && !isLandscape ? 'text-[10px]' : 'text-xs'
+        }`}>
           <div className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-cyan-400 rounded-full border-2 border-white"></div>
