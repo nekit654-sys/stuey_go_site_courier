@@ -21,6 +21,7 @@ import { useFoodOrders } from './FoodOrderSystem';
 import { NavigationArrow } from './NavigationArrow';
 import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
+import { SessionStats } from './SessionStats';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateCityBuildings, type BuildingData } from './CityData';
@@ -85,6 +86,16 @@ export function CityDeliveryRush() {
   const [isMobile, setIsMobile] = useState(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   const [cameraRotation, setCameraRotation] = useState({ horizontal: 0, vertical: 0 });
   const [isPointerLocked, setIsPointerLocked] = useState(false);
+  const [showSessionStats, setShowSessionStats] = useState(false);
+  const [sessionStats, setSessionStats] = useState({
+    startTime: Date.now(),
+    deliveriesCompleted: 0,
+    coinsEarned: 0,
+    bestReward: 0,
+    distanceTraveled: 0,
+    levelUps: 0
+  });
+  const [lastPosition, setLastPosition] = useState<{ x: number; z: number } | null>(null);
   
   const cityBuildings = useMemo(() => generateCityBuildings(), []);
   
@@ -409,7 +420,15 @@ export function CityDeliveryRush() {
         hasPackage: false
       }));
       
+      setSessionStats(prev => ({
+        ...prev,
+        deliveriesCompleted: prev.deliveriesCompleted + 1,
+        coinsEarned: prev.coinsEarned + activeOrder.reward,
+        bestReward: Math.max(prev.bestReward, activeOrder.reward)
+      }));
+      
       const expGained = Math.floor(activeOrder.reward / 10);
+      let leveledUp = false;
       setCurrentExp(prev => {
         const newExp = prev + expGained;
         if (newExp >= expToNextLevel) {
@@ -423,10 +442,18 @@ export function CityDeliveryRush() {
           setExpToNextLevel(prev => prev + 50);
           (window as any).playSound?.('levelUp');
           playVibration('levelUp');
+          leveledUp = true;
           return 0;
         }
         return newExp;
       });
+      
+      if (leveledUp) {
+        setSessionStats(prev => ({
+          ...prev,
+          levelUps: prev.levelUps + 1
+        }));
+      }
       
       completeOrder();
       setDeliveryStage('none');
@@ -538,6 +565,15 @@ export function CityDeliveryRush() {
                 onClick={() => {
                   console.log('🎮 Запуск игры...');
                   setGameStarted(true);
+                  setSessionStats({
+                    startTime: Date.now(),
+                    deliveriesCompleted: 0,
+                    coinsEarned: 0,
+                    bestReward: 0,
+                    distanceTraveled: 0,
+                    levelUps: 0
+                  });
+                  setLastPosition(null);
                 }}
                 className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-extrabold py-4 text-lg rounded-xl border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] active:translate-y-[5px] active:shadow-none transition-all mb-3"
               >
@@ -725,6 +761,18 @@ export function CityDeliveryRush() {
             vehicle={gameState.currentVehicle}
             onPositionChange={(x, z) => {
               setPlayerPosition({ x, z });
+              
+              if (lastPosition) {
+                const distance = Math.sqrt(
+                  Math.pow(x - lastPosition.x, 2) + 
+                  Math.pow(z - lastPosition.z, 2)
+                );
+                setSessionStats(prev => ({
+                  ...prev,
+                  distanceTraveled: prev.distanceTraveled + distance
+                }));
+              }
+              setLastPosition({ x, z });
             }}
             mobileInput={mobileInput}
             mobileSprint={mobileSprint}
@@ -793,7 +841,13 @@ export function CityDeliveryRush() {
             🏆
           </button>
           <button
-            onClick={() => setGameStarted(false)}
+            onClick={() => {
+              if (sessionStats.deliveriesCompleted > 0) {
+                setShowSessionStats(true);
+              } else {
+                setGameStarted(false);
+              }
+            }}
             className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-red-700 transition-colors"
           >
             ✕
@@ -817,6 +871,26 @@ export function CityDeliveryRush() {
         targetPosition={deliveryStage === 'delivery' ? activeOrder?.deliveryLocation : null}
         pickupPosition={deliveryStage === 'pickup' ? activeOrder?.pickupLocation : null}
       />
+      
+      <div className={`fixed z-30 bg-black/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/50 ${
+        isMobile && !isLandscape ? 'bottom-24 left-2' : 'bottom-4 left-4'
+      }`}>
+        <div className="text-purple-300 text-[10px] font-bold mb-1 uppercase tracking-wide">Сессия</div>
+        <div className="flex flex-col gap-1 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400">📦</span>
+            <span className="text-white font-bold">{sessionStats.deliveriesCompleted}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400">💰</span>
+            <span className="text-yellow-400 font-bold">+{sessionStats.coinsEarned}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400">🚶</span>
+            <span className="text-blue-300 font-bold">{Math.floor(sessionStats.distanceTraveled)}м</span>
+          </div>
+        </div>
+      </div>
 
       {soundEnabled && (
         <>
@@ -855,6 +929,17 @@ export function CityDeliveryRush() {
       
       {showLeaderboard && (
         <Leaderboard onClose={() => setShowLeaderboard(false)} />
+      )}
+      
+      {showSessionStats && (
+        <SessionStats
+          isOpen={showSessionStats}
+          sessionData={sessionStats}
+          onClose={() => {
+            setShowSessionStats(false);
+            setGameStarted(false);
+          }}
+        />
       )}
       
       {/* Подсказка об ориентации для мобильных устройств */}
