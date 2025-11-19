@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import * as THREE from 'three';
+import { collisionSystem } from './CollisionSystem';
 
 interface RoadSegment {
   start: [number, number];
@@ -25,7 +26,7 @@ export function CityMap({ playerPosition }: CityMapProps) {
     const buildingsList: BuildingData[] = [];
     const sidewalkSegments: RoadSegment[] = [];
     
-    const gridSize = 6;
+    const gridSize = 4;
     const blockSize = 30;
     const roadWidth = 8;
     const sidewalkWidth = 2;
@@ -81,6 +82,10 @@ export function CityMap({ playerPosition }: CityMapProps) {
     console.log(`✅ Карта готова: ${roadSegments.length} дорог, ${buildingsList.length} зданий`);
     return { roads: roadSegments, buildings: buildingsList, sidewalks: sidewalkSegments };
   }, []);
+
+  useEffect(() => {
+    collisionSystem.setBuildingsFromCityMap(buildings);
+  }, [buildings]);
 
   return (
     <group>

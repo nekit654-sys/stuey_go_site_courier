@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { collisionSystem } from './CollisionSystem';
 
 interface SimpleCourierProps {
   vehicle: 'walk' | 'bicycle' | 'scooter';
@@ -41,7 +42,10 @@ function CameraFollower({
     
     const desiredPosition = new THREE.Vector3(cameraX, cameraY, cameraZ);
 
-    currentPosition.current.lerp(desiredPosition, 0.1);
+    const playerPos = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
+    const safePosition = collisionSystem.checkCameraCollision(desiredPosition, playerPos);
+
+    currentPosition.current.lerp(safePosition, 0.1);
     camera.position.copy(currentPosition.current);
 
     const lookAtTarget = new THREE.Vector3(
@@ -144,8 +148,12 @@ export function SimpleCourier({
         moveZ /= moveLength;
       }
       
-      position.current.x += moveX * stats.speed * delta;
-      position.current.z += moveZ * stats.speed * delta;
+      const newX = position.current.x + moveX * stats.speed * delta;
+      const newZ = position.current.z + moveZ * stats.speed * delta;
+      
+      const safePos = collisionSystem.checkPlayerCollision(newX, newZ);
+      position.current.x = safePos.x;
+      position.current.z = safePos.z;
       
       rotation.current = Math.atan2(moveX, moveZ);
       
