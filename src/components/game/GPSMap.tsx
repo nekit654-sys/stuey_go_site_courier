@@ -20,7 +20,7 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
     
     const width = canvas.width;
     const height = canvas.height;
-    const scale = 1.2;
+    const scale = 2.5;
     const centerX = width / 2;
     const centerY = height / 2;
     
@@ -29,9 +29,10 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(0, 0, width, height);
     
-    ctx.strokeStyle = '#444';
+    ctx.strokeStyle = '#333';
     ctx.lineWidth = 1;
-    for (let i = -100; i <= 100; i += 20) {
+    const gridSpacing = 15;
+    for (let i = -100; i <= 100; i += gridSpacing) {
       const x = centerX + (i - playerPosition.x) * scale;
       const y = centerY + (i - playerPosition.z) * scale;
       
@@ -64,18 +65,18 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
         const modernBuilding = building as { x: number; z: number; size: number };
         bx = centerX + (modernBuilding.x - playerPosition.x) * scale;
         by = centerY + (modernBuilding.z - playerPosition.z) * scale;
-        bw = modernBuilding.size * scale * 0.7;
-        bh = modernBuilding.size * scale * 0.7;
+        bw = modernBuilding.size * scale;
+        bh = modernBuilding.size * scale;
       }
       
       if (bx < -20 || bx > width + 20 || by < -20 || by > height + 20) return;
       
       const buildingType = isLegacy ? (building as BuildingData).type : 'residential';
-      ctx.fillStyle = buildingType === 'restaurant' ? '#FF8C00' : '#666';
+      ctx.fillStyle = buildingType === 'restaurant' ? '#FF8C00' : '#555';
       ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
       
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
       ctx.strokeRect(bx - bw / 2, by - bh / 2, bw, bh);
     });
     
@@ -85,12 +86,18 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
       
       ctx.fillStyle = '#FFA500';
       ctx.beginPath();
-      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.arc(px, py, 8, 0, Math.PI * 2);
       ctx.fill();
       
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.stroke();
+      
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🍔', px, py);
     }
     
     if (targetPosition) {
@@ -99,57 +106,83 @@ export function GPSMap({ playerPosition, buildings, targetPosition, pickupPositi
       
       ctx.fillStyle = '#00FF00';
       ctx.beginPath();
-      ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+      ctx.arc(tx, ty, 8, 0, Math.PI * 2);
       ctx.fill();
       
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.stroke();
+      
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('👤', tx, ty);
     }
     
     ctx.fillStyle = '#00BFFF';
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, 6, 0, Math.PI * 2);
     ctx.fill();
     
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, 6, 0, Math.PI * 2);
     ctx.stroke();
     
     ctx.strokeStyle = '#00BFFF';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.setLineDash([]);
     
   }, [playerPosition, buildings, targetPosition, pickupPosition]);
   
   return (
     <div className="absolute top-4 right-4 z-10">
-      <div className="bg-black/80 p-2 rounded-lg border border-cyan-500/50">
+      <div className="bg-black/90 p-3 rounded-lg border-2 border-cyan-500/70 shadow-xl">
         <canvas 
           ref={canvasRef} 
-          width={200} 
-          height={200}
+          width={240} 
+          height={240}
           className="rounded"
         />
-        <div className="mt-2 text-xs text-white text-center space-y-1">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-3 h-3 bg-cyan-400 rounded-full border-2 border-white"></div>
-            <span>Вы</span>
+        <div className="mt-2 text-xs text-white space-y-1">
+          <div className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-cyan-400 rounded-full border-2 border-white"></div>
+              <span>Вы</span>
+            </div>
           </div>
           {pickupPosition && (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-3 h-3 bg-orange-400 rounded-full border-2 border-white"></div>
-              <span>Ресторан</span>
+            <div className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-400 rounded-full border-2 border-white"></div>
+                <span>Ресторан</span>
+              </div>
+              <span className="text-orange-300 font-mono">
+                {Math.round(Math.sqrt(
+                  Math.pow(pickupPosition.x - playerPosition.x, 2) + 
+                  Math.pow(pickupPosition.z - playerPosition.z, 2)
+                ))}м
+              </span>
             </div>
           )}
           {targetPosition && (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
-              <span>Клиент</span>
+            <div className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                <span>Клиент</span>
+              </div>
+              <span className="text-green-300 font-mono">
+                {Math.round(Math.sqrt(
+                  Math.pow(targetPosition.x - playerPosition.x, 2) + 
+                  Math.pow(targetPosition.z - playerPosition.z, 2)
+                ))}м
+              </span>
             </div>
           )}
         </div>
