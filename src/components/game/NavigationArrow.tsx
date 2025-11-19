@@ -15,7 +15,7 @@ export function NavigationArrow({ playerPosition, targetPosition }: NavigationAr
 
     const dx = targetPosition.x - playerPosition.x;
     const dz = targetPosition.z - playerPosition.z;
-    const angle = Math.atan2(dx, -dz);
+    const angle = Math.atan2(dx, dz);
 
     arrowRef.current.position.set(playerPosition.x, 3, playerPosition.z);
     arrowRef.current.rotation.y = angle;

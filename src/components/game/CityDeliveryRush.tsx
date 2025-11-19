@@ -71,7 +71,7 @@ export function CityDeliveryRush() {
   const [showSettings, setShowSettings] = useState(false);
   const [graphicsQuality, setGraphicsQuality] = useState<'low' | 'medium' | 'high'>('medium');
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-  const [deliveryStage, setDeliveryStage] = useState<'none' | 'pickup' | 'delivery'>('none');
+  const [deliveryStage, setDeliveryStage] = useState<'none' | 'pickup' | 'delivery' | 'completing'>('none');
   const [autoAcceptOrders, setAutoAcceptOrders] = useState(true);
   const [level, setLevel] = useState(1);
   const [currentExp, setCurrentExp] = useState(0);
@@ -103,7 +103,7 @@ export function CityDeliveryRush() {
       if (document.pointerLockElement) {
         setCameraRotation(prev => ({
           horizontal: prev.horizontal - e.movementX * 0.002,
-          vertical: prev.vertical - e.movementY * 0.002
+          vertical: 0
         }));
       }
     };
@@ -154,11 +154,10 @@ export function CityDeliveryRush() {
         const touch = e.touches[i];
         if (touch.identifier === cameraTouch.id) {
           const deltaX = touch.clientX - cameraTouch.startX;
-          const deltaY = touch.clientY - cameraTouch.startY;
 
           setCameraRotation(prev => ({
             horizontal: prev.horizontal - deltaX * 0.01,
-            vertical: prev.vertical - deltaY * 0.01
+            vertical: 0
           }));
 
           cameraTouch.startX = touch.clientX;
@@ -351,7 +350,7 @@ export function CityDeliveryRush() {
   }, [gameStarted, sceneLoaded, activeOrder, orders]);
 
   useEffect(() => {
-    if (!activeOrder) return;
+    if (!activeOrder || deliveryStage === 'completing') return;
     
     const targetLocation = deliveryStage === 'pickup' 
       ? activeOrder.pickupLocation 
@@ -369,6 +368,7 @@ export function CityDeliveryRush() {
         (window as any).playPickupSound?.();
         playVibration('pickup');
       } else if (deliveryStage === 'delivery') {
+        setDeliveryStage('completing');
         handleFoodDeliveryComplete();
       }
     }

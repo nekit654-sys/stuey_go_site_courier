@@ -34,11 +34,10 @@ function CameraFollower({
     const height = 8;
     
     const horizontalAngle = cameraRotation.horizontal;
-    const verticalAngle = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, cameraRotation.vertical));
     
-    const cameraX = targetPosition.x + distance * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
-    const cameraY = targetPosition.y + height + distance * Math.sin(verticalAngle);
-    const cameraZ = targetPosition.z + distance * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
+    const cameraX = targetPosition.x + distance * Math.sin(horizontalAngle);
+    const cameraY = targetPosition.y + height;
+    const cameraZ = targetPosition.z + distance * Math.cos(horizontalAngle);
     
     const desiredPosition = new THREE.Vector3(cameraX, cameraY, cameraZ);
 

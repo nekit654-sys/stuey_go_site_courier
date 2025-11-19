@@ -39,16 +39,30 @@ const NAMES = [
   'Андрей', 'Наталья', 'Михаил', 'Татьяна', 'Владимир', 'Светлана'
 ];
 
-const LOCATIONS = [
-  { name: 'Центр', x: 0, z: 0 },
-  { name: 'Север', x: 0, z: -60 },
-  { name: 'Юг', x: 0, z: 60 },
-  { name: 'Запад', x: -60, z: 0 },
-  { name: 'Восток', x: 60, z: 0 },
-  { name: 'Северо-Запад', x: -45, z: -45 },
-  { name: 'Северо-Восток', x: 45, z: -45 },
-  { name: 'Юго-Запад', x: -45, z: 45 },
-  { name: 'Юго-Восток', x: 45, z: 45 },
+function generateBuildingLocation() {
+  const gridSize = 6;
+  const blockSize = 30;
+  const roadWidth = 8;
+  
+  const x = Math.floor(Math.random() * gridSize * 2) - gridSize;
+  const z = Math.floor(Math.random() * gridSize * 2) - gridSize;
+  
+  const centerX = x * blockSize + blockSize / 2;
+  const centerZ = z * blockSize + blockSize / 2;
+  
+  const offsetX = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
+  const offsetZ = (Math.random() - 0.5) * (blockSize - roadWidth - 8);
+  
+  return {
+    x: centerX + offsetX,
+    z: centerZ + offsetZ
+  };
+}
+
+const LOCATION_NAMES = [
+  'Центр', 'Север', 'Юг', 'Запад', 'Восток',
+  'Северо-Запад', 'Северо-Восток', 'Юго-Запад', 'Юго-Восток',
+  'Район А', 'Район Б', 'Район В', 'Район Г'
 ];
 
 function generateOrder(): FoodOrder {
@@ -57,15 +71,21 @@ function generateOrder(): FoodOrder {
   const customerName = NAMES[Math.floor(Math.random() * NAMES.length)];
   const customerEmoji = CUSTOMER_EMOJIS[Math.floor(Math.random() * CUSTOMER_EMOJIS.length)];
   
-  const pickup = LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
-  let delivery = LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
+  const pickupPos = generateBuildingLocation();
+  let deliveryPos = generateBuildingLocation();
   
-  while (delivery.name === pickup.name) {
-    delivery = LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
+  while (
+    Math.abs(deliveryPos.x - pickupPos.x) < 15 && 
+    Math.abs(deliveryPos.z - pickupPos.z) < 15
+  ) {
+    deliveryPos = generateBuildingLocation();
   }
   
+  const pickupName = LOCATION_NAMES[Math.floor(Math.random() * LOCATION_NAMES.length)];
+  const deliveryName = LOCATION_NAMES[Math.floor(Math.random() * LOCATION_NAMES.length)];
+  
   const distance = Math.sqrt(
-    Math.pow(delivery.x - pickup.x, 2) + Math.pow(delivery.z - pickup.z, 2)
+    Math.pow(deliveryPos.x - pickupPos.x, 2) + Math.pow(deliveryPos.z - pickupPos.z, 2)
   );
   
   const timeLimit = Math.max(60, Math.floor(distance / 2) + 30);
@@ -78,8 +98,8 @@ function generateOrder(): FoodOrder {
     restaurantName: restaurant,
     customerName,
     customerEmoji,
-    pickupLocation: { ...pickup },
-    deliveryLocation: { ...delivery },
+    pickupLocation: { x: pickupPos.x, z: pickupPos.z, name: pickupName },
+    deliveryLocation: { x: deliveryPos.x, z: deliveryPos.z, name: deliveryName },
     distance: Math.floor(distance),
     timeLimit,
     reward,
