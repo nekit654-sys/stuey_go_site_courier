@@ -132,53 +132,64 @@ export function CityDeliveryRush() {
     };
   }, [gameStarted, isMobile]);
 
-  // Управление камерой пальцами (мобильные)
+  // Управление камерой пальцами (мобильные) - поддержка multi-touch
   useEffect(() => {
     if (!gameStarted || !isMobile) return;
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let isCameraTouch = false;
+    const cameraTouch = { id: -1, startX: 0, startY: 0 };
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        if (touch.clientX > window.innerWidth / 2) {
-          isCameraTouch = true;
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.clientX > window.innerWidth / 2 && cameraTouch.id === -1) {
+          cameraTouch.id = touch.identifier;
+          cameraTouch.startX = touch.clientX;
+          cameraTouch.startY = touch.clientY;
         }
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (isCameraTouch && e.touches.length === 1) {
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.identifier === cameraTouch.id) {
+          const deltaX = touch.clientX - cameraTouch.startX;
+          const deltaY = touch.clientY - cameraTouch.startY;
 
-        setCameraRotation(prev => ({
-          horizontal: prev.horizontal - deltaX * 0.01,
-          vertical: prev.vertical - deltaY * 0.01
-        }));
+          setCameraRotation(prev => ({
+            horizontal: prev.horizontal - deltaX * 0.01,
+            vertical: prev.vertical - deltaY * 0.01
+          }));
 
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
+          cameraTouch.startX = touch.clientX;
+          cameraTouch.startY = touch.clientY;
+        }
       }
     };
 
-    const handleTouchEnd = () => {
-      isCameraTouch = false;
+    const handleTouchEnd = (e: TouchEvent) => {
+      let stillTouching = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === cameraTouch.id) {
+          stillTouching = true;
+          break;
+        }
+      }
+      if (!stillTouching) {
+        cameraTouch.id = -1;
+      }
     };
 
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchmove', handleTouchMove);
-    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [gameStarted, isMobile]);
 

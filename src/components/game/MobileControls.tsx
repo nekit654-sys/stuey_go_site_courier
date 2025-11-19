@@ -11,74 +11,96 @@ export function MobileControls({ onMove, onJump, onSprint }: MobileControlsProps
   const knobRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const centerRef = useRef({ x: 0, y: 0 });
-  const isDraggingRef = useRef(false);
+  const activeTouchId = useRef<number>(-1);
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
-      if (!joystickRef.current) return;
+      if (!joystickRef.current || activeTouchId.current !== -1) return;
       
-      const touch = e.touches[0];
-      const rect = joystickRef.current.getBoundingClientRect();
-      
-      if (
-        touch.clientX >= rect.left &&
-        touch.clientX <= rect.right &&
-        touch.clientY >= rect.top &&
-        touch.clientY <= rect.bottom
-      ) {
-        isDraggingRef.current = true;
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        centerRef.current = { x: centerX, y: centerY };
-        e.preventDefault();
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.clientX > window.innerWidth / 2) continue;
+        
+        const rect = joystickRef.current.getBoundingClientRect();
+        
+        if (
+          touch.clientX >= rect.left &&
+          touch.clientX <= rect.right &&
+          touch.clientY >= rect.top &&
+          touch.clientY <= rect.bottom
+        ) {
+          activeTouchId.current = touch.identifier;
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          centerRef.current = { x: centerX, y: centerY };
+          e.preventDefault();
+          break;
+        }
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current || !joystickRef.current || !knobRef.current) return;
+      if (activeTouchId.current === -1 || !joystickRef.current || !knobRef.current) return;
 
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - centerRef.current.x;
-      const deltaY = touch.clientY - centerRef.current.y;
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.identifier !== activeTouchId.current) continue;
 
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const maxDistance = 60;
+        const deltaX = touch.clientX - centerRef.current.x;
+        const deltaY = touch.clientY - centerRef.current.y;
 
-      const clampedDistance = Math.min(distance, maxDistance);
-      const angle = Math.atan2(deltaY, deltaX);
-      
-      const clampedX = Math.cos(angle) * clampedDistance;
-      const clampedY = Math.sin(angle) * clampedDistance;
-      
-      knobRef.current.style.transform = `translate(-50%, -50%) translate(${clampedX}px, ${clampedY}px)`;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const maxDistance = 60;
 
-      const normalizedX = clampedX / maxDistance;
-      const normalizedY = -clampedY / maxDistance;
-      
-      onMove({
-        x: normalizedX,
-        y: normalizedY
-      });
+        const clampedDistance = Math.min(distance, maxDistance);
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        const clampedX = Math.cos(angle) * clampedDistance;
+        const clampedY = Math.sin(angle) * clampedDistance;
+        
+        knobRef.current.style.transform = `translate(-50%, -50%) translate(${clampedX}px, ${clampedY}px)`;
 
-      e.preventDefault();
+        const normalizedX = clampedX / maxDistance;
+        const normalizedY = -clampedY / maxDistance;
+        
+        onMove({
+          x: normalizedX,
+          y: normalizedY
+        });
+
+        e.preventDefault();
+        break;
+      }
     };
 
-    const handleTouchEnd = () => {
-      isDraggingRef.current = false;
-      onMove({ x: 0, y: 0 });
-      if (knobRef.current) {
-        knobRef.current.style.transform = 'translate(-50%, -50%)';
+    const handleTouchEnd = (e: TouchEvent) => {
+      let stillTouching = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === activeTouchId.current) {
+          stillTouching = true;
+          break;
+        }
+      }
+      
+      if (!stillTouching && activeTouchId.current !== -1) {
+        activeTouchId.current = -1;
+        onMove({ x: 0, y: 0 });
+        if (knobRef.current) {
+          knobRef.current.style.transform = 'translate(-50%, -50%)';
+        }
       }
     };
 
     document.addEventListener('touchstart', handleTouchStart, { passive: false });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [onMove]);
 

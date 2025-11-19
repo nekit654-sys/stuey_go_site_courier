@@ -130,13 +130,13 @@ export function SimpleCourier({
         isMoving = true;
       }
       if (keys['KeyA'] || keys['ArrowLeft']) {
-        moveX += cameraRight.x;
-        moveZ += cameraRight.z;
+        moveX -= cameraRight.x;
+        moveZ -= cameraRight.z;
         isMoving = true;
       }
       if (keys['KeyD'] || keys['ArrowRight']) {
-        moveX -= cameraRight.x;
-        moveZ -= cameraRight.z;
+        moveX += cameraRight.x;
+        moveZ += cameraRight.z;
         isMoving = true;
       }
     }
