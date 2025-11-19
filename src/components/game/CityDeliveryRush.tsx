@@ -305,7 +305,8 @@ export function CityDeliveryRush() {
         setGameState(prev => ({
           ...prev,
           courierId: data.courier.id,
-          score: data.courier.total_coins
+          score: data.courier.total_coins || 0,
+          deliveries: data.courier.deliveries_completed || 0
         }));
       } catch (error) {
         console.error('Failed to fetch profile:', error);
@@ -764,8 +765,17 @@ export function CityDeliveryRush() {
           <div className="bg-blue-400 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-blue-600">
             ⚡ {Math.round(gameState.energy)}%
           </div>
-          <div className="bg-purple-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-purple-700">
+          <div className="bg-purple-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-lg border-2 border-purple-700 flex items-center gap-1">
             ⭐ Ур.{level}
+            <div className="hidden sm:flex items-center gap-1 ml-1">
+              <div className="w-16 h-1.5 bg-purple-900 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-yellow-300 transition-all duration-300"
+                  style={{ width: `${(currentExp / expToNextLevel) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px]">{currentExp}/{expToNextLevel}</span>
+            </div>
           </div>
         </div>
         
