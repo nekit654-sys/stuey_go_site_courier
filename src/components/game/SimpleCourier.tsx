@@ -21,15 +21,12 @@ function CameraFollower({ target }: { target: React.RefObject<THREE.Group> }) {
     if (!target.current) return;
 
     const targetPosition = target.current.position;
-    const targetRotation = target.current.rotation;
-
-    const cameraOffset = new THREE.Vector3(0, 8, -15);
-    cameraOffset.applyEuler(new THREE.Euler(0, targetRotation.y, 0));
     
+    // Камера всегда сзади на фиксированном расстоянии
     const desiredPosition = new THREE.Vector3(
-      targetPosition.x + cameraOffset.x,
-      targetPosition.y + cameraOffset.y,
-      targetPosition.z + cameraOffset.z
+      targetPosition.x,
+      targetPosition.y + 8,
+      targetPosition.z - 15
     );
 
     currentPosition.current.lerp(desiredPosition, 0.1);
@@ -81,27 +78,76 @@ export function SimpleCourier({
   useFrame((state, delta) => {
     if (!meshRef.current) return;
     
-    let forward = 0;
-    let turn = 0;
+    const { camera } = state;
+    
+    // Получаем направление камеры
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    cameraDirection.y = 0;
+    cameraDirection.normalize();
+    
+    // Вектор вправо от камеры
+    const cameraRight = new THREE.Vector3();
+    cameraRight.crossVectors(camera.up, cameraDirection);
+    cameraRight.normalize();
+    
+    let moveX = 0;
+    let moveZ = 0;
+    let isMoving = false;
     
     if (mobileInput && (mobileInput.x !== 0 || mobileInput.y !== 0)) {
-      forward = -mobileInput.y;
-      turn = -mobileInput.x;
+      // Мобильное управление
+      const forward = new THREE.Vector3(
+        cameraDirection.x * mobileInput.y,
+        0,
+        cameraDirection.z * mobileInput.y
+      );
+      const right = new THREE.Vector3(
+        cameraRight.x * mobileInput.x,
+        0,
+        cameraRight.z * mobileInput.x
+      );
+      moveX = forward.x + right.x;
+      moveZ = forward.z + right.z;
+      isMoving = true;
     } else {
-      if (keys['KeyW'] || keys['ArrowUp']) forward = 1;
-      if (keys['KeyS'] || keys['ArrowDown']) forward = -1;
-      if (keys['KeyA'] || keys['ArrowLeft']) turn = 1;
-      if (keys['KeyD'] || keys['ArrowRight']) turn = -1;
+      // Клавиатурное управление
+      if (keys['KeyW'] || keys['ArrowUp']) {
+        moveX += cameraDirection.x;
+        moveZ += cameraDirection.z;
+        isMoving = true;
+      }
+      if (keys['KeyS'] || keys['ArrowDown']) {
+        moveX -= cameraDirection.x;
+        moveZ -= cameraDirection.z;
+        isMoving = true;
+      }
+      if (keys['KeyA'] || keys['ArrowLeft']) {
+        moveX += cameraRight.x;
+        moveZ += cameraRight.z;
+        isMoving = true;
+      }
+      if (keys['KeyD'] || keys['ArrowRight']) {
+        moveX -= cameraRight.x;
+        moveZ -= cameraRight.z;
+        isMoving = true;
+      }
     }
     
-    if (forward !== 0 && energy.current > 0) {
-      rotation.current += turn * stats.turnSpeed;
+    if (isMoving && energy.current > 0) {
+      // Нормализуем вектор движения
+      const moveLength = Math.sqrt(moveX * moveX + moveZ * moveZ);
+      if (moveLength > 0) {
+        moveX /= moveLength;
+        moveZ /= moveLength;
+      }
       
-      const moveX = Math.sin(rotation.current) * forward * stats.speed * delta;
-      const moveZ = -Math.cos(rotation.current) * forward * stats.speed * delta;
+      // Применяем движение
+      position.current.x += moveX * stats.speed * delta;
+      position.current.z += moveZ * stats.speed * delta;
       
-      position.current.x += moveX;
-      position.current.z += moveZ;
+      // Поворачиваем персонажа в сторону движения
+      rotation.current = Math.atan2(moveX, moveZ);
       
       energy.current = Math.max(0, energy.current - stats.energyCost * delta * 10);
       onEnergyChange?.(energy.current);
