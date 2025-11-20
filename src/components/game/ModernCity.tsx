@@ -761,7 +761,7 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
           position={ped.position}
           path={ped.path}
         />
-      })}
+      ))}
 
       <TrafficSystem />
     </group>
