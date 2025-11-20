@@ -431,7 +431,7 @@ function PedestrianSystem({ trafficLights }: { trafficLights: TrafficLight[] }) 
   );
 }
 
-export default function ModernCity({ gridSize = 100, quality = 'low', onBuildingsReady }: ModernCityProps) {
+export function ModernCity({ gridSize = 100, quality = 'low', onBuildingsReady }: ModernCityProps) {
   const { buildings, roads, sidewalks, intersections } = useMemo(() => {
     const buildingData: Array<{
       x: number;
