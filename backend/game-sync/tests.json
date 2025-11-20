@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "Get leaderboard",
+      "method": "GET",
+      "path": "/?action=leaderboard",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "leaderboard": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create player profile",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "user_id": "test_user_123",
+        "username": "TestPlayer"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "profile": "object"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

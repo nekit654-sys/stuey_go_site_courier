@@ -1,4 +1,5 @@
 {
+  "game-sync": "https://functions.poehali.dev/831e85b8-244b-44e1-91bf-4ffae3295aa5",
   "game-api": "https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4",
   "cleanup-visits": "https://functions.poehali.dev/12d56d01-19eb-4b20-9f70-7577f5547597",
   "visit-tracking": "https://functions.poehali.dev/f52e1a9a-d1cb-41bf-a68f-5a795c41833c",
