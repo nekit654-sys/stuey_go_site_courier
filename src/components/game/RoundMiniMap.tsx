@@ -2,9 +2,10 @@ interface RoundMiniMapProps {
   playerPosition: { x: number; z: number };
   targetPosition?: { x: number; z: number };
   citySize?: number;
+  buildings?: Array<{ x: number; z: number; width: number; depth: number }>;
 }
 
-export function RoundMiniMap({ playerPosition, targetPosition, citySize = 200 }: RoundMiniMapProps) {
+export function RoundMiniMap({ playerPosition, targetPosition, citySize = 200, buildings = [] }: RoundMiniMapProps) {
   const mapScale = 0.4;
   
   const normalizePosition = (value: number) => {
@@ -18,7 +19,7 @@ export function RoundMiniMap({ playerPosition, targetPosition, citySize = 200 }:
   const targetZ = targetPosition ? normalizePosition(targetPosition.z) : null;
 
   return (
-    <div className="absolute top-4 left-4 z-50">
+    <div className="absolute top-4 right-4 z-50">
       <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl bg-gray-900/90 backdrop-blur-sm">
         <div 
           className="absolute inset-0 opacity-30"
@@ -31,19 +32,54 @@ export function RoundMiniMap({ playerPosition, targetPosition, citySize = 200 }:
         />
         
         <div className="absolute inset-0">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute bg-gray-700/40 rounded-sm"
-              style={{
-                width: `${Math.random() * 15 + 8}%`,
-                height: `${Math.random() * 15 + 8}%`,
-                left: `${Math.random() * 80 + 10}%`,
-                top: `${Math.random() * 80 + 10}%`,
-              }}
-            />
-          ))}
+          {buildings.map((building, i) => {
+            const bx = normalizePosition(building.x);
+            const bz = normalizePosition(building.z);
+            const bw = (building.width / citySize) * 100;
+            const bd = (building.depth / citySize) * 100;
+            
+            return (
+              <div
+                key={i}
+                className="absolute bg-gray-700/60 rounded-sm"
+                style={{
+                  width: `${bw}%`,
+                  height: `${bd}%`,
+                  left: `${bx - bw/2}%`,
+                  top: `${bz - bd/2}%`,
+                }}
+              />
+            );
+          })}
         </div>
+        
+        <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+          {[-70, -50, -30, -10, 10, 30, 50, 70].map((roadPos, i) => {
+            const normalized = normalizePosition(roadPos);
+            return (
+              <g key={i}>
+                <line
+                  x1={`${normalized}%`}
+                  y1="10%"
+                  x2={`${normalized}%`}
+                  y2="90%"
+                  stroke="#555"
+                  strokeWidth="2"
+                  opacity="0.5"
+                />
+                <line
+                  x1="10%"
+                  y1={`${normalized}%`}
+                  x2="90%"
+                  y2={`${normalized}%`}
+                  stroke="#555"
+                  strokeWidth="2"
+                  opacity="0.5"
+                />
+              </g>
+            );
+          })}
+        </svg>
 
         {targetX !== null && targetZ !== null && (
           <div

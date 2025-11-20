@@ -205,7 +205,7 @@ function Tree({ position, scale = 1 }: { position: [number, number, number], sca
 
 function ParkArea({ x, z, size }: { x: number, z: number, size: number }) {
   const trees = useMemo(() => {
-    const treePositions: Array<[number, number, number]> = [];
+    const treeData: Array<{ position: [number, number, number], scale: number }> = [];
     const treeCount = Math.min(4, Math.floor(size / 4));
     
     for (let i = 0; i < treeCount; i++) {
@@ -213,10 +213,13 @@ function ParkArea({ x, z, size }: { x: number, z: number, size: number }) {
       const radius = size * 0.3;
       const tx = x + Math.cos(angle) * radius;
       const tz = z + Math.sin(angle) * radius;
-      treePositions.push([tx, 0, tz]);
+      treeData.push({
+        position: [tx, 0, tz],
+        scale: 1.0
+      });
     }
     
-    return treePositions;
+    return treeData;
   }, [x, z, size]);
 
   return (
@@ -231,8 +234,8 @@ function ParkArea({ x, z, size }: { x: number, z: number, size: number }) {
         <meshStandardMaterial color="#FCD34D" />
       </mesh>
 
-      {trees.map((pos, idx) => (
-        <Tree key={idx} position={pos} scale={0.8 + Math.random() * 0.4} />
+      {trees.map((tree, idx) => (
+        <Tree key={idx} position={tree.position} scale={tree.scale} />
       ))}
     </group>
   );
@@ -282,13 +285,13 @@ function TrafficSystem() {
     const initialCars: CarData[] = [];
     const carColors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#FFFFFF', '#1F2937', '#F97316', '#06B6D4'];
     
-    const roads = [-60, -40, -20, 0, 20, 40, 60];
+    const roads = [-70, -50, -30, -10, 10, 30, 50, 70];
     
     for (let i = 0; i < 25; i++) {
       const path = Math.random() > 0.5 ? 'horizontal' : 'vertical';
       const direction = Math.random() > 0.5 ? 1 : -1;
       const roadIndex = Math.floor(Math.random() * roads.length);
-      const laneOffset = direction > 0 ? -2 : 2;
+      const laneOffset = direction > 0 ? -1.5 : 1.5;
       
       let x, z, rotation;
       if (path === 'horizontal') {

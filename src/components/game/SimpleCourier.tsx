@@ -246,13 +246,13 @@ export function SimpleCourier({
           <meshStandardMaterial color="#1a1a1a" />
         </mesh>
         
-        {/* Руки */}
-        <mesh position={[-0.45, 0.3, 0]} rotation={[0, 0, 0.3]} castShadow>
-          <capsuleGeometry args={[0.1, 0.5, 8, 16]} />
+        {/* Руки - отходят от плеч */}
+        <mesh position={[-0.45, 0.7, 0]} rotation={[0, 0, 0.3]} castShadow>
+          <capsuleGeometry args={[0.1, 0.6, 8, 16]} />
           <meshStandardMaterial color="#FFD700" />
         </mesh>
-        <mesh position={[0.45, 0.3, 0]} rotation={[0, 0, -0.3]} castShadow>
-          <capsuleGeometry args={[0.1, 0.5, 8, 16]} />
+        <mesh position={[0.45, 0.7, 0]} rotation={[0, 0, -0.3]} castShadow>
+          <capsuleGeometry args={[0.1, 0.6, 8, 16]} />
           <meshStandardMaterial color="#FFD700" />
         </mesh>
         

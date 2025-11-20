@@ -12,6 +12,7 @@ import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
 import { usePerformanceSettings, PerformanceMonitor } from './PerformanceManager';
 import { MobileControls } from './MobileControls';
+import { VirtualJoystick } from './VirtualJoystick';
 import { playVibration } from './VibrationManager';
 import { LandscapeOrientation } from './LandscapeOrientation';
 import { CityAudioEngine } from './CityAudioEngine';
@@ -919,6 +920,7 @@ export function CityDeliveryRush() {
             : undefined
         }
         citySize={200}
+        buildings={cityBuildings}
       />
       
       <div className={`fixed z-30 bg-black/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/50 ${
@@ -954,10 +956,8 @@ export function CityDeliveryRush() {
       <PerformanceMonitor />
 
       {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
-        <MobileControls
-          onMove={setMobileInput}
-          onSprint={setMobileSprint}
-          onJump={setMobileJump}
+        <VirtualJoystick
+          onMove={(x, y) => setMobileInput({ x, y })}
         />
       )}
       
