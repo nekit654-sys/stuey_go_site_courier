@@ -19,18 +19,18 @@ export function OrderInfoPanel({
   if (!activeOrder) return null;
   
   return (
-    <div className={`fixed z-10 bg-black/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border-2 border-cyan-500/70 shadow-xl transition-all ${
+    <div className={`fixed z-10 bg-gradient-to-br from-black/95 to-gray-900/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border-3 border-white/20 shadow-2xl transition-all ${
       isMobile && !isLandscape 
         ? 'top-16 left-2 right-2 text-xs' 
-        : 'top-4 left-4 max-w-xs'
+        : 'top-4 left-48 sm:left-56 w-64 sm:w-72'
     }`}>
       {/* Заголовок */}
-      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-cyan-500/30">
-        <div className="text-2xl">
+      <div className="flex items-center gap-3 mb-4 pb-3 border-b border-white/10">
+        <div className="text-3xl drop-shadow-lg">
           {deliveryStage === 'pickup' ? '🍔' : '📦'}
         </div>
         <div>
-          <div className="text-cyan-400 font-bold text-sm sm:text-base">
+          <div className="text-white font-bold text-base sm:text-lg">
             {deliveryStage === 'pickup' ? 'Забрать заказ' : 'Доставить заказ'}
           </div>
           <div className="text-xs text-gray-400">

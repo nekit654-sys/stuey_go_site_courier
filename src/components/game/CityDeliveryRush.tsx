@@ -5,6 +5,7 @@ import { SimpleCourier } from './SimpleCourier';
 import { ModernCity } from './ModernCity';
 import { MiniMap } from './GPSNavigation';
 import { GPSMap } from './GPSMap';
+import { RoundMiniMap } from './RoundMiniMap';
 import { OrderInfoPanel } from './OrderInfoPanel';
 import { Leaderboard } from './Leaderboard';
 import { CourierProfile } from './CourierProfile';
@@ -908,13 +909,16 @@ export function CityDeliveryRush() {
         isLandscape={isLandscape}
       />
       
-      <GPSMap
+      <RoundMiniMap
         playerPosition={playerPosition}
-        buildings={cityBuildings}
-        targetPosition={deliveryStage === 'delivery' ? activeOrder?.deliveryLocation : null}
-        pickupPosition={deliveryStage === 'pickup' ? activeOrder?.pickupLocation : null}
-        isMobile={isMobile}
-        isLandscape={isLandscape}
+        targetPosition={
+          deliveryStage === 'pickup' 
+            ? activeOrder?.pickupLocation 
+            : deliveryStage === 'delivery' 
+            ? activeOrder?.deliveryLocation 
+            : undefined
+        }
+        citySize={200}
       />
       
       <div className={`fixed z-30 bg-black/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/50 ${
