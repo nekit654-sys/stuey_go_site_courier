@@ -529,6 +529,77 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
   };
 
   const qm = qualityMultipliers[quality];
+  
+  const decorations = useMemo(() => {
+    const seededRandom = (s: number) => {
+      const x = Math.sin(s) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const trees = Array.from({ length: Math.floor(50 * qm.trees) }).map((_, idx) => {
+      const angle = seededRandom(idx * 100) * Math.PI * 2;
+      const radius = 25 + seededRandom(idx * 100 + 1) * 60;
+      return {
+        position: [Math.cos(angle) * radius, 0, Math.sin(angle) * radius] as [number, number, number],
+        scale: 0.6 + seededRandom(idx * 100 + 2) * 0.6
+      };
+    });
+
+    const benches = Array.from({ length: Math.floor(20 * qm.benches) }).map((_, idx) => {
+      const x = (seededRandom(idx * 200) - 0.5) * 140;
+      const z = (seededRandom(idx * 200 + 1) - 0.5) * 140;
+      const rotation = seededRandom(idx * 200 + 2) * Math.PI * 2;
+      return { position: [x, 0, z] as [number, number, number], rotation };
+    });
+
+    const busStops = Array.from({ length: Math.floor(8 * qm.busStops) }).map((_, idx) => {
+      const roads = [-70, -50, -30, -10, 10, 30, 50, 70];
+      const road = roads[idx % roads.length];
+      const path = idx % 2 === 0 ? 'horizontal' : 'vertical';
+      const sidewalkOffset = 7;
+      
+      let x, z, rotation;
+      if (path === 'horizontal') {
+        x = (idx - 4) * 30;
+        z = road + sidewalkOffset;
+        rotation = 0;
+      } else {
+        x = road + sidewalkOffset;
+        z = (idx - 4) * 30;
+        rotation = Math.PI / 2;
+      }
+      
+      return { position: [x, 0, z] as [number, number, number], rotation };
+    });
+
+    const clouds = Array.from({ length: Math.floor(8 * qm.clouds) }).map((_, idx) => {
+      const x = (seededRandom(idx * 300) - 0.5) * 200;
+      const y = 40 + seededRandom(idx * 300 + 1) * 20;
+      const z = (seededRandom(idx * 300 + 2) - 0.5) * 200;
+      return { position: [x, y, z] as [number, number, number] };
+    });
+
+    const pedestrians = Array.from({ length: Math.floor(25 * qm.pedestrians) }).map((_, idx) => {
+      const roads = [-70, -50, -30, -10, 10, 30, 50, 70];
+      const road = roads[Math.floor(seededRandom(idx * 400) * roads.length)];
+      const path = seededRandom(idx * 400 + 1) > 0.5 ? 'horizontal' : 'vertical';
+      const sidewalkOffset = seededRandom(idx * 400 + 2) > 0.5 ? 6 : -6;
+      
+      let x, z;
+      if (path === 'horizontal') {
+        x = (seededRandom(idx * 400 + 3) - 0.5) * 160;
+        z = road + sidewalkOffset;
+      } else {
+        x = road + sidewalkOffset;
+        z = (seededRandom(idx * 400 + 4) - 0.5) * 160;
+      }
+      
+      return { position: [x, 0, z] as [number, number, number], path };
+    });
+
+    return { trees, benches, busStops, clouds, pedestrians };
+  }, [qm]);
+
   const buildings = useMemo(() => {
     const buildingsList: BuildingData[] = [];
     const blockSize = 15;
@@ -542,13 +613,22 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
         const x = col * spacing;
         const z = row * spacing;
         
-        const width = 8 + Math.random() * 4;
-        const depth = 8 + Math.random() * 4;
-        const floors = 4 + Math.floor(Math.random() * 6);
+        const seed = (row * 1000 + col) * 12345;
+        const seededRandom = (s: number) => {
+          const x = Math.sin(s) * 10000;
+          return x - Math.floor(x);
+        };
+        
+        const width = 8 + seededRandom(seed) * 4;
+        const depth = 8 + seededRandom(seed + 1) * 4;
+        const floors = 4 + Math.floor(seededRandom(seed + 2) * 6);
         const height = floors * 3;
         
         const windowsPerFloor = Math.floor(width / 2);
         const windows = Array(floors).fill(0).map(() => Array(windowsPerFloor).fill(0));
+        
+        const hasParking = seededRandom(seed + 5) > 0.6;
+        const parkingColor = ['#EF4444', '#3B82F6', '#1F2937', '#FFFFFF'][Math.floor(seededRandom(seed + 6) * 4)];
         
         buildingsList.push({
           x,
@@ -556,10 +636,12 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
           width,
           depth,
           height,
-          color: BUILDING_COLORS[Math.floor(Math.random() * BUILDING_COLORS.length)],
-          roofColor: ROOF_COLORS[Math.floor(Math.random() * ROOF_COLORS.length)],
-          windows
-        });
+          color: BUILDING_COLORS[Math.floor(seededRandom(seed + 3) * BUILDING_COLORS.length)],
+          roofColor: ROOF_COLORS[Math.floor(seededRandom(seed + 4) * ROOF_COLORS.length)],
+          windows,
+          hasParking,
+          parkingColor
+        } as any);
       }
     }
 
@@ -569,10 +651,11 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
   const roads = useMemo(() => {
     const roadsList: Array<{ start: [number, number], end: [number, number], width: number }> = [];
     const roadWidth = 8;
-    const extent = 80;
+    const extent = 100;
+    const spacing = 20;
 
-    for (let i = -4; i <= 4; i++) {
-      const offset = i * 20;
+    for (let i = -4; i < 4; i++) {
+      const offset = i * spacing + spacing / 2;
       roadsList.push({
         start: [-extent, offset],
         end: [extent, offset],
@@ -612,16 +695,16 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
         <Road key={idx} start={road.start} end={road.end} width={road.width} />
       ))}
 
-      {buildings.map((building, idx) => (
+      {buildings.map((building: any, idx) => (
         <>
           <ModernBuilding key={idx} building={building} />
           
-          {Math.random() > 0.6 && (
+          {building.hasParking && (
             <group key={`parking-${idx}`} position={[building.x + building.width / 2 + 2, 0.3, building.z]}>
               <mesh castShadow>
                 <boxGeometry args={[1.6, 0.5, 3]} />
                 <meshStandardMaterial 
-                  color={['#EF4444', '#3B82F6', '#1F2937', '#FFFFFF'][Math.floor(Math.random() * 4)]}
+                  color={building.parkingColor}
                   metalness={0.6} 
                   roughness={0.3} 
                 />
@@ -629,7 +712,7 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
               <mesh position={[0, 0.4, -0.2]} castShadow>
                 <boxGeometry args={[1.4, 0.5, 1.4]} />
                 <meshStandardMaterial 
-                  color={['#EF4444', '#3B82F6', '#1F2937', '#FFFFFF'][Math.floor(Math.random() * 4)]}
+                  color={building.parkingColor}
                   metalness={0.6} 
                   roughness={0.3} 
                 />
@@ -641,91 +724,43 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
 
       <ParkArea x={0} z={0} size={16} />
 
-      {Array.from({ length: Math.floor(50 * qm.trees) }).map((_, idx) => {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 25 + Math.random() * 60;
-        return (
-          <Tree 
-            key={`tree-${idx}`} 
-            position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}
-            scale={0.6 + Math.random() * 0.6}
-          />
-        );
-      })}
+      {decorations.trees.map((tree, idx) => (
+        <Tree 
+          key={`tree-${idx}`} 
+          position={tree.position}
+          scale={tree.scale}
+        />
+      ))}
 
-      {Array.from({ length: Math.floor(20 * qm.benches) }).map((_, idx) => {
-        const x = (Math.random() - 0.5) * 140;
-        const z = (Math.random() - 0.5) * 140;
-        const rotation = Math.random() * Math.PI * 2;
-        return (
-          <Bench 
-            key={`bench-${idx}`} 
-            position={[x, 0, z]}
-            rotation={rotation}
-          />
-        );
-      })}
+      {decorations.benches.map((bench, idx) => (
+        <Bench 
+          key={`bench-${idx}`} 
+          position={bench.position}
+          rotation={bench.rotation}
+        />
+      ))}
 
-      {Array.from({ length: Math.floor(8 * qm.busStops) }).map((_, idx) => {
-        const roads = [-60, -40, -20, 0, 20, 40, 60];
-        const road = roads[idx % roads.length];
-        const path = idx % 2 === 0 ? 'horizontal' : 'vertical';
-        const sidewalkOffset = 7;
-        
-        let x, z, rotation;
-        if (path === 'horizontal') {
-          x = (idx - 4) * 30;
-          z = road + sidewalkOffset;
-          rotation = 0;
-        } else {
-          x = road + sidewalkOffset;
-          z = (idx - 4) * 30;
-          rotation = Math.PI / 2;
-        }
-        
-        return (
-          <BusStop 
-            key={`bus-${idx}`} 
-            position={[x, 0, z]}
-            rotation={rotation}
-          />
-        );
-      })}
+      {decorations.busStops.map((busStop, idx) => (
+        <BusStop 
+          key={`bus-${idx}`} 
+          position={busStop.position}
+          rotation={busStop.rotation}
+        />
+      ))}
 
-      {Array.from({ length: Math.floor(8 * qm.clouds) }).map((_, idx) => {
-        const x = (Math.random() - 0.5) * 200;
-        const y = 40 + Math.random() * 20;
-        const z = (Math.random() - 0.5) * 200;
-        return (
-          <Cloud 
-            key={`cloud-${idx}`} 
-            position={[x, y, z]}
-          />
-        );
-      })}
+      {decorations.clouds.map((cloud, idx) => (
+        <Cloud 
+          key={`cloud-${idx}`} 
+          position={cloud.position}
+        />
+      ))}
 
-      {Array.from({ length: Math.floor(25 * qm.pedestrians) }).map((_, idx) => {
-        const roads = [-60, -40, -20, 0, 20, 40, 60];
-        const road = roads[Math.floor(Math.random() * roads.length)];
-        const path = Math.random() > 0.5 ? 'horizontal' : 'vertical';
-        const sidewalkOffset = Math.random() > 0.5 ? 6 : -6;
-        
-        let x, z;
-        if (path === 'horizontal') {
-          x = (Math.random() - 0.5) * 160;
-          z = road + sidewalkOffset;
-        } else {
-          x = road + sidewalkOffset;
-          z = (Math.random() - 0.5) * 160;
-        }
-        
-        return (
-          <Pedestrian 
-            key={`ped-${idx}`} 
-            position={[x, 0, z]}
-            path={path}
-          />
-        );
+      {decorations.pedestrians.map((ped, idx) => (
+        <Pedestrian 
+          key={`ped-${idx}`} 
+          position={ped.position}
+          path={ped.path}
+        />
       })}
 
       <TrafficSystem />

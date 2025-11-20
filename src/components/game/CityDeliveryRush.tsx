@@ -955,7 +955,7 @@ export function CityDeliveryRush() {
       )}
       <PerformanceMonitor />
 
-      {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
+      {isMobile && (
         <VirtualJoystick
           onMove={(x, y) => setMobileInput({ x, y })}
         />
