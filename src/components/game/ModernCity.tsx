@@ -696,11 +696,11 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
       ))}
 
       {buildings.map((building: any, idx) => (
-        <>
-          <ModernBuilding key={idx} building={building} />
+        <group key={idx}>
+          <ModernBuilding building={building} />
           
           {building.hasParking && (
-            <group key={`parking-${idx}`} position={[building.x + building.width / 2 + 2, 0.3, building.z]}>
+            <group position={[building.x + building.width / 2 + 2, 0.3, building.z]}>
               <mesh castShadow>
                 <boxGeometry args={[1.6, 0.5, 3]} />
                 <meshStandardMaterial 
@@ -719,7 +719,7 @@ export function ModernCity({ gridSize = 8, quality = 'medium', onBuildingsReady 
               </mesh>
             </group>
           )}
-        </>
+        </group>
       ))}
 
       <ParkArea x={0} z={0} size={16} />
