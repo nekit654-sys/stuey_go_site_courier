@@ -44,7 +44,7 @@ const Navigation = () => {
                 className="w-9 h-9 rounded object-cover"
               />
             </div>
-            <span className="text-black font-rubik whitespace-nowrap text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)]">Stuey.Go | Яндекс Еда</span>
+            <span className="text-black font-rubik whitespace-nowrap font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)] text-3xl">Яндекс Еда × Stuey.Go</span>
           </Link>
 
           {/* Desktop menu */}
