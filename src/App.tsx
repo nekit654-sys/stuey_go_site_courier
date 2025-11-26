@@ -48,6 +48,18 @@ const YandexMetrika = () => {
 
 const MaintenanceWrapper = () => {
   const location = useLocation();
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  useEffect(() => {
+    const bypass = localStorage.getItem('maintenance_bypass');
+    if (bypass === 'true') {
+      setIsUnlocked(true);
+    }
+  }, []);
+
+  if (!isUnlocked) {
+    return <Maintenance onUnlock={() => setIsUnlocked(true)} />;
+  }
 
   return (
     <>

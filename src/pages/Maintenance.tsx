@@ -69,7 +69,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const targetDate = new Date('2025-11-04T00:00:00');
+      const targetDate = new Date('2025-11-30T00:00:00');
       const now = new Date();
       const difference = targetDate.getTime() - now.getTime();
 
