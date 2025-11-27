@@ -21,10 +21,11 @@ import { Weather } from './Weather';
 import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
 import { useFoodOrders } from './FoodOrderSystem';
-import { NavigationArrow } from './NavigationArrow';
+
 import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
 import { SessionStats } from './SessionStats';
+import { ScreenNavigationArrow } from './ScreenNavigationArrow';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateCityBuildings, type BuildingData } from './CityData';
@@ -100,6 +101,9 @@ export function CityDeliveryRush() {
     levelUps: 0
   });
   const [lastPosition, setLastPosition] = useState<{ x: number; z: number } | null>(null);
+  const [nearTarget, setNearTarget] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [tutorialStep, setTutorialStep] = useState(0);
   const [cityBuildings, setCityBuildings] = useState<Array<{ 
     x: number; 
     z: number; 
@@ -396,18 +400,33 @@ export function CityDeliveryRush() {
       Math.pow(targetLocation.z - playerPosition.z, 2)
     );
     
-    if (distance < 5) {
-      if (deliveryStage === 'pickup' || deliveryStage === 'none') {
-        setDeliveryStage('delivery');
-        setGameState(prev => ({ ...prev, hasPackage: true }));
-        (window as any).playPickupSound?.();
-        playVibration('pickup');
-      } else if (deliveryStage === 'delivery') {
-        setDeliveryStage('completing');
-        handleFoodDeliveryComplete();
+    setNearTarget(distance < 8);
+  }, [playerPosition, activeOrder, deliveryStage]);
+  
+  const handleActionButtonClick = () => {
+    if (!activeOrder || !nearTarget) return;
+    
+    if (deliveryStage === 'pickup' || deliveryStage === 'none') {
+      setDeliveryStage('delivery');
+      setGameState(prev => ({ ...prev, hasPackage: true }));
+      (window as any).playPickupSound?.();
+      playVibration('pickup');
+      
+      // Прогресс туториала
+      if (tutorialStep === 1) {
+        setTutorialStep(2);
+      }
+    } else if (deliveryStage === 'delivery') {
+      setDeliveryStage('completing');
+      handleFoodDeliveryComplete();
+      
+      // Завершение туториала
+      if (tutorialStep === 2) {
+        setShowTutorial(false);
+        localStorage.setItem('game_tutorial_completed', 'true');
       }
     }
-  }, [playerPosition, activeOrder, deliveryStage]);
+  };
 
   const handleFoodDeliveryComplete = async () => {
     if (!gameState.courierId || !activeOrder) return;
@@ -596,6 +615,15 @@ export function CityDeliveryRush() {
                     levelUps: 0
                   });
                   setLastPosition(null);
+                  
+                  // Проверяем, проходил ли игрок туториал
+                  const tutorialCompleted = localStorage.getItem('game_tutorial_completed');
+                  if (!tutorialCompleted) {
+                    setShowTutorial(true);
+                    setTutorialStep(0);
+                  } else {
+                    setShowTutorial(false);
+                  }
                 }}
                 className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-extrabold py-4 text-lg rounded-xl border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] active:translate-y-[5px] active:shadow-none transition-all mb-3"
               >
@@ -783,14 +811,6 @@ export function CityDeliveryRush() {
           
           {activeOrder && (
             <>
-              <NavigationArrow
-                playerPosition={playerPosition}
-                targetPosition={
-                  deliveryStage === 'pickup' 
-                    ? activeOrder.pickupLocation 
-                    : activeOrder.deliveryLocation
-                }
-              />
               <DeliveryMarkers order={activeOrder} stage={deliveryStage} />
             </>
           )}
@@ -923,6 +943,49 @@ export function CityDeliveryRush() {
         buildings={cityBuildings}
       />
       
+      {activeOrder && deliveryStage !== 'none' && (
+        <ScreenNavigationArrow
+          playerPosition={playerPosition}
+          targetPosition={
+            deliveryStage === 'pickup' 
+              ? activeOrder.pickupLocation 
+              : activeOrder.deliveryLocation
+          }
+          targetName={
+            deliveryStage === 'pickup' 
+              ? activeOrder.pickupLocation.name 
+              : activeOrder.deliveryLocation.name
+          }
+          stage={deliveryStage}
+        />
+      )}
+      
+      {/* Кнопка действия при приближении */}
+      {nearTarget && activeOrder && deliveryStage !== 'completing' && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-pulse">
+          <button
+            onClick={handleActionButtonClick}
+            className={`${
+              deliveryStage === 'pickup' 
+                ? 'bg-gradient-to-br from-green-400 to-green-600 border-green-700' 
+                : 'bg-gradient-to-br from-blue-400 to-blue-600 border-blue-700'
+            } text-white px-8 py-6 rounded-3xl font-black text-2xl sm:text-3xl shadow-2xl border-4 hover:scale-110 active:scale-95 transition-transform`}
+          >
+            {deliveryStage === 'pickup' ? (
+              <>
+                <div className="text-4xl mb-2">🏪</div>
+                <div>ЗАБРАТЬ ЗАКАЗ</div>
+              </>
+            ) : (
+              <>
+                <div className="text-4xl mb-2">{activeOrder.customerEmoji}</div>
+                <div>ДОСТАВИТЬ</div>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      
       <div className={`fixed z-30 bg-black/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/50 ${
         isMobile && !isLandscape ? 'bottom-24 left-2' : 'bottom-4 left-4'
       }`}>
@@ -978,6 +1041,67 @@ export function CityDeliveryRush() {
       
       {showLeaderboard && (
         <Leaderboard onClose={() => setShowLeaderboard(false)} />
+      )}
+      
+      {/* Туториал */}
+      {showTutorial && activeOrder && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4 pointer-events-none">
+          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 border-4 border-black rounded-2xl p-6 max-w-md shadow-2xl animate-bounce pointer-events-auto">
+            {tutorialStep === 0 && (
+              <div className="text-center">
+                <div className="text-6xl mb-4">👋</div>
+                <h2 className="text-2xl font-black mb-3 text-black">Добро пожаловать!</h2>
+                <p className="text-black font-bold mb-4 text-lg">
+                  Давай научу тебя работать курьером
+                </p>
+                <button
+                  onClick={() => setTutorialStep(1)}
+                  className="bg-black text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors"
+                >
+                  Начать обучение →
+                </button>
+                <button
+                  onClick={() => {
+                    setShowTutorial(false);
+                    localStorage.setItem('game_tutorial_completed', 'true');
+                  }}
+                  className="block w-full mt-3 text-black underline text-sm font-bold"
+                >
+                  Пропустить
+                </button>
+              </div>
+            )}
+            
+            {tutorialStep === 1 && (
+              <div className="text-center">
+                <div className="text-6xl mb-4">🗺️</div>
+                <h2 className="text-2xl font-black mb-3 text-black">Следуй за стрелкой!</h2>
+                <p className="text-black font-bold mb-2 text-lg">
+                  {isMobile ? '🕹️ Управляй джойстиком слева' : '⌨️ Используй WASD для движения'}
+                </p>
+                <p className="text-black font-bold mb-4">
+                  Иди к зелёному маяку и нажми кнопку "ЗАБРАТЬ ЗАКАЗ"
+                </p>
+                <div className="bg-black/20 p-3 rounded-xl">
+                  <p className="text-sm font-bold text-black">💡 Стрелка в правом нижнем углу покажет направление</p>
+                </div>
+              </div>
+            )}
+            
+            {tutorialStep === 2 && (
+              <div className="text-center">
+                <div className="text-6xl mb-4">🚀</div>
+                <h2 className="text-2xl font-black mb-3 text-black">Отлично!</h2>
+                <p className="text-black font-bold mb-4 text-lg">
+                  Теперь доставь заказ клиенту по синему маяку!
+                </p>
+                <div className="bg-black/20 p-3 rounded-xl">
+                  <p className="text-sm font-bold text-black">💰 За доставку получишь монеты и опыт!</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
       
       {showSessionStats && (
