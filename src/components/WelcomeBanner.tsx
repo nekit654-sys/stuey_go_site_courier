@@ -238,7 +238,7 @@ const WelcomeBanner = ({ onClose }: WelcomeBannerProps) => {
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                   </div>
                   <p className="text-xs sm:text-sm md:text-base font-extrabold text-black">
-                    <span className="text-yellow-600">3000₽</span> за первые<br className="sm:hidden" /> <span className="text-yellow-600">30 заказов!</span>
+                    <span className="text-yellow-600">5000₽</span> за первые<br className="sm:hidden" /> <span className="text-yellow-600">50 заказов!</span>
                   </p>
                   <div className="mt-2 flex items-start gap-1">
                     <Icon name="MousePointer" size={16} className="text-yellow-400 flex-shrink-0 animate-pulse" />

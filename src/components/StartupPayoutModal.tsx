@@ -98,7 +98,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
               <Icon name="Gift" size={24} className="text-black sm:w-7 sm:h-7" />
             </div>
             <h2 className="text-xl sm:text-3xl font-extrabold text-black leading-tight">
-              Получи 3000₽!
+              Получи 5000₽!
             </h2>
           </div>
 
@@ -111,7 +111,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
               <ul className="space-y-2 text-xs sm:text-sm text-gray-800">
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={14} className="text-green-600 flex-shrink-0 mt-0.5 sm:w-4 sm:h-4" />
-                  <span className="leading-snug">Выполнить <strong>30 заказов</strong> в Яндекс Еде</span>
+                  <span className="leading-snug">Выполнить <strong>50 заказов</strong> в Яндекс Еде</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={14} className="text-green-600 flex-shrink-0 mt-0.5 sm:w-4 sm:h-4" />
@@ -119,7 +119,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
                 </li>
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={14} className="text-green-600 flex-shrink-0 mt-0.5 sm:w-4 sm:h-4" />
-                  <span className="leading-snug">После выполнения — <strong>получить 3000₽</strong> на карту</span>
+                  <span className="leading-snug">После выполнения — <strong>получить 5000₽</strong> на карту</span>
                 </li>
               </ul>
             </div>
@@ -133,8 +133,8 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
                 <li>Заполните форму ниже</li>
                 <li>Мы свяжемся с вами и предоставим реферальный код</li>
                 <li>Зарегистрируйтесь в Яндекс Еде по нашему коду</li>
-                <li>Выполните 30 заказов</li>
-                <li>Получите 3000₽!</li>
+                <li>Выполните 50 заказов</li>
+                <li>Получите 5000₽!</li>
               </ol>
             </div>
 

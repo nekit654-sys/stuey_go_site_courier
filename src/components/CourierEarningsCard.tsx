@@ -94,7 +94,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
     );
   }
 
-  const SELF_BONUS_TARGET = 3000;
+  const SELF_BONUS_TARGET = 5000;
   const selfBonusProgress = selfBonus 
     ? Math.min((selfBonus.bonus_earned / SELF_BONUS_TARGET) * 100, 100) 
     : 0;
@@ -146,15 +146,15 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                   <Icon name="Target" className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900">Самобонус 3,000₽</h3>
-                  <p className="text-sm text-gray-600">За первые 30 заказов ваших рефералов</p>
+                  <h3 className="font-bold text-lg text-gray-900">Самобонус 5,000₽</h3>
+                  <p className="text-sm text-gray-600">За первые 50 заказов ваших рефералов</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-blue-700">
                   {selfBonus.bonus_earned.toLocaleString('ru-RU')} ₽
                 </div>
-                <div className="text-sm text-gray-600">из 3,000₽</div>
+                <div className="text-sm text-gray-600">из 5,000₽</div>
               </div>
             </div>
 
@@ -180,7 +180,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                   <p className="font-medium mb-1">Как это работает:</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
                     <li>Вы получаете 100% от доходов ваших рефералов</li>
-                    <li>После 3,000₽ самобонус завершается</li>
+                    <li>После 5,000₽ самобонус завершается</li>
                     <li>Далее вы получаете % с каждого вашего реферала постоянно</li>
                   </ul>
                 </div>

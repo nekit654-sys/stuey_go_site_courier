@@ -595,6 +595,30 @@ export default function StoriesTab() {
                 {story.description && (
                   <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 break-words">{story.description}</p>
                 )}
+                <div className="flex flex-col gap-1 mb-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Icon name="Calendar" size={12} />
+                    <span>Создано: {new Date(story.createdAt).toLocaleDateString('ru-RU', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</span>
+                  </div>
+                  {story.updatedAt !== story.createdAt && (
+                    <div className="flex items-center gap-1">
+                      <Icon name="RefreshCw" size={12} />
+                      <span>Обновлено: {new Date(story.updatedAt).toLocaleDateString('ru-RU', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</span>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
                   <Button

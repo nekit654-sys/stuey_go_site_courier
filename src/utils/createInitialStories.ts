@@ -1,8 +1,8 @@
 export async function createInitialStories() {
   const stories = [
     {
-      title: "Бонус 3000₽!",
-      description: "Стартовая выплата для новых курьеров",
+      title: "Бонус 5000₽!",
+      description: "Стартовая выплата для новых курьеров за первые 50 заказов",
       imageUrl: "https://cdn.poehali.dev/files/da2d6308-de5f-45ad-ae8d-3ed07b41fcd9.jpg",
       buttonText: "Подать заявку",
       buttonLink: "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank",

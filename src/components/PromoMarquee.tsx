@@ -14,7 +14,7 @@ const PromoMarquee = ({ onOpenPayoutModal }: PromoMarqueeProps) => {
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="DollarSign" size={28} className="text-black" />
-        Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!
+        Бонус 5000₽ за первые 50 заказов — жми и заполни заявку!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="Rocket" size={28} className="text-black" />
@@ -22,7 +22,7 @@ const PromoMarquee = ({ onOpenPayoutModal }: PromoMarqueeProps) => {
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="DollarSign" size={28} className="text-black" />
-        Бонус 3000₽ за первые 30 заказов — жми и заполни заявку!
+        Бонус 5000₽ за первые 50 заказов — жми и заполни заявку!
       </span>
     </>
   );

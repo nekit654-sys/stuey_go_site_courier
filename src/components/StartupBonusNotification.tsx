@@ -86,7 +86,7 @@ export default function StartupBonusNotification({ userId, onOpenPayoutModal }: 
             <Icon name="Gift" className="h-5 w-5 text-green-600 mt-0.5" />
             <div>
               <p className="font-semibold text-gray-900">
-                Вам доступна стартовая выплата 3000₽!
+                Вам доступна стартовая выплата 5000₽!
               </p>
               <p className="text-sm text-gray-600 mt-1">
                 Заполните заявку на выплату, чтобы получить свой стартовый бонус
