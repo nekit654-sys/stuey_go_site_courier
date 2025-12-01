@@ -1896,7 +1896,7 @@ def _distribute_to_admins(admin_share_total: float, original_total: float, cur) 
 def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, cur) -> list:
     '''
     Рассчитывает распределение выплат по правилам:
-    1. Курьер получает первые 3000₽ за 30 заказов (самобонус)
+    1. Курьер получает первые 5000₽ за 50 заказов (самобонус)
     2. После самобонуса: рефереру 60%, админам 40% пропорционально рекламным расходам
     3. Если нет реферера: все курьеру до завершения самобонуса, потом админам
     '''
@@ -1910,9 +1910,9 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
         """, (courier_id,))
         tracking = cur.fetchone()
         current_bonus = float(tracking['bonus_earned']) if tracking else 0.0
-        remaining_bonus = max(0, 3000 - current_bonus)
+        remaining_bonus = max(0, 5000 - current_bonus)
         
-        # Самобонус: только до 3000₽
+        # Самобонус: только до 5000₽
         self_bonus_amount = min(total_amount, remaining_bonus)
         remaining_amount = total_amount - self_bonus_amount
         
@@ -1922,7 +1922,7 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
                 'recipient_id': courier_id,
                 'amount': self_bonus_amount,
                 'percentage': (self_bonus_amount / total_amount) * 100.0,
-                'description': f'Самобонус ({current_bonus:.0f}₽ → {current_bonus + self_bonus_amount:.0f}₽ из 3000₽)'
+                'description': f'Самобонус ({current_bonus:.0f}₽ → {current_bonus + self_bonus_amount:.0f}₽ из 5000₽)'
             })
         
         # Остаток распределяем: 60% рефереру, 40% админам
