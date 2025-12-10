@@ -26,6 +26,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
+import MessengerSettings from '@/components/dashboard/MessengerSettings';
 
 
 interface Stats {
@@ -72,7 +73,7 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings'>('stats');
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
@@ -517,6 +518,11 @@ export default function Dashboard() {
                   Написать сообщение
                 </Button>
               </Card>
+            )}
+
+            {/* Settings Tab - Messenger Integration */}
+            {activeTab === 'settings' && (
+              <MessengerSettings />
             )}
           </div>
         </div>

@@ -4,7 +4,7 @@ import Icon from '@/components/ui/icon';
 
 interface SidebarProps {
   activeTab: string;
-  onTabChange: (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages') => void;
+  onTabChange: (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings') => void;
   stats: any;
   user: any;
 }
@@ -17,6 +17,7 @@ export default function Sidebar({ activeTab, onTabChange, stats, user }: Sidebar
     { id: 'referrals', icon: 'Users', label: 'Рефералы', badge: stats?.total_referrals || 0 },
     { id: 'game', icon: 'Trophy', label: 'Игра', badge: null },
     { id: 'withdrawals', icon: 'Wallet', label: 'Выплаты', badge: null },
+    { id: 'settings', icon: 'Settings', label: 'Настройки', badge: null },
   ];
 
   return (
