@@ -23,8 +23,8 @@ function CameraFollower({
   cameraRotation: { horizontal: number; vertical: number };
 }) {
   const { camera } = useThree();
-  const currentPosition = useRef(new THREE.Vector3(0, 12, -18));
-  const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
+  const currentPosition = useRef(new THREE.Vector3(0, 15, 20)); // Правильная начальная позиция камеры
+  const currentLookAt = useRef(new THREE.Vector3(0, 1, 0));
 
   useFrame(() => {
     if (!target.current) return;
@@ -74,7 +74,7 @@ export function SimpleCourier({
   const meshRef = useRef<THREE.Group>(null);
   const cameraTargetRef = useRef<THREE.Group>(null);
   const rotation = useRef(0);
-  const position = useRef(new THREE.Vector3(0, 1, 0));
+  const position = useRef(new THREE.Vector3(0, 1, 0)); // Спавн в центре города
   const energy = useRef(100);
   const [mounted, setMounted] = useState(false);
   

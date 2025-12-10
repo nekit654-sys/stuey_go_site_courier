@@ -15,13 +15,15 @@ interface ModernCityNewProps {
   playerPosition: { x: number; z: number };
   onBuildingsReady?: (buildings: any[]) => void;
   onRoadsReady?: (roads: any[]) => void;
+  courierId?: number | null;
+  onDeliveryComplete?: (reward: number) => void;
 }
 
 const BLOCK_SIZE = 20;
 const ROAD_WIDTH = 5;
 const GRID_SIZE = 3;
 
-export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsReady, onRoadsReady }: ModernCityNewProps) {
+export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsReady, onRoadsReady, courierId, onDeliveryComplete }: ModernCityNewProps) {
   const {
     orders,
     activeOrder,
@@ -31,42 +33,54 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
     checkNearLocation
   } = useOrderSystem();
   
-  // Генерация зданий
+  // Генерация зданий - СТРОГО между дорогами
   const buildings = useMemo(() => {
     const buildingsData = [];
     const colors = ['#374151', '#4B5563', '#6B7280', '#9CA3AF'];
     
-    for (let i = -GRID_SIZE; i <= GRID_SIZE; i++) {
-      for (let j = -GRID_SIZE; j <= GRID_SIZE; j++) {
-        const centerX = i * (BLOCK_SIZE + ROAD_WIDTH);
-        const centerZ = j * (BLOCK_SIZE + ROAD_WIDTH);
+    // Дороги находятся на позициях: -37.5, -12.5, 12.5, 37.5
+    // Кварталы между дорогами: от -50 до -15, от -10 до 10, от 15 до 50
+    const blocks = [
+      { minX: -50, maxX: -15, minZ: -50, maxZ: -15 }, // Левый верхний
+      { minX: -50, maxX: -15, minZ: -10, maxZ: 10 },   // Левый центр
+      { minX: -50, maxX: -15, minZ: 15, maxZ: 50 },    // Левый нижний
+      
+      { minX: -10, maxX: 10, minZ: -50, maxZ: -15 },   // Центр верхний
+      { minX: -10, maxX: 10, minZ: -10, maxZ: 10 },    // Центр центр
+      { minX: -10, maxX: 10, minZ: 15, maxZ: 50 },     // Центр нижний
+      
+      { minX: 15, maxX: 50, minZ: -50, maxZ: -15 },    // Правый верхний
+      { minX: 15, maxX: 50, minZ: -10, maxZ: 10 },     // Правый центр
+      { minX: 15, maxX: 50, minZ: 15, maxZ: 50 }       // Правый нижний
+    ];
+    
+    blocks.forEach(block => {
+      // 2-4 здания в каждом квартале
+      const buildingsCount = 2 + Math.floor(Math.random() * 3);
+      
+      for (let i = 0; i < buildingsCount; i++) {
+        const width = 6 + Math.random() * 6;
+        const depth = 6 + Math.random() * 6;
         
-        // Создаём 2-3 здания в каждом квартале
-        const buildingsPerBlock = 2 + Math.floor(Math.random() * 2);
+        // Позиция с отступом от краёв квартала
+        const padding = Math.max(width, depth) / 2 + 2;
+        const x = block.minX + padding + Math.random() * (block.maxX - block.minX - padding * 2);
+        const z = block.minZ + padding + Math.random() * (block.maxZ - block.minZ - padding * 2);
         
-        for (let b = 0; b < buildingsPerBlock; b++) {
-          // Смещение внутри квартала, НЕ НА ДОРОГЕ (дороги это ±2.5м от центра)
-          // BLOCK_SIZE = 20, значит безопасная зона ±8м от центра
-          const offsetX = (Math.random() - 0.5) * 16; // -8 до 8
-          const offsetZ = (Math.random() - 0.5) * 16; // -8 до 8
-          
-          const width = 5 + Math.random() * 5;
-          const depth = 5 + Math.random() * 5;
-          const height = quality === 'low' ? 
-            (8 + Math.random() * 8) : 
-            (12 + Math.random() * 18);
-          
-          buildingsData.push({
-            x: centerX + offsetX,
-            z: centerZ + offsetZ,
-            width,
-            depth,
-            height,
-            color: colors[Math.floor(Math.random() * colors.length)]
-          });
-        }
+        const height = quality === 'low' ? 
+          (8 + Math.random() * 10) : 
+          (12 + Math.random() * 20);
+        
+        buildingsData.push({
+          x,
+          z,
+          width,
+          depth,
+          height,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
       }
-    }
+    });
     
     return buildingsData;
   }, [quality]);
@@ -121,13 +135,36 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
   // Проверка близости к заказам
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log('🔍 Проверка заказов:', { 
+        playerPos: `${playerPosition.x.toFixed(1)}, ${playerPosition.z.toFixed(1)}`,
+        ordersCount: orders.length,
+        hasActiveOrder: !!activeOrder,
+        activeOrderPickedUp: activeOrder?.pickedUp
+      });
+      
       // Автоприем ближайшего заказа
       if (!activeOrder && orders.length > 0) {
-        const nearestOrder = orders.find(order => 
-          checkNearLocation(playerPosition.x, playerPosition.z, order.pickupLocation.x, order.pickupLocation.z, 10)
-        );
+        orders.forEach(order => {
+          const dist = Math.sqrt(
+            Math.pow(order.pickupLocation.x - playerPosition.x, 2) +
+            Math.pow(order.pickupLocation.z - playerPosition.z, 2)
+          );
+          console.log(`  📦 Заказ ${order.id}: расстояние ${dist.toFixed(1)}м`);
+        });
+        
+        const nearestOrder = orders.find(order => {
+          const isNear = checkNearLocation(
+            playerPosition.x, 
+            playerPosition.z, 
+            order.pickupLocation.x, 
+            order.pickupLocation.z, 
+            15 // Увеличил радиус для тестирования
+          );
+          return isNear;
+        });
         
         if (nearestOrder) {
+          console.log('✅ Принимаю заказ:', nearestOrder.id);
           acceptOrder(nearestOrder.id);
           toast.success(`📦 Новый заказ принят!`, {
             description: `${nearestOrder.restaurantName} → ${nearestOrder.customerName}`
@@ -137,13 +174,20 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
       
       // Подбор заказа в точке A
       if (activeOrder && !activeOrder.pickedUp) {
+        const dist = Math.sqrt(
+          Math.pow(activeOrder.pickupLocation.x - playerPosition.x, 2) +
+          Math.pow(activeOrder.pickupLocation.z - playerPosition.z, 2)
+        );
+        console.log(`  🟢 До подбора: ${dist.toFixed(1)}м`);
+        
         if (checkNearLocation(
           playerPosition.x, 
           playerPosition.z, 
           activeOrder.pickupLocation.x, 
           activeOrder.pickupLocation.z, 
-          5
+          7 // Увеличил радиус
         )) {
+          console.log('✅ Подбираю заказ');
           pickupOrder(activeOrder.id);
           toast.success('✅ Заказ подобран!', {
             description: `Везите в ${activeOrder.deliveryLocation.name}`
@@ -153,17 +197,42 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
       
       // Доставка заказа в точке B
       if (activeOrder && activeOrder.pickedUp) {
+        const dist = Math.sqrt(
+          Math.pow(activeOrder.deliveryLocation.x - playerPosition.x, 2) +
+          Math.pow(activeOrder.deliveryLocation.z - playerPosition.z, 2)
+        );
+        console.log(`  🔵 До доставки: ${dist.toFixed(1)}м`);
+        
         if (checkNearLocation(
           playerPosition.x, 
           playerPosition.z, 
           activeOrder.deliveryLocation.x, 
           activeOrder.deliveryLocation.z, 
-          5
+          7 // Увеличил радиус
         )) {
+          console.log('✅ Доставляю заказ');
           const reward = completeOrder(activeOrder.id);
           toast.success(`🎉 Заказ доставлен! +${reward}₽`, {
             description: 'Отличная работа!'
           });
+          
+          // Сохранение результата в профиль курьера
+          if (courierId && onDeliveryComplete) {
+            onDeliveryComplete(reward);
+            
+            // Отправка на сервер
+            fetch('https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'complete_delivery',
+                courier_id: courierId,
+                delivery_type: activeOrder.type,
+                distance: activeOrder.distance,
+                reward: reward
+              })
+            }).catch(err => console.error('❌ Ошибка сохранения:', err));
+          }
         }
       }
     }, 500);

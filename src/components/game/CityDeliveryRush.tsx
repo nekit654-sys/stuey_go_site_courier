@@ -22,6 +22,7 @@ import { LevelUpNotification } from './LevelUpNotification';
 import { SkillTree } from './SkillTree';
 import { useFoodOrders } from './FoodOrderSystem';
 
+import { CompactOrderDisplay } from './CompactOrderDisplay';
 import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
 import { SessionStats } from './SessionStats';
@@ -804,9 +805,23 @@ export function CityDeliveryRush() {
           <ModernCityNew 
             quality={graphicsQuality}
             playerPosition={playerPosition}
+            courierId={gameState.courierId}
             onBuildingsReady={(buildings) => {
               console.log(`🏗️ ModernCityNew готов: ${buildings.length} зданий`);
               setCityBuildings(buildings);
+            }}
+            onDeliveryComplete={(reward) => {
+              console.log('💰 Доставка завершена, награда:', reward);
+              setGameState(prev => ({
+                ...prev,
+                score: prev.score + reward,
+                deliveries: prev.deliveries + 1
+              }));
+              setSessionStats(prev => ({
+                ...prev,
+                deliveriesCompleted: prev.deliveriesCompleted + 1,
+                coinsEarned: prev.coinsEarned + reward
+              }));
             }}
           />
           
@@ -914,12 +929,11 @@ export function CityDeliveryRush() {
         </div>
       </div>
       
-      {activeOrder && (
-        <ActiveOrderDisplay
-          order={activeOrder}
-          playerPosition={playerPosition}
-        />
-      )}
+      {/* Компактный экран заказа слева сверху */}
+      <CompactOrderDisplay
+        order={activeOrder}
+        playerPosition={playerPosition}
+      />
       
       <OrderInfoPanel
         activeOrder={activeOrder}
