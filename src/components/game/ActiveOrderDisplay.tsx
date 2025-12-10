@@ -1,80 +1,102 @@
 import Icon from '@/components/ui/icon';
-import { FoodOrder } from './FoodOrderSystem';
+import { Order } from './OrderSystem';
 
 interface ActiveOrderDisplayProps {
-  order: FoodOrder;
-  stage: 'pickup' | 'delivery';
-  onCancel: () => void;
+  order: Order | null;
+  playerPosition: { x: number; z: number };
 }
 
-export function ActiveOrderDisplay({ order, stage, onCancel }: ActiveOrderDisplayProps) {
-  const targetLocation = stage === 'pickup' ? order.pickupLocation : order.deliveryLocation;
+export function ActiveOrderDisplay({ order, playerPosition }: ActiveOrderDisplayProps) {
+  if (!order) return null;
+
+  const targetLocation = order.pickedUp ? order.deliveryLocation : order.pickupLocation;
+  const distance = Math.sqrt(
+    Math.pow(targetLocation.x - playerPosition.x, 2) +
+    Math.pow(targetLocation.z - playerPosition.z, 2)
+  );
+  
+  const getOrderIcon = () => {
+    switch (order.type) {
+      case 'food': return 'UtensilsCrossed';
+      case 'package': return 'Package';
+      case 'documents': return 'FileText';
+      case 'groceries': return 'ShoppingBag';
+      default: return 'Package';
+    }
+  };
+  
+  const stage = order.pickedUp ? 'delivery' : 'pickup';
   
   return (
-    <div className="fixed top-4 left-4 z-40 max-w-xs">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border-2 border-emerald-500/50 overflow-hidden">
-        <div className={`px-4 py-2 ${stage === 'pickup' ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+      <div className="bg-black/90 backdrop-blur-md text-white rounded-2xl shadow-2xl border border-white/20 overflow-hidden min-w-[340px]">
+        <div className={`px-4 py-3 ${stage === 'pickup' ? 'bg-green-600' : 'bg-blue-600'}`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-2xl">
-                {stage === 'pickup' ? '📦' : '🚀'}
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Icon name={getOrderIcon()} size={20} className="text-white" />
               </div>
               <div>
-                <div className="text-xs font-bold text-white/90 uppercase tracking-wider">
-                  {stage === 'pickup' ? 'Забрать заказ' : 'Доставить клиенту'}
+                <div className="text-xs font-semibold text-white/80 uppercase">
+                  {stage === 'pickup' ? '🟢 Забрать заказ' : '🔵 Доставить заказ'}
                 </div>
-                <div className="text-lg font-black text-white">
-                  {order.foodEmoji} {order.foodType}
+                <div className="text-lg font-bold text-white">
+                  {targetLocation.name}
                 </div>
               </div>
             </div>
-            <button
-              onClick={onCancel}
-              className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-              aria-label="Отменить"
-            >
-              <Icon name="X" size={16} className="text-white" />
-            </button>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-yellow-300">{order.reward}₽</div>
+            </div>
           </div>
         </div>
 
         <div className="p-4 space-y-3">
-          <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3">
-            <div className="text-3xl flex-shrink-0">
-              {stage === 'pickup' ? '🏪' : order.customerEmoji}
+          {/* Прогресс бар */}
+          <div className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${order.pickedUp ? 'bg-green-500' : 'bg-green-400 animate-pulse'}`} />
+            <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${stage === 'pickup' ? 'bg-green-500' : 'bg-blue-500'}`}
+                style={{ width: order.pickedUp ? '100%' : '50%' }}
+              />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-white font-bold text-sm mb-1">
-                {stage === 'pickup' ? order.restaurantName : order.customerName}
-              </div>
-              <div className="text-emerald-400 text-xs font-medium flex items-center gap-1">
-                <Icon name="MapPin" size={12} />
-                <span className="truncate">{targetLocation.name}</span>
-              </div>
-            </div>
+            <div className={`w-3 h-3 rounded-full ${order.pickedUp ? 'bg-blue-400 animate-pulse' : 'bg-white/30'}`} />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-emerald-500/20 rounded-lg p-2 border border-emerald-500/30">
-              <div className="flex items-center gap-1.5 text-emerald-400">
-                <Icon name="Navigation" size={14} />
-                <div>
-                  <div className="text-xs opacity-75">Расстояние</div>
-                  <div className="text-lg font-black">{order.distance}м</div>
-                </div>
+          {/* Информация */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon name="MapPin" size={18} className="text-yellow-400" />
+              <div>
+                <div className="text-xs text-white/60">Расстояние</div>
+                <div className="text-xl font-bold">{Math.round(distance)}м</div>
               </div>
             </div>
-
-            <div className="bg-amber-500/20 rounded-lg p-2 border border-amber-500/30">
-              <div className="flex items-center gap-1.5 text-amber-400">
-                <Icon name="Coins" size={14} />
-                <div>
-                  <div className="text-xs opacity-75">Награда</div>
-                  <div className="text-lg font-black">{order.reward}₽</div>
+            <div className="flex items-center gap-2 text-white/80">
+              <Icon name={stage === 'pickup' ? 'Store' : 'Home'} size={18} />
+              <div>
+                <div className="text-xs text-white/60">{stage === 'pickup' ? 'Ресторан' : 'Клиент'}</div>
+                <div className="text-sm font-semibold">
+                  {stage === 'pickup' ? order.restaurantName : order.customerName}
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Подсказка при приближении */}
+          {distance < 10 && (
+            <div className="mt-2 pt-3 border-t border-white/10">
+              <div className={`text-center font-semibold animate-pulse ${
+                stage === 'pickup' ? 'text-green-400' : 'text-blue-400'
+              }`}>
+                {stage === 'pickup' 
+                  ? '🟢 Подъезжайте ближе (5м) чтобы забрать заказ' 
+                  : '🔵 Подъезжайте ближе (5м) чтобы доставить заказ'
+                }
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

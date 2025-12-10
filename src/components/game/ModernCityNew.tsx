@@ -31,8 +31,6 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
     checkNearLocation
   } = useOrderSystem();
   
-  const [lastCheckTime, setLastCheckTime] = useState(0);
-  
   // Генерация зданий
   const buildings = useMemo(() => {
     const buildingsData = [];
@@ -43,19 +41,20 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
         const centerX = i * (BLOCK_SIZE + ROAD_WIDTH);
         const centerZ = j * (BLOCK_SIZE + ROAD_WIDTH);
         
-        // Создаём 2-4 здания в каждом квартале
-        const buildingsPerBlock = 2 + Math.floor(Math.random() * 3);
+        // Создаём 2-3 здания в каждом квартале
+        const buildingsPerBlock = 2 + Math.floor(Math.random() * 2);
         
         for (let b = 0; b < buildingsPerBlock; b++) {
-          // Случайное смещение внутри квартала (не на дороге)
-          const offsetX = (Math.random() - 0.5) * (BLOCK_SIZE - 5);
-          const offsetZ = (Math.random() - 0.5) * (BLOCK_SIZE - 5);
+          // Смещение внутри квартала, НЕ НА ДОРОГЕ (дороги это ±2.5м от центра)
+          // BLOCK_SIZE = 20, значит безопасная зона ±8м от центра
+          const offsetX = (Math.random() - 0.5) * 16; // -8 до 8
+          const offsetZ = (Math.random() - 0.5) * 16; // -8 до 8
           
-          const width = 4 + Math.random() * 6;
-          const depth = 4 + Math.random() * 6;
+          const width = 5 + Math.random() * 5;
+          const depth = 5 + Math.random() * 5;
           const height = quality === 'low' ? 
-            (6 + Math.random() * 6) : 
-            (10 + Math.random() * 15);
+            (8 + Math.random() * 8) : 
+            (12 + Math.random() * 18);
           
           buildingsData.push({
             x: centerX + offsetX,
@@ -119,59 +118,58 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
     }
   }, [buildings, roads, onBuildingsReady, onRoadsReady]);
   
-  // Проверка близости к заказам (оптимизировано - раз в 500мс)
+  // Проверка близости к заказам
   useEffect(() => {
-    const now = Date.now();
-    if (now - lastCheckTime < 500) return;
-    
-    setLastCheckTime(now);
-    
-    // Автоприем ближайшего заказа
-    if (!activeOrder && orders.length > 0) {
-      const nearestOrder = orders.find(order => 
-        checkNearLocation(playerPosition.x, playerPosition.z, order.pickupLocation.x, order.pickupLocation.z, 10)
-      );
+    const interval = setInterval(() => {
+      // Автоприем ближайшего заказа
+      if (!activeOrder && orders.length > 0) {
+        const nearestOrder = orders.find(order => 
+          checkNearLocation(playerPosition.x, playerPosition.z, order.pickupLocation.x, order.pickupLocation.z, 10)
+        );
+        
+        if (nearestOrder) {
+          acceptOrder(nearestOrder.id);
+          toast.success(`📦 Новый заказ принят!`, {
+            description: `${nearestOrder.restaurantName} → ${nearestOrder.customerName}`
+          });
+        }
+      }
       
-      if (nearestOrder) {
-        acceptOrder(nearestOrder.id);
-        toast.success(`📦 Новый заказ: ${nearestOrder.restaurantName}`, {
-          description: `Доставка: ${nearestOrder.customerName} (${Math.round(nearestOrder.distance)}м)`
-        });
+      // Подбор заказа в точке A
+      if (activeOrder && !activeOrder.pickedUp) {
+        if (checkNearLocation(
+          playerPosition.x, 
+          playerPosition.z, 
+          activeOrder.pickupLocation.x, 
+          activeOrder.pickupLocation.z, 
+          5
+        )) {
+          pickupOrder(activeOrder.id);
+          toast.success('✅ Заказ подобран!', {
+            description: `Везите в ${activeOrder.deliveryLocation.name}`
+          });
+        }
       }
-    }
+      
+      // Доставка заказа в точке B
+      if (activeOrder && activeOrder.pickedUp) {
+        if (checkNearLocation(
+          playerPosition.x, 
+          playerPosition.z, 
+          activeOrder.deliveryLocation.x, 
+          activeOrder.deliveryLocation.z, 
+          5
+        )) {
+          const reward = completeOrder(activeOrder.id);
+          toast.success(`🎉 Заказ доставлен! +${reward}₽`, {
+            description: 'Отличная работа!'
+          });
+        }
+      }
+    }, 500);
     
-    // Подбор заказа в точке A
-    if (activeOrder && !activeOrder.pickedUp) {
-      if (checkNearLocation(
-        playerPosition.x, 
-        playerPosition.z, 
-        activeOrder.pickupLocation.x, 
-        activeOrder.pickupLocation.z, 
-        3
-      )) {
-        pickupOrder(activeOrder.id);
-        toast.success('✅ Заказ подобран!', {
-          description: `Доставьте к ${activeOrder.customerName}`
-        });
-      }
-    }
-    
-    // Доставка заказа в точке B
-    if (activeOrder && activeOrder.pickedUp) {
-      if (checkNearLocation(
-        playerPosition.x, 
-        playerPosition.z, 
-        activeOrder.deliveryLocation.x, 
-        activeOrder.deliveryLocation.z, 
-        3
-      )) {
-        const reward = completeOrder(activeOrder.id);
-        toast.success(`🎉 Заказ доставлен! +${reward}₽`, {
-          description: 'Отличная работа!'
-        });
-      }
-    }
-  }, [playerPosition, orders, activeOrder, acceptOrder, pickupOrder, completeOrder, checkNearLocation, lastCheckTime]);
+    return () => clearInterval(interval);
+  }, [playerPosition, orders, activeOrder, acceptOrder, pickupOrder, completeOrder, checkNearLocation]);
   
   return (
     <group>

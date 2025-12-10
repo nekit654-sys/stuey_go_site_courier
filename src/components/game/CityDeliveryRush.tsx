@@ -915,13 +915,10 @@ export function CityDeliveryRush() {
       </div>
       
       {activeOrder && (
-        <div className={isMobile && !isLandscape ? 'mt-24' : ''}>
-          <ActiveOrderDisplay
-            order={activeOrder}
-            stage={deliveryStage}
-            onCancel={cancelOrder}
-          />
-        </div>
+        <ActiveOrderDisplay
+          order={activeOrder}
+          playerPosition={playerPosition}
+        />
       )}
       
       <OrderInfoPanel
