@@ -43,20 +43,29 @@ export function ModernCityNew({ quality = 'medium', playerPosition, onBuildingsR
         const centerX = i * (BLOCK_SIZE + ROAD_WIDTH);
         const centerZ = j * (BLOCK_SIZE + ROAD_WIDTH);
         
-        const width = 8 + Math.random() * 8;
-        const depth = 8 + Math.random() * 8;
-        const height = quality === 'low' ? 
-          (6 + Math.random() * 6) : 
-          (10 + Math.random() * 15);
+        // Создаём 2-4 здания в каждом квартале
+        const buildingsPerBlock = 2 + Math.floor(Math.random() * 3);
         
-        buildingsData.push({
-          x: centerX,
-          z: centerZ,
-          width,
-          depth,
-          height,
-          color: colors[Math.floor(Math.random() * colors.length)]
-        });
+        for (let b = 0; b < buildingsPerBlock; b++) {
+          // Случайное смещение внутри квартала (не на дороге)
+          const offsetX = (Math.random() - 0.5) * (BLOCK_SIZE - 5);
+          const offsetZ = (Math.random() - 0.5) * (BLOCK_SIZE - 5);
+          
+          const width = 4 + Math.random() * 6;
+          const depth = 4 + Math.random() * 6;
+          const height = quality === 'low' ? 
+            (6 + Math.random() * 6) : 
+            (10 + Math.random() * 15);
+          
+          buildingsData.push({
+            x: centerX + offsetX,
+            z: centerZ + offsetZ,
+            width,
+            depth,
+            height,
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+        }
       }
     }
     

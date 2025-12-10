@@ -23,7 +23,7 @@ function CameraFollower({
   cameraRotation: { horizontal: number; vertical: number };
 }) {
   const { camera } = useThree();
-  const currentPosition = useRef(new THREE.Vector3(0, 8, -15));
+  const currentPosition = useRef(new THREE.Vector3(0, 12, -18));
   const currentLookAt = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame(() => {
@@ -31,13 +31,14 @@ function CameraFollower({
 
     const targetPosition = target.current.position;
     
-    const distance = 15;
-    const height = 8;
+    const distance = 18;
+    const height = 12; // Фиксированная высота камеры
     
     const horizontalAngle = cameraRotation.horizontal;
     
+    // Камера всегда на фиксированной высоте, только горизонтальное вращение
     const cameraX = targetPosition.x + distance * Math.sin(horizontalAngle);
-    const cameraY = targetPosition.y + height;
+    const cameraY = height; // Фиксированная высота
     const cameraZ = targetPosition.z + distance * Math.cos(horizontalAngle);
     
     const desiredPosition = new THREE.Vector3(cameraX, cameraY, cameraZ);
@@ -45,16 +46,17 @@ function CameraFollower({
     const playerPos = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
     const safePosition = collisionSystem.checkCameraCollision(desiredPosition, playerPos);
 
-    currentPosition.current.lerp(safePosition, 0.1);
+    currentPosition.current.lerp(safePosition, 0.08);
     camera.position.copy(currentPosition.current);
 
+    // Смотрим немного выше игрока для лучшего обзора
     const lookAtTarget = new THREE.Vector3(
       targetPosition.x,
-      targetPosition.y + 2,
+      targetPosition.y + 1.5,
       targetPosition.z
     );
     
-    currentLookAt.current.lerp(lookAtTarget, 0.1);
+    currentLookAt.current.lerp(lookAtTarget, 0.08);
     camera.lookAt(currentLookAt.current);
   });
 
