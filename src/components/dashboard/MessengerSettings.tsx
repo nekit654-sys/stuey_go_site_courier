@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
+
+const MESSENGER_API_URL = 'https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface MessengerConnection {
@@ -53,19 +55,28 @@ export default function MessengerSettings() {
 
   const fetchConnectionStatus = async () => {
     try {
-      const response = await fetch(`${API_URL.replace('/api', '/messenger-api')}?action=status`, {
+      const response = await fetch(`${MESSENGER_API_URL}?action=status`, {
         headers: {
           'X-User-Id': user?.id?.toString() || ''
         }
       });
 
+      if (!response.ok) {
+        console.error('API error:', response.status);
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setConnections(data.connections);
+      } else {
+        console.error('API returned error:', data.error);
       }
     } catch (error) {
       console.error('Error fetching connection status:', error);
+      toast.error('Не удалось загрузить статус подключений');
     } finally {
       setLoading(false);
     }
@@ -76,7 +87,7 @@ export default function MessengerSettings() {
     setSelectedMessenger(messenger);
 
     try {
-      const response = await fetch(`${API_URL.replace('/api', '/messenger-api')}?action=generate_code`, {
+      const response = await fetch(`${MESSENGER_API_URL}?action=generate_code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +117,7 @@ export default function MessengerSettings() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`${API_URL.replace('/api', '/messenger-api')}?action=unlink`, {
+      const response = await fetch(`${MESSENGER_API_URL}?action=unlink`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
