@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { collisionSystem } from './CollisionSystem';
-import { clampPositionToBounds } from './CityData';
+import { clampToBounds } from './MapBoundary';
 
 interface SimpleCourierProps {
   vehicle: 'walk' | 'bicycle' | 'scooter';
@@ -152,7 +152,7 @@ export function SimpleCourier({
       const newZ = position.current.z + moveZ * stats.speed * delta;
       
       const safePos = collisionSystem.checkPlayerCollision(newX, newZ);
-      const clampedPos = clampPositionToBounds(safePos.x, safePos.z);
+      const clampedPos = clampToBounds(safePos.x, safePos.z); // Используем новую систему границ
       position.current.x = clampedPos.x;
       position.current.z = clampedPos.z;
       

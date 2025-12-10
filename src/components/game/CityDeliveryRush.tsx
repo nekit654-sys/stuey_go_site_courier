@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, PerspectiveCamera } from '@react-three/drei';
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import { SimpleCourier } from './SimpleCourier';
-import { ModernCity } from './ModernCity';
+import { ModernCityNew } from './ModernCityNew';
 import { MiniMap } from './GPSNavigation';
 import { GPSMap } from './GPSMap';
 import { RoundMiniMap } from './RoundMiniMap';
@@ -26,6 +26,7 @@ import { ActiveOrderDisplay } from './ActiveOrderDisplay';
 import { DeliveryMarkers } from './DeliveryMarkers';
 import { SessionStats } from './SessionStats';
 import { ScreenNavigationArrow } from './ScreenNavigationArrow';
+import { OrderHUD, OrderHUDMobile } from './OrderHUD';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateCityBuildings, type BuildingData } from './CityData';
@@ -800,11 +801,11 @@ export function CityDeliveryRush() {
             </mesh>
           </group>
         }>
-          <ModernCity 
-            gridSize={8} 
+          <ModernCityNew 
             quality={graphicsQuality}
+            playerPosition={playerPosition}
             onBuildingsReady={(buildings) => {
-              console.log(`🏗️ ModernCity готов: ${buildings.length} зданий`);
+              console.log(`🏗️ ModernCityNew готов: ${buildings.length} зданий`);
               setCityBuildings(buildings);
             }}
           />
