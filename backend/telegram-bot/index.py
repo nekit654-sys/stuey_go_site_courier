@@ -15,7 +15,8 @@ import urllib.parse
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+YANDEX_GPT_API_KEY = os.environ.get('YANDEX_GPT_API_KEY', '')
+YANDEX_FOLDER_ID = os.environ.get('YANDEX_FOLDER_ID', '')
 BOT_USERNAME = os.environ.get('BOT_USERNAME', 'StueyGoBot')
 
 def get_db_connection():
@@ -114,9 +115,9 @@ def log_activity(courier_id: Optional[int], action: str, details: Optional[Dict]
         cursor.close()
         conn.close()
 
-def ask_openai(question: str, context: Dict[str, Any]) -> str:
-    """Спросить AI о чём угодно"""
-    if not OPENAI_API_KEY:
+def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
+    """Спросить YandexGPT о чём угодно"""
+    if not YANDEX_GPT_API_KEY or not YANDEX_FOLDER_ID:
         return "🤖 AI-ассистент временно недоступен. Используйте команды из меню."
     
     system_prompt = f"""Ты — дружелюбный ассистент Telegram-бота для курьеров Stuey.Go.
@@ -144,15 +145,25 @@ def ask_openai(question: str, context: Dict[str, Any]) -> str:
 - 🏆 Рейтинг — рейтинг курьеров"""
 
     try:
-        url = 'https://api.openai.com/v1/chat/completions'
+        url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion'
+        
         data = {
-            'model': 'gpt-3.5-turbo',
+            'modelUri': f'gpt://{YANDEX_FOLDER_ID}/yandexgpt-lite',
+            'completionOptions': {
+                'stream': False,
+                'temperature': 0.6,
+                'maxTokens': 500
+            },
             'messages': [
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': question}
-            ],
-            'max_tokens': 300,
-            'temperature': 0.7
+                {
+                    'role': 'system',
+                    'text': system_prompt
+                },
+                {
+                    'role': 'user',
+                    'text': question
+                }
+            ]
         }
         
         req = urllib.request.Request(
@@ -160,16 +171,17 @@ def ask_openai(question: str, context: Dict[str, Any]) -> str:
             data=json.dumps(data).encode('utf-8'),
             headers={
                 'Content-Type': 'application/json',
-                'Authorization': f'Bearer {OPENAI_API_KEY}'
+                'Authorization': f'Api-Key {YANDEX_GPT_API_KEY}',
+                'x-folder-id': YANDEX_FOLDER_ID
             }
         )
         
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             result = json.loads(response.read().decode('utf-8'))
-            return result['choices'][0]['message']['content'].strip()
+            return result['result']['alternatives'][0]['message']['text'].strip()
     
     except Exception as e:
-        print(f'OpenAI error: {e}')
+        print(f'YandexGPT error: {e}')
         return "😅 Извини, не смог обработать вопрос. Попробуй использовать кнопки меню!"
 
 def get_courier_context(courier_id: int) -> Dict[str, Any]:
@@ -558,8 +570,8 @@ def handle_text_message(chat_id: int, telegram_id: int, text: str):
     except:
         pass
     
-    # Спросить AI
-    answer = ask_openai(text, context)
+    # Спросить YandexGPT
+    answer = ask_yandex_gpt(text, context)
     
     send_telegram_message(chat_id, answer, reply_markup=get_main_menu_keyboard())
     log_activity(courier_id, 'ai_question', {'question': text[:100], 'answer': answer[:100]})
