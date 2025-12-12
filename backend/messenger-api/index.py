@@ -57,7 +57,7 @@ def generate_link_code(courier_id: int) -> Dict[str, Any]:
         return {
             'success': True,
             'code': result['code'],
-            'expires_at': result['expires_at'].isoformat()
+            'expires_at': result['expires_at'].isoformat() + 'Z'  # Явно указываем UTC
         }
     except Exception as e:
         conn.rollback()
