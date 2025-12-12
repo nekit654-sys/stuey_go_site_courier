@@ -34,6 +34,8 @@ def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', rep
     if reply_markup:
         data['reply_markup'] = reply_markup
     
+    print(f'Sending message data: {json.dumps(data, ensure_ascii=False)}')
+    
     req = urllib.request.Request(
         url,
         data=json.dumps(data).encode('utf-8'),
@@ -42,7 +44,14 @@ def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', rep
     
     try:
         with urllib.request.urlopen(req) as response:
-            return json.loads(response.read().decode('utf-8'))
+            result = json.loads(response.read().decode('utf-8'))
+            print(f'Telegram API response: {result}')
+            return result
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8')
+        print(f'Error sending message: {e}')
+        print(f'Error response: {error_body}')
+        return None
     except Exception as e:
         print(f'Error sending message: {e}')
         return None
