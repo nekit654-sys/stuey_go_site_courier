@@ -18,6 +18,8 @@ interface ActivityTabProps {
 export default function ActivityTab({ authToken }: ActivityTabProps) {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchActivities();
@@ -228,6 +230,57 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
     );
   }
 
+  const toggleSelect = (id: number) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === activities.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(activities.map(a => a.id)));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (selectedIds.size === 0 || isDeleting) return;
+    
+    if (!confirm(`Удалить ${selectedIds.size} событий?`)) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(
+        'https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559?action=delete_activities',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': authToken,
+          },
+          body: JSON.stringify({ ids: Array.from(selectedIds) }),
+        }
+      );
+
+      if (response.ok) {
+        setActivities(activities.filter(a => !selectedIds.has(a.id)));
+        setSelectedIds(new Set());
+      } else {
+        alert('Ошибка при удалении событий');
+      }
+    } catch (error) {
+      console.error('Ошибка удаления:', error);
+      alert('Ошибка при удалении событий');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -235,26 +288,77 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
           <Icon name="Newspaper" size={24} />
           Лента событий
         </h2>
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="hidden sm:inline">Автообновление</span>
+        <div className="flex items-center gap-2 sm:gap-4">
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold text-xs sm:text-sm transition-colors disabled:opacity-50"
+            >
+              <Icon name={isDeleting ? "Loader2" : "Trash2"} size={16} className={isDeleting ? "animate-spin" : ""} />
+              Удалить ({selectedIds.size})
+            </button>
+          )}
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="hidden sm:inline">Автообновление</span>
+          </div>
         </div>
       </div>
+
+      {activities.length > 0 && (
+        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <input
+            type="checkbox"
+            checked={selectedIds.size === activities.length}
+            onChange={toggleSelectAll}
+            className="w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm font-medium text-gray-700">
+            Выбрать все ({activities.length})
+          </span>
+        </div>
+      )}
 
       <div className="space-y-3 sm:space-y-4">
         {activities.map((activity) => (
           <Card
             key={activity.id}
-            className="p-4 sm:p-6 border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] transition-all"
+            className={`p-4 sm:p-6 border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] transition-all ${
+              selectedIds.has(activity.id) ? 'ring-2 ring-blue-500' : ''
+            }`}
           >
             <div className="flex items-start gap-2 sm:gap-4">
+              <input
+                type="checkbox"
+                checked={selectedIds.has(activity.id)}
+                onChange={() => toggleSelect(activity.id)}
+                className="mt-1 w-4 h-4 cursor-pointer flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              />
               <div className={`p-3 rounded-lg border-2 ${getActivityColor(activity.event_type)}`}>
                 <Icon name={getActivityIcon(activity.event_type)} size={20} />
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-bold text-gray-900 break-words">{activity.message}</p>
-                <p className="text-xs text-gray-500 mt-1">{formatTime(activity.created_at)}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 break-words flex-1">{activity.message}</p>
+                  <div className="text-xs text-gray-600 whitespace-nowrap flex-shrink-0 text-right">
+                    <div className="font-medium">
+                      {new Date(activity.created_at).toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div className="text-gray-500">
+                      {new Date(activity.created_at).toLocaleTimeString('ru-RU', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
                 {renderEventDetails(activity)}
               </div>
             </div>

@@ -78,17 +78,42 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             activities = []
             for row in rows:
                 activities.append({
-                    'id': str(row[0]),
-                    'type': row[1],
+                    'id': row[0],
+                    'event_type': row[1],
                     'message': row[2],
                     'data': row[3],
-                    'timestamp': row[4].isoformat() if row[4] else None
+                    'created_at': row[4].isoformat() if row[4] else None
                 })
             
             return {
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'success': True, 'activities': activities}),
+                'isBase64Encoded': False
+            }
+        
+        # Удаление событий
+        if method == 'POST' and action == 'delete_activities':
+            ids = body_data.get('ids', [])
+            if not ids:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Не указаны ID событий'}),
+                    'isBase64Encoded': False
+                }
+            
+            placeholders = ','.join(['%s'] * len(ids))
+            cursor.execute(f"""
+                DELETE FROM t_p25272970_courier_button_site.activity_log 
+                WHERE id IN ({placeholders})
+            """, tuple(ids))
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'deleted': len(ids)}),
                 'isBase64Encoded': False
             }
         
@@ -465,6 +490,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'success': True,
                     'couriers': couriers
                 }),
+                'isBase64Encoded': False
+            }
+        
+        # Получение списка администраторов
+        if method == 'POST' and body_data.get('action') == 'get_admins':
+            cursor.execute("""
+                SELECT id, username, created_at, last_login 
+                FROM t_p25272970_courier_button_site.admins 
+                ORDER BY created_at DESC
+            """)
+            rows = cursor.fetchall()
+            admins = []
+            for row in rows:
+                admins.append({
+                    'id': row[0],
+                    'username': row[1],
+                    'created_at': row[2].isoformat() if row[2] else None,
+                    'last_login': row[3].isoformat() if row[3] else None
+                })
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'admins': admins}),
                 'isBase64Encoded': False
             }
         
