@@ -1,6 +1,6 @@
 """
-Telegram бот для курьеров Stuey.Go
-Функционал: привязка аккаунта, статистика, самобонус, выплаты, AI-ассистент
+Telegram бот для курьеров Stuey.Go с AI-ассистентом
+Интерактивное меню, умные ответы на вопросы, статистика
 """
 
 import json
@@ -10,18 +10,18 @@ from datetime import datetime
 from typing import Dict, Any, Optional, List
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import urllib.request
+import urllib.parse
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 BOT_USERNAME = os.environ.get('BOT_USERNAME', 'StueyGoBot')
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
 def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', reply_markup: Optional[Dict] = None):
-    import urllib.request
-    import urllib.parse
-    
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage'
     
     data = {
@@ -45,6 +45,28 @@ def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', rep
     except Exception as e:
         print(f'Error sending message: {e}')
         return None
+
+def get_main_menu_keyboard():
+    """Главное меню с кнопками"""
+    return {
+        'keyboard': [
+            [{'text': '📊 Статистика'}, {'text': '🎁 Самобонус'}],
+            [{'text': '💸 Выплата'}, {'text': '📜 История'}],
+            [{'text': '🏆 Рейтинг'}, {'text': '❓ Помощь'}]
+        ],
+        'resize_keyboard': True
+    }
+
+def get_stats_menu_keyboard():
+    """Меню статистики"""
+    return {
+        'inline_keyboard': [
+            [{'text': '💰 Заработок', 'callback_data': 'stats_earnings'}],
+            [{'text': '👥 Рефералы', 'callback_data': 'stats_referrals'}],
+            [{'text': '📦 Заказы', 'callback_data': 'stats_orders'}],
+            [{'text': '⬅️ Назад в меню', 'callback_data': 'main_menu'}]
+        ]
+    }
 
 def get_courier_by_telegram(telegram_id: int) -> Optional[int]:
     conn = get_db_connection()
@@ -92,24 +114,156 @@ def log_activity(courier_id: Optional[int], action: str, details: Optional[Dict]
         cursor.close()
         conn.close()
 
+def ask_openai(question: str, context: Dict[str, Any]) -> str:
+    """Спросить AI о чём угодно"""
+    if not OPENAI_API_KEY:
+        return "🤖 AI-ассистент временно недоступен. Используйте команды из меню."
+    
+    system_prompt = f"""Ты — дружелюбный ассистент Telegram-бота для курьеров Stuey.Go.
+
+Информация о курьере:
+- ID: {context.get('courier_id', 'неизвестен')}
+- Баланс: {context.get('balance', 0)} руб.
+- Выполнено заказов: {context.get('total_orders', 0)}
+- Рефералов: {context.get('referrals', 0)}
+- Активных рефералов: {context.get('active_referrals', 0)}
+
+Твоя задача:
+1. Отвечай на русском языке
+2. Будь дружелюбным и мотивирующим
+3. Используй эмодзи для живости
+4. Если курьер спрашивает про статистику — используй данные выше
+5. Отвечай кратко (1-3 предложения)
+6. Если не знаешь точного ответа — предложи использовать команды меню
+
+Доступные команды:
+- 📊 Статистика — подробная статистика
+- 🎁 Самобонус — прогресс самобонуса
+- 💸 Выплата — заявка на выплату
+- 📜 История — история заказов
+- 🏆 Рейтинг — рейтинг курьеров"""
+
+    try:
+        url = 'https://api.openai.com/v1/chat/completions'
+        data = {
+            'model': 'gpt-3.5-turbo',
+            'messages': [
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': question}
+            ],
+            'max_tokens': 300,
+            'temperature': 0.7
+        }
+        
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(data).encode('utf-8'),
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {OPENAI_API_KEY}'
+            }
+        )
+        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return result['choices'][0]['message']['content'].strip()
+    
+    except Exception as e:
+        print(f'OpenAI error: {e}')
+        return "😅 Извини, не смог обработать вопрос. Попробуй использовать кнопки меню!"
+
+def get_courier_context(courier_id: int) -> Dict[str, Any]:
+    """Получить контекст курьера для AI"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Баланс
+        cursor.execute("""
+            SELECT SUM(amount) as total_balance
+            FROM t_p25272970_courier_button_site.courier_earnings
+            WHERE courier_id = %s AND NOT withdrawn
+        """, (courier_id,))
+        balance_data = cursor.fetchone()
+        balance = float(balance_data['total_balance'] or 0)
+        
+        # Заказы
+        cursor.execute("""
+            SELECT COUNT(*) as total_orders
+            FROM t_p25272970_courier_button_site.courier_earnings
+            WHERE courier_id = %s
+        """, (courier_id,))
+        orders_data = cursor.fetchone()
+        total_orders = orders_data['total_orders'] or 0
+        
+        # Рефералы
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total_referrals,
+                COUNT(*) FILTER (WHERE total_orders >= 30) as active_referrals
+            FROM t_p25272970_courier_button_site.couriers
+            WHERE invited_by = %s
+        """, (courier_id,))
+        referrals_data = cursor.fetchone()
+        
+        return {
+            'courier_id': courier_id,
+            'balance': balance,
+            'total_orders': total_orders,
+            'referrals': referrals_data['total_referrals'] or 0,
+            'active_referrals': referrals_data['active_referrals'] or 0
+        }
+    finally:
+        cursor.close()
+        conn.close()
+
 def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str], message_text: str):
+    """Приветствие и привязка аккаунта"""
     parts = message_text.split()
     
+    # Если уже привязан — показать главное меню
+    courier_id = get_courier_by_telegram(telegram_id)
+    if courier_id and len(parts) < 2:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT full_name FROM t_p25272970_courier_button_site.couriers 
+                WHERE id = %s
+            """, (courier_id,))
+            courier = cursor.fetchone()
+            
+            text = (
+                f"👋 <b>С возвращением, {courier['full_name']}!</b>\n\n"
+                f"Выберите раздел в меню или спросите меня что угодно! 😊"
+            )
+            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+            return
+        finally:
+            cursor.close()
+            conn.close()
+    
+    # Если без кода — инструкция
     if len(parts) < 2:
         text = (
-            "👋 <b>Привет! Я бот Stuey.Go</b>\n\n"
-            "Для подключения к личному кабинету:\n"
-            "1️⃣ Откройте личный кабинет на сайте\n"
-            "2️⃣ Перейдите в раздел 'Настройки'\n"
-            "3️⃣ Нажмите 'Подключить Telegram'\n"
-            "4️⃣ Получите код и отправьте мне:\n"
-            "<code>/start ВАШ_КОД</code>\n\n"
-            "🌐 Сайт: https://stuey-go.ru"
+            "👋 <b>Привет! Я помощник Stuey.Go</b>\n\n"
+            "Я помогу тебе:\n"
+            "✅ Следить за заработком\n"
+            "✅ Отслеживать рефералов\n"
+            "✅ Подавать заявки на выплату\n"
+            "✅ Отвечать на твои вопросы\n\n"
+            "<b>Как подключиться:</b>\n"
+            "1️⃣ Открой личный кабинет на сайте\n"
+            "2️⃣ Перейди в 'Настройки'\n"
+            "3️⃣ Нажми 'Подключить Telegram'\n"
+            "4️⃣ Отправь мне полученный код\n\n"
+            "🌐 <a href='https://stuey-go.ru/dashboard'>Открыть личный кабинет</a>"
         )
         send_telegram_message(chat_id, text)
         log_activity(None, 'start_without_code', {'telegram_id': telegram_id})
         return
     
+    # Привязка по коду
     code = parts[1].upper()
     
     conn = get_db_connection()
@@ -127,26 +281,27 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
             send_telegram_message(
                 chat_id,
                 "❌ <b>Код не найден</b>\n\n"
-                "Получите новый код в личном кабинете:\n"
+                "Получи новый код в личном кабинете:\n"
                 "https://stuey-go.ru/dashboard"
             )
             return
         
         if link_data['is_used']:
-            send_telegram_message(chat_id, "❌ <b>Код уже использован</b>\n\nПолучите новый код.")
+            send_telegram_message(chat_id, "❌ <b>Код уже использован</b>\n\nПолучи новый код.")
             return
         
         if link_data['expires_at'] < datetime.now():
             send_telegram_message(
                 chat_id,
                 "⏰ <b>Код истёк</b>\n\n"
-                "Получите новый код в личном кабинете.\n"
+                "Получи новый код в личном кабинете.\n"
                 "Коды действуют 10 минут."
             )
             return
         
         courier_id = link_data['courier_id']
         
+        # Проверка на дубликат
         cursor.execute("""
             SELECT courier_id FROM t_p25272970_courier_button_site.messenger_connections
             WHERE messenger_type = 'telegram' AND messenger_user_id = %s
@@ -159,10 +314,11 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
                 chat_id,
                 "❌ <b>Ошибка привязки</b>\n\n"
                 "Этот Telegram уже привязан к другому аккаунту.\n"
-                "Сначала отвяжите его: /unlink"
+                "Сначала отвяжи его: /unlink"
             )
             return
         
+        # Привязка
         cursor.execute("""
             INSERT INTO t_p25272970_courier_button_site.messenger_connections 
             (courier_id, messenger_type, messenger_user_id, messenger_username, is_verified)
@@ -190,28 +346,17 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
         conn.commit()
         
         text = (
-            f"✅ <b>Аккаунт успешно привязан!</b>\n\n"
-            f"Курьер: {courier['full_name']}\n"
-            f"ID: {courier_id}\n\n"
-            f"<b>Доступные команды:</b>\n"
-            f"📊 /stats - Моя статистика\n"
-            f"🎁 /bonus - Прогресс самобонуса\n"
-            f"💸 /payout - Заявка на выплату\n"
-            f"📜 /history - История заказов\n"
-            f"🏆 /rating - Рейтинг курьеров\n"
-            f"❓ /help - Все команды\n\n"
-            f"Или просто спросите что угодно! 😊"
+            f"✅ <b>Отлично, {courier['full_name']}!</b>\n\n"
+            f"Твой аккаунт успешно подключён! 🎉\n\n"
+            f"<b>Что я умею:</b>\n"
+            f"📊 Показать статистику\n"
+            f"🎁 Отслеживать самобонус\n"
+            f"💸 Помочь с выплатами\n"
+            f"🤖 Отвечать на вопросы\n\n"
+            f"Выбери раздел в меню или просто спроси что-нибудь! 😊"
         )
         
-        keyboard = {
-            'keyboard': [
-                [{'text': '📊 Статистика'}, {'text': '🎁 Самобонус'}],
-                [{'text': '💸 Выплата'}, {'text': '📜 История'}]
-            ],
-            'resize_keyboard': True
-        }
-        
-        send_telegram_message(chat_id, text, reply_markup=keyboard)
+        send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
         log_activity(courier_id, 'link_success', {'username': username})
         
     finally:
@@ -219,13 +364,14 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
         conn.close()
 
 def handle_stats_command(chat_id: int, telegram_id: int):
+    """Статистика с интерактивным меню"""
     courier_id = get_courier_by_telegram(telegram_id)
     
     if not courier_id:
         send_telegram_message(
             chat_id,
             "❌ <b>Аккаунт не привязан</b>\n\n"
-            "Для начала работы привяжите Telegram в личном кабинете."
+            "Для начала работы привяжи Telegram в личном кабинете."
         )
         return
     
@@ -235,68 +381,48 @@ def handle_stats_command(chat_id: int, telegram_id: int):
     cursor = conn.cursor()
     
     try:
+        # Баланс
         cursor.execute("""
             SELECT SUM(amount) as total_balance
             FROM t_p25272970_courier_button_site.courier_earnings
             WHERE courier_id = %s AND NOT withdrawn
         """, (courier_id,))
-        
         balance_data = cursor.fetchone()
         balance = float(balance_data['total_balance'] or 0)
         
+        # Заказы
         cursor.execute("""
             SELECT COUNT(*) as total_orders, AVG(amount) as avg_order
             FROM t_p25272970_courier_button_site.courier_earnings
             WHERE courier_id = %s
         """, (courier_id,))
-        
         orders_data = cursor.fetchone()
         total_orders = orders_data['total_orders'] or 0
         avg_order = float(orders_data['avg_order'] or 0)
         
+        # Рефералы
         cursor.execute("""
-            SELECT current_orders, target_orders, bonus_amount, is_completed
-            FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
-            WHERE courier_id = %s
-            ORDER BY created_at DESC LIMIT 1
+            SELECT 
+                COUNT(*) as total_referrals,
+                COUNT(*) FILTER (WHERE total_orders >= 30) as active_referrals
+            FROM t_p25272970_courier_button_site.couriers
+            WHERE invited_by = %s
         """, (courier_id,))
-        
-        bonus_data = cursor.fetchone()
-        
-        if bonus_data:
-            current = bonus_data['current_orders']
-            target = bonus_data['target_orders']
-            bonus_amount = float(bonus_data['bonus_amount'])
-            is_completed = bonus_data['is_completed']
-            remaining = max(0, target - current)
-            progress_percent = int((current / target) * 100) if target > 0 else 0
-            progress_bar = '█' * (progress_percent // 10) + '░' * (10 - progress_percent // 10)
-        else:
-            current = total_orders
-            target = 50
-            bonus_amount = 5000
-            is_completed = False
-            remaining = max(0, target - current)
-            progress_percent = int((current / target) * 100) if target > 0 else 0
-            progress_bar = '█' * (progress_percent // 10) + '░' * (10 - progress_percent // 10)
+        referrals_data = cursor.fetchone()
+        total_referrals = referrals_data['total_referrals'] or 0
+        active_referrals = referrals_data['active_referrals'] or 0
         
         text = (
-            f"📊 <b>Ваша статистика</b>\n\n"
-            f"🚚 <b>Заказы:</b> {current} / {target} (для самобонуса)\n"
-            f"💰 <b>Текущий баланс:</b> {balance:,.0f} ₽\n"
-            f"🎯 <b>До самобонуса:</b> {remaining} заказов ({remaining * avg_order:,.0f} ₽)\n"
-            f"🔥 <b>Средний чек:</b> {avg_order:,.0f} ₽\n\n"
-            f"📈 <b>Прогресс самобонуса:</b> [{progress_bar}] {progress_percent}%\n\n"
+            f"📊 <b>Твоя статистика</b>\n\n"
+            f"💰 <b>Баланс:</b> {balance:,.0f} ₽\n"
+            f"📦 <b>Заказов выполнено:</b> {total_orders}\n"
+            f"💵 <b>Средний заказ:</b> {avg_order:,.0f} ₽\n\n"
+            f"👥 <b>Рефералов:</b> {total_referrals}\n"
+            f"✅ <b>Активных:</b> {active_referrals}\n\n"
+            f"Выбери подробности:"
         )
         
-        if is_completed:
-            text += "✅ <b>Самобонус достигнут!</b> 🎉\nПодайте заявку: /bonus"
-        elif remaining <= 5:
-            text += f"🔥 <b>Осталось всего {remaining} заказов!</b>"
-        else:
-            text += "💪 Продолжайте в том же духе!"
-        
-        send_telegram_message(chat_id, text)
+        send_telegram_message(chat_id, text, reply_markup=get_stats_menu_keyboard())
         log_activity(courier_id, 'view_stats', {'balance': balance, 'orders': total_orders})
         
     finally:
@@ -304,6 +430,7 @@ def handle_stats_command(chat_id: int, telegram_id: int):
         conn.close()
 
 def handle_bonus_command(chat_id: int, telegram_id: int):
+    """Прогресс самобонуса с мотивацией"""
     courier_id = get_courier_by_telegram(telegram_id)
     
     if not courier_id:
@@ -334,7 +461,7 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
             
             orders = cursor.fetchone()
             current = orders['total_orders'] or 0
-            target = 50
+            target = 30
             bonus_amount = 5000
             is_completed = False
             bonus_earned = 0
@@ -351,29 +478,33 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
         
         if is_completed:
             text = (
-                f"🎉 <b>Самобонус {bonus_earned:,.0f}₽</b>\n\n"
-                f"✅ <b>Поздравляем!</b>\n"
-                f"Вы выполнили {target} заказов и получили самобонус!\n\n"
-                f"💰 Бонус начислен на ваш баланс\n"
-                f"Подайте заявку на выплату: /payout"
+                f"🎉 <b>Самобонус {bonus_earned:,.0f}₽ получен!</b>\n\n"
+                f"✅ Поздравляем!\n"
+                f"Ты выполнил {target} заказов и получил самобонус!\n\n"
+                f"💰 Бонус уже на твоём балансе\n"
+                f"Подай заявку на выплату: 💸 Выплата"
             )
         else:
             estimated_days = max(1, remaining // 3)
             
+            motivation = ""
+            if remaining <= 3:
+                motivation = "🔥 <b>Ты почти у цели!</b> Ещё чуть-чуть! 💪"
+            elif remaining <= 10:
+                motivation = "⚡ <b>Отличный темп!</b> Продолжай в том же духе! 🚀"
+            else:
+                motivation = f"💪 <b>Продолжай работать!</b> До бонуса ~{estimated_days} дн."
+            
             text = (
                 f"🎁 <b>Самобонус {bonus_amount:,.0f}₽</b>\n\n"
-                f"Ваш прогресс: <b>{current} / {target}</b> заказов\n"
+                f"Твой прогресс:\n"
+                f"<b>{current} / {target}</b> заказов\n"
                 f"[{progress_bar}] {progress_percent}%\n\n"
-                f"Осталось выполнить: <b>{remaining} заказов</b>\n"
-                f"Примерное время: ~{estimated_days} дн.\n\n"
+                f"Осталось: <b>{remaining} заказов</b>\n\n"
+                f"{motivation}"
             )
-            
-            if remaining <= 5:
-                text += "🔥 Вы почти у цели! Ещё чуть-чуть! 💪"
-            else:
-                text += f"При текущем темпе вы получите бонус через {estimated_days} дн.! 🚀"
         
-        send_telegram_message(chat_id, text)
+        send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
         log_activity(courier_id, 'view_bonus', {'current': current, 'target': target})
         
     finally:
@@ -381,51 +512,60 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
         conn.close()
 
 def handle_help_command(chat_id: int):
+    """Помощь с эмодзи и примерами"""
     text = (
-        "❓ <b>Список команд</b>\n\n"
-        "📊 /stats - Моя статистика\n"
-        "🎁 /bonus - Прогресс самобонуса\n"
-        "💸 /payout - Заявка на выплату\n"
-        "📜 /history - История заказов\n"
-        "🏆 /rating - Рейтинг курьеров\n"
-        "⚙️ /settings - Настройки уведомлений\n"
-        "🔗 /unlink - Отвязать Telegram\n\n"
-        "Или просто спросите что угодно!\n"
-        "Я понимаю обычные вопросы 😊"
+        "❓ <b>Я умею отвечать на вопросы!</b>\n\n"
+        "<b>Примеры вопросов:</b>\n"
+        "• Сколько я заработал?\n"
+        "• Когда придёт выплата?\n"
+        "• Сколько у меня рефералов?\n"
+        "• Как получить самобонус?\n"
+        "• Сколько осталось до бонуса?\n\n"
+        "<b>Или используй меню:</b>\n"
+        "📊 Статистика — весь заработок\n"
+        "🎁 Самобонус — прогресс\n"
+        "💸 Выплата — подать заявку\n"
+        "📜 История — все заказы\n"
+        "🏆 Рейтинг — топ курьеров\n\n"
+        "Просто напиши мне свой вопрос! 😊"
     )
     
-    send_telegram_message(chat_id, text)
+    send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
 
 def handle_text_message(chat_id: int, telegram_id: int, text: str):
-    text_lower = text.lower()
+    """Обработка текстовых сообщений через AI"""
+    courier_id = get_courier_by_telegram(telegram_id)
     
-    if 'статистика' in text_lower or 'stats' in text_lower:
-        handle_stats_command(chat_id, telegram_id)
-    elif 'самобонус' in text_lower or 'бонус' in text_lower:
-        handle_bonus_command(chat_id, telegram_id)
-    elif 'помощь' in text_lower or 'help' in text_lower:
-        handle_help_command(chat_id)
-    else:
-        courier_id = get_courier_by_telegram(telegram_id)
-        
-        if not courier_id:
-            send_telegram_message(
-                chat_id,
-                "❌ Аккаунт не привязан\n\n"
-                "Для начала работы привяжите Telegram в личном кабинете."
-            )
-            return
-        
+    if not courier_id:
         send_telegram_message(
             chat_id,
-            "🤖 AI-ассистент пока в разработке.\n\n"
-            "Используйте команды:\n"
-            "/stats - Статистика\n"
-            "/bonus - Самобонус\n"
-            "/help - Все команды"
+            "❌ <b>Аккаунт не привязан</b>\n\n"
+            "Для начала работы привяжи Telegram в личном кабинете."
         )
+        return
+    
+    update_last_interaction(telegram_id)
+    
+    # Получить контекст курьера
+    context = get_courier_context(courier_id)
+    
+    # Отправить typing action
+    try:
+        typing_url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendChatAction'
+        typing_data = json.dumps({'chat_id': chat_id, 'action': 'typing'}).encode('utf-8')
+        typing_req = urllib.request.Request(typing_url, data=typing_data, headers={'Content-Type': 'application/json'})
+        urllib.request.urlopen(typing_req)
+    except:
+        pass
+    
+    # Спросить AI
+    answer = ask_openai(text, context)
+    
+    send_telegram_message(chat_id, answer, reply_markup=get_main_menu_keyboard())
+    log_activity(courier_id, 'ai_question', {'question': text[:100], 'answer': answer[:100]})
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    """Основной обработчик webhook от Telegram"""
     method = event.get('httpMethod', 'POST')
     
     if method == 'OPTIONS':
@@ -436,16 +576,34 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Methods': 'POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     try:
         body = json.loads(event.get('body', '{}'))
         
+        # Обработка callback кнопок
+        if 'callback_query' in body:
+            callback = body['callback_query']
+            chat_id = callback['message']['chat']['id']
+            telegram_id = callback['from']['id']
+            data = callback['data']
+            
+            # TODO: обработка callback кнопок (stats_earnings, stats_referrals и т.д.)
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'ok': True}),
+                'isBase64Encoded': False
+            }
+        
+        # Обработка обычных сообщений
         if 'message' not in body:
             return {
                 'statusCode': 200,
-                'body': json.dumps({'ok': True})
+                'body': json.dumps({'ok': True}),
+                'isBase64Encoded': False
             }
         
         message = body['message']
@@ -454,25 +612,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         username = message['from'].get('username')
         text = message.get('text', '')
         
+        # Команды
         if text.startswith('/start'):
             handle_start_command(chat_id, telegram_id, username, text)
-        elif text == '/stats' or text == '📊 Статистика':
+        elif text in ['/stats', '📊 Статистика']:
             handle_stats_command(chat_id, telegram_id)
-        elif text == '/bonus' or text == '🎁 Самобонус':
+        elif text in ['/bonus', '🎁 Самобонус']:
             handle_bonus_command(chat_id, telegram_id)
-        elif text == '/help' or text == '❓ Помощь':
+        elif text in ['/help', '❓ Помощь']:
             handle_help_command(chat_id)
         else:
+            # Любой другой текст — спросить AI
             handle_text_message(chat_id, telegram_id, text)
         
         return {
             'statusCode': 200,
-            'body': json.dumps({'ok': True})
+            'body': json.dumps({'ok': True}),
+            'isBase64Encoded': False
         }
     
     except Exception as e:
         print(f'Error: {e}')
+        import traceback
+        traceback.print_exc()
         return {
             'statusCode': 200,
-            'body': json.dumps({'ok': True})
+            'body': json.dumps({'ok': True}),
+            'isBase64Encoded': False
         }
