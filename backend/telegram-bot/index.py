@@ -238,54 +238,9 @@ def get_courier_context(courier_id: int) -> Dict[str, Any]:
         cursor.close()
         conn.close()
 
-def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str], message_text: str):
-    """Приветствие и привязка аккаунта"""
-    parts = message_text.split()
-    
-    # Если уже привязан — показать главное меню
-    courier_id = get_courier_by_telegram(telegram_id)
-    if courier_id and len(parts) < 2:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                SELECT full_name FROM t_p25272970_courier_button_site.couriers 
-                WHERE id = %s
-            """, (courier_id,))
-            courier = cursor.fetchone()
-            
-            text = (
-                f"👋 <b>С возвращением, {courier['full_name']}!</b>\n\n"
-                f"Выберите раздел в меню или спросите меня что угодно! 😊"
-            )
-            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
-            return
-        finally:
-            cursor.close()
-            conn.close()
-    
-    # Если без кода — инструкция
-    if len(parts) < 2:
-        text = (
-            "👋 <b>Привет! Я помощник Stuey.Go</b>\n\n"
-            "Я помогу тебе:\n"
-            "✅ Следить за заработком\n"
-            "✅ Отслеживать рефералов\n"
-            "✅ Подавать заявки на выплату\n"
-            "✅ Отвечать на твои вопросы\n\n"
-            "<b>Как подключиться:</b>\n"
-            "1️⃣ Открой личный кабинет на сайте\n"
-            "2️⃣ Перейди в 'Настройки'\n"
-            "3️⃣ Нажми 'Подключить Telegram'\n"
-            "4️⃣ Отправь мне полученный код\n\n"
-            "🌐 <a href='https://stuey-go.ru/dashboard'>Открыть личный кабинет</a>"
-        )
-        send_telegram_message(chat_id, text)
-        log_activity(None, 'start_without_code', {'telegram_id': telegram_id})
-        return
-    
-    # Привязка по коду
-    code = parts[1].upper()
+def verify_and_link_code(chat_id: int, telegram_id: int, username: Optional[str], code: str):
+    """Проверка и привязка кода"""
+    code = code.upper().strip()
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -303,12 +258,12 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
                 chat_id,
                 "❌ <b>Код не найден</b>\n\n"
                 "Получи новый код в личном кабинете:\n"
-                "https://stuey-go.ru/dashboard"
+                "🌐 <a href='https://stuey-go.ru/dashboard'>Открыть личный кабинет</a>"
             )
             return
         
         if link_data['is_used']:
-            send_telegram_message(chat_id, "❌ <b>Код уже использован</b>\n\nПолучи новый код.")
+            send_telegram_message(chat_id, "❌ <b>Код уже использован</b>\n\nПолучи новый код в личном кабинете.")
             return
         
         if link_data['expires_at'] < datetime.now():
@@ -316,7 +271,8 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
                 chat_id,
                 "⏰ <b>Код истёк</b>\n\n"
                 "Получи новый код в личном кабинете.\n"
-                "Коды действуют 10 минут."
+                "Коды действуют 10 минут.\n\n"
+                "🌐 <a href='https://stuey-go.ru/dashboard'>Открыть личный кабинет</a>"
             )
             return
         
@@ -383,6 +339,56 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
     finally:
         cursor.close()
         conn.close()
+
+def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str], message_text: str):
+    """Приветствие и привязка аккаунта"""
+    parts = message_text.split()
+    
+    # Если уже привязан — показать главное меню
+    courier_id = get_courier_by_telegram(telegram_id)
+    if courier_id and len(parts) < 2:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT full_name FROM t_p25272970_courier_button_site.couriers 
+                WHERE id = %s
+            """, (courier_id,))
+            courier = cursor.fetchone()
+            
+            text = (
+                f"👋 <b>С возвращением, {courier['full_name']}!</b>\n\n"
+                f"Выберите раздел в меню или спросите меня что угодно! 😊"
+            )
+            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+            return
+        finally:
+            cursor.close()
+            conn.close()
+    
+    # Если без кода — инструкция
+    if len(parts) < 2:
+        text = (
+            "👋 <b>Привет! Я помощник Stuey.Go</b>\n\n"
+            "Я помогу тебе:\n"
+            "✅ Следить за заработком\n"
+            "✅ Отслеживать рефералов\n"
+            "✅ Подавать заявки на выплату\n"
+            "✅ Отвечать на твои вопросы\n\n"
+            "<b>Как подключиться:</b>\n"
+            "1️⃣ Открой личный кабинет на сайте\n"
+            "2️⃣ Перейди в 'Настройки'\n"
+            "3️⃣ Нажми 'Подключить Telegram'\n"
+            "4️⃣ Отправь мне полученный код\n\n"
+            "🌐 <a href='https://stuey-go.ru/dashboard'>Открыть личный кабинет</a>"
+        )
+        send_telegram_message(chat_id, text)
+        log_activity(None, 'start_without_code', {'telegram_id': telegram_id})
+        return
+    
+    # Привязка по коду
+    code = parts[1].upper()
+    verify_and_link_code(chat_id, telegram_id, username, code)
 
 def handle_stats_command(chat_id: int, telegram_id: int):
     """Статистика с интерактивным меню"""
@@ -642,6 +648,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             handle_bonus_command(chat_id, telegram_id)
         elif text in ['/help', '❓ Помощь']:
             handle_help_command(chat_id)
+        elif len(text) == 6 and text.replace(' ', '').isalnum():
+            # Если текст выглядит как 6-символьный код — попробовать привязать
+            verify_and_link_code(chat_id, telegram_id, username, text)
         else:
             # Любой другой текст — спросить AI
             handle_text_message(chat_id, telegram_id, text)
