@@ -38,6 +38,17 @@ export default function MessengerSettings() {
     fetchConnectionStatus();
   }, [user?.id]);
 
+  // Проверка подключения каждые 3 секунды когда есть активный код
+  useEffect(() => {
+    if (!linkCode || !selectedMessenger) return;
+
+    const interval = setInterval(() => {
+      fetchConnectionStatus();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [linkCode, selectedMessenger]);
+
   useEffect(() => {
     if (!codeExpiry) return;
 
@@ -71,6 +82,14 @@ export default function MessengerSettings() {
 
       if (data.success) {
         setConnections(data.connections);
+        
+        // Если подключение произошло, сбросить код
+        if (selectedMessenger && data.connections[selectedMessenger]?.connected) {
+          setLinkCode(null);
+          setCodeExpiry(null);
+          setSelectedMessenger(null);
+          toast.success(`${selectedMessenger === 'telegram' ? 'Telegram' : 'WhatsApp'} успешно подключен!`);
+        }
       } else {
         console.error('API returned error:', data.error);
       }
