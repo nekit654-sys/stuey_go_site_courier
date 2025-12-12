@@ -275,7 +275,7 @@ def get_courier_context(courier_id: int) -> Dict[str, Any]:
         cursor.execute("""
             SELECT COALESCE(SUM(amount), 0) as total_paid
             FROM t_p25272970_courier_button_site.withdrawal_requests
-            WHERE user_id = %s AND status = 'paid'
+            WHERE courier_id = %s AND status = 'paid'
         """, (courier_id,))
         paid_data = cursor.fetchone()
         total_paid = float(paid_data['total_paid'] or 0)
@@ -408,7 +408,7 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                SELECT full_name FROM t_p25272970_courier_button_site.couriers 
+                SELECT full_name FROM t_p25272970_courier_button_site.users 
                 WHERE id = %s
             """, (courier_id,))
             courier = cursor.fetchone()
