@@ -22,6 +22,36 @@ BOT_USERNAME = os.environ.get('BOT_USERNAME', 'StueyGoBot')
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
+def get_bot_content(cursor) -> Dict[str, str]:
+    """Получает актуальный контент бота из БД"""
+    cursor.execute("""
+        SELECT welcome_message, start_message, bonus_title, bonus_description, 
+               bonus_conditions, referral_title, referral_description, referral_conditions,
+               faq_earnings, faq_withdrawal, faq_support, profile_header, 
+               stats_header, help_message
+        FROM t_p25272970_courier_button_site.bot_content 
+        WHERE id = 1
+    """)
+    row = cursor.fetchone()
+    if row:
+        return {
+            'welcome_message': row['welcome_message'],
+            'start_message': row['start_message'],
+            'bonus_title': row['bonus_title'],
+            'bonus_description': row['bonus_description'],
+            'bonus_conditions': row['bonus_conditions'],
+            'referral_title': row['referral_title'],
+            'referral_description': row['referral_description'],
+            'referral_conditions': row['referral_conditions'],
+            'faq_earnings': row['faq_earnings'],
+            'faq_withdrawal': row['faq_withdrawal'],
+            'faq_support': row['faq_support'],
+            'profile_header': row['profile_header'],
+            'stats_header': row['stats_header'],
+            'help_message': row['help_message']
+        }
+    return {}
+
 def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', reply_markup: Optional[Dict] = None):
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage'
     

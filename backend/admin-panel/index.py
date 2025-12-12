@@ -517,6 +517,92 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        # Получение контента бота
+        if method == 'POST' and body_data.get('action') == 'get_bot_content':
+            cursor.execute("""
+                SELECT * FROM t_p25272970_courier_button_site.bot_content 
+                WHERE id = 1
+            """)
+            row = cursor.fetchone()
+            if row:
+                content = {
+                    'welcome_message': row[1],
+                    'start_message': row[2],
+                    'bonus_title': row[3],
+                    'bonus_description': row[4],
+                    'bonus_conditions': row[5],
+                    'referral_title': row[6],
+                    'referral_description': row[7],
+                    'referral_conditions': row[8],
+                    'faq_earnings': row[9],
+                    'faq_withdrawal': row[10],
+                    'faq_support': row[11],
+                    'profile_header': row[12],
+                    'stats_header': row[13],
+                    'help_message': row[14],
+                    'updated_at': row[16].isoformat() if row[16] else None
+                }
+            else:
+                content = {}
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'content': content}),
+                'isBase64Encoded': False
+            }
+        
+        # Обновление контента бота
+        if method == 'POST' and body_data.get('action') == 'update_bot_content':
+            content = body_data.get('content', {})
+            
+            update_fields = []
+            values = []
+            
+            field_mapping = {
+                'welcome_message': 'welcome_message',
+                'start_message': 'start_message',
+                'bonus_title': 'bonus_title',
+                'bonus_description': 'bonus_description',
+                'bonus_conditions': 'bonus_conditions',
+                'referral_title': 'referral_title',
+                'referral_description': 'referral_description',
+                'referral_conditions': 'referral_conditions',
+                'faq_earnings': 'faq_earnings',
+                'faq_withdrawal': 'faq_withdrawal',
+                'faq_support': 'faq_support',
+                'profile_header': 'profile_header',
+                'stats_header': 'stats_header',
+                'help_message': 'help_message'
+            }
+            
+            for field_key, db_field in field_mapping.items():
+                if field_key in content:
+                    update_fields.append(f"{db_field} = %s")
+                    values.append(content[field_key])
+            
+            if update_fields:
+                update_fields.append("updated_at = CURRENT_TIMESTAMP")
+                query = f"""
+                    UPDATE t_p25272970_courier_button_site.bot_content 
+                    SET {', '.join(update_fields)}
+                    WHERE id = 1
+                """
+                cursor.execute(query, tuple(values))
+                conn.commit()
+                
+                log_activity(cursor, 'bot_content_updated', 'Обновлён контент Telegram-бота', {
+                    'fields_updated': list(content.keys())
+                })
+                conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'message': 'Контент бота обновлён'}),
+                'isBase64Encoded': False
+            }
+        
         elif method == 'GET' and action == 'payouts':
             # Получение всех заявок на выплаты
             cursor.execute("""
