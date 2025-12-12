@@ -507,7 +507,7 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
     
     try:
         cursor.execute("""
-            SELECT current_orders, target_orders, bonus_amount, is_completed, bonus_earned
+            SELECT orders_completed, is_completed, bonus_earned
             FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
             WHERE courier_id = %s
             ORDER BY created_at DESC LIMIT 1
@@ -529,9 +529,9 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
             is_completed = False
             bonus_earned = 0
         else:
-            current = bonus_data['current_orders']
-            target = bonus_data['target_orders']
-            bonus_amount = float(bonus_data['bonus_amount'])
+            current = bonus_data['orders_completed']
+            target = 30
+            bonus_amount = 5000
             is_completed = bonus_data['is_completed']
             bonus_earned = float(bonus_data['bonus_earned'] or 0)
         
