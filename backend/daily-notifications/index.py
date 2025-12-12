@@ -108,21 +108,19 @@ def send_daily_notifications():
         cursor.execute("""
             SELECT 
                 mc.messenger_user_id as telegram_id,
-                u.id as courier_id,
-                u.full_name,
-                u.total_orders,
-                u.total_earnings + u.referral_earnings as balance,
-                (SELECT COUNT(*) FROM t_p25272970_courier_button_site.referrals WHERE referred_by = u.id) as total_referrals,
-                (SELECT COUNT(*) FROM t_p25272970_courier_button_site.referrals r 
-                 JOIN t_p25272970_courier_button_site.users ru ON r.referred_user_id = ru.id 
-                 WHERE r.referred_by = u.id AND ru.total_orders >= 30) as active_referrals
+                c.id as courier_id,
+                c.username as full_name,
+                COALESCE(c.total_deliveries, 0) as total_orders,
+                COALESCE(c.total_coins, 0) as balance,
+                0 as total_referrals,
+                0 as active_referrals
             FROM t_p25272970_courier_button_site.messenger_connections mc
-            JOIN t_p25272970_courier_button_site.users u ON mc.courier_id = u.id
+            JOIN t_p25272970_courier_button_site.couriers c ON mc.courier_id = c.id
             WHERE 
                 mc.messenger_type = 'telegram' 
                 AND mc.is_verified = true
-                AND mc.last_interaction > %s
-            ORDER BY u.id
+                AND mc.last_interaction_at > %s
+            ORDER BY c.id
         """, (yesterday,))
         
         couriers = cursor.fetchall()
