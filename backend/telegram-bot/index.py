@@ -235,23 +235,31 @@ def get_courier_context(courier_id: int) -> Dict[str, Any]:
     cursor = conn.cursor()
     
     try:
-        # Баланс
+        # Получить данные пользователя
         cursor.execute("""
-            SELECT SUM(amount) as total_balance
-            FROM t_p25272970_courier_button_site.courier_earnings
-            WHERE courier_id = %s AND NOT withdrawn
+            SELECT 
+                id,
+                total_orders,
+                total_earnings,
+                referral_earnings,
+                self_orders_count
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
         """, (courier_id,))
-        balance_data = cursor.fetchone()
-        balance = float(balance_data['total_balance'] or 0)
+        user_data = cursor.fetchone()
         
-        # Заказы
-        cursor.execute("""
-            SELECT COUNT(*) as total_orders
-            FROM t_p25272970_courier_button_site.courier_earnings
-            WHERE courier_id = %s
-        """, (courier_id,))
-        orders_data = cursor.fetchone()
-        total_orders = orders_data['total_orders'] or 0
+        if not user_data:
+            return {
+                'courier_id': courier_id,
+                'balance': 0,
+                'total_orders': 0,
+                'referrals': 0,
+                'active_referrals': 0
+            }
+        
+        total_orders = user_data['total_orders'] or 0
+        total_earnings = float(user_data['total_earnings'] or 0)
+        referral_earnings = float(user_data['referral_earnings'] or 0)
         
         # Рефералы
         cursor.execute("""
@@ -259,14 +267,27 @@ def get_courier_context(courier_id: int) -> Dict[str, Any]:
                 COUNT(*) as total_referrals,
                 COUNT(*) FILTER (WHERE total_orders >= 30) as active_referrals
             FROM t_p25272970_courier_button_site.users
-            WHERE invited_by = %s
+            WHERE invited_by_user_id = %s
         """, (courier_id,))
         referrals_data = cursor.fetchone()
+        
+        # Выплаты
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount), 0) as total_paid
+            FROM t_p25272970_courier_button_site.withdrawal_requests
+            WHERE user_id = %s AND status = 'paid'
+        """, (courier_id,))
+        paid_data = cursor.fetchone()
+        total_paid = float(paid_data['total_paid'] or 0)
+        
+        balance = total_earnings + referral_earnings - total_paid
         
         return {
             'courier_id': courier_id,
             'balance': balance,
             'total_orders': total_orders,
+            'total_earnings': total_earnings,
+            'referral_earnings': referral_earnings,
             'referrals': referrals_data['total_referrals'] or 0,
             'active_referrals': referrals_data['active_referrals'] or 0
         }
@@ -444,36 +465,15 @@ def handle_stats_command(chat_id: int, telegram_id: int):
     cursor = conn.cursor()
     
     try:
-        # Баланс
-        cursor.execute("""
-            SELECT SUM(amount) as total_balance
-            FROM t_p25272970_courier_button_site.courier_earnings
-            WHERE courier_id = %s AND NOT withdrawn
-        """, (courier_id,))
-        balance_data = cursor.fetchone()
-        balance = float(balance_data['total_balance'] or 0)
+        # Получить контекст курьера (весь заработок)
+        context = get_courier_context(courier_id)
+        balance = context['balance']
+        total_orders = context['total_orders']
+        total_referrals = context['referrals']
+        active_referrals = context['active_referrals']
         
-        # Заказы
-        cursor.execute("""
-            SELECT COUNT(*) as total_orders, AVG(amount) as avg_order
-            FROM t_p25272970_courier_button_site.courier_earnings
-            WHERE courier_id = %s
-        """, (courier_id,))
-        orders_data = cursor.fetchone()
-        total_orders = orders_data['total_orders'] or 0
-        avg_order = float(orders_data['avg_order'] or 0)
-        
-        # Рефералы
-        cursor.execute("""
-            SELECT 
-                COUNT(*) as total_referrals,
-                COUNT(*) FILTER (WHERE total_orders >= 30) as active_referrals
-            FROM t_p25272970_courier_button_site.users
-            WHERE invited_by = %s
-        """, (courier_id,))
-        referrals_data = cursor.fetchone()
-        total_referrals = referrals_data['total_referrals'] or 0
-        active_referrals = referrals_data['active_referrals'] or 0
+        # Средний заработок за заказ
+        avg_order = (context['total_earnings'] / total_orders) if total_orders > 0 else 0
         
         text = (
             f"📊 <b>Твоя статистика</b>\n\n"
