@@ -32,7 +32,7 @@ def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', rep
     }
     
     if reply_markup:
-        data['reply_markup'] = json.dumps(reply_markup)
+        data['reply_markup'] = reply_markup
     
     req = urllib.request.Request(
         url,
