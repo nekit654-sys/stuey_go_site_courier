@@ -55,6 +55,7 @@ export default function MessengerSettings() {
     const timer = setInterval(() => {
       const now = new Date();
       if (now >= codeExpiry) {
+        console.log('⏰ Код истёк');
         setLinkCode(null);
         setCodeExpiry(null);
         toast.info('Код истёк. Сгенерируйте новый код.');
@@ -66,6 +67,7 @@ export default function MessengerSettings() {
 
   const fetchConnectionStatus = async () => {
     try {
+      console.log('🔄 Проверка статуса подключений, linkCode:', linkCode, 'selectedMessenger:', selectedMessenger);
       const response = await fetch(`${MESSENGER_API_URL}?action=status`, {
         headers: {
           'X-User-Id': user?.id?.toString() || ''
@@ -81,10 +83,12 @@ export default function MessengerSettings() {
       const data = await response.json();
 
       if (data.success) {
+        console.log('📡 Статус подключений:', data.connections);
         setConnections(data.connections);
         
         // Если подключение произошло, сбросить код
         if (selectedMessenger && data.connections[selectedMessenger]?.connected) {
+          console.log('✅ Подключение обнаружено! Сбрасываем код');
           setLinkCode(null);
           setCodeExpiry(null);
           setSelectedMessenger(null);
@@ -122,6 +126,7 @@ export default function MessengerSettings() {
       const data = await response.json();
 
       if (data.success) {
+        console.log('✅ Код сгенерирован:', data.code, 'expires:', data.expires_at);
         setLinkCode(data.code);
         setCodeExpiry(new Date(data.expires_at));
         toast.success('Код сгенерирован! Действителен 10 минут');
@@ -129,6 +134,7 @@ export default function MessengerSettings() {
         toast.error(data.error || 'Ошибка генерации кода');
       }
     } catch (error) {
+      console.error('❌ Ошибка генерации кода:', error);
       toast.error('Ошибка подключения к серверу');
     } finally {
       setIsGeneratingCode(false);
