@@ -27,6 +27,7 @@ import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
 import MessengerSettings from '@/components/dashboard/MessengerSettings';
+import TelegramConnectCard from '@/components/dashboard/TelegramConnectCard';
 
 
 interface Stats {
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const [stories, setStories] = useState<any[]>([]);
   const [showStories, setShowStories] = useState(false);
   const [showNewCourierNotification, setShowNewCourierNotification] = useState(false);
+  const [telegramConnected, setTelegramConnected] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -93,9 +95,27 @@ export default function Dashboard() {
       fetchReferrals();
       fetchWithdrawalRequests();
       fetchStories();
+      checkTelegramConnection();
       setLoading(false);
     }
   }, [isAuthenticated, navigate, user?.id]);
+
+  const checkTelegramConnection = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=status', {
+        headers: {
+          'X-User-Id': user?.id?.toString() || ''
+        }
+      });
+
+      const data = await response.json();
+      if (data.success && data.connections?.telegram?.connected) {
+        setTelegramConnected(true);
+      }
+    } catch (error) {
+      console.error('Error checking Telegram connection:', error);
+    }
+  };
 
   useEffect(() => {
     if (!user || !isAuthenticated) return;
@@ -337,6 +357,11 @@ export default function Dashboard() {
             {/* Stats Tab */}
             {activeTab === 'stats' && (
               <div className="space-y-3 sm:space-y-4">
+                {/* Telegram Connect Card - показываем только если не подключен */}
+                {!telegramConnected && (
+                  <TelegramConnectCard onConnect={() => setActiveTab('settings')} />
+                )}
+
                 {/* Startup Bonus Notification */}
                 {user?.id && (
                   <StartupBonusNotification 
