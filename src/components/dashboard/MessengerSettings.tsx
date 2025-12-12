@@ -92,8 +92,13 @@ export default function MessengerSettings() {
         headers: {
           'Content-Type': 'application/json',
           'X-User-Id': user?.id?.toString() || ''
-        }
+        },
+        body: JSON.stringify({})
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 

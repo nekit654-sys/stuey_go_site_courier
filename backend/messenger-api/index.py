@@ -19,6 +19,7 @@ def get_db_connection():
 
 def cors_headers():
     return {
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token',
@@ -240,7 +241,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             'statusCode': 200,
             'headers': cors_headers(),
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     params = event.get('queryStringParameters', {}) or {}
@@ -251,7 +253,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         if method == 'POST':
-            body = json.loads(event.get('body', '{}'))
+            body_str = event.get('body') or '{}'
+            body = json.loads(body_str) if body_str else {}
             
             if action == 'generate_code':
                 if not courier_id_header:
@@ -280,7 +283,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     return {
                         'statusCode': 400,
                         'headers': cors_headers(),
-                        'body': json.dumps({'success': False, 'error': 'Отсутствуют обязательные поля'})
+                        'body': json.dumps({'success': False, 'error': 'Отсутствуют обязательные поля'}),
+                        'isBase64Encoded': False
                     }
                 
                 result = verify_link_code(code, messenger_type, messenger_user_id, messenger_username)
@@ -288,7 +292,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     'statusCode': 200 if result['success'] else 400,
                     'headers': cors_headers(),
-                    'body': json.dumps(result)
+                    'body': json.dumps(result),
+                    'isBase64Encoded': False
                 }
             
             elif action == 'unlink':
@@ -296,7 +301,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     return {
                         'statusCode': 401,
                         'headers': cors_headers(),
-                        'body': json.dumps({'success': False, 'error': 'Не авторизован'})
+                        'body': json.dumps({'success': False, 'error': 'Не авторизован'}),
+                        'isBase64Encoded': False
                     }
                 
                 courier_id = int(courier_id_header)
@@ -306,7 +312,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     return {
                         'statusCode': 400,
                         'headers': cors_headers(),
-                        'body': json.dumps({'success': False, 'error': 'Укажите тип мессенджера'})
+                        'body': json.dumps({'success': False, 'error': 'Укажите тип мессенджера'}),
+                        'isBase64Encoded': False
                     }
                 
                 result = unlink_messenger(courier_id, messenger_type)
@@ -314,7 +321,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     'statusCode': 200 if result['success'] else 400,
                     'headers': cors_headers(),
-                    'body': json.dumps(result)
+                    'body': json.dumps(result),
+                    'isBase64Encoded': False
                 }
         
         elif method == 'GET':
@@ -323,7 +331,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     return {
                         'statusCode': 401,
                         'headers': cors_headers(),
-                        'body': json.dumps({'success': False, 'error': 'Не авторизован'})
+                        'body': json.dumps({'success': False, 'error': 'Не авторизован'}),
+                        'isBase64Encoded': False
                     }
                 
                 courier_id = int(courier_id_header)
@@ -332,18 +341,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     'statusCode': 200,
                     'headers': cors_headers(),
-                    'body': json.dumps(result)
+                    'body': json.dumps(result),
+                    'isBase64Encoded': False
                 }
         
         return {
             'statusCode': 400,
             'headers': cors_headers(),
-            'body': json.dumps({'success': False, 'error': 'Неизвестное действие'})
+            'body': json.dumps({'success': False, 'error': 'Неизвестное действие'}),
+            'isBase64Encoded': False
         }
     
     except Exception as e:
         return {
             'statusCode': 500,
             'headers': cors_headers(),
-            'body': json.dumps({'success': False, 'error': str(e)})
+            'body': json.dumps({'success': False, 'error': str(e)}),
+            'isBase64Encoded': False
         }
