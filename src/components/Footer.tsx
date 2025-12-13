@@ -41,7 +41,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="text-gray-400 text-sm border-t-2 border-gray-700 pt-4 font-medium">
-          <p>© 2025 | Все права защищены!</p>
+          <p>© 2025 Яндекс Еда × Stuey.Go | Все права защищены!</p>
         </div>
       </div>
     </footer>
