@@ -12,10 +12,9 @@ interface Game2DStats {
   rank?: number;
 }
 
-interface Game3DStats {
-  total_deliveries: number;
-  total_coins: number;
-  level: number;
+interface GameHTMLStats {
+  high_score: number;
+  total_plays: number;
   rank?: number;
 }
 
@@ -34,11 +33,11 @@ export default function GamesTab({ userId }: GamesTabProps) {
   const { user, isAuthenticated } = useAuth();
   const { openGame } = useGame();
   const navigate = useNavigate();
-  const [activeGame, setActiveGame] = useState<'2d' | '3d'>('2d');
+  const [activeGame, setActiveGame] = useState<'2d' | 'html'>('2d');
   const [stats2D, setStats2D] = useState<Game2DStats | null>(null);
-  const [stats3D, setStats3D] = useState<Game3DStats | null>(null);
+  const [statsHTML, setStatsHTML] = useState<GameHTMLStats | null>(null);
   const [leaderboard2D, setLeaderboard2D] = useState<LeaderboardEntry[]>([]);
-  const [leaderboard3D, setLeaderboard3D] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardHTML, setLeaderboardHTML] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,27 +54,16 @@ export default function GamesTab({ userId }: GamesTabProps) {
 
   const fetchStats = async () => {
     try {
-      const [response2D, response3D] = await Promise.all([
-        fetch(`${API_URL}?route=game&action=my_stats`, {
-          headers: { 'X-User-Id': userId.toString() },
-        }),
-        fetch(`https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=profile&user_id=${userId}&username=${user?.full_name || 'Guest'}`)
-      ]);
+      const response2D = await fetch(`${API_URL}?route=game&action=my_stats`, {
+        headers: { 'X-User-Id': userId.toString() },
+      });
 
       const data2D = await response2D.json();
       if (data2D.success) {
         setStats2D(data2D.stats);
       }
 
-      const data3D = await response3D.json();
-      if (data3D.courier) {
-        setStats3D({
-          total_deliveries: data3D.courier.total_deliveries || 0,
-          total_coins: data3D.courier.total_coins || 0,
-          level: data3D.courier.level || 1,
-          rank: data3D.courier.rank
-        });
-      }
+      setStatsHTML({ high_score: 0, total_plays: 0, rank: undefined });
     } catch (error) {
       console.error('Error fetching game stats:', error);
     } finally {
@@ -85,25 +73,14 @@ export default function GamesTab({ userId }: GamesTabProps) {
 
   const fetchLeaderboards = async () => {
     try {
-      const [response2D, response3D] = await Promise.all([
-        fetch(`${API_URL}?route=game&action=leaderboard&limit=5`),
-        fetch(`https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4?action=leaderboard&limit=5`)
-      ]);
+      const response2D = await fetch(`${API_URL}?route=game&action=leaderboard&limit=5`);
 
       const data2D = await response2D.json();
       if (data2D.success) {
         setLeaderboard2D(data2D.leaderboard || []);
       }
 
-      const data3D = await response3D.json();
-      if (data3D.leaderboard) {
-        setLeaderboard3D(data3D.leaderboard.map((entry: any, index: number) => ({
-          id: entry.courier_id,
-          full_name: entry.username,
-          score: entry.total_coins,
-          rank: index + 1
-        })));
-      }
+      setLeaderboardHTML([]);
     } catch (error) {
       console.error('Error fetching leaderboards:', error);
     }
@@ -133,15 +110,15 @@ export default function GamesTab({ userId }: GamesTabProps) {
           2D Игра
         </Button>
         <Button
-          onClick={() => setActiveGame('3d')}
+          onClick={() => setActiveGame('html')}
           className={`flex-1 font-extrabold text-sm sm:text-base py-3 sm:py-4 rounded-xl border-3 border-black transition-all ${
-            activeGame === '3d'
-              ? 'bg-green-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)]'
+            activeGame === 'html'
+              ? 'bg-orange-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)]'
               : 'bg-white text-black hover:bg-gray-100'
           }`}
         >
-          <Icon name="Box" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-          3D Доставка
+          <Icon name="Zap" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          Раннер
         </Button>
       </div>
 
@@ -151,9 +128,9 @@ export default function GamesTab({ userId }: GamesTabProps) {
           <div className="bg-black border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] text-yellow-400 p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6">
               <Icon name="Gamepad2" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🎮 Приключения курьера</h2>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🎮 Курьер: Город в движении</h2>
               <p className="text-yellow-400/80 text-sm sm:text-lg font-bold">
-                Управляй курьером, уклоняйся от препятствий!
+                2D симулятор с видом сверху — доставляй заказы по городу!
               </p>
             </div>
             <Button
@@ -238,33 +215,22 @@ export default function GamesTab({ userId }: GamesTabProps) {
         </>
       )}
 
-      {/* 3D Game Tab */}
-      {activeGame === '3d' && (
+      {/* HTML Game Tab - Приключения курьера */}
+      {activeGame === 'html' && (
         <>
-          <div className="bg-gradient-to-br from-green-400 to-emerald-500 border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-6 sm:p-8 text-center">
+          <div className="bg-gradient-to-br from-orange-500 to-red-600 border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-6 sm:p-8 text-center">
             <div className="mb-4 sm:mb-6">
-              <Icon name="Truck" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🚀 Город доставок 3D</h2>
+              <Icon name="Zap" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3" />
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🏃 Приключения курьера</h2>
               <p className="text-white/90 text-sm sm:text-lg font-bold">
-                Доставляй заказы еды по городу!
+                2D раннер — уклоняйся от препятствий и доставляй заказы!
               </p>
             </div>
             <div className="space-y-3">
-              {!isAuthenticated && (
-                <div className="bg-orange-100 border-2 border-orange-400 rounded-xl p-4 text-center">
-                  <Icon name="AlertCircle" className="h-6 w-6 mx-auto mb-2 text-orange-600" />
-                  <p className="text-sm font-bold text-orange-700 mb-2">
-                    ⚠️ Результаты сохраняются только при авторизации
-                  </p>
-                  <p className="text-xs text-orange-600 font-semibold">
-                    Войдите в личный кабинет, чтобы сохранять прогресс
-                  </p>
-                </div>
-              )}
               <Button
-                onClick={() => openGame('3d')}
+                onClick={() => window.location.href = '/game.html'}
                 size="lg"
-                className="w-full bg-white text-green-600 hover:bg-gray-100 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                className="w-full bg-white text-orange-600 hover:bg-gray-100 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
               >
                 <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
                 Играть сейчас
@@ -274,71 +240,42 @@ export default function GamesTab({ userId }: GamesTabProps) {
 
           <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
             <h3 className="text-lg sm:text-xl font-extrabold mb-4 flex items-center gap-2 text-black">
-              <Icon name="BarChart3" className="text-green-500 h-5 w-5 sm:h-6 sm:w-6" />
+              <Icon name="BarChart3" className="text-orange-500 h-5 w-5 sm:h-6 sm:w-6" />
               Моя статистика
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-green-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Package" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Доставок</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{stats3D?.total_deliveries || 0}</div>
+              <div className="bg-orange-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Trophy" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
+                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Лучший результат</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-black">{statsHTML?.high_score || 0}</div>
               </div>
 
-              <div className="bg-green-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Coins" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Монет заработано</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{stats3D?.total_coins || 0}</div>
+              <div className="bg-orange-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Gamepad2" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
+                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Игр сыграно</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-black">{statsHTML?.total_plays || 0}</div>
               </div>
 
-              <div className="bg-green-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Star" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Уровень</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{stats3D?.level || 1}</div>
+              <div className="bg-orange-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Award" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
+                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Место в рейтинге</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-black">
+                  {statsHTML?.rank ? `#${statsHTML.rank}` : '-'}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
             <h3 className="text-lg sm:text-xl font-extrabold mb-4 flex items-center gap-2 text-black">
-              <Icon name="Crown" className="text-green-500 h-5 w-5 sm:h-6 sm:w-6" />
-              Топ курьеров
+              <Icon name="Crown" className="text-orange-500 h-5 w-5 sm:h-6 sm:w-6" />
+              Топ игроков
             </h3>
 
-            {leaderboard3D.length === 0 ? (
-              <p className="text-center text-black/70 font-bold py-6 sm:py-8 text-sm sm:text-base">
-                Пока нет результатов. Стань первым!
-              </p>
-            ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {leaderboard3D.map((player, index) => (
-                  <div
-                    key={player.id}
-                    className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                      player.full_name === user?.full_name
-                        ? 'bg-green-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
-                        : 'bg-white border-black'
-                    }`}
-                  >
-                    <div className="text-xl sm:text-2xl font-extrabold w-8 sm:w-10 text-center flex-shrink-0">
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-extrabold text-black truncate text-sm sm:text-base">
-                        {player.full_name}
-                        {player.full_name === user?.full_name && (
-                          <span className="ml-2 text-xs bg-black text-green-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-lg sm:text-xl font-extrabold text-black flex-shrink-0 flex items-center gap-1">
-                      <Icon name="Coins" className="h-4 w-4" />
-                      {player.score}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p className="text-center text-black/70 font-bold py-6 sm:py-8 text-sm sm:text-base">
+              Лидерборд пока недоступен для этой игры
+            </p>
           </div>
         </>
       )}
