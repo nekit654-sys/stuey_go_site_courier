@@ -15,6 +15,7 @@ const CAMERA_HEIGHT = 800;
 
 interface LeaderboardEntry {
   user_id: number;
+  username?: string;
   level: number;
   best_score: number;
   total_orders: number;
@@ -1431,8 +1432,24 @@ export function CourierGame2D() {
             </Button>
           </div>
 
+          {/* Предупреждение о регистрации */}
+          {!isAuthenticated && (
+            <div className="mt-8 bg-red-900/80 p-4 rounded-lg border-4 border-red-500 max-w-md mx-auto">
+              <div className="flex items-start gap-3">
+                <Icon name="AlertTriangle" size={24} className="text-yellow-400 flex-shrink-0 mt-1" />
+                <div className="text-white">
+                  <p className="font-bold text-lg mb-1">Внимание!</p>
+                  <p className="text-sm">
+                    Зарегистрируйтесь, чтобы сохранять прогресс и участвовать в лидерборде!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Статистика игрока */}
-          <div className="mt-8 bg-black/80 p-6 rounded-lg border-4 border-yellow-400 max-w-md mx-auto">
+          {isAuthenticated && (
+            <div className="mt-8 bg-black/80 p-6 rounded-lg border-4 border-yellow-400 max-w-md mx-auto">
             <div className="grid grid-cols-2 gap-4 text-white font-bold">
               <div>
                 <p className="text-yellow-400 text-sm">УРОВЕНЬ</p>
@@ -1452,6 +1469,7 @@ export function CourierGame2D() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Модальное окно магазина */}
@@ -1509,7 +1527,7 @@ export function CourierGame2D() {
                       #{index + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-bold">Игрок {entry.user_id}</p>
+                      <p className="text-white font-bold">{entry.username || `Игрок ${entry.user_id}`}</p>
                       <p className="text-gray-400 text-sm">
                         Уровень {entry.level} • {entry.total_orders} заказов • {entry.total_earnings}₽
                       </p>

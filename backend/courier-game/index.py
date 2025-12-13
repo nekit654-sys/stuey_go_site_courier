@@ -41,9 +41,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 limit = int(event.get('queryStringParameters', {}).get('limit', 10))
                 
                 cur.execute("""
-                    SELECT user_id, level, best_score, total_orders, transport, total_earnings
-                    FROM courier_game_progress
-                    ORDER BY best_score DESC
+                    SELECT 
+                        cgp.user_id, 
+                        COALESCE(u.username, u.full_name, u.nickname, 'Игрок ' || cgp.user_id) as username,
+                        cgp.level, 
+                        cgp.best_score, 
+                        cgp.total_orders, 
+                        cgp.transport, 
+                        cgp.total_earnings
+                    FROM t_p25272970_courier_button_site.courier_game_progress cgp
+                    LEFT JOIN t_p25272970_courier_button_site.users u ON cgp.user_id::text = u.telegram_id
+                    ORDER BY cgp.best_score DESC
                     LIMIT %s
                 """, (limit,))
                 
@@ -52,11 +60,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 for row in rows:
                     leaderboard.append({
                         'user_id': row[0],
-                        'level': row[1],
-                        'best_score': row[2],
-                        'total_orders': row[3],
-                        'transport': row[4],
-                        'total_earnings': row[5]
+                        'username': row[1],
+                        'level': row[2],
+                        'best_score': row[3],
+                        'total_orders': row[4],
+                        'transport': row[5],
+                        'total_earnings': row[6]
                     })
                 
                 cur.close()
@@ -84,7 +93,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 cur.execute("""
                     SELECT level, money, experience, transport, total_orders, best_score, total_distance, total_earnings
-                    FROM courier_game_progress
+                    FROM t_p25272970_courier_button_site.courier_game_progress
                     WHERE user_id = %s
                 """, (int(user_id),))
                 
@@ -139,7 +148,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             total_earnings = body.get('total_earnings', 0)
             
             cur.execute("""
-                INSERT INTO courier_game_progress 
+                INSERT INTO t_p25272970_courier_button_site.courier_game_progress 
                 (user_id, level, money, experience, transport, total_orders, best_score, total_distance, total_earnings, updated_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
                 ON CONFLICT (user_id) DO UPDATE SET
@@ -148,7 +157,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     experience = EXCLUDED.experience,
                     transport = EXCLUDED.transport,
                     total_orders = EXCLUDED.total_orders,
-                    best_score = GREATEST(courier_game_progress.best_score, EXCLUDED.best_score),
+                    best_score = GREATEST(t_p25272970_courier_button_site.courier_game_progress.best_score, EXCLUDED.best_score),
                     total_distance = EXCLUDED.total_distance,
                     total_earnings = EXCLUDED.total_earnings,
                     updated_at = CURRENT_TIMESTAMP
