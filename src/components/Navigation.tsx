@@ -15,7 +15,6 @@ const Navigation = () => {
   const { openGame } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameMenuOpen, setIsGameMenuOpen] = useState(false);
-  const [isMobileGameMenuOpen, setIsMobileGameMenuOpen] = useState(false);
 
 
   const menuItems = [
@@ -73,26 +72,76 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Game Button - Только 2D игра */}
-            <Button
-              onClick={() => {
-                playSound('whoosh');
-                openGame('2d');
-              }}
-              onMouseEnter={() => playSound('hover')}
-              className="
-                bg-gradient-to-b from-green-400 to-green-500
-                text-black font-extrabold px-5 py-2.5 rounded-xl
-                shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
-                hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
-                transition-all duration-150
-                border-3 border-black
-                flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
-              "
-            >
-              <Icon name="Gamepad2" size={18} />
-              <span className="hidden lg:inline">Игра</span>
-            </Button>
+            {/* Game Button with Dropdown - 2 игры */}
+            <div className="relative">
+              <Button
+                onClick={() => {
+                  playSound('click');
+                  setIsGameMenuOpen(!isGameMenuOpen);
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className="
+                  bg-gradient-to-b from-green-400 to-green-500
+                  text-black font-extrabold px-5 py-2.5 rounded-xl
+                  shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                  hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                  transition-all duration-150
+                  border-3 border-black
+                  flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
+                "
+              >
+                <Icon name="Gamepad2" size={18} />
+                <span className="hidden lg:inline">Игры</span>
+                <Icon name="ChevronDown" size={16} className={`transition-transform ${isGameMenuOpen ? 'rotate-180' : ''}`} />
+              </Button>
+
+              {/* Game Selection Dropdown */}
+              {isGameMenuOpen && (
+                <div className="absolute top-full mt-2 right-0 w-[320px] bg-white border-3 border-black rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,1)] z-50 overflow-hidden">
+                  <div className="p-3 border-b-3 border-black bg-yellow-100">
+                    <h3 className="text-sm font-extrabold text-black">🎮 Выбери игру</h3>
+                  </div>
+                  
+                  <div className="p-3 space-y-2">
+                    {/* 2D Game - Курьер */}
+                    <button
+                      onClick={() => {
+                        playSound('whoosh');
+                        openGame('2d');
+                        setIsGameMenuOpen(false);
+                      }}
+                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">🚚</div>
+                        <div className="flex-1">
+                          <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
+                          <div className="text-xs text-gray-700 font-semibold">2D симулятор доставок</div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* 3D Game */}
+                    <button
+                      onClick={() => {
+                        playSound('whoosh');
+                        openGame('3d');
+                        setIsGameMenuOpen(false);
+                      }}
+                      className="w-full text-left bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">🏙️</div>
+                        <div className="flex-1">
+                          <div className="font-extrabold text-black text-sm mb-1">City Rush 3D</div>
+                          <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Login/Profile Button */}
             <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
@@ -173,26 +222,40 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Game Button - Только 2D игра */}
-            <Button
-              onClick={() => {
-                playSound('whoosh');
-                openGame('2d');
-                handleMenuItemClick();
-              }}
-              onMouseEnter={() => playSound('hover')}
-              className="
-                w-full justify-start bg-gradient-to-b from-green-400 to-green-500
-                text-black font-extrabold transition-all duration-150
-                shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
-                py-6 text-base rounded-xl border-3 border-black
-                hover:from-green-500 hover:to-green-600
-                flex items-center
-              "
-            >
-              <Icon name="Gamepad2" size={20} className="mr-3 text-black" />
-              Игра
-            </Button>
+            {/* Mobile Games - 2 игры */}
+            <div className="space-y-2">
+              <Button
+                onClick={() => {
+                  playSound('whoosh');
+                  openGame('2d');
+                  handleMenuItemClick();
+                }}
+                variant="ghost"
+                className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
+              >
+                <span className="text-2xl mr-3">🚚</span>
+                <div className="text-left">
+                  <div className="font-extrabold">Курьер: Город в движении</div>
+                  <div className="text-xs font-semibold opacity-90">2D симулятор</div>
+                </div>
+              </Button>
+
+              <Button
+                onClick={() => {
+                  playSound('whoosh');
+                  openGame('3d');
+                  handleMenuItemClick();
+                }}
+                variant="ghost"
+                className="w-full justify-start bg-gradient-to-b from-purple-400 to-purple-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-purple-500 hover:to-purple-600"
+              >
+                <span className="text-2xl mr-3">🏙️</span>
+                <div className="text-left flex-1">
+                  <div className="font-extrabold">City Rush 3D</div>
+                  <div className="text-xs font-semibold opacity-90">3D доставки</div>
+                </div>
+              </Button>
+            </div>
 
             {/* Mobile Login/Profile Button */}
             <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>

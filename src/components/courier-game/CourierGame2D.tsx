@@ -84,10 +84,22 @@ export function CourierGame2D() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastSaveTime, setLastSaveTime] = useState(Date.now());
+  const [gameStarted, setGameStarted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
   const lastPositionRef = useRef({ x: 600, y: 400 });
+
+  // Проверка мобильного устройства
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Загрузка прогресса
   useEffect(() => {
@@ -535,59 +547,164 @@ export function CourierGame2D() {
     }
   };
 
+  // Стартовое меню
+  if (!gameStarted) {
+    return (
+      <div className="relative w-full h-screen bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 overflow-hidden flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.05)_0%,transparent_50%)]" />
+        
+        <div className="relative z-10 max-w-2xl w-full bg-white rounded-2xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <div className="text-6xl sm:text-8xl mb-4">🚚</div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3 text-black">
+              Курьер: Город в движении
+            </h1>
+            <p className="text-base sm:text-lg text-gray-700 font-semibold mb-6">
+              Доставляй заказы, зарабатывай деньги, покупай транспорт!
+            </p>
+          </div>
+
+          <div className="bg-yellow-50 border-3 border-yellow-400 rounded-xl p-4 mb-6">
+            <h3 className="font-bold text-lg mb-3 text-black flex items-center gap-2">
+              <Icon name="Gamepad2" size={20} />
+              Управление:
+            </h3>
+            <div className="space-y-2 text-sm sm:text-base text-gray-700">
+              <div className="flex items-center gap-2">
+                <span className="font-bold">⌨️ ПК:</span>
+                <span>WASD или стрелки для движения</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold">📱 Мобилка:</span>
+                <span>Виртуальный джойстик слева внизу</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold">B:</span>
+                <span>Открыть магазин</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold">ESC:</span>
+                <span>Пауза</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border-3 border-blue-400 rounded-xl p-4 mb-6">
+            <h3 className="font-bold text-lg mb-3 text-black flex items-center gap-2">
+              <Icon name="Target" size={20} />
+              Цель игры:
+            </h3>
+            <div className="space-y-2 text-sm sm:text-base text-gray-700">
+              <div>📦 Подбирай заказы (желтые маркеры)</div>
+              <div>🎯 Доставляй по адресу (зеленые маркеры)</div>
+              <div>⏱️ Успевай до конца таймера</div>
+              <div>💰 Зарабатывай деньги и покупай транспорт</div>
+              <div>🏆 Попади в топ-10 лучших курьеров!</div>
+            </div>
+          </div>
+
+          {!isAuthenticated && (
+            <div className="bg-orange-50 border-3 border-orange-400 rounded-xl p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <Icon name="AlertCircle" size={24} className="text-orange-600 flex-shrink-0 mt-1" />
+                <div>
+                  <p className="font-bold text-orange-900 mb-1">Гостевой режим</p>
+                  <p className="text-sm text-orange-800">
+                    Войдите в аккаунт, чтобы сохранять прогресс и попасть в лидерборд!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <Button
+              onClick={() => setGameStarted(true)}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-extrabold text-lg sm:text-xl py-6 rounded-xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all"
+            >
+              <Icon name="Play" size={24} className="mr-2" />
+              Начать игру
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="w-full border-3 border-black font-bold py-4 rounded-xl"
+            >
+              <Icon name="Home" size={20} className="mr-2" />
+              На главную
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
       <canvas
         ref={canvasRef}
         width={1200}
         height={800}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-yellow-400 rounded-lg shadow-2xl"
+        className={`${
+          isMobile 
+            ? 'absolute top-2 right-2 w-48 h-32 border-2 border-yellow-400 rounded-lg shadow-lg z-10'
+            : 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-yellow-400 rounded-lg shadow-2xl'
+        }`}
       />
       
-      <div className="absolute top-4 left-4 space-y-2">
-        <div className="bg-black/90 text-white p-4 rounded-lg space-y-2 border-2 border-yellow-400">
-          <div className="text-2xl font-bold">💰 ${money}</div>
-          <div className="text-lg">📊 Уровень {level}</div>
-          <div className="text-sm">⭐ Опыт: {experience}/{level * 100}</div>
-          <div className="text-sm">🚚 Выполнено: {totalOrders}</div>
-          <div className="text-sm">💵 Заработано: ${totalEarnings}</div>
-          <div className="text-xs text-gray-400">📍 {Math.round(totalDistance)}м</div>
+      <div className={`absolute space-y-2 ${
+        isMobile ? 'bottom-20 left-2 right-2' : 'top-4 left-4'
+      }`}>
+        <div className={`bg-black/90 text-white rounded-lg space-y-2 border-2 border-yellow-400 ${
+          isMobile ? 'p-3' : 'p-4'
+        }`}>
+          <div className={isMobile ? 'text-lg font-bold' : 'text-2xl font-bold'}>💰 ${money}</div>
+          <div className={isMobile ? 'text-sm' : 'text-lg'}>📊 Уровень {level}</div>
+          <div className="text-xs">⭐ {experience}/{level * 100}</div>
+          <div className="text-xs">🚚 {totalOrders} заказов</div>
+          <div className="text-xs">💵 ${totalEarnings}</div>
         </div>
         
-        <Button
-          onClick={() => setShowShop(true)}
-          className="w-full bg-green-600 hover:bg-green-700"
-        >
-          <Icon name="ShoppingCart" size={18} className="mr-2" />
-          Магазин (B)
-        </Button>
-        
-        <Button
-          onClick={() => setShowLeaderboard(true)}
-          className="w-full bg-yellow-600 hover:bg-yellow-700"
-        >
-          <Icon name="Trophy" size={18} className="mr-2" />
-          Топ-10
-        </Button>
-        
-        {isAuthenticated && (
+        <div className={`grid gap-2 ${
+          isMobile ? 'grid-cols-2' : 'grid-cols-1'
+        }`}>
           <Button
-            onClick={saveProgress}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            onClick={() => setShowShop(true)}
+            className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm py-2"
           >
-            <Icon name="Save" size={18} className="mr-2" />
-            Сохранить
+            <Icon name="ShoppingCart" size={16} className="mr-1" />
+            {!isMobile && 'Магазин'}
           </Button>
-        )}
-        
-        <Button
-          onClick={() => navigate('/')}
-          variant="outline"
-          className="w-full"
-        >
-          <Icon name="Home" size={18} className="mr-2" />
-          Выход
-        </Button>
+          
+          <Button
+            onClick={() => setShowLeaderboard(true)}
+            className="bg-yellow-600 hover:bg-yellow-700 text-xs sm:text-sm py-2"
+          >
+            <Icon name="Trophy" size={16} className="mr-1" />
+            {!isMobile && 'Топ-10'}
+          </Button>
+          
+          {isAuthenticated && (
+            <Button
+              onClick={saveProgress}
+              className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm py-2"
+            >
+              <Icon name="Save" size={16} className="mr-1" />
+              {!isMobile && 'Сохранить'}
+            </Button>
+          )}
+          
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="text-xs sm:text-sm py-2"
+          >
+            <Icon name="Home" size={16} className="mr-1" />
+            {!isMobile && 'Выход'}
+          </Button>
+        </div>
       </div>
       
       {currentOrder && (
