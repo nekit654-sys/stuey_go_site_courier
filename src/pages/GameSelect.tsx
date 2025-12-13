@@ -2,11 +2,44 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { useGame } from '@/contexts/GameContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect } from 'react';
+
+const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e';
+
+interface LeaderboardEntry {
+  user_id: number;
+  username?: string;
+  level: number;
+  best_score: number;
+  total_orders: number;
+  transport: string;
+  total_earnings: number;
+}
 
 export default function GameSelect() {
   const navigate = useNavigate();
   const { openGame } = useGame();
   const { isAuthenticated } = useAuth();
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
+
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const response = await fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`);
+        const data = await response.json();
+        if (data.success) {
+          setLeaderboard(data.leaderboard);
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки лидерборда:', error);
+      } finally {
+        setIsLoadingLeaderboard(false);
+      }
+    };
+
+    loadLeaderboard();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
@@ -126,6 +159,108 @@ export default function GameSelect() {
             <Icon name="User" size={18} />
             {isAuthenticated ? 'Личный кабинет' : 'Войти'}
           </button>
+        </div>
+
+        {/* Лидерборд игры */}
+        <div className="mt-8 sm:mt-12 md:mt-16 max-w-4xl mx-auto">
+          <div className="bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="text-4xl sm:text-5xl mb-3">🏆</div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-2">
+                Лидерборд
+              </h2>
+              <p className="text-sm sm:text-base text-gray-700 font-semibold">
+                Топ-10 лучших курьеров в игре "Город в движении"
+              </p>
+            </div>
+
+            {isLoadingLeaderboard ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-400 border-t-transparent"></div>
+                <p className="mt-4 text-gray-600 font-semibold">Загрузка...</p>
+              </div>
+            ) : leaderboard.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-5xl mb-4">🎮</div>
+                <p className="text-lg text-gray-600 font-semibold">
+                  Лидерборд пока пуст. Стань первым!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {leaderboard.map((entry, index) => (
+                  <div
+                    key={entry.user_id}
+                    className={`
+                      relative bg-gradient-to-r p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black
+                      transition-all hover:translate-x-1
+                      ${index === 0 ? 'from-yellow-200 to-yellow-300 shadow-lg' : ''}
+                      ${index === 1 ? 'from-gray-200 to-gray-300' : ''}
+                      ${index === 2 ? 'from-orange-200 to-orange-300' : ''}
+                      ${index > 2 ? 'from-white to-gray-50' : ''}
+                    `}
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      {/* Место */}
+                      <div className={`
+                        text-2xl sm:text-3xl md:text-4xl font-extrabold flex-shrink-0 w-10 sm:w-12 text-center
+                        ${index === 0 ? 'text-yellow-600' : ''}
+                        ${index === 1 ? 'text-gray-600' : ''}
+                        ${index === 2 ? 'text-orange-600' : ''}
+                        ${index > 2 ? 'text-gray-500' : ''}
+                      `}>
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                      </div>
+
+                      {/* Информация об игроке */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base sm:text-lg md:text-xl font-bold text-black truncate">
+                          {entry.username || `Игрок ${entry.user_id}`}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700 font-semibold mt-1">
+                          <span className="flex items-center gap-1">
+                            <Icon name="TrendingUp" size={14} />
+                            Уровень {entry.level}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Icon name="Package" size={14} />
+                            {entry.total_orders} заказов
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Icon name="DollarSign" size={14} />
+                            {entry.total_earnings}₽
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Очки */}
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-black">
+                          {entry.best_score}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600 font-semibold capitalize">
+                          {entry.transport === 'walk' ? '🚶 Пешком' : 
+                           entry.transport === 'bike' ? '🚴 Велосипед' :
+                           entry.transport === 'moped' ? '🛵 Мопед' :
+                           entry.transport === 'car' ? '🚗 Машина' : entry.transport}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6 sm:mt-8 text-center">
+              <button
+                onClick={() => openGame('2d')}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-8 rounded-xl border-3 border-black transition-all inline-flex items-center gap-2 shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
+              >
+                <Icon name="Gamepad2" size={20} />
+                Попасть в топ!
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
