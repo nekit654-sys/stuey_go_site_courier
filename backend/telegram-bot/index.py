@@ -724,7 +724,7 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
     """Приветствие и привязка аккаунта"""
     parts = message_text.split()
     
-    # Если уже привязан — показать главное меню + проверить напоминания
+    # Если уже привязан — показать детальное приветствие с контекстом
     courier_id = get_courier_by_telegram(telegram_id)
     if courier_id and len(parts) < 2:
         conn = get_db_connection()
@@ -736,13 +736,44 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
             """, (courier_id,))
             courier = cursor.fetchone()
             
+            # Получить контекст курьера
+            context = get_courier_context(courier_id)
+            balance = context['balance']
+            total_orders = context['total_orders']
+            referrals = context['referrals']
+            active_referrals = context['active_referrals']
+            
             # Проверить и отправить напоминание если нужно
             check_and_send_onboarding_reminder(chat_id, courier_id)
             
+            # Детальное приветствие с мотивацией
             text = (
                 f"👋 <b>С возвращением, {courier['full_name']}!</b>\n\n"
-                f"Выберите раздел в меню или спросите меня что угодно! 😊"
+                f"📊 <b>Твоя статистика:</b>\n"
+                f"💰 Баланс: {balance:,.0f}₽\n"
+                f"📦 Заказов выполнено: {total_orders}\n"
+                f"👥 Рефералов: {referrals} ({active_referrals} активных)\n\n"
             )
+            
+            # Добавить мотивирующую подсказку
+            if balance >= 500:
+                text += "✅ <b>Можешь вывести деньги!</b> Нажми 💸 Выплата\n\n"
+            elif total_orders < 50:
+                orders_left = 50 - total_orders
+                text += f"🔥 <b>До бонуса 5,000₽ осталось {orders_left} заказов!</b>\n\n"
+            
+            if referrals > 0 and active_referrals == 0:
+                text += f"💡 <b>Совет:</b> У тебя {referrals} {'реферал' if referrals == 1 else 'рефералов'}! Напиши им, поддержи — заработаешь ещё {referrals * 5000:,}₽\n\n"
+            
+            text += (
+                "<b>📱 Быстрый доступ:</b>\n"
+                "📊 Статистика — весь заработок\n"
+                "🎁 Самобонус — прогресс до 5,000₽\n"
+                "💸 Выплата — вывести деньги\n"
+                "❓ FAQ — частые вопросы\n\n"
+                "💬 Или спроси меня что угодно!"
+            )
+            
             send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
             return
         finally:
