@@ -81,6 +81,14 @@ interface Road {
   type: 'horizontal' | 'vertical';
 }
 
+interface TrafficLight {
+  x: number;
+  y: number;
+  state: 'red' | 'yellow' | 'green';
+  timer: number;
+  direction: 'horizontal' | 'vertical';
+}
+
 const TRANSPORT_COSTS = {
   walk: { cost: 0, speed: 3 },
   bike: { cost: 100, speed: 5 },
@@ -122,6 +130,7 @@ export function CourierGame2D() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [camera, setCamera] = useState({ x: 0, y: 0 });
+  const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
@@ -319,7 +328,7 @@ export function CourierGame2D() {
     
     setRoads(newRoads);
     
-    // Создаём здания между дорогами
+    // Создаём здания между дорогами (БЕЗ НАЛОЖЕНИЯ)
     const buildingTypes: Array<Building['type']> = ['house', 'office', 'shop', 'cafe'];
     const buildingColors = {
       house: '#FF6B6B',
@@ -328,38 +337,89 @@ export function CourierGame2D() {
       cafe: '#98D8C8'
     };
     
-    for (let y = 80; y < MAP_HEIGHT; y += 400) {
-      for (let x = 80; x < MAP_WIDTH; x += 400) {
-        // 2-4 здания в каждом квартале
-        const numBuildings = 2 + Math.floor(Math.random() * 3);
+    // Функция проверки пересечения зданий
+    const checkCollision = (x: number, y: number, w: number, h: number) => {
+      for (const b of newBuildings) {
+        if (!(x + w < b.x || x > b.x + b.width || y + h < b.y || y > b.y + b.height)) {
+          return true; // Есть пересечение
+        }
+      }
+      return false;
+    };
+    
+    for (let y = 90; y < MAP_HEIGHT; y += 400) {
+      for (let x = 90; x < MAP_WIDTH; x += 400) {
+        // 2-3 здания в каждом квартале
+        const numBuildings = 2 + Math.floor(Math.random() * 2);
         
         for (let i = 0; i < numBuildings; i++) {
           const type = buildingTypes[Math.floor(Math.random() * buildingTypes.length)];
-          const width = 60 + Math.random() * 80;
-          const height = 60 + Math.random() * 80;
+          const width = 60 + Math.random() * 70;
+          const height = 60 + Math.random() * 70;
           
-          const bx = x + Math.random() * (300 - width);
-          const by = y + Math.random() * (300 - height);
+          // Пытаемся разместить здание 20 раз
+          let attempts = 0;
+          let bx = 0;
+          let by = 0;
+          let placed = false;
           
-          newBuildings.push({
-            x: bx,
-            y: by,
-            width,
-            height,
-            type,
-            color: buildingColors[type]
-          });
+          while (attempts < 20 && !placed) {
+            bx = x + Math.random() * (280 - width);
+            by = y + Math.random() * (280 - height);
+            
+            if (!checkCollision(bx, by, width, height)) {
+              newBuildings.push({
+                x: bx,
+                y: by,
+                width,
+                height,
+                type,
+                color: buildingColors[type]
+              });
+              placed = true;
+            }
+            attempts++;
+          }
         }
       }
     }
     
     setBuildings(newBuildings);
     
-    // Создаём начальные заказы возле зданий
+    // Создаём светофоры на перекрёстках
+    const lights: TrafficLight[] = [];
+    for (let y = 0; y < MAP_HEIGHT; y += 400) {
+      for (let x = 0; x < MAP_WIDTH; x += 400) {
+        // Горизонтальный светофор
+        lights.push({
+          x: x + 30,
+          y: y + 10,
+          state: 'green',
+          timer: 0,
+          direction: 'horizontal'
+        });
+        // Вертикальный светофор
+        lights.push({
+          x: x + 10,
+          y: y + 30,
+          state: 'red',
+          timer: 0,
+          direction: 'vertical'
+        });
+      }
+    }
+    setTrafficLights(lights);
+    
+    // Создаём начальные заказы ТОЛЬКО В ЗДАНИЯХ
     const initialOrders: Order[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       const pickupBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
-      const deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
+      let deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
+      
+      // Убеждаемся что доставка в другое здание
+      while (deliveryBuilding === pickupBuilding) {
+        deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
+      }
       
       initialOrders.push({
         id: `order-${i}`,
@@ -371,7 +431,9 @@ export function CourierGame2D() {
         timeLimit: 120,
         timeLeft: 120,
         type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
-        status: 'available'
+        status: 'available',
+        pickupBuilding: newBuildings.indexOf(pickupBuilding),
+        deliveryBuilding: newBuildings.indexOf(deliveryBuilding)
       });
     }
     
@@ -564,14 +626,27 @@ export function CourierGame2D() {
     };
   }, [gameState]);
 
-  // Генерация новых заказов
+  // Автоматическая система назначения заказов
   useEffect(() => {
     if (gameState !== 'playing') return;
     
     const interval = setInterval(() => {
+      // Автоматически назначаем новые заказы когда нет активного
+      if (!currentOrder && orders.filter(o => o.status === 'available').length > 0) {
+        const availableOrders = orders.filter(o => o.status === 'available');
+        const nextOrder = availableOrders[0];
+        setCurrentOrder(nextOrder);
+        toast.info(`📦 Новый заказ! Едем забирать посылку`, { duration: 3000 });
+      }
+      
+      // Генерируем новые заказы если их мало
       if (orders.filter(o => o.status === 'available').length < 3 && buildings.length > 0) {
         const pickupBuilding = buildings[Math.floor(Math.random() * buildings.length)];
-        const deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        let deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        
+        while (deliveryBuilding === pickupBuilding && buildings.length > 1) {
+          deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        }
         
         setOrders(prev => [...prev, {
           id: `order-${Date.now()}`,
@@ -583,13 +658,15 @@ export function CourierGame2D() {
           timeLimit: 120,
           timeLeft: 120,
           type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
-          status: 'available'
+          status: 'available',
+          pickupBuilding: buildings.indexOf(pickupBuilding),
+          deliveryBuilding: buildings.indexOf(deliveryBuilding)
         }]);
       }
-    }, 15000);
+    }, 5000);
     
     return () => clearInterval(interval);
-  }, [orders, gameState, buildings]);
+  }, [orders, gameState, buildings, currentOrder]);
 
   // Таймер заказов
   useEffect(() => {
@@ -614,12 +691,61 @@ export function CourierGame2D() {
     return () => clearInterval(timer);
   }, [gameState, currentOrder, playErrorSound]);
 
-  // Обновление позиций машин
+  // Обновление светофоров
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    
+    const interval = setInterval(() => {
+      setTrafficLights(prev => prev.map(light => {
+        let newTimer = light.timer + 1;
+        let newState = light.state;
+        
+        // Цикл: зелёный (5с) → жёлтый (1с) → красный (5с)
+        if (light.state === 'green' && newTimer >= 50) {
+          newState = 'yellow';
+          newTimer = 0;
+        } else if (light.state === 'yellow' && newTimer >= 10) {
+          newState = 'red';
+          newTimer = 0;
+        } else if (light.state === 'red' && newTimer >= 50) {
+          newState = 'green';
+          newTimer = 0;
+        }
+        
+        return { ...light, state: newState, timer: newTimer };
+      }));
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  // Обновление позиций машин с учётом светофоров
   useEffect(() => {
     if (gameState !== 'playing') return;
     
     const interval = setInterval(() => {
       setVehicles(prev => prev.map(vehicle => {
+        // Проверяем светофоры впереди
+        let shouldStop = false;
+        
+        for (const light of trafficLights) {
+          const distance = vehicle.direction === 'horizontal' 
+            ? Math.abs(vehicle.x - light.x)
+            : Math.abs(vehicle.y - light.y);
+          
+          // Если светофор близко и красный/жёлтый
+          if (distance < 50 && distance > 10 && 
+              light.direction === vehicle.direction &&
+              (light.state === 'red' || light.state === 'yellow')) {
+            shouldStop = true;
+            break;
+          }
+        }
+        
+        if (shouldStop) {
+          return vehicle; // Стоим на месте
+        }
+        
         let newX = vehicle.x;
         let newY = vehicle.y;
         
@@ -638,7 +764,7 @@ export function CourierGame2D() {
     }, 50);
     
     return () => clearInterval(interval);
-  }, [gameState]);
+  }, [gameState, trafficLights]);
 
   // Обновление позиций пешеходов
   useEffect(() => {
@@ -723,6 +849,7 @@ export function CourierGame2D() {
       ctx.translate(-camera.x, -camera.y);
       
       drawCity(ctx);
+      drawTrafficLights(ctx);
       drawBuildings(ctx);
       drawVehicles(ctx);
       drawPedestrians(ctx);
@@ -743,7 +870,7 @@ export function CourierGame2D() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights]);
 
   const drawCity = (ctx: CanvasRenderingContext2D) => {
     // Рисуем траву между дорогами
@@ -783,6 +910,34 @@ export function CourierGame2D() {
       }
       
       ctx.setLineDash([]);
+    });
+  };
+
+  const drawTrafficLights = (ctx: CanvasRenderingContext2D) => {
+    trafficLights.forEach(light => {
+      // Столб светофора
+      ctx.fillStyle = '#333';
+      ctx.fillRect(light.x - 3, light.y - 3, 6, 30);
+      
+      // Корпус
+      ctx.fillStyle = '#222';
+      ctx.fillRect(light.x - 5, light.y, 10, 20);
+      
+      // Огни
+      ctx.fillStyle = light.state === 'red' ? '#FF0000' : '#660000';
+      ctx.beginPath();
+      ctx.arc(light.x, light.y + 4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = light.state === 'yellow' ? '#FFFF00' : '#666600';
+      ctx.beginPath();
+      ctx.arc(light.x, light.y + 10, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = light.state === 'green' ? '#00FF00' : '#006600';
+      ctx.beginPath();
+      ctx.arc(light.x, light.y + 16, 3, 0, Math.PI * 2);
+      ctx.fill();
     });
   };
 
@@ -1294,8 +1449,7 @@ export function CourierGame2D() {
       {/* Мобильный джойстик */}
       {isMobile && (
         <MobileJoystick
-          onMove={setJoystickMove}
-          onAction={checkOrderCollisions}
+          onMove={(x, y) => setJoystickMove({ x, y })}
         />
       )}
 

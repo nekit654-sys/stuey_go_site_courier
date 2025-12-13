@@ -22,7 +22,7 @@ export function MobileJoystick({ onMove }: JoystickProps) {
   };
 
   const handleMove = (clientX: number, clientY: number) => {
-    if (!containerRef.current || !isDragging) return;
+    if (!containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -71,7 +71,7 @@ export function MobileJoystick({ onMove }: JoystickProps) {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging || touchId.current === null) return;
+      if (touchId.current === null) return;
       
       const touch = Array.from(e.touches).find(t => t.identifier === touchId.current);
       if (touch) {
