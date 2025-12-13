@@ -687,6 +687,11 @@ export function CourierGame2D() {
   // Управление клавиатурой
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Предотвращаем прокрутку страницы стрелками
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+      
       keys.current[e.key.toLowerCase()] = true;
       
       if (e.key === 'Escape') {
@@ -962,11 +967,20 @@ export function CourierGame2D() {
     const canvas = canvasRef.current;
     if (!canvas || gameState !== 'playing') return;
     
-    // Фокусируем canvas при старте игры
+    // Фокусируем canvas при старте игры и при клике
     canvas.focus();
     
+    const handleCanvasClick = () => {
+      canvas.focus();
+    };
+    
+    canvas.addEventListener('click', handleCanvasClick);
+    
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      canvas.removeEventListener('click', handleCanvasClick);
+      return;
+    };
     
     const render = () => {
       // Обновление позиции игрока
@@ -1047,11 +1061,15 @@ export function CourierGame2D() {
     render();
     
     return () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.removeEventListener('click', handleCanvasClick);
+      }
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights, trees]);
 
   const drawCity = (ctx: CanvasRenderingContext2D) => {
     // Рисуем траву между дорогами
@@ -1742,8 +1760,9 @@ export function CourierGame2D() {
         width={CAMERA_WIDTH}
         height={CAMERA_HEIGHT}
         className="w-full h-full"
-        style={{ imageRendering: 'pixelated' }}
+        style={{ imageRendering: 'pixelated', outline: 'none' }}
         tabIndex={0}
+        autoFocus
       />
 
       {/* HUD */}
