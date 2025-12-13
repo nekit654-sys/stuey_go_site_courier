@@ -43,6 +43,8 @@ export function MobileJoystick({ onMove }: JoystickProps) {
     // Нормализуем значения от -1 до 1
     const normalizedX = dx / maxDistance;
     const normalizedY = dy / maxDistance;
+    
+    console.log('[Joystick] Move:', { normalizedX, normalizedY, dx, dy });
     onMove(normalizedX, normalizedY);
   };
 
@@ -108,30 +110,38 @@ export function MobileJoystick({ onMove }: JoystickProps) {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-8 left-8 w-32 h-32 bg-black/30 rounded-full border-4 border-white/50 backdrop-blur-sm z-50"
+      className="w-32 h-32 bg-black/40 rounded-full border-4 border-yellow-400 backdrop-blur-sm relative"
       style={{
         touchAction: 'none'
       }}
     >
       {/* Центральная точка */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-2 h-2 bg-white/50 rounded-full"></div>
+        <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
       </div>
       
       {/* Джойстик */}
       <div
-        className="absolute w-16 h-16 bg-white rounded-full border-4 border-gray-800 shadow-lg transition-transform"
+        className="absolute w-16 h-16 bg-yellow-400 rounded-full border-4 border-black shadow-lg"
         style={{
           left: '50%',
           top: '50%',
           transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
-          opacity: isDragging ? 1 : 0.7
+          opacity: isDragging ? 1 : 0.8,
+          transition: isDragging ? 'none' : 'transform 0.1s ease-out'
         }}
       >
         <div className="absolute inset-0 flex items-center justify-center text-2xl">
           🎮
         </div>
       </div>
+      
+      {/* Отладочная информация */}
+      {isDragging && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+          {position.x.toFixed(0)}, {position.y.toFixed(0)}
+        </div>
+      )}
     </div>
   );
 }

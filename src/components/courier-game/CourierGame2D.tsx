@@ -691,15 +691,19 @@ export function CourierGame2D() {
     }
   };
 
-  // Управление клавиатурой
+  // Управление клавиатурой - ИСПРАВЛЕНО
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Предотвращаем прокрутку страницы стрелками
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
         e.preventDefault();
       }
       
-      keys.current[e.key.toLowerCase()] = true;
+      const key = e.key.toLowerCase();
+      keys.current[key] = true;
+      
+      // Логируем для отладки
+      console.log('Key pressed:', key, 'Keys state:', keys.current);
       
       if (e.key === 'Escape') {
         if (gameState === 'playing') {
@@ -715,15 +719,18 @@ export function CourierGame2D() {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      keys.current[e.key.toLowerCase()] = false;
+      const key = e.key.toLowerCase();
+      keys.current[key] = false;
+      console.log('Key released:', key);
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Слушаем события на document, а не на window
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+    document.addEventListener('keyup', handleKeyUp, { capture: true });
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown, { capture: true });
+      document.removeEventListener('keyup', handleKeyUp, { capture: true });
     };
   }, [gameState]);
 
@@ -985,39 +992,53 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // Игровой цикл
+  // Игровой цикл - ИСПРАВЛЕНО
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || gameState !== 'playing') return;
     
-    // Фокусируем canvas при старте игры и при клике
-    canvas.focus();
-    
-    const handleCanvasClick = () => {
-      canvas.focus();
-    };
-    
-    canvas.addEventListener('click', handleCanvasClick);
-    
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      canvas.removeEventListener('click', handleCanvasClick);
-      return;
-    };
+    if (!ctx) return;
     
     const render = () => {
       // Обновление позиции игрока
       let newX = player.x;
       let newY = player.y;
+      let moved = false;
       
-      if (keys.current['w'] || keys.current['arrowup']) newY -= player.speed;
-      if (keys.current['s'] || keys.current['arrowdown']) newY += player.speed;
-      if (keys.current['a'] || keys.current['arrowleft']) newX -= player.speed;
-      if (keys.current['d'] || keys.current['arrowright']) newX += player.speed;
+      // Клавиатурное управление
+      if (keys.current['w'] || keys.current['arrowup']) {
+        newY -= player.speed;
+        moved = true;
+      }
+      if (keys.current['s'] || keys.current['arrowdown']) {
+        newY += player.speed;
+        moved = true;
+      }
+      if (keys.current['a'] || keys.current['arrowleft']) {
+        newX -= player.speed;
+        moved = true;
+      }
+      if (keys.current['d'] || keys.current['arrowright']) {
+        newX += player.speed;
+        moved = true;
+      }
       
+      // Джойстик управление
       if (joystickMove.x !== 0 || joystickMove.y !== 0) {
         newX += joystickMove.x * player.speed;
         newY += joystickMove.y * player.speed;
+        moved = true;
+      }
+      
+      // Отладка: логируем только когда двигаемся
+      if (moved && Math.random() < 0.01) { // Логируем 1% кадров чтобы не засорять консоль
+        console.log('[Player] Moving:', { 
+          keys: keys.current, 
+          joystick: joystickMove, 
+          oldPos: { x: player.x, y: player.y },
+          newPos: { x: newX, y: newY }
+        });
       }
       
       // Проверка коллизий со зданиями
@@ -1084,10 +1105,6 @@ export function CourierGame2D() {
     render();
     
     return () => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.removeEventListener('click', handleCanvasClick);
-      }
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -1777,15 +1794,13 @@ export function CourierGame2D() {
   // Игра
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Canvas - адаптивный размер */}
+      {/* Canvas - адаптивный размер, БЕЗ tabIndex */}
       <canvas
         ref={canvasRef}
         width={viewportSize.width}
         height={viewportSize.height}
         className="w-full h-full"
-        style={{ imageRendering: 'pixelated', outline: 'none', maxWidth: '100vw', maxHeight: '100vh' }}
-        tabIndex={0}
-        autoFocus
+        style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       />
 
       {/* HUD - компактный для мобильных */}
@@ -1810,6 +1825,13 @@ export function CourierGame2D() {
           <Icon name="Truck" size={16} className="text-orange-400" />
           <span className="font-bold capitalize text-[10px] sm:text-xs">{player.transport}</span>
         </div>
+        {/* Индикатор джойстика для отладки */}
+        {isMobile && (joystickMove.x !== 0 || joystickMove.y !== 0) && (
+          <div className="flex items-center gap-1 text-[10px] text-cyan-400">
+            <Icon name="Gamepad2" size={12} />
+            <span>{joystickMove.x.toFixed(2)}, {joystickMove.y.toFixed(2)}</span>
+          </div>
+        )}
       </div>
 
       {/* Текущий заказ - компактный для мобильных */}
@@ -1903,11 +1925,16 @@ export function CourierGame2D() {
         </div>
       </div>
 
-      {/* Мобильный джойстик */}
+      {/* Мобильный джойстик - ВСЕГДА показываем на touch-устройствах */}
       {isMobile && (
-        <MobileJoystick
-          onMove={(x, y) => setJoystickMove({ x, y })}
-        />
+        <div className="absolute bottom-4 left-4 z-50">
+          <MobileJoystick
+            onMove={(x, y) => {
+              console.log('Joystick move:', x, y);
+              setJoystickMove({ x, y });
+            }}
+          />
+        </div>
       )}
 
       {/* Кнопки управления - компактные для мобильных */}
