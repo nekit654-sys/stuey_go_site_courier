@@ -736,7 +736,7 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // Обновление позиций машин с учётом светофоров и поворотов
+  // Обновление позиций машин с учётом светофоров, пешеходов и поворотов
   useEffect(() => {
     if (gameState !== 'playing') return;
     
@@ -783,6 +783,38 @@ export function CourierGame2D() {
           }
         }
         
+        // Проверяем пешеходов на зебре впереди
+        if (!shouldStop) {
+          for (const ped of pedestrians) {
+            // Определяем, находится ли пешеход на перекрёстке
+            const pedAtIntersectionX = Math.abs(ped.x % 400) < 60;
+            const pedAtIntersectionY = Math.abs(ped.y % 400) < 60;
+            
+            if (pedAtIntersectionX && pedAtIntersectionY) {
+              // Пешеход на перекрёстке (на зебре)
+              if (vehicle.direction === 'horizontal') {
+                // Машина едет горизонтально, проверяем пешехода впереди
+                const distanceX = vehicle.lane > 0 ? ped.x - vehicle.x : vehicle.x - ped.x;
+                const distanceY = Math.abs(ped.y - vehicle.y);
+                
+                if (distanceX > 0 && distanceX < 40 && distanceY < 30) {
+                  shouldStop = true;
+                  break;
+                }
+              } else {
+                // Машина едет вертикально, проверяем пешехода впереди
+                const distanceY = vehicle.lane > 0 ? ped.y - vehicle.y : vehicle.y - ped.y;
+                const distanceX = Math.abs(ped.x - vehicle.x);
+                
+                if (distanceY > 0 && distanceY < 40 && distanceX < 30) {
+                  shouldStop = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
         if (shouldStop) {
           return vehicle; // Стоим на месте
         }
@@ -807,7 +839,7 @@ export function CourierGame2D() {
     }, 50);
     
     return () => clearInterval(interval);
-  }, [gameState, trafficLights]);
+  }, [gameState, trafficLights, pedestrians]);
 
   // Обновление позиций пешеходов (В ПРЕДЕЛАХ КАРТЫ)
   useEffect(() => {
