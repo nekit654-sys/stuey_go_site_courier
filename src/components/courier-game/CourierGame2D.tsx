@@ -885,17 +885,6 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // Обновление камеры
-  useEffect(() => {
-    const centerX = player.x - CAMERA_WIDTH / 2;
-    const centerY = player.y - CAMERA_HEIGHT / 2;
-    
-    const clampedX = Math.max(0, Math.min(MAP_WIDTH - CAMERA_WIDTH, centerX));
-    const clampedY = Math.max(0, Math.min(MAP_HEIGHT - CAMERA_HEIGHT, centerY));
-    
-    setCamera({ x: clampedX, y: clampedY });
-  }, [player.x, player.y]);
-
   // Игровой цикл
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -948,13 +937,20 @@ export function CourierGame2D() {
       
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
+      // Обновляем камеру СИНХРОННО с движением игрока
+      const centerX = newX - CAMERA_WIDTH / 2;
+      const centerY = newY - CAMERA_HEIGHT / 2;
+      const clampedCameraX = Math.max(0, Math.min(MAP_WIDTH - CAMERA_WIDTH, centerX));
+      const clampedCameraY = Math.max(0, Math.min(MAP_HEIGHT - CAMERA_HEIGHT, centerY));
+      setCamera({ x: clampedCameraX, y: clampedCameraY });
+      
       // Очистка и фон
       ctx.fillStyle = '#A8E6CF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Отрисовка с учётом камеры
       ctx.save();
-      ctx.translate(-camera.x, -camera.y);
+      ctx.translate(-clampedCameraX, -clampedCameraY);
       
       drawCity(ctx);
       drawTrafficLights(ctx);
