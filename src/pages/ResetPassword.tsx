@@ -65,10 +65,15 @@ export default function ResetPassword() {
                     <span className="font-semibold text-gray-700">Пароль:</span>
                     <span className="font-mono text-gray-900">{result.password}</span>
                   </p>
-                  {result.deleted_admin && (
-                    <p className="flex justify-between text-red-600">
-                      <span className="font-semibold">Удалён админ:</span>
-                      <span className="font-mono">{result.deleted_admin}</span>
+                  {result.deactivated_admin && (
+                    <p className="flex justify-between text-orange-600">
+                      <span className="font-semibold">Деактивирован:</span>
+                      <span className="font-mono">{result.deactivated_admin}</span>
+                    </p>
+                  )}
+                  {result.message && (
+                    <p className="text-gray-700 italic pt-2 border-t border-gray-200 mt-2">
+                      {result.message}
                     </p>
                   )}
                 </div>
@@ -100,7 +105,7 @@ export default function ResetPassword() {
             <p>При нажатии на кнопку будет:</p>
             <ul className="text-left space-y-1 max-w-xs mx-auto">
               <li>✓ Установлен новый пароль для nekit654</li>
-              <li>✓ Удалён администратор danil654</li>
+              <li>✓ Деактивирован администратор danil654</li>
             </ul>
           </div>
         )}

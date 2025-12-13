@@ -56,14 +56,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             WHERE username = %s
         """, (password_hash, username))
         
-        # Delete admin if requested
-        deleted = False
+        # Deactivate admin if requested (set password to random unusable value)
+        deactivated = False
         if delete_username:
+            # Instead of deleting, set an impossible password so they can't log in
+            impossible_hash = '$2b$12$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
             cursor.execute("""
-                DELETE FROM t_p25272970_courier_button_site.admins 
+                UPDATE t_p25272970_courier_button_site.admins 
+                SET password_hash = %s, updated_at = NOW() 
                 WHERE username = %s
-            """, (delete_username,))
-            deleted = cursor.rowcount > 0
+            """, (impossible_hash, delete_username))
+            deactivated = cursor.rowcount > 0
         
         conn.commit()
         
@@ -74,7 +77,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'success': True,
                 'username': username,
                 'password': password,
-                'deleted_admin': delete_username if deleted else None
+                'deactivated_admin': delete_username if deactivated else None,
+                'message': f'Пароль для {username} установлен. {delete_username} деактивирован.' if deactivated else f'Пароль для {username} установлен.'
             }),
             'isBase64Encoded': False
         }
