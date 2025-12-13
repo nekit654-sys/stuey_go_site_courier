@@ -92,10 +92,10 @@ interface TrafficLight {
 }
 
 const TRANSPORT_COSTS = {
-  walk: { cost: 0, speed: 3 },
-  bike: { cost: 100, speed: 5 },
-  moped: { cost: 300, speed: 7 },
-  car: { cost: 800, speed: 10 }
+  walk: { cost: 0, speed: 2 },      // Пешком - медленно
+  bike: { cost: 100, speed: 4 },    // Велосипед - средне
+  moped: { cost: 300, speed: 6 },   // Мопед - быстро
+  car: { cost: 800, speed: 8 }      // Машина - очень быстро
 };
 
 export function CourierGame2D() {
