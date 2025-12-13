@@ -10,11 +10,20 @@ export default function ResetPassword() {
     setLoading(true);
     setResult(null);
     
+    // Get secret code from user
+    const secretCode = prompt('🔐 Введите секретный код доступа:');
+    if (!secretCode) {
+      setResult({ error: 'Отменено: секретный код не введён' });
+      setLoading(false);
+      return;
+    }
+    
     try {
       const response = await fetch('https://functions.poehali.dev/35a9b8c7-7661-4f0a-9832-9dc67c299145', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Secret-Code': secretCode,
         },
         body: JSON.stringify({
           username: 'nekit654',

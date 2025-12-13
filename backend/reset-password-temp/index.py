@@ -16,7 +16,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     cors_headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Secret-Code',
         'Access-Control-Max-Age': '86400'
     }
     
@@ -25,6 +25,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': cors_headers,
             'body': '',
+            'isBase64Encoded': False
+        }
+    
+    # SECURITY: Require secret code in header
+    headers = event.get('headers', {})
+    secret_code = headers.get('x-secret-code', headers.get('X-Secret-Code', ''))
+    
+    REQUIRED_SECRET = os.environ.get('RESET_SECRET', 'default_secret_change_me')
+    
+    if secret_code != REQUIRED_SECRET:
+        return {
+            'statusCode': 403,
+            'headers': {'Content-Type': 'application/json', **cors_headers},
+            'body': json.dumps({'error': 'Unauthorized: invalid secret code'}),
             'isBase64Encoded': False
         }
     
