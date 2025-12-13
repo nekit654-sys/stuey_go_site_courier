@@ -122,178 +122,24 @@ export function CourierGame2D() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [camera, setCamera] = useState({ x: 0, y: 0 });
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
   const lastPositionRef = useRef({ x: 300, y: 300 });
   
-  // Аудио контексты
+  // Аудио контекст только для звуковых эффектов
   const audioContextRef = useRef<AudioContext | null>(null);
-  const musicGainRef = useRef<GainNode | null>(null);
-  const engineSoundRef = useRef<OscillatorNode | null>(null);
-  const engineGainRef = useRef<GainNode | null>(null);
-  const trafficNoiseRef = useRef<OscillatorNode | null>(null);
-  const trafficGainRef = useRef<GainNode | null>(null);
 
   // Инициализация аудио
   useEffect(() => {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     audioContextRef.current = new AudioContextClass();
     
-    const ctx = audioContextRef.current;
-    
-    // Создаём узел громкости для музыки
-    musicGainRef.current = ctx.createGain();
-    musicGainRef.current.gain.value = 0.3;
-    musicGainRef.current.connect(ctx.destination);
-    
-    // Создаём узел громкости для двигателя
-    engineGainRef.current = ctx.createGain();
-    engineGainRef.current.gain.value = 0;
-    engineGainRef.current.connect(ctx.destination);
-    
-    // Создаём узел громкости для городского шума
-    trafficGainRef.current = ctx.createGain();
-    trafficGainRef.current.gain.value = 0.05;
-    trafficGainRef.current.connect(ctx.destination);
-    
     return () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
-  }, []);
-
-  // Фоновая музыка (синтезированная в стиле GTA)
-  const playBackgroundMusic = useCallback(() => {
-    if (!audioContextRef.current || !musicGainRef.current) return;
-    
-    const ctx = audioContextRef.current;
-    
-    // Басовая линия
-    const createBassLoop = () => {
-      const bass = ctx.createOscillator();
-      bass.type = 'sawtooth';
-      bass.frequency.value = 55; // A1
-      
-      const bassGain = ctx.createGain();
-      bassGain.gain.value = 0.15;
-      
-      bass.connect(bassGain);
-      bassGain.connect(musicGainRef.current!);
-      
-      bass.start();
-      
-      // Басовый паттерн
-      const pattern = [55, 55, 82.4, 55, 73.4, 55, 82.4, 65.4];
-      let index = 0;
-      
-      setInterval(() => {
-        bass.frequency.setValueAtTime(pattern[index % pattern.length], ctx.currentTime);
-        index++;
-      }, 500);
-      
-      return bass;
-    };
-    
-    // Ритмический синт
-    const createRhythmLoop = () => {
-      const rhythm = ctx.createOscillator();
-      rhythm.type = 'square';
-      rhythm.frequency.value = 220;
-      
-      const rhythmGain = ctx.createGain();
-      rhythmGain.gain.value = 0;
-      
-      rhythm.connect(rhythmGain);
-      rhythmGain.connect(musicGainRef.current!);
-      
-      rhythm.start();
-      
-      // Ритмический паттерн (удары)
-      setInterval(() => {
-        rhythmGain.gain.setValueAtTime(0.08, ctx.currentTime);
-        rhythmGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      }, 250);
-      
-      return rhythm;
-    };
-    
-    createBassLoop();
-    createRhythmLoop();
-    
-    setIsMusicPlaying(true);
-  }, []);
-
-  // Звук двигателя
-  const updateEngineSound = useCallback((speed: number, transport: string) => {
-    if (!audioContextRef.current || !engineGainRef.current) return;
-    
-    const ctx = audioContextRef.current;
-    
-    // Убираем старый звук
-    if (engineSoundRef.current) {
-      engineSoundRef.current.stop();
-    }
-    
-    // Создаём новый звук двигателя
-    const engine = ctx.createOscillator();
-    
-    // Разные типы звуков для разного транспорта
-    switch (transport) {
-      case 'walk':
-        engineGainRef.current.gain.value = 0;
-        return;
-      case 'bike':
-        engine.type = 'sawtooth';
-        engine.frequency.value = 80 + speed * 5;
-        engineGainRef.current.gain.value = 0.03;
-        break;
-      case 'moped':
-        engine.type = 'sawtooth';
-        engine.frequency.value = 120 + speed * 8;
-        engineGainRef.current.gain.value = 0.06;
-        break;
-      case 'car':
-        engine.type = 'sawtooth';
-        engine.frequency.value = 150 + speed * 10;
-        engineGainRef.current.gain.value = 0.08;
-        break;
-    }
-    
-    engine.connect(engineGainRef.current);
-    engine.start();
-    
-    engineSoundRef.current = engine;
-  }, []);
-
-  // Городской шум (звуки машин вокруг)
-  const playTrafficNoise = useCallback(() => {
-    if (!audioContextRef.current || !trafficGainRef.current) return;
-    
-    const ctx = audioContextRef.current;
-    
-    const traffic = ctx.createOscillator();
-    traffic.type = 'sawtooth';
-    traffic.frequency.value = 100;
-    
-    const lfo = ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.5;
-    
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 30;
-    
-    lfo.connect(lfoGain);
-    lfoGain.connect(traffic.frequency);
-    
-    traffic.connect(trafficGainRef.current);
-    
-    traffic.start();
-    lfo.start();
-    
-    trafficNoiseRef.current = traffic;
   }, []);
 
   // Звук взятия заказа (короткий бип)
@@ -866,17 +712,7 @@ export function CourierGame2D() {
         lastPositionRef.current = { x: newX, y: newY };
       }
       
-      setPlayer(prev => {
-        // Обновляем звук двигателя при изменении скорости
-        const isMoving = newX !== prev.x || newY !== prev.y;
-        if (isMoving) {
-          updateEngineSound(prev.speed, prev.transport);
-        } else {
-          updateEngineSound(0, prev.transport);
-        }
-        
-        return { ...prev, x: newX, y: newY };
-      });
+      setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
       // Очистка и фон
       ctx.fillStyle = '#A8E6CF';
@@ -907,7 +743,7 @@ export function CourierGame2D() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, updateEngineSound]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads]);
 
   const drawCity = (ctx: CanvasRenderingContext2D) => {
     // Рисуем траву между дорогами
@@ -1160,12 +996,6 @@ export function CourierGame2D() {
 
   const startGame = () => {
     setGameState('playing');
-    
-    // Запускаем музыку и звуки при старте игры
-    if (!isMusicPlaying) {
-      playBackgroundMusic();
-      playTrafficNoise();
-    }
   };
 
   const quitGame = () => {
@@ -1223,7 +1053,7 @@ export function CourierGame2D() {
               }}
             >
               <Icon name="Play" className="mr-3" size={28} />
-              ИГРАТЬ {!isMusicPlaying && '🔊'}
+              ИГРАТЬ
             </Button>
 
             <Button
@@ -1485,22 +1315,6 @@ export function CourierGame2D() {
         >
           <Icon name="ShoppingCart" size={20} />
           Магазин
-        </Button>
-        
-        <Button
-          onClick={() => {
-            if (musicGainRef.current) {
-              const currentVolume = musicGainRef.current.gain.value;
-              musicGainRef.current.gain.value = currentVolume > 0 ? 0 : 0.3;
-            }
-            if (trafficGainRef.current) {
-              const currentVolume = trafficGainRef.current.gain.value;
-              trafficGainRef.current.gain.value = currentVolume > 0 ? 0 : 0.05;
-            }
-          }}
-          className="bg-blue-500 hover:bg-blue-400 text-black font-bold"
-        >
-          <Icon name="Volume2" size={20} />
         </Button>
       </div>
 
