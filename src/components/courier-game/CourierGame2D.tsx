@@ -4,6 +4,18 @@ import { MobileJoystick } from './MobileJoystick';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
+const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e';
+
+interface LeaderboardEntry {
+  user_id: number;
+  level: number;
+  best_score: number;
+  total_orders: number;
+  transport: string;
+  total_earnings: number;
+}
 
 interface Player {
   x: number;
@@ -45,7 +57,7 @@ const TRANSPORT_COSTS = {
 export function CourierGame2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
-  const { userTelegramId } = useAuth();
+  const { userTelegramId, isAuthenticated } = useAuth();
   
   const [player, setPlayer] = useState<Player>({
     x: 600,
@@ -65,9 +77,126 @@ export function CourierGame2D() {
   const [showShop, setShowShop] = useState(false);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [joystickMove, setJoystickMove] = useState({ x: 0, y: 0 });
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastSaveTime, setLastSaveTime] = useState(Date.now());
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
+  const lastPositionRef = useRef({ x: 600, y: 400 });
+
+  // Загрузка прогресса
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!isAuthenticated || !userTelegramId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${COURIER_GAME_API}?action=load&user_id=${userTelegramId}`);
+        const data = await response.json();
+
+        if (data.success && data.progress) {
+          const p = data.progress;
+          setLevel(p.level);
+          setMoney(p.money);
+          setExperience(p.experience);
+          setTotalOrders(p.total_orders);
+          setTotalDistance(p.total_distance);
+          setTotalEarnings(p.total_earnings);
+          
+          setPlayer(prev => ({
+            ...prev,
+            transport: p.transport as any,
+            speed: TRANSPORT_COSTS[p.transport as keyof typeof TRANSPORT_COSTS].speed
+          }));
+          
+          toast.success('Прогресс загружен!');
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+        toast.error('Ошибка загрузки прогресса');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProgress();
+  }, [isAuthenticated, userTelegramId]);
+
+  // Автосохранение каждые 30 секунд
+  useEffect(() => {
+    if (!isAuthenticated || !userTelegramId) return;
+
+    const interval = setInterval(() => {
+      saveProgress();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, userTelegramId, level, money, experience, player.transport, totalOrders, totalDistance, totalEarnings]);
+
+  // Сохранение прогресса
+  const saveProgress = async () => {
+    if (!isAuthenticated || !userTelegramId) return;
+
+    try {
+      const bestScore = totalEarnings;
+      
+      const response = await fetch(COURIER_GAME_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: parseInt(userTelegramId),
+          level,
+          money,
+          experience,
+          transport: player.transport,
+          total_orders: totalOrders,
+          best_score: bestScore,
+          total_distance: Math.round(totalDistance),
+          total_earnings: totalEarnings
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setLastSaveTime(Date.now());
+        if (data.is_new_record) {
+          toast.success('🎉 Новый рекорд!');
+        }
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+    }
+  };
+
+  // Загрузка лидерборда
+  const loadLeaderboard = async () => {
+    try {
+      const response = await fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setLeaderboard(data.leaderboard);
+      }
+    } catch (error) {
+      console.error('Leaderboard error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (showLeaderboard) {
+      loadLeaderboard();
+      const interval = setInterval(loadLeaderboard, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [showLeaderboard]);
 
   // Генерация зданий
   useEffect(() => {
@@ -202,6 +331,12 @@ export function CourierGame2D() {
       
       newX = Math.max(20, Math.min(canvas.width - 20, newX));
       newY = Math.max(20, Math.min(canvas.height - 20, newY));
+      
+      const distance = Math.hypot(newX - lastPositionRef.current.x, newY - lastPositionRef.current.y);
+      if (distance > 0) {
+        setTotalDistance(prev => prev + distance);
+        lastPositionRef.current = { x: newX, y: newY };
+      }
       
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
@@ -373,12 +508,17 @@ export function CourierGame2D() {
     
     setMoney(prev => prev + totalReward);
     setExperience(prev => prev + 20);
+    setTotalOrders(prev => prev + 1);
+    setTotalEarnings(prev => prev + totalReward);
     setCurrentOrder(null);
     setOrders(prev => prev.filter(o => o.id !== order.id));
+    
+    toast.success(`+$${totalReward}! Заказ выполнен`);
     
     if (experience + 20 >= level * 100) {
       setLevel(prev => prev + 1);
       setExperience(0);
+      toast.success(`🎉 Уровень ${level + 1}!`);
     }
   };
 
@@ -409,7 +549,9 @@ export function CourierGame2D() {
           <div className="text-2xl font-bold">💰 ${money}</div>
           <div className="text-lg">📊 Уровень {level}</div>
           <div className="text-sm">⭐ Опыт: {experience}/{level * 100}</div>
-          <div className="text-sm">🚚 Заказов: {orders.filter(o => o.status === 'available').length}</div>
+          <div className="text-sm">🚚 Выполнено: {totalOrders}</div>
+          <div className="text-sm">💵 Заработано: ${totalEarnings}</div>
+          <div className="text-xs text-gray-400">📍 {Math.round(totalDistance)}м</div>
         </div>
         
         <Button
@@ -419,6 +561,24 @@ export function CourierGame2D() {
           <Icon name="ShoppingCart" size={18} className="mr-2" />
           Магазин (B)
         </Button>
+        
+        <Button
+          onClick={() => setShowLeaderboard(true)}
+          className="w-full bg-yellow-600 hover:bg-yellow-700"
+        >
+          <Icon name="Trophy" size={18} className="mr-2" />
+          Топ-10
+        </Button>
+        
+        {isAuthenticated && (
+          <Button
+            onClick={saveProgress}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            <Icon name="Save" size={18} className="mr-2" />
+            Сохранить
+          </Button>
+        )}
         
         <Button
           onClick={() => navigate('/')}
@@ -499,6 +659,73 @@ export function CourierGame2D() {
       </div>
       
       <MobileJoystick onMove={(dx, dy) => setJoystickMove({ x: dx, y: dy })} />
+      
+      {/* Лидерборд */}
+      {showLeaderboard && (
+        <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold flex items-center gap-2">
+                <Icon name="Trophy" size={32} className="text-yellow-500" />
+                Топ-10 курьеров
+              </h2>
+              <Button onClick={() => setShowLeaderboard(false)} variant="outline">
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              {leaderboard.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">Пока нет результатов</p>
+              ) : (
+                leaderboard.map((entry, index) => (
+                  <div
+                    key={entry.user_id}
+                    className={`flex items-center gap-4 p-4 rounded-lg border-2 ${
+                      entry.user_id === parseInt(userTelegramId || '0')
+                        ? 'bg-yellow-100 border-yellow-500'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <div className="text-3xl font-bold w-12 text-center">
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold">Курьер #{entry.user_id}</div>
+                      <div className="text-sm text-gray-600">
+                        {entry.transport === 'walk' ? '🚶' : entry.transport === 'bike' ? '🚴' : entry.transport === 'moped' ? '🛵' : '🚗'}
+                        {' '}Уровень {entry.level} • {entry.total_orders} заказов
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-600">${entry.best_score}</div>
+                      <div className="text-xs text-gray-500">Заработано</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            {!isAuthenticated && (
+              <div className="mt-6 p-4 bg-blue-100 rounded-lg border-2 border-blue-300">
+                <p className="text-center text-sm font-bold text-blue-900">
+                  🔐 Войдите, чтобы сохранять прогресс и попасть в рейтинг!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Загрузка */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="text-white text-center">
+            <Icon name="Loader2" size={48} className="animate-spin mx-auto mb-4" />
+            <p className="text-xl font-bold">Загрузка игры...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
