@@ -8,6 +8,11 @@ import { toast } from 'sonner';
 
 const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e';
 
+const MAP_WIDTH = 3000;
+const MAP_HEIGHT = 2000;
+const CAMERA_WIDTH = 1200;
+const CAMERA_HEIGHT = 800;
+
 interface LeaderboardEntry {
   user_id: number;
   level: number;
@@ -37,6 +42,8 @@ interface Order {
   timeLeft: number;
   type: 'food' | 'documents' | 'fragile';
   status: 'available' | 'picked' | 'delivered';
+  pickupBuilding?: number;
+  deliveryBuilding?: number;
 }
 
 interface Building {
@@ -45,13 +52,40 @@ interface Building {
   width: number;
   height: number;
   type: 'house' | 'office' | 'shop' | 'cafe';
+  color: string;
+}
+
+interface Vehicle {
+  x: number;
+  y: number;
+  speed: number;
+  angle: number;
+  direction: 'horizontal' | 'vertical';
+  color: string;
+  lane: number;
+}
+
+interface Pedestrian {
+  x: number;
+  y: number;
+  speed: number;
+  direction: number;
+  color: string;
+}
+
+interface Road {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: 'horizontal' | 'vertical';
 }
 
 const TRANSPORT_COSTS = {
-  walk: { cost: 0, speed: 2 },
-  bike: { cost: 100, speed: 4 },
-  moped: { cost: 300, speed: 6 },
-  car: { cost: 800, speed: 8 }
+  walk: { cost: 0, speed: 3 },
+  bike: { cost: 100, speed: 5 },
+  moped: { cost: 300, speed: 7 },
+  car: { cost: 800, speed: 10 }
 };
 
 export function CourierGame2D() {
@@ -59,9 +93,10 @@ export function CourierGame2D() {
   const navigate = useNavigate();
   const { userTelegramId, isAuthenticated } = useAuth();
   
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
-    x: 600,
-    y: 400,
+    x: 300,
+    y: 300,
     speed: TRANSPORT_COSTS.walk.speed,
     angle: 0,
     transport: 'walk',
@@ -73,9 +108,11 @@ export function CourierGame2D() {
   const [money, setMoney] = useState(50);
   const [level, setLevel] = useState(1);
   const [experience, setExperience] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [buildings, setBuildings] = useState<Building[]>([]);
+  const [roads, setRoads] = useState<Road[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [pedestrians, setPedestrians] = useState<Pedestrian[]>([]);
   const [joystickMove, setJoystickMove] = useState({ x: 0, y: 0 });
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
@@ -83,13 +120,12 @@ export function CourierGame2D() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastSaveTime, setLastSaveTime] = useState(Date.now());
-  const [gameStarted, setGameStarted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [camera, setCamera] = useState({ x: 0, y: 0 });
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
-  const lastPositionRef = useRef({ x: 600, y: 400 });
+  const lastPositionRef = useRef({ x: 300, y: 300 });
 
   // Проверка мобильного устройства
   useEffect(() => {
@@ -99,6 +135,161 @@ export function CourierGame2D() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Генерация карты города
+  useEffect(() => {
+    const newRoads: Road[] = [];
+    const newBuildings: Building[] = [];
+    
+    // Создаём сетку дорог
+    for (let y = 0; y < MAP_HEIGHT; y += 400) {
+      newRoads.push({
+        x: 0,
+        y: y,
+        width: MAP_WIDTH,
+        height: 60,
+        type: 'horizontal'
+      });
+    }
+    
+    for (let x = 0; x < MAP_WIDTH; x += 400) {
+      newRoads.push({
+        x: x,
+        y: 0,
+        width: 60,
+        height: MAP_HEIGHT,
+        type: 'vertical'
+      });
+    }
+    
+    setRoads(newRoads);
+    
+    // Создаём здания между дорогами
+    const buildingTypes: Array<Building['type']> = ['house', 'office', 'shop', 'cafe'];
+    const buildingColors = {
+      house: '#FF6B6B',
+      office: '#4ECDC4',
+      shop: '#FFA07A',
+      cafe: '#98D8C8'
+    };
+    
+    for (let y = 80; y < MAP_HEIGHT; y += 400) {
+      for (let x = 80; x < MAP_WIDTH; x += 400) {
+        // 2-4 здания в каждом квартале
+        const numBuildings = 2 + Math.floor(Math.random() * 3);
+        
+        for (let i = 0; i < numBuildings; i++) {
+          const type = buildingTypes[Math.floor(Math.random() * buildingTypes.length)];
+          const width = 60 + Math.random() * 80;
+          const height = 60 + Math.random() * 80;
+          
+          const bx = x + Math.random() * (300 - width);
+          const by = y + Math.random() * (300 - height);
+          
+          newBuildings.push({
+            x: bx,
+            y: by,
+            width,
+            height,
+            type,
+            color: buildingColors[type]
+          });
+        }
+      }
+    }
+    
+    setBuildings(newBuildings);
+    
+    // Создаём начальные заказы возле зданий
+    const initialOrders: Order[] = [];
+    for (let i = 0; i < 5; i++) {
+      const pickupBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
+      const deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
+      
+      initialOrders.push({
+        id: `order-${i}`,
+        pickupX: pickupBuilding.x + pickupBuilding.width / 2,
+        pickupY: pickupBuilding.y + pickupBuilding.height / 2,
+        deliveryX: deliveryBuilding.x + deliveryBuilding.width / 2,
+        deliveryY: deliveryBuilding.y + deliveryBuilding.height / 2,
+        reward: 30 + Math.floor(Math.random() * 70),
+        timeLimit: 120,
+        timeLeft: 120,
+        type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
+        status: 'available'
+      });
+    }
+    
+    setOrders(initialOrders);
+    
+    // Создаём машины на дорогах
+    const initialVehicles: Vehicle[] = [];
+    for (let i = 0; i < 20; i++) {
+      const isHorizontal = Math.random() > 0.5;
+      const colors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
+      
+      if (isHorizontal) {
+        const roadY = Math.floor(Math.random() * 5) * 400;
+        const lane = Math.random() > 0.5 ? -1 : 1;
+        initialVehicles.push({
+          x: Math.random() * MAP_WIDTH,
+          y: roadY + 30 + (lane > 0 ? 0 : 20),
+          speed: 2 + Math.random() * 2,
+          angle: lane > 0 ? 0 : 180,
+          direction: 'horizontal',
+          color: colors[Math.floor(Math.random() * colors.length)],
+          lane
+        });
+      } else {
+        const roadX = Math.floor(Math.random() * 7) * 400;
+        const lane = Math.random() > 0.5 ? -1 : 1;
+        initialVehicles.push({
+          x: roadX + 30 + (lane > 0 ? 0 : 20),
+          y: Math.random() * MAP_HEIGHT,
+          speed: 2 + Math.random() * 2,
+          angle: lane > 0 ? 90 : 270,
+          direction: 'vertical',
+          color: colors[Math.floor(Math.random() * colors.length)],
+          lane
+        });
+      }
+    }
+    
+    setVehicles(initialVehicles);
+    
+    // Создаём пешеходов на тротуарах
+    const initialPedestrians: Pedestrian[] = [];
+    for (let i = 0; i < 30; i++) {
+      const colors = ['#333', '#666', '#999', '#CCC', '#FF69B4', '#00CED1', '#FFD700'];
+      
+      // Размещаем на тротуарах (по краям дорог)
+      const isOnHorizontalRoad = Math.random() > 0.5;
+      
+      if (isOnHorizontalRoad) {
+        const roadY = Math.floor(Math.random() * 5) * 400;
+        const side = Math.random() > 0.5 ? -1 : 1;
+        initialPedestrians.push({
+          x: Math.random() * MAP_WIDTH,
+          y: roadY + (side > 0 ? 5 : 55),
+          speed: 0.5 + Math.random() * 0.5,
+          direction: Math.random() > 0.5 ? 1 : -1,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      } else {
+        const roadX = Math.floor(Math.random() * 7) * 400;
+        const side = Math.random() > 0.5 ? -1 : 1;
+        initialPedestrians.push({
+          x: roadX + (side > 0 ? 5 : 55),
+          y: Math.random() * MAP_HEIGHT,
+          speed: 0.5 + Math.random() * 0.5,
+          direction: Math.random() > 0.5 ? 1 : -1,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    }
+    
+    setPedestrians(initialPedestrians);
   }, []);
 
   // Загрузка прогресса
@@ -127,12 +318,9 @@ export function CourierGame2D() {
             transport: p.transport as any,
             speed: TRANSPORT_COSTS[p.transport as keyof typeof TRANSPORT_COSTS].speed
           }));
-          
-          toast.success('Прогресс загружен!');
         }
       } catch (error) {
         console.error('Load error:', error);
-        toast.error('Ошибка загрузки прогресса');
       } finally {
         setIsLoading(false);
       }
@@ -141,59 +329,48 @@ export function CourierGame2D() {
     loadProgress();
   }, [isAuthenticated, userTelegramId]);
 
-  // Автосохранение каждые 30 секунд
-  useEffect(() => {
+  // Сохранение прогресса
+  const saveProgress = useCallback(async () => {
     if (!isAuthenticated || !userTelegramId) return;
+
+    try {
+      await fetch(COURIER_GAME_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save',
+          user_id: userTelegramId,
+          level,
+          money,
+          experience,
+          total_orders: totalOrders,
+          total_distance: totalDistance,
+          total_earnings: totalEarnings,
+          transport: player.transport,
+          best_score: money + experience
+        })
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+    }
+  }, [isAuthenticated, userTelegramId, level, money, experience, totalOrders, totalDistance, totalEarnings, player.transport]);
+
+  // Автосохранение
+  useEffect(() => {
+    if (!isAuthenticated || !userTelegramId || gameState !== 'playing') return;
 
     const interval = setInterval(() => {
       saveProgress();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, userTelegramId, level, money, experience, player.transport, totalOrders, totalDistance, totalEarnings]);
-
-  // Сохранение прогресса
-  const saveProgress = async () => {
-    if (!isAuthenticated || !userTelegramId) return;
-
-    try {
-      const bestScore = totalEarnings;
-      
-      const response = await fetch(COURIER_GAME_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: parseInt(userTelegramId),
-          level,
-          money,
-          experience,
-          transport: player.transport,
-          total_orders: totalOrders,
-          best_score: bestScore,
-          total_distance: Math.round(totalDistance),
-          total_earnings: totalEarnings
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setLastSaveTime(Date.now());
-        if (data.is_new_record) {
-          toast.success('🎉 Новый рекорд!');
-        }
-      }
-    } catch (error) {
-      console.error('Save error:', error);
-    }
-  };
+  }, [isAuthenticated, userTelegramId, saveProgress, gameState]);
 
   // Загрузка лидерборда
   const loadLeaderboard = async () => {
     try {
-      const response = await fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`);
+      const response = await fetch(`${COURIER_GAME_API}?action=leaderboard`);
       const data = await response.json();
-      
       if (data.success) {
         setLeaderboard(data.leaderboard);
       }
@@ -202,100 +379,67 @@ export function CourierGame2D() {
     }
   };
 
-  useEffect(() => {
-    if (showLeaderboard) {
-      loadLeaderboard();
-      const interval = setInterval(loadLeaderboard, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [showLeaderboard]);
-
-  // Генерация зданий
-  useEffect(() => {
-    const newBuildings: Building[] = [];
-    for (let i = 0; i < 30; i++) {
-      newBuildings.push({
-        x: Math.random() * 1100 + 50,
-        y: Math.random() * 700 + 50,
-        width: 60 + Math.random() * 40,
-        height: 60 + Math.random() * 40,
-        type: ['house', 'office', 'shop', 'cafe'][Math.floor(Math.random() * 4)] as any
-      });
-    }
-    setBuildings(newBuildings);
-  }, []);
-
   // Управление клавиатурой
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keys.current[e.key.toLowerCase()] = true;
-      if (e.key === 'Escape') setIsPaused(prev => !prev);
-      if (e.key === 'b') setShowShop(prev => !prev);
+      
+      if (e.key === 'Escape') {
+        if (gameState === 'playing') {
+          setGameState('paused');
+        } else if (gameState === 'paused') {
+          setGameState('playing');
+        }
+      }
+      
+      if (e.key === ' ' && gameState === 'playing') {
+        checkOrderCollisions();
+      }
     };
-    
+
     const handleKeyUp = (e: KeyboardEvent) => {
       keys.current[e.key.toLowerCase()] = false;
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [gameState]);
 
-  // Генерация заказов
+  // Генерация новых заказов
   useEffect(() => {
-    const generateOrder = (): Order => {
-      const canvas = canvasRef.current;
-      if (!canvas) return createDefaultOrder();
-      
-      return {
-        id: Math.random().toString(36).substr(2, 9),
-        pickupX: Math.random() * (canvas.width - 100) + 50,
-        pickupY: Math.random() * (canvas.height - 100) + 50,
-        deliveryX: Math.random() * (canvas.width - 100) + 50,
-        deliveryY: Math.random() * (canvas.height - 100) + 50,
-        reward: Math.floor(Math.random() * 50) + 30 + (level * 10),
-        timeLimit: 90,
-        timeLeft: 90,
-        type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
-        status: 'available'
-      };
-    };
-    
-    const createDefaultOrder = (): Order => ({
-      id: '0',
-      pickupX: 400,
-      pickupY: 300,
-      deliveryX: 800,
-      deliveryY: 500,
-      reward: 40,
-      timeLimit: 90,
-      timeLeft: 90,
-      type: 'food',
-      status: 'available'
-    });
-    
-    setOrders([generateOrder(), generateOrder(), generateOrder()]);
+    if (gameState !== 'playing') return;
     
     const interval = setInterval(() => {
-      setOrders(prev => {
-        if (prev.length < 6) {
-          return [...prev, generateOrder()];
-        }
-        return prev;
-      });
-    }, 20000);
+      if (orders.filter(o => o.status === 'available').length < 3 && buildings.length > 0) {
+        const pickupBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        const deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        
+        setOrders(prev => [...prev, {
+          id: `order-${Date.now()}`,
+          pickupX: pickupBuilding.x + pickupBuilding.width / 2,
+          pickupY: pickupBuilding.y + pickupBuilding.height / 2,
+          deliveryX: deliveryBuilding.x + deliveryBuilding.width / 2,
+          deliveryY: deliveryBuilding.y + deliveryBuilding.height / 2,
+          reward: 30 + Math.floor(Math.random() * 70),
+          timeLimit: 120,
+          timeLeft: 120,
+          type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
+          status: 'available'
+        }]);
+      }
+    }, 15000);
     
     return () => clearInterval(interval);
-  }, [level]);
+  }, [orders, gameState, buildings]);
 
   // Таймер заказов
   useEffect(() => {
-    if (isPaused || !currentOrder) return;
+    if (gameState !== 'playing' || !currentOrder) return;
     
     const timer = setInterval(() => {
       setOrders(prev => prev.map(order => {
@@ -303,6 +447,7 @@ export function CourierGame2D() {
           if (order.timeLeft <= 0) {
             setMoney(m => Math.max(0, m - 20));
             setCurrentOrder(null);
+            toast.error('Время вышло! -20₽');
             return { ...order, status: 'delivered' as const };
           }
           return { ...order, timeLeft: order.timeLeft - 1 };
@@ -312,22 +457,84 @@ export function CourierGame2D() {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [isPaused, currentOrder]);
+  }, [gameState, currentOrder]);
+
+  // Обновление позиций машин
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    
+    const interval = setInterval(() => {
+      setVehicles(prev => prev.map(vehicle => {
+        let newX = vehicle.x;
+        let newY = vehicle.y;
+        
+        if (vehicle.direction === 'horizontal') {
+          newX += vehicle.speed * vehicle.lane;
+          if (newX > MAP_WIDTH) newX = -50;
+          if (newX < -50) newX = MAP_WIDTH;
+        } else {
+          newY += vehicle.speed * vehicle.lane;
+          if (newY > MAP_HEIGHT) newY = -50;
+          if (newY < -50) newY = MAP_HEIGHT;
+        }
+        
+        return { ...vehicle, x: newX, y: newY };
+      }));
+    }, 50);
+    
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  // Обновление позиций пешеходов
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    
+    const interval = setInterval(() => {
+      setPedestrians(prev => prev.map(ped => {
+        // Определяем, движется ли пешеход по горизонтали или вертикали
+        const isOnHorizontalSidewalk = ped.y % 400 < 70;
+        
+        let newX = ped.x;
+        let newY = ped.y;
+        
+        if (isOnHorizontalSidewalk) {
+          newX += ped.speed * ped.direction;
+          if (newX > MAP_WIDTH) newX = 0;
+          if (newX < 0) newX = MAP_WIDTH;
+        } else {
+          newY += ped.speed * ped.direction;
+          if (newY > MAP_HEIGHT) newY = 0;
+          if (newY < 0) newY = MAP_HEIGHT;
+        }
+        
+        return { ...ped, x: newX, y: newY };
+      }));
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  // Обновление камеры
+  useEffect(() => {
+    const centerX = player.x - CAMERA_WIDTH / 2;
+    const centerY = player.y - CAMERA_HEIGHT / 2;
+    
+    const clampedX = Math.max(0, Math.min(MAP_WIDTH - CAMERA_WIDTH, centerX));
+    const clampedY = Math.max(0, Math.min(MAP_HEIGHT - CAMERA_HEIGHT, centerY));
+    
+    setCamera({ x: clampedX, y: clampedY });
+  }, [player.x, player.y]);
 
   // Игровой цикл
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || gameState !== 'playing') return;
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     const render = () => {
-      if (isPaused) {
-        animationFrameId.current = requestAnimationFrame(render);
-        return;
-      }
-      
+      // Обновление позиции игрока
       let newX = player.x;
       let newY = player.y;
       
@@ -341,8 +548,8 @@ export function CourierGame2D() {
         newY += joystickMove.y * player.speed;
       }
       
-      newX = Math.max(20, Math.min(canvas.width - 20, newX));
-      newY = Math.max(20, Math.min(canvas.height - 20, newY));
+      newX = Math.max(20, Math.min(MAP_WIDTH - 20, newX));
+      newY = Math.max(20, Math.min(MAP_HEIGHT - 20, newY));
       
       const distance = Math.hypot(newX - lastPositionRef.current.x, newY - lastPositionRef.current.y);
       if (distance > 0) {
@@ -352,13 +559,23 @@ export function CourierGame2D() {
       
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
+      // Очистка и фон
       ctx.fillStyle = '#A8E6CF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      drawCity(ctx, canvas.width, canvas.height);
+      // Отрисовка с учётом камеры
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+      
+      drawCity(ctx);
       drawBuildings(ctx);
+      drawVehicles(ctx);
+      drawPedestrians(ctx);
       drawOrders(ctx);
       drawPlayer(ctx, player.x, player.y, player.transport);
+      
+      ctx.restore();
+      
       checkOrderCollisions();
       
       animationFrameId.current = requestAnimationFrame(render);
@@ -371,62 +588,70 @@ export function CourierGame2D() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, isPaused, currentOrder, joystickMove, buildings]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads]);
 
-  const drawCity = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.strokeStyle = '#666';
-    ctx.lineWidth = 40;
+  const drawCity = (ctx: CanvasRenderingContext2D) => {
+    // Рисуем траву между дорогами
+    ctx.fillStyle = '#90EE90';
+    ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
     
-    for (let y = 0; y < height; y += 200) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-    
-    for (let x = 0; x < width; x += 200) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-    
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([15, 15]);
-    
-    for (let y = 0; y < height; y += 200) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-    
-    ctx.setLineDash([]);
+    // Рисуем дороги
+    roads.forEach(road => {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(road.x, road.y, road.width, road.height);
+      
+      // Тротуары
+      ctx.fillStyle = '#999';
+      if (road.type === 'horizontal') {
+        ctx.fillRect(road.x, road.y, road.width, 5);
+        ctx.fillRect(road.x, road.y + 55, road.width, 5);
+      } else {
+        ctx.fillRect(road.x, road.y, 5, road.height);
+        ctx.fillRect(road.x + 55, road.y, 5, road.height);
+      }
+      
+      // Разметка
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([20, 20]);
+      
+      if (road.type === 'horizontal') {
+        ctx.beginPath();
+        ctx.moveTo(road.x, road.y + 30);
+        ctx.lineTo(road.x + road.width, road.y + 30);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(road.x + 30, road.y);
+        ctx.lineTo(road.x + 30, road.y + road.height);
+        ctx.stroke();
+      }
+      
+      ctx.setLineDash([]);
+    });
   };
 
   const drawBuildings = (ctx: CanvasRenderingContext2D) => {
     buildings.forEach(building => {
-      const colors = {
-        house: '#FF6B6B',
-        office: '#4ECDC4',
-        shop: '#FFA07A',
-        cafe: '#98D8C8'
-      };
-      
-      ctx.fillStyle = colors[building.type];
+      // Здание
+      ctx.fillStyle = building.color;
       ctx.fillRect(building.x, building.y, building.width, building.height);
       
+      // Контур
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 2;
       ctx.strokeRect(building.x, building.y, building.width, building.height);
       
-      ctx.fillStyle = '#FFF3';
-      for (let i = 0; i < 2; i++) {
-        for (let j = 0; j < 2; j++) {
+      // Окна
+      ctx.fillStyle = '#FFF5';
+      const windowRows = Math.floor(building.height / 30);
+      const windowCols = Math.floor(building.width / 30);
+      
+      for (let i = 0; i < windowCols; i++) {
+        for (let j = 0; j < windowRows; j++) {
           ctx.fillRect(
-            building.x + 10 + i * 25,
-            building.y + 10 + j * 25,
+            building.x + 10 + i * 30,
+            building.y + 10 + j * 30,
             15,
             15
           );
@@ -435,411 +660,567 @@ export function CourierGame2D() {
     });
   };
 
-  const drawPlayer = (ctx: CanvasRenderingContext2D, x: number, y: number, transport: string) => {
-    ctx.save();
-    ctx.translate(x, y);
-    
-    ctx.fillStyle = '#FF6B6B';
-    ctx.beginPath();
-    ctx.arc(0, 0, 18, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const icons = { walk: '🚶', bike: '🚴', moped: '🛵', car: '🚗' };
-    ctx.fillText(icons[transport as keyof typeof icons], 0, -30);
-    
-    ctx.restore();
+  const drawVehicles = (ctx: CanvasRenderingContext2D) => {
+    vehicles.forEach(vehicle => {
+      ctx.save();
+      ctx.translate(vehicle.x, vehicle.y);
+      ctx.rotate((vehicle.angle * Math.PI) / 180);
+      
+      // Кузов
+      ctx.fillStyle = vehicle.color;
+      ctx.fillRect(-15, -8, 30, 16);
+      
+      // Окна
+      ctx.fillStyle = '#87CEEB';
+      ctx.fillRect(-8, -6, 12, 12);
+      
+      // Фары
+      ctx.fillStyle = '#FFFF00';
+      ctx.fillRect(13, -6, 3, 4);
+      ctx.fillRect(13, 2, 3, 4);
+      
+      ctx.restore();
+    });
+  };
+
+  const drawPedestrians = (ctx: CanvasRenderingContext2D) => {
+    pedestrians.forEach(ped => {
+      ctx.fillStyle = ped.color;
+      ctx.beginPath();
+      ctx.arc(ped.x, ped.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Голова
+      ctx.fillStyle = '#FFD1A4';
+      ctx.beginPath();
+      ctx.arc(ped.x, ped.y - 3, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
   };
 
   const drawOrders = (ctx: CanvasRenderingContext2D) => {
     orders.forEach(order => {
-      if (order.status === 'available') {
-        drawOrderMarker(ctx, order.pickupX, order.pickupY, order.type, false);
-      } else if (order.status === 'picked' && currentOrder?.id === order.id) {
-        drawOrderMarker(ctx, order.deliveryX, order.deliveryY, order.type, true);
+      if (order.status === 'delivered') return;
+      
+      // Маркер взятия
+      if (!currentOrder || currentOrder.id !== order.id) {
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(order.pickupX, order.pickupY, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('📦', order.pickupX, order.pickupY + 5);
+      }
+      
+      // Маркер доставки (если заказ взят)
+      if (currentOrder?.id === order.id) {
+        ctx.fillStyle = '#00FF00';
+        ctx.beginPath();
+        ctx.arc(order.deliveryX, order.deliveryY, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏠', order.deliveryX, order.deliveryY + 5);
+        
+        // Линия к цели
+        ctx.strokeStyle = '#00FF00';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 10]);
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(order.deliveryX, order.deliveryY);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
     });
   };
 
-  const drawOrderMarker = (ctx: CanvasRenderingContext2D, x: number, y: number, type: string, isDelivery: boolean) => {
+  const drawPlayer = (ctx: CanvasRenderingContext2D, x: number, y: number, transport: string) => {
     ctx.save();
     ctx.translate(x, y);
     
-    const pulse = Math.sin(Date.now() / 200) * 3 + 25;
+    const transportColors = {
+      walk: '#FF6B6B',
+      bike: '#4ECDC4',
+      moped: '#FFD93D',
+      car: '#6C5CE7'
+    };
     
-    ctx.fillStyle = isDelivery ? '#4CAF50' : '#FFC107';
-    ctx.beginPath();
-    ctx.arc(0, 0, pulse, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = transportColors[transport];
+    
+    if (transport === 'walk') {
+      // Человек
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#FFD1A4';
+      ctx.beginPath();
+      ctx.arc(0, -5, 6, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Транспорт
+      ctx.fillRect(-12, -8, 24, 16);
+      
+      ctx.fillStyle = '#000';
+      ctx.fillRect(-8, -6, 4, 4);
+      ctx.fillRect(4, -6, 4, 4);
+    }
     
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.stroke();
-    
-    ctx.font = '28px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const icons = { food: '🍔', documents: '📄', fragile: '📦' };
-    ctx.fillText(icons[type as keyof typeof icons], 0, 0);
     
     ctx.restore();
   };
 
-  const checkOrderCollisions = useCallback(() => {
-    const collisionDistance = 50;
-    
+  const checkOrderCollisions = () => {
     orders.forEach(order => {
-      if (order.status === 'available' && !currentOrder) {
-        const dist = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
-        if (dist < collisionDistance) {
-          setCurrentOrder(order);
-          setOrders(prev => prev.map(o => 
-            o.id === order.id ? { ...o, status: 'picked' } : o
-          ));
-        }
+      const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
+      const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
+      
+      if (distToPickup < 30 && order.status === 'available' && !currentOrder) {
+        setCurrentOrder(order);
+        setOrders(prev => prev.map(o => 
+          o.id === order.id ? { ...o, status: 'picked' as const } : o
+        ));
+        toast.success(`Заказ взят! Доставь за ${order.timeLeft}с`);
       }
       
-      if (order.status === 'picked' && currentOrder?.id === order.id) {
-        const dist = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
-        if (dist < collisionDistance) {
-          completeOrder(order);
+      if (distToDelivery < 30 && order.status === 'picked' && currentOrder?.id === order.id) {
+        const reward = order.reward;
+        const exp = Math.floor(reward / 2);
+        
+        setMoney(m => m + reward);
+        setExperience(e => e + exp);
+        setTotalOrders(t => t + 1);
+        setTotalEarnings(e => e + reward);
+        setCurrentOrder(null);
+        
+        setOrders(prev => prev.map(o => 
+          o.id === order.id ? { ...o, status: 'delivered' as const } : o
+        ));
+        
+        toast.success(`+${reward}₽ +${exp} XP`);
+        
+        if (experience + exp >= level * 100) {
+          setLevel(l => l + 1);
+          setExperience(0);
+          toast.success(`Уровень ${level + 1}!`);
         }
       }
     });
-  }, [player, orders, currentOrder]);
-
-  const completeOrder = (order: Order) => {
-    const timeBonus = Math.floor(order.timeLeft / 10) * 5;
-    const totalReward = order.reward + timeBonus;
-    
-    setMoney(prev => prev + totalReward);
-    setExperience(prev => prev + 20);
-    setTotalOrders(prev => prev + 1);
-    setTotalEarnings(prev => prev + totalReward);
-    setCurrentOrder(null);
-    setOrders(prev => prev.filter(o => o.id !== order.id));
-    
-    toast.success(`+$${totalReward}! Заказ выполнен`);
-    
-    if (experience + 20 >= level * 100) {
-      setLevel(prev => prev + 1);
-      setExperience(0);
-      toast.success(`🎉 Уровень ${level + 1}!`);
-    }
   };
 
-  const buyTransport = (transport: 'bike' | 'moped' | 'car') => {
+  const buyTransport = (transport: keyof typeof TRANSPORT_COSTS) => {
     const cost = TRANSPORT_COSTS[transport].cost;
+    
     if (money >= cost) {
-      setMoney(prev => prev - cost);
+      setMoney(m => m - cost);
       setPlayer(prev => ({
         ...prev,
         transport,
         speed: TRANSPORT_COSTS[transport].speed
       }));
+      toast.success(`Куплен ${transport}!`);
       setShowShop(false);
+    } else {
+      toast.error('Недостаточно денег!');
     }
   };
 
-  // Стартовое меню
-  if (!gameStarted) {
+  const startGame = () => {
+    setGameState('playing');
+  };
+
+  const quitGame = () => {
+    saveProgress();
+    navigate('/');
+  };
+
+  if (isLoading) {
     return (
-      <div className="relative w-full h-screen bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 overflow-hidden flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.05)_0%,transparent_50%)]" />
-        
-        <div className="relative z-10 max-w-2xl w-full bg-white rounded-2xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] p-6 sm:p-8">
-          <div className="text-center mb-6">
-            <div className="text-6xl sm:text-8xl mb-4">🚚</div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3 text-black">
-              Курьер: Город в движении
-            </h1>
-            <p className="text-base sm:text-lg text-gray-700 font-semibold mb-6">
-              Доставляй заказы, зарабатывай деньги, покупай транспорт!
-            </p>
-          </div>
-
-          <div className="bg-yellow-50 border-3 border-yellow-400 rounded-xl p-4 mb-6">
-            <h3 className="font-bold text-lg mb-3 text-black flex items-center gap-2">
-              <Icon name="Gamepad2" size={20} />
-              Управление:
-            </h3>
-            <div className="space-y-2 text-sm sm:text-base text-gray-700">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">⌨️ ПК:</span>
-                <span>WASD или стрелки для движения</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">📱 Мобилка:</span>
-                <span>Виртуальный джойстик слева внизу</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">B:</span>
-                <span>Открыть магазин</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">ESC:</span>
-                <span>Пауза</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 border-3 border-blue-400 rounded-xl p-4 mb-6">
-            <h3 className="font-bold text-lg mb-3 text-black flex items-center gap-2">
-              <Icon name="Target" size={20} />
-              Цель игры:
-            </h3>
-            <div className="space-y-2 text-sm sm:text-base text-gray-700">
-              <div>📦 Подбирай заказы (желтые маркеры)</div>
-              <div>🎯 Доставляй по адресу (зеленые маркеры)</div>
-              <div>⏱️ Успевай до конца таймера</div>
-              <div>💰 Зарабатывай деньги и покупай транспорт</div>
-              <div>🏆 Попади в топ-10 лучших курьеров!</div>
-            </div>
-          </div>
-
-          {!isAuthenticated && (
-            <div className="bg-orange-50 border-3 border-orange-400 rounded-xl p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <Icon name="AlertCircle" size={24} className="text-orange-600 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold text-orange-900 mb-1">Гостевой режим</p>
-                  <p className="text-sm text-orange-800">
-                    Войдите в аккаунт, чтобы сохранять прогресс и попасть в лидерборд!
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <Button
-              onClick={() => setGameStarted(true)}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-extrabold text-lg sm:text-xl py-6 rounded-xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all"
-            >
-              <Icon name="Play" size={24} className="mr-2" />
-              Начать игру
-            </Button>
-            
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="w-full border-3 border-black font-bold py-4 rounded-xl"
-            >
-              <Icon name="Home" size={20} className="mr-2" />
-              На главную
-            </Button>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-white text-2xl">Загрузка...</div>
       </div>
     );
   }
 
+  // Главное меню в стиле GTA 2
+  if (gameState === 'menu') {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center relative overflow-hidden"
+        style={{
+          backgroundImage: 'url(https://cdn.poehali.dev/files/i.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Затемнение */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        {/* Меню */}
+        <div className="relative z-10 text-center space-y-6">
+          {/* Логотип */}
+          <div className="mb-12">
+            <h1 className="text-7xl font-bold text-yellow-400 mb-2" style={{
+              textShadow: '4px 4px 0px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000',
+              fontFamily: 'Impact, sans-serif'
+            }}>
+              STUEY.GO
+            </h1>
+            <p className="text-2xl text-white font-bold" style={{
+              textShadow: '2px 2px 0px #000'
+            }}>
+              COURIER RUSH
+            </p>
+          </div>
+
+          {/* Кнопки меню */}
+          <div className="space-y-4 max-w-md mx-auto">
+            <Button
+              onClick={startGame}
+              className="w-full h-16 text-2xl font-bold bg-yellow-500 hover:bg-yellow-400 text-black border-4 border-black"
+              style={{
+                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                boxShadow: '4px 4px 0px #000'
+              }}
+            >
+              <Icon name="Play" className="mr-3" size={28} />
+              ИГРАТЬ
+            </Button>
+
+            <Button
+              onClick={() => {
+                loadLeaderboard();
+                setShowLeaderboard(true);
+              }}
+              className="w-full h-14 text-xl font-bold bg-orange-500 hover:bg-orange-400 text-black border-4 border-black"
+              style={{
+                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                boxShadow: '4px 4px 0px #000'
+              }}
+            >
+              <Icon name="Trophy" className="mr-3" size={24} />
+              ЛИДЕРБОРД
+            </Button>
+
+            <Button
+              onClick={() => setShowShop(true)}
+              className="w-full h-14 text-xl font-bold bg-green-500 hover:bg-green-400 text-black border-4 border-black"
+              style={{
+                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                boxShadow: '4px 4px 0px #000'
+              }}
+            >
+              <Icon name="ShoppingCart" className="mr-3" size={24} />
+              МАГАЗИН
+            </Button>
+
+            <Button
+              onClick={quitGame}
+              className="w-full h-14 text-xl font-bold bg-red-500 hover:bg-red-400 text-black border-4 border-black"
+              style={{
+                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                boxShadow: '4px 4px 0px #000'
+              }}
+            >
+              <Icon name="LogOut" className="mr-3" size={24} />
+              ВЫХОД
+            </Button>
+          </div>
+
+          {/* Статистика игрока */}
+          <div className="mt-8 bg-black/80 p-6 rounded-lg border-4 border-yellow-400 max-w-md mx-auto">
+            <div className="grid grid-cols-2 gap-4 text-white font-bold">
+              <div>
+                <p className="text-yellow-400 text-sm">УРОВЕНЬ</p>
+                <p className="text-2xl">{level}</p>
+              </div>
+              <div>
+                <p className="text-yellow-400 text-sm">ДЕНЬГИ</p>
+                <p className="text-2xl">{money}₽</p>
+              </div>
+              <div>
+                <p className="text-yellow-400 text-sm">ЗАКАЗОВ</p>
+                <p className="text-2xl">{totalOrders}</p>
+              </div>
+              <div>
+                <p className="text-yellow-400 text-sm">ЗАРАБОТАНО</p>
+                <p className="text-2xl">{totalEarnings}₽</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Модальное окно магазина */}
+        {showShop && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 p-8 rounded-lg max-w-2xl w-full border-4 border-yellow-400">
+              <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">МАГАЗИН ТРАНСПОРТА</h2>
+              
+              <div className="grid gap-4 mb-6">
+                {Object.entries(TRANSPORT_COSTS).map(([key, value]) => (
+                  <div key={key} className="bg-gray-800 p-4 rounded flex justify-between items-center border-2 border-gray-700">
+                    <div>
+                      <p className="text-xl font-bold text-white capitalize">{key}</p>
+                      <p className="text-gray-400">Скорость: {value.speed}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-yellow-400">{value.cost}₽</p>
+                      <Button
+                        onClick={() => buyTransport(key as any)}
+                        disabled={player.transport === key || money < value.cost}
+                        className="mt-2"
+                      >
+                        {player.transport === key ? 'Куплено' : 'Купить'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={() => setShowShop(false)}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-bold"
+              >
+                Закрыть
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Модальное окно лидерборда */}
+        {showLeaderboard && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 p-8 rounded-lg max-w-2xl w-full border-4 border-yellow-400 max-h-[80vh] overflow-auto">
+              <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">ЛИДЕРБОРД</h2>
+              
+              <div className="space-y-3">
+                {leaderboard.map((entry, index) => (
+                  <div key={entry.user_id} className="bg-gray-800 p-4 rounded flex items-center gap-4 border-2 border-gray-700">
+                    <div className={`text-3xl font-bold ${
+                      index === 0 ? 'text-yellow-400' : 
+                      index === 1 ? 'text-gray-400' : 
+                      index === 2 ? 'text-orange-600' : 
+                      'text-gray-500'
+                    }`}>
+                      #{index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">Игрок {entry.user_id}</p>
+                      <p className="text-gray-400 text-sm">
+                        Уровень {entry.level} • {entry.total_orders} заказов • {entry.total_earnings}₽
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-yellow-400">{entry.best_score}</p>
+                      <p className="text-gray-400 text-sm capitalize">{entry.transport}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={() => setShowLeaderboard(false)}
+                className="w-full mt-6 bg-red-500 hover:bg-red-600 text-white font-bold"
+              >
+                Закрыть
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Игра
   return (
-    <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* Canvas */}
       <canvas
         ref={canvasRef}
-        width={1200}
-        height={800}
-        className={`${
-          isMobile 
-            ? 'absolute top-2 right-2 w-48 h-32 border-2 border-yellow-400 rounded-lg shadow-lg z-10'
-            : 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-yellow-400 rounded-lg shadow-2xl'
-        }`}
+        width={CAMERA_WIDTH}
+        height={CAMERA_HEIGHT}
+        className="w-full h-full"
+        style={{ imageRendering: 'pixelated' }}
       />
-      
-      <div className={`absolute space-y-2 ${
-        isMobile ? 'bottom-20 left-2 right-2' : 'top-4 left-4'
-      }`}>
-        <div className={`bg-black/90 text-white rounded-lg space-y-2 border-2 border-yellow-400 ${
-          isMobile ? 'p-3' : 'p-4'
-        }`}>
-          <div className={isMobile ? 'text-lg font-bold' : 'text-2xl font-bold'}>💰 ${money}</div>
-          <div className={isMobile ? 'text-sm' : 'text-lg'}>📊 Уровень {level}</div>
-          <div className="text-xs">⭐ {experience}/{level * 100}</div>
-          <div className="text-xs">🚚 {totalOrders} заказов</div>
-          <div className="text-xs">💵 ${totalEarnings}</div>
+
+      {/* HUD */}
+      <div className="absolute top-4 left-4 bg-black/80 p-4 rounded-lg text-white space-y-2 border-2 border-yellow-400">
+        <div className="flex items-center gap-2">
+          <Icon name="User" size={20} className="text-yellow-400" />
+          <span className="font-bold">Уровень {level}</span>
         </div>
-        
-        <div className={`grid gap-2 ${
-          isMobile ? 'grid-cols-2' : 'grid-cols-1'
-        }`}>
-          <Button
-            onClick={() => setShowShop(true)}
-            className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm py-2"
-          >
-            <Icon name="ShoppingCart" size={16} className="mr-1" />
-            {!isMobile && 'Магазин'}
-          </Button>
-          
-          <Button
-            onClick={() => setShowLeaderboard(true)}
-            className="bg-yellow-600 hover:bg-yellow-700 text-xs sm:text-sm py-2"
-          >
-            <Icon name="Trophy" size={16} className="mr-1" />
-            {!isMobile && 'Топ-10'}
-          </Button>
-          
-          {isAuthenticated && (
-            <Button
-              onClick={saveProgress}
-              className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm py-2"
-            >
-              <Icon name="Save" size={16} className="mr-1" />
-              {!isMobile && 'Сохранить'}
-            </Button>
-          )}
-          
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="text-xs sm:text-sm py-2"
-          >
-            <Icon name="Home" size={16} className="mr-1" />
-            {!isMobile && 'Выход'}
-          </Button>
+        <div className="flex items-center gap-2">
+          <Icon name="DollarSign" size={20} className="text-green-400" />
+          <span className="font-bold">{money}₽</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Icon name="Package" size={20} className="text-blue-400" />
+          <span className="font-bold">{totalOrders}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Icon name="Star" size={20} className="text-purple-400" />
+          <span className="font-bold">{experience}/{level * 100} XP</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Icon name="Truck" size={20} className="text-orange-400" />
+          <span className="font-bold capitalize">{player.transport}</span>
         </div>
       </div>
-      
+
+      {/* Текущий заказ */}
       {currentOrder && (
-        <div className="absolute top-4 right-4 bg-gradient-to-br from-green-600 to-green-700 text-white p-4 rounded-lg max-w-xs border-2 border-white shadow-xl">
-          <div className="font-bold mb-2 text-lg">📦 Активный заказ</div>
-          <div className="text-sm space-y-1">
-            <div>Тип: {currentOrder.type === 'food' ? '🍔 Еда' : currentOrder.type === 'documents' ? '📄 Документы' : '📦 Посылка'}</div>
-            <div>Награда: ${currentOrder.reward}</div>
-            <div className={`font-bold ${currentOrder.timeLeft < 30 ? 'text-red-300 animate-pulse' : ''}`}>
-              ⏱️ {currentOrder.timeLeft}с
+        <div className="absolute top-4 right-4 bg-black/80 p-4 rounded-lg text-white border-2 border-green-400">
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="Navigation" size={20} className="text-green-400" />
+            <span className="font-bold">Текущий заказ</span>
+          </div>
+          <div className="space-y-1 text-sm">
+            <p>Награда: {currentOrder.reward}₽</p>
+            <p>Осталось: {currentOrder.timeLeft}с</p>
+            <p className="text-yellow-400">Доставь в зелёную точку!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Мини-карта */}
+      <div className="absolute bottom-4 right-4 bg-black/80 p-2 rounded-lg border-2 border-yellow-400">
+        <div className="w-48 h-32 relative bg-gray-900 rounded">
+          {/* Игрок на мини-карте */}
+          <div
+            className="absolute w-2 h-2 bg-red-500 rounded-full"
+            style={{
+              left: `${(player.x / MAP_WIDTH) * 100}%`,
+              top: `${(player.y / MAP_HEIGHT) * 100}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          />
+          
+          {/* Заказы на мини-карте */}
+          {orders.filter(o => o.status === 'available').map(order => (
+            <div
+              key={order.id}
+              className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
+              style={{
+                left: `${(order.pickupX / MAP_WIDTH) * 100}%`,
+                top: `${(order.pickupY / MAP_HEIGHT) * 100}%`,
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
+          ))}
+          
+          {/* Цель на мини-карте */}
+          {currentOrder && (
+            <div
+              className="absolute w-1.5 h-1.5 bg-green-400 rounded-full"
+              style={{
+                left: `${(currentOrder.deliveryX / MAP_WIDTH) * 100}%`,
+                top: `${(currentOrder.deliveryY / MAP_HEIGHT) * 100}%`,
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Мобильный джойстик */}
+      {isMobile && (
+        <MobileJoystick
+          onMove={setJoystickMove}
+          onAction={checkOrderCollisions}
+        />
+      )}
+
+      {/* Кнопки управления */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
+        <Button
+          onClick={() => setGameState('paused')}
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+        >
+          <Icon name="Pause" size={20} />
+          Пауза
+        </Button>
+        
+        <Button
+          onClick={() => setShowShop(true)}
+          className="bg-green-500 hover:bg-green-400 text-black font-bold"
+        >
+          <Icon name="ShoppingCart" size={20} />
+          Магазин
+        </Button>
+      </div>
+
+      {/* Пауза */}
+      {gameState === 'paused' && (
+        <div className="absolute inset-0 bg-black/90 flex items-center justify-center">
+          <div className="text-center space-y-6">
+            <h2 className="text-5xl font-bold text-yellow-400">ПАУЗА</h2>
+            
+            <div className="space-y-3">
+              <Button
+                onClick={() => setGameState('playing')}
+                className="w-64 h-14 text-xl font-bold bg-green-500 hover:bg-green-400 text-black"
+              >
+                <Icon name="Play" className="mr-2" />
+                Продолжить
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  saveProgress();
+                  setGameState('menu');
+                }}
+                className="w-64 h-14 text-xl font-bold bg-red-500 hover:bg-red-400 text-black"
+              >
+                <Icon name="Home" className="mr-2" />
+                В меню
+              </Button>
             </div>
           </div>
         </div>
       )}
-      
-      {showShop && (
-        <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl max-w-2xl w-full mx-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-bold">🏪 Магазин транспорта</h2>
-              <Button onClick={() => setShowShop(false)} variant="outline">
-                <Icon name="X" size={20} />
-              </Button>
-            </div>
+
+      {/* Магазин в игре */}
+      {showShop && gameState === 'playing' && (
+        <div className="absolute inset-0 bg-black/90 flex items-center justify-center p-4">
+          <div className="bg-gray-900 p-8 rounded-lg max-w-2xl w-full border-4 border-yellow-400">
+            <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">МАГАЗИН</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(['bike', 'moped', 'car'] as const).map(transport => (
-                <div key={transport} className="border-2 border-black rounded-lg p-4">
-                  <div className="text-4xl mb-2 text-center">
-                    {transport === 'bike' ? '🚴' : transport === 'moped' ? '🛵' : '🚗'}
+            <div className="grid gap-4 mb-6">
+              {Object.entries(TRANSPORT_COSTS).map(([key, value]) => (
+                <div key={key} className="bg-gray-800 p-4 rounded flex justify-between items-center border-2 border-gray-700">
+                  <div>
+                    <p className="text-xl font-bold text-white capitalize">{key}</p>
+                    <p className="text-gray-400">Скорость: {value.speed}</p>
                   </div>
-                  <h3 className="font-bold text-center mb-2">
-                    {transport === 'bike' ? 'Велосипед' : transport === 'moped' ? 'Мопед' : 'Автомобиль'}
-                  </h3>
-                  <div className="text-sm space-y-1 mb-3">
-                    <div>💰 Цена: ${TRANSPORT_COSTS[transport].cost}</div>
-                    <div>⚡ Скорость: {TRANSPORT_COSTS[transport].speed}</div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-yellow-400">{value.cost}₽</p>
+                    <Button
+                      onClick={() => buyTransport(key as any)}
+                      disabled={player.transport === key || money < value.cost}
+                      className="mt-2"
+                    >
+                      {player.transport === key ? 'Куплено' : 'Купить'}
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => buyTransport(transport)}
-                    disabled={money < TRANSPORT_COSTS[transport].cost || player.transport === transport}
-                    className="w-full"
-                  >
-                    {player.transport === transport ? 'Куплено' : 'Купить'}
-                  </Button>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-      
-      {isPaused && (
-        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl text-center">
-            <div className="text-6xl mb-4">⏸️</div>
-            <h2 className="text-3xl font-bold mb-4">Пауза</h2>
-            <Button onClick={() => setIsPaused(false)} size="lg">
-              Продолжить
+
+            <Button
+              onClick={() => setShowShop(false)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold"
+            >
+              Закрыть
             </Button>
-          </div>
-        </div>
-      )}
-      
-      <div className="absolute bottom-4 left-4 bg-black/90 text-white p-3 rounded-lg text-sm border-2 border-yellow-400">
-        <div>WASD / ← ↑ → ↓ - движение</div>
-        <div>B - магазин</div>
-        <div>ESC - пауза</div>
-      </div>
-      
-      <MobileJoystick onMove={(dx, dy) => setJoystickMove({ x: dx, y: dy })} />
-      
-      {/* Лидерборд */}
-      {showLeaderboard && (
-        <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-bold flex items-center gap-2">
-                <Icon name="Trophy" size={32} className="text-yellow-500" />
-                Топ-10 курьеров
-              </h2>
-              <Button onClick={() => setShowLeaderboard(false)} variant="outline">
-                <Icon name="X" size={20} />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              {leaderboard.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">Пока нет результатов</p>
-              ) : (
-                leaderboard.map((entry, index) => (
-                  <div
-                    key={entry.user_id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border-2 ${
-                      entry.user_id === parseInt(userTelegramId || '0')
-                        ? 'bg-yellow-100 border-yellow-500'
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <div className="text-3xl font-bold w-12 text-center">
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold">Курьер #{entry.user_id}</div>
-                      <div className="text-sm text-gray-600">
-                        {entry.transport === 'walk' ? '🚶' : entry.transport === 'bike' ? '🚴' : entry.transport === 'moped' ? '🛵' : '🚗'}
-                        {' '}Уровень {entry.level} • {entry.total_orders} заказов
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">${entry.best_score}</div>
-                      <div className="text-xs text-gray-500">Заработано</div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            
-            {!isAuthenticated && (
-              <div className="mt-6 p-4 bg-blue-100 rounded-lg border-2 border-blue-300">
-                <p className="text-center text-sm font-bold text-blue-900">
-                  🔐 Войдите, чтобы сохранять прогресс и попасть в рейтинг!
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      
-      {/* Загрузка */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="text-white text-center">
-            <Icon name="Loader2" size={48} className="animate-spin mx-auto mb-4" />
-            <p className="text-xl font-bold">Загрузка игры...</p>
           </div>
         </div>
       )}
