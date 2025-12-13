@@ -25,6 +25,16 @@ interface LeaderboardEntry {
   rank: number;
 }
 
+interface CourierGameLeaderboardEntry {
+  user_id: number;
+  username?: string;
+  level: number;
+  best_score: number;
+  total_orders: number;
+  transport: string;
+  total_earnings: number;
+}
+
 interface GamesTabProps {
   userId: number;
 }
@@ -37,7 +47,7 @@ export default function GamesTab({ userId }: GamesTabProps) {
   const [stats2D, setStats2D] = useState<Game2DStats | null>(null);
   const [statsHTML, setStatsHTML] = useState<GameHTMLStats | null>(null);
   const [leaderboard2D, setLeaderboard2D] = useState<LeaderboardEntry[]>([]);
-  const [leaderboardHTML, setLeaderboardHTML] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardHTML, setLeaderboardHTML] = useState<CourierGameLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,14 +83,20 @@ export default function GamesTab({ userId }: GamesTabProps) {
 
   const fetchLeaderboards = async () => {
     try {
-      const response2D = await fetch(`${API_URL}?route=game&action=leaderboard&limit=5`);
+      const [response2D, responseHTML] = await Promise.all([
+        fetch(`${API_URL}?route=game&action=leaderboard&limit=5`),
+        fetch('https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e?action=leaderboard&limit=10')
+      ]);
 
       const data2D = await response2D.json();
       if (data2D.success) {
         setLeaderboard2D(data2D.leaderboard || []);
       }
 
-      setLeaderboardHTML([]);
+      const dataHTML = await responseHTML.json();
+      if (dataHTML.success && dataHTML.leaderboard) {
+        setLeaderboardHTML(dataHTML.leaderboard);
+      }
     } catch (error) {
       console.error('Error fetching leaderboards:', error);
     }
@@ -273,9 +289,55 @@ export default function GamesTab({ userId }: GamesTabProps) {
               Топ игроков
             </h3>
 
-            <p className="text-center text-black/70 font-bold py-4 sm:py-8 text-xs sm:text-base">
-              Лидерборд пока недоступен для этой игры
-            </p>
+            {leaderboardHTML.length === 0 ? (
+              <p className="text-center text-black/70 font-bold py-4 sm:py-8 text-xs sm:text-base">
+                Пока нет результатов. Стань первым!
+              </p>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {leaderboardHTML.map((player, index) => (
+                  <div
+                    key={player.user_id}
+                    className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
+                      player.user_id === userId
+                        ? 'bg-blue-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
+                        : index === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-black'
+                        : index === 1 ? 'bg-gradient-to-r from-gray-200 to-gray-300 border-black'
+                        : index === 2 ? 'bg-gradient-to-r from-orange-200 to-orange-300 border-black'
+                        : 'bg-white border-black'
+                    }`}
+                  >
+                    <div className="text-xl sm:text-2xl font-extrabold w-8 sm:w-10 text-center flex-shrink-0">
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-extrabold text-black truncate text-sm sm:text-base">
+                        {player.username || `Игрок ${player.user_id}`}
+                        {player.user_id === userId && (
+                          <span className="ml-2 text-xs bg-black text-blue-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-black/70 font-semibold">
+                        <span>Ур. {player.level}</span>
+                        <span>•</span>
+                        <span>{player.total_orders} зак.</span>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg sm:text-xl font-extrabold text-black">
+                        {player.best_score}
+                      </div>
+                      <div className="text-sm">
+                        {player.transport === 'walk' ? '🚶' : 
+                         player.transport === 'bike' ? '🚴' :
+                         player.transport === 'moped' ? '🛵' :
+                         player.transport === 'car' ? '🚗' : '🎮'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
