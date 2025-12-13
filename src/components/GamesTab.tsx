@@ -97,27 +97,27 @@ export default function GamesTab({ userId }: GamesTabProps) {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Game Selection Tabs */}
-      <div className="flex gap-2 sm:gap-3 bg-white border-3 border-black rounded-2xl p-2 shadow-[0_5px_0_0_rgba(0,0,0,1)]">
+      <div className="flex gap-2 bg-white border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl p-2 shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_5px_0_0_rgba(0,0,0,1)]">
         <Button
           onClick={() => setActiveGame('2d')}
-          className={`flex-1 font-extrabold text-sm sm:text-base py-3 sm:py-4 rounded-xl border-3 border-black transition-all ${
+          className={`flex-1 font-extrabold text-xs sm:text-base py-2 sm:py-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black transition-all ${
             activeGame === '2d'
-              ? 'bg-yellow-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)]'
+              ? 'bg-yellow-400 text-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]'
               : 'bg-white text-black hover:bg-gray-100'
           }`}
         >
-          <Icon name="Zap" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <Icon name="Zap" className="mr-1 sm:mr-2 h-3 w-3 sm:h-5 sm:w-5" />
           2D Игра
         </Button>
         <Button
           onClick={() => setActiveGame('html')}
-          className={`flex-1 font-extrabold text-sm sm:text-base py-3 sm:py-4 rounded-xl border-3 border-black transition-all ${
+          className={`flex-1 font-extrabold text-xs sm:text-base py-2 sm:py-3 rounded-lg sm:rounded-xl border-2 sm:border-3 border-black transition-all ${
             activeGame === 'html'
-              ? 'bg-orange-400 text-black shadow-[0_4px_0_0_rgba(0,0,0,1)]'
+              ? 'bg-orange-400 text-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)]'
               : 'bg-white text-black hover:bg-gray-100'
           }`}
         >
-          <Icon name="Zap" className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <Icon name="Zap" className="mr-1 sm:mr-2 h-3 w-3 sm:h-5 sm:w-5" />
           Раннер
         </Button>
       </div>
@@ -125,47 +125,47 @@ export default function GamesTab({ userId }: GamesTabProps) {
       {/* 2D Game Tab */}
       {activeGame === '2d' && (
         <>
-          <div className="bg-black border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] text-yellow-400 p-6 sm:p-8 text-center">
-            <div className="mb-4 sm:mb-6">
-              <Icon name="Gamepad2" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🎮 Приключения курьера</h2>
-              <p className="text-yellow-400/80 text-sm sm:text-lg font-bold">
+          <div className="bg-black border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)] text-yellow-400 p-4 sm:p-8 text-center">
+            <div className="mb-3 sm:mb-6">
+              <Icon name="Gamepad2" className="h-10 w-10 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-3" />
+              <h2 className="text-lg sm:text-3xl font-extrabold mb-1 sm:mb-2">🎮 Приключения курьера</h2>
+              <p className="text-yellow-400/80 text-xs sm:text-lg font-bold">
                 2D раннер — уклоняйся от препятствий!
               </p>
             </div>
             <Button
               onClick={() => window.location.href = '/game.html'}
               size="lg"
-              className="bg-yellow-400 text-black hover:bg-yellow-500 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+              className="w-full sm:w-auto bg-yellow-400 text-black hover:bg-yellow-500 font-extrabold text-sm sm:text-xl px-4 sm:px-8 py-3 sm:py-6 h-auto border-2 sm:border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all"
             >
-              <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+              <Icon name="Play" className="mr-2 h-4 w-4 sm:h-6 sm:w-6" />
               Играть сейчас
             </Button>
           </div>
 
-          <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-extrabold mb-4 flex items-center gap-2 text-black">
-              <Icon name="BarChart3" className="text-yellow-400 h-5 w-5 sm:h-6 sm:w-6" />
+          <div className="bg-white border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_5px_0_0_rgba(0,0,0,1)] p-3 sm:p-6">
+            <h3 className="text-base sm:text-xl font-extrabold mb-3 sm:mb-4 flex items-center gap-2 text-black">
+              <Icon name="BarChart3" className="text-yellow-400 h-4 w-4 sm:h-6 sm:w-6" />
               Моя статистика
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-yellow-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Trophy" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Лучший результат</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{stats2D?.game_high_score || 0}</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="bg-yellow-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Trophy" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Лучший</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">{stats2D?.game_high_score || 0}</div>
               </div>
 
-              <div className="bg-yellow-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Gamepad2" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Игр сыграно</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{stats2D?.game_total_plays || 0}</div>
+              <div className="bg-yellow-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Gamepad2" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Сыграно</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">{stats2D?.game_total_plays || 0}</div>
               </div>
 
-              <div className="bg-yellow-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Award" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Место в рейтинге</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">
+              <div className="bg-yellow-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Award" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Место</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">
                   {stats2D?.rank ? `#${stats2D.rank}` : '-'}
                 </div>
               </div>
@@ -218,11 +218,11 @@ export default function GamesTab({ userId }: GamesTabProps) {
       {/* HTML Game Tab - Приключения курьера */}
       {activeGame === 'html' && (
         <>
-          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 border-3 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-6 sm:p-8 text-center">
-            <div className="mb-4 sm:mb-6">
-              <Icon name="Map" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">🚚 Курьер: Город в движении</h2>
-              <p className="text-white/90 text-sm sm:text-lg font-bold">
+          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-4 sm:p-8 text-center">
+            <div className="mb-3 sm:mb-6">
+              <Icon name="Map" className="h-10 w-10 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-3" />
+              <h2 className="text-lg sm:text-3xl font-extrabold mb-1 sm:mb-2">🚚 Курьер: Город в движении</h2>
+              <p className="text-white/90 text-xs sm:text-lg font-bold">
                 2D симулятор с видом сверху!
               </p>
             </div>
@@ -230,50 +230,50 @@ export default function GamesTab({ userId }: GamesTabProps) {
               <Button
                 onClick={() => openGame('2d')}
                 size="lg"
-                className="w-full bg-white text-blue-600 hover:bg-gray-100 font-extrabold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-6 h-auto border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all"
+                className="w-full bg-white text-blue-600 hover:bg-gray-100 font-extrabold text-sm sm:text-xl px-4 sm:px-8 py-3 sm:py-6 h-auto border-2 sm:border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all"
               >
-                <Icon name="Play" className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                <Icon name="Play" className="mr-2 h-4 w-4 sm:h-6 sm:w-6" />
                 Играть сейчас
               </Button>
             </div>
           </div>
 
-          <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-extrabold mb-4 flex items-center gap-2 text-black">
-              <Icon name="BarChart3" className="text-blue-500 h-5 w-5 sm:h-6 sm:w-6" />
+          <div className="bg-white border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_5px_0_0_rgba(0,0,0,1)] p-3 sm:p-6">
+            <h3 className="text-base sm:text-xl font-extrabold mb-3 sm:mb-4 flex items-center gap-2 text-black">
+              <Icon name="BarChart3" className="text-blue-500 h-4 w-4 sm:h-6 sm:w-6" />
               Моя статистика
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-blue-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Trophy" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Лучший результат</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{statsHTML?.high_score || 0}</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="bg-blue-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Trophy" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Лучший</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">{statsHTML?.high_score || 0}</div>
               </div>
 
-              <div className="bg-blue-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Gamepad2" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Игр сыграно</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">{statsHTML?.total_plays || 0}</div>
+              <div className="bg-blue-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Gamepad2" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Сыграно</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">{statsHTML?.total_plays || 0}</div>
               </div>
 
-              <div className="bg-blue-400 border-2 border-black rounded-xl p-4 sm:p-6 text-center shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="Award" className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-black" />
-                <div className="text-xs sm:text-sm font-bold text-black/70 mb-1">Место в рейтинге</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-black">
+              <div className="bg-blue-400 border-2 border-black rounded-lg sm:rounded-xl p-2 sm:p-6 text-center shadow-[0_2px_0_0_rgba(0,0,0,1)] sm:shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <Icon name="Award" className="h-4 w-4 sm:h-8 sm:w-8 mx-auto mb-1 sm:mb-2 text-black" />
+                <div className="text-[9px] sm:text-sm font-bold text-black/70 mb-0.5 sm:mb-1">Место</div>
+                <div className="text-lg sm:text-4xl font-extrabold text-black">
                   {statsHTML?.rank ? `#${statsHTML.rank}` : '-'}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border-3 border-black rounded-2xl shadow-[0_5px_0_0_rgba(0,0,0,1)] p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-extrabold mb-4 flex items-center gap-2 text-black">
-              <Icon name="Crown" className="text-blue-500 h-5 w-5 sm:h-6 sm:w-6" />
+          <div className="bg-white border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_5px_0_0_rgba(0,0,0,1)] p-3 sm:p-6">
+            <h3 className="text-base sm:text-xl font-extrabold mb-3 sm:mb-4 flex items-center gap-2 text-black">
+              <Icon name="Crown" className="text-blue-500 h-4 w-4 sm:h-6 sm:w-6" />
               Топ игроков
             </h3>
 
-            <p className="text-center text-black/70 font-bold py-6 sm:py-8 text-sm sm:text-base">
+            <p className="text-center text-black/70 font-bold py-4 sm:py-8 text-xs sm:text-base">
               Лидерборд пока недоступен для этой игры
             </p>
           </div>
