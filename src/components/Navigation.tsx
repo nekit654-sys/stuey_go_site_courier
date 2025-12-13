@@ -133,7 +133,7 @@ const Navigation = () => {
                       <div className="flex items-start gap-2">
                         <div className="text-2xl">🏙️</div>
                         <div className="flex-1">
-                          <div className="font-extrabold text-black text-sm mb-1">City Rush 3D</div>
+                          <div className="font-extrabold text-black text-sm mb-1">Приключения курьера</div>
                           <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
                         </div>
                       </div>
@@ -251,7 +251,7 @@ const Navigation = () => {
               >
                 <span className="text-2xl mr-3">🏙️</span>
                 <div className="text-left flex-1">
-                  <div className="font-extrabold">City Rush 3D</div>
+                  <div className="font-extrabold">Приключения курьера</div>
                   <div className="text-xs font-semibold opacity-90">3D доставки</div>
                 </div>
               </Button>

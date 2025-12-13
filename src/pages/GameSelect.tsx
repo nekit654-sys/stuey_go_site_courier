@@ -85,25 +85,25 @@ export default function GameSelect() {
                 Приключения курьера
               </h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 font-semibold">
-                3D гонки по городу — собирай монеты и уворачивайся от машин!
+                3D доставки по городу — выполняй заказы и становись лучшим!
               </p>
               
               <div className="flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-gray-600 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Icon name="Box" size={14} />
-                  3D графика
+                  3D мир
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon name="Zap" size={14} />
-                  Быстрые гонки
+                  <Icon name="Package" size={14} />
+                  Заказы
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon name="Coins" size={14} />
-                  Монеты
+                  <Icon name="MapPin" size={14} />
+                  Город
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon name="Star" size={14} />
-                  Рекорды
+                  <Icon name="Award" size={14} />
+                  Прогресс
                 </span>
               </div>
 
