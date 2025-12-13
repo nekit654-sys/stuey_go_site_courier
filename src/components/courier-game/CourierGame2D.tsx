@@ -296,6 +296,145 @@ export function CourierGame2D() {
     trafficNoiseRef.current = traffic;
   }, []);
 
+  // Звук взятия заказа (короткий бип)
+  const playPickupSound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 800;
+    
+    const gain = ctx.createGain();
+    gain.gain.value = 0.2;
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  }, []);
+
+  // Звук доставки заказа (позитивный колокольчик)
+  const playDeliverySound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    // Трезвучие для красивого звука
+    const frequencies = [659.25, 783.99, 987.77]; // E5, G5, B5
+    
+    frequencies.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      
+      const gain = ctx.createGain();
+      gain.gain.value = 0.15;
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + index * 0.05);
+      osc.stop(ctx.currentTime + 0.5 + index * 0.05);
+    });
+  }, []);
+
+  // Звук повышения уровня (фанфары)
+  const playLevelUpSound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    // Восходящая мелодия
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      
+      const gain = ctx.createGain();
+      gain.gain.value = 0.2;
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3 + index * 0.1);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + index * 0.1);
+      osc.stop(ctx.currentTime + 0.3 + index * 0.1);
+    });
+    
+    // Финальный аккорд
+    setTimeout(() => {
+      const chord = [523.25, 659.25, 783.99]; // C5, E5, G5
+      
+      chord.forEach(freq => {
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        
+        const gain = ctx.createGain();
+        gain.gain.value = 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.8);
+      });
+    }, 400);
+  }, []);
+
+  // Звук покупки в магазине (монетки)
+  const playPurchaseSound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    // Звук монетки
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 1000;
+    
+    const gain = ctx.createGain();
+    gain.gain.value = 0.15;
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+    osc.stop(ctx.currentTime + 0.3);
+  }, []);
+
+  // Звук ошибки (недостаточно денег)
+  const playErrorSound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    const osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 200;
+    
+    const gain = ctx.createGain();
+    gain.gain.value = 0.2;
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
+  }, []);
+
   // Проверка мобильного устройства
   useEffect(() => {
     const checkMobile = () => {
@@ -616,7 +755,8 @@ export function CourierGame2D() {
           if (order.timeLeft <= 0) {
             setMoney(m => Math.max(0, m - 20));
             setCurrentOrder(null);
-            toast.error('Время вышло! -20₽');
+            playErrorSound();
+            toast.error('⏰ Время вышло! -20₽');
             return { ...order, status: 'delivered' as const };
           }
           return { ...order, timeLeft: order.timeLeft - 1 };
@@ -626,7 +766,7 @@ export function CourierGame2D() {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [gameState, currentOrder]);
+  }, [gameState, currentOrder, playErrorSound]);
 
   // Обновление позиций машин
   useEffect(() => {
@@ -968,6 +1108,7 @@ export function CourierGame2D() {
         setOrders(prev => prev.map(o => 
           o.id === order.id ? { ...o, status: 'picked' as const } : o
         ));
+        playPickupSound();
         toast.success(`Заказ взят! Доставь за ${order.timeLeft}с`);
       }
       
@@ -985,12 +1126,14 @@ export function CourierGame2D() {
           o.id === order.id ? { ...o, status: 'delivered' as const } : o
         ));
         
+        playDeliverySound();
         toast.success(`+${reward}₽ +${exp} XP`);
         
         if (experience + exp >= level * 100) {
           setLevel(l => l + 1);
           setExperience(0);
-          toast.success(`Уровень ${level + 1}!`);
+          playLevelUpSound();
+          toast.success(`🎉 Уровень ${level + 1}!`);
         }
       }
     });
@@ -1006,10 +1149,12 @@ export function CourierGame2D() {
         transport,
         speed: TRANSPORT_COSTS[transport].speed
       }));
-      toast.success(`Куплен ${transport}!`);
+      playPurchaseSound();
+      toast.success(`✅ Куплен ${transport}!`);
       setShowShop(false);
     } else {
-      toast.error('Недостаточно денег!');
+      playErrorSound();
+      toast.error('❌ Недостаточно денег!');
     }
   };
 
