@@ -389,37 +389,45 @@ export function CourierGame2D() {
     
     setBuildings(newBuildings);
     
-    // Создаём светофоры на перекрёстках (ПО КРАЯМ ДОРОГ)
+    // Создаём светофоры НА УГЛАХ перекрёстков (по краям дорог)
     const lights: TrafficLight[] = [];
     for (let y = 0; y < MAP_HEIGHT; y += 400) {
       for (let x = 0; x < MAP_WIDTH; x += 400) {
-        // Светофор для горизонтальной дороги (сверху и снизу от перекрёстка)
+        // Пропускаем если это край карты
+        if (x === 0 || y === 0) continue;
+        
+        // 4 светофора на углах каждого перекрёстка
+        // Верхний левый угол
         lights.push({
-          x: x + 30,
-          y: y - 10, // Над дорогой
-          state: 'green',
-          timer: 0,
-          direction: 'horizontal'
-        });
-        lights.push({
-          x: x + 30,
-          y: y + 70, // Под дорогой
+          x: x - 15,
+          y: y - 15,
           state: 'green',
           timer: 0,
           direction: 'horizontal'
         });
         
-        // Светофор для вертикальной дороги (слева и справа от перекрёстка)
+        // Верхний правый угол
         lights.push({
-          x: x - 10, // Слева от дороги
-          y: y + 30,
+          x: x + 75,
+          y: y - 15,
+          state: 'green',
+          timer: 0,
+          direction: 'horizontal'
+        });
+        
+        // Нижний левый угол
+        lights.push({
+          x: x - 15,
+          y: y + 75,
           state: 'red',
           timer: 0,
           direction: 'vertical'
         });
+        
+        // Нижний правый угол
         lights.push({
-          x: x + 70, // Справа от дороги
-          y: y + 30,
+          x: x + 75,
+          y: y + 75,
           state: 'red',
           timer: 0,
           direction: 'vertical'
@@ -891,6 +899,9 @@ export function CourierGame2D() {
     const canvas = canvasRef.current;
     if (!canvas || gameState !== 'playing') return;
     
+    // Фокусируем canvas при старте игры
+    canvas.focus();
+    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
@@ -983,19 +994,32 @@ export function CourierGame2D() {
     ctx.fillStyle = '#90EE90';
     ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
     
-    // Рисуем дороги
+    // Рисуем дороги БЕЗ серых полос на перекрёстках
     roads.forEach(road => {
       ctx.fillStyle = '#555';
       ctx.fillRect(road.x, road.y, road.width, road.height);
       
-      // Тротуары
-      ctx.fillStyle = '#999';
+      // Тротуары (БЕЗ ОТРИСОВКИ НА ПЕРЕКРЁСТКАХ)
       if (road.type === 'horizontal') {
-        ctx.fillRect(road.x, road.y, road.width, 5);
-        ctx.fillRect(road.x, road.y + 55, road.width, 5);
+        // Рисуем тротуары сегментами, пропуская перекрёстки
+        for (let x = road.x; x < road.x + road.width; x += 60) {
+          const isIntersection = x % 400 < 60;
+          if (!isIntersection) {
+            ctx.fillStyle = '#999';
+            ctx.fillRect(x, road.y, 60, 5);
+            ctx.fillRect(x, road.y + 55, 60, 5);
+          }
+        }
       } else {
-        ctx.fillRect(road.x, road.y, 5, road.height);
-        ctx.fillRect(road.x + 55, road.y, 5, road.height);
+        // Рисуем тротуары сегментами, пропуская перекрёстки
+        for (let y = road.y; y < road.y + road.height; y += 60) {
+          const isIntersection = y % 400 < 60;
+          if (!isIntersection) {
+            ctx.fillStyle = '#999';
+            ctx.fillRect(road.x, y, 5, 60);
+            ctx.fillRect(road.x + 55, y, 5, 60);
+          }
+        }
       }
     });
     
@@ -1332,6 +1356,10 @@ export function CourierGame2D() {
 
   const startGame = () => {
     setGameState('playing');
+    // Фокусируем canvas для получения клавиатурных событий
+    if (canvasRef.current) {
+      canvasRef.current.focus();
+    }
   };
 
   const quitGame = () => {
@@ -1563,6 +1591,7 @@ export function CourierGame2D() {
         height={CAMERA_HEIGHT}
         className="w-full h-full"
         style={{ imageRendering: 'pixelated' }}
+        tabIndex={0}
       />
 
       {/* HUD */}
