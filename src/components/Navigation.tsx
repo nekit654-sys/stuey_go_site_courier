@@ -103,12 +103,11 @@ const Navigation = () => {
                   </div>
                   
                   <div className="p-3 space-y-2">
-                    {/* Приключения курьера - /game */}
+                    {/* Приключения курьера - /game.html */}
                     <button
                       onClick={() => {
                         playSound('whoosh');
-                        openGame('2d');
-                        setIsGameMenuOpen(false);
+                        window.location.href = '/game.html';
                       }}
                       className="w-full text-left bg-gradient-to-br from-orange-100 to-red-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
                     >
@@ -121,11 +120,12 @@ const Navigation = () => {
                       </div>
                     </button>
 
-                    {/* Курьер: Город в движении - /game.html */}
+                    {/* Курьер: Город в движении - /game */}
                     <button
                       onClick={() => {
                         playSound('whoosh');
-                        window.location.href = '/game.html';
+                        openGame('2d');
+                        setIsGameMenuOpen(false);
                       }}
                       className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
                     >
@@ -226,8 +226,7 @@ const Navigation = () => {
               <Button
                 onClick={() => {
                   playSound('whoosh');
-                  openGame('2d');
-                  handleMenuItemClick();
+                  window.location.href = '/game.html';
                 }}
                 variant="ghost"
                 className="w-full justify-start bg-gradient-to-b from-orange-400 to-orange-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-orange-500 hover:to-orange-600"
@@ -242,7 +241,8 @@ const Navigation = () => {
               <Button
                 onClick={() => {
                   playSound('whoosh');
-                  window.location.href = '/game.html';
+                  openGame('2d');
+                  handleMenuItemClick();
                 }}
                 variant="ghost"
                 className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"

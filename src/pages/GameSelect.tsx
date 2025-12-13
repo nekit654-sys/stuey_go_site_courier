@@ -30,9 +30,9 @@ export default function GameSelect() {
         </p>
 
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-4 sm:gap-6">
-          {/* Приключения курьера - /game */}
+          {/* Приключения курьера - /game.html */}
           <button
-            onClick={() => openGame('2d')}
+            onClick={() => window.location.href = '/game.html'}
             className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden w-full"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 opacity-10 group-hover:opacity-20 transition-opacity" />
@@ -72,9 +72,9 @@ export default function GameSelect() {
             </div>
           </button>
 
-          {/* Курьер: Город в движении - /game.html */}
+          {/* Курьер: Город в движении - /game */}
           <button
-            onClick={() => window.location.href = '/game.html'}
+            onClick={() => openGame('2d')}
             className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden w-full"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 opacity-10 group-hover:opacity-20 transition-opacity" />
