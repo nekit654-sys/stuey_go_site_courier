@@ -92,6 +92,13 @@ interface TrafficLight {
   direction: 'horizontal' | 'vertical';
 }
 
+interface Tree {
+  x: number;
+  y: number;
+  size: number;
+  type: 'pine' | 'oak';
+}
+
 const TRANSPORT_COSTS = {
   walk: { cost: 0, speed: 2 },      // Пешком - медленно
   bike: { cost: 100, speed: 4 },    // Велосипед - средне
@@ -134,6 +141,7 @@ export function CourierGame2D() {
   const [isMobile, setIsMobile] = useState(false);
   const [camera, setCamera] = useState({ x: 0, y: 0 });
   const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
+  const [trees, setTrees] = useState<Tree[]>([]);
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
@@ -435,6 +443,61 @@ export function CourierGame2D() {
       }
     }
     setTrafficLights(lights);
+    
+    // Создаём деревья вдоль дорог
+    const newTrees: Tree[] = [];
+    
+    // Деревья вдоль горизонтальных дорог
+    for (let y = 0; y < MAP_HEIGHT; y += 400) {
+      for (let x = 70; x < MAP_WIDTH - 70; x += 80 + Math.random() * 40) {
+        // Пропускаем перекрёстки
+        const nearIntersection = (x % 400) < 100;
+        if (nearIntersection) continue;
+        
+        // Деревья сверху дороги
+        newTrees.push({
+          x: x,
+          y: y - 20 - Math.random() * 15,
+          size: 15 + Math.random() * 10,
+          type: Math.random() > 0.5 ? 'pine' : 'oak'
+        });
+        
+        // Деревья снизу дороги
+        newTrees.push({
+          x: x,
+          y: y + 80 + Math.random() * 15,
+          size: 15 + Math.random() * 10,
+          type: Math.random() > 0.5 ? 'pine' : 'oak'
+        });
+      }
+    }
+    
+    // Деревья вдоль вертикальных дорог
+    for (let x = 0; x < MAP_WIDTH; x += 400) {
+      for (let y = 70; y < MAP_HEIGHT - 70; y += 80 + Math.random() * 40) {
+        // Пропускаем перекрёстки
+        const nearIntersection = (y % 400) < 100;
+        if (nearIntersection) continue;
+        
+        // Деревья слева от дороги
+        newTrees.push({
+          x: x - 20 - Math.random() * 15,
+          y: y,
+          size: 15 + Math.random() * 10,
+          type: Math.random() > 0.5 ? 'pine' : 'oak'
+        });
+        
+        // Деревья справа от дороги
+        newTrees.push({
+          x: x + 80 + Math.random() * 15,
+          y: y,
+          size: 15 + Math.random() * 10,
+          type: Math.random() > 0.5 ? 'pine' : 'oak'
+        });
+      }
+    }
+    
+    setTrees(newTrees);
     
     // Создаём начальные заказы ТОЛЬКО В ЗДАНИЯХ
     const initialOrders: Order[] = [];
@@ -967,6 +1030,7 @@ export function CourierGame2D() {
       drawCity(ctx);
       drawTrafficLights(ctx);
       drawBuildings(ctx);
+      drawTrees(ctx);
       drawVehicles(ctx);
       drawPedestrians(ctx);
       drawOrders(ctx);
@@ -1108,6 +1172,94 @@ export function CourierGame2D() {
       ctx.beginPath();
       ctx.arc(light.x, light.y + 16, 3, 0, Math.PI * 2);
       ctx.fill();
+    });
+  };
+
+  const drawTrees = (ctx: CanvasRenderingContext2D) => {
+    trees.forEach(tree => {
+      ctx.save();
+      ctx.translate(tree.x, tree.y);
+      
+      if (tree.type === 'pine') {
+        // Ёлка (треугольник)
+        // Ствол
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(-3, tree.size - 5, 6, 10);
+        
+        // Крона (3 треугольника)
+        ctx.fillStyle = '#228B22';
+        
+        // Нижний треугольник
+        ctx.beginPath();
+        ctx.moveTo(0, -tree.size);
+        ctx.lineTo(-tree.size * 0.8, tree.size * 0.2);
+        ctx.lineTo(tree.size * 0.8, tree.size * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Средний треугольник
+        ctx.beginPath();
+        ctx.moveTo(0, -tree.size * 0.8);
+        ctx.lineTo(-tree.size * 0.6, 0);
+        ctx.lineTo(tree.size * 0.6, 0);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Верхний треугольник
+        ctx.beginPath();
+        ctx.moveTo(0, -tree.size);
+        ctx.lineTo(-tree.size * 0.4, -tree.size * 0.3);
+        ctx.lineTo(tree.size * 0.4, -tree.size * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Тёмный контур
+        ctx.strokeStyle = '#006400';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -tree.size);
+        ctx.lineTo(-tree.size * 0.8, tree.size * 0.2);
+        ctx.lineTo(tree.size * 0.8, tree.size * 0.2);
+        ctx.closePath();
+        ctx.stroke();
+      } else {
+        // Дуб (круглая крона)
+        // Ствол
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(-4, tree.size * 0.3, 8, tree.size * 0.5);
+        
+        // Крона (несколько кругов)
+        ctx.fillStyle = '#3CB371';
+        
+        // Центральный круг
+        ctx.beginPath();
+        ctx.arc(0, 0, tree.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Левый круг
+        ctx.beginPath();
+        ctx.arc(-tree.size * 0.5, tree.size * 0.1, tree.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Правый круг
+        ctx.beginPath();
+        ctx.arc(tree.size * 0.5, tree.size * 0.1, tree.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Верхний круг
+        ctx.beginPath();
+        ctx.arc(0, -tree.size * 0.4, tree.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Тёмный контур
+        ctx.strokeStyle = '#2E8B57';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, tree.size * 0.7, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      ctx.restore();
     });
   };
 
