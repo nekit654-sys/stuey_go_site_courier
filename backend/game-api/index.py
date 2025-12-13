@@ -152,10 +152,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
             else:
                 cur.execute(
-                    """SELECT username, total_coins as score, total_deliveries as deliveries,
-                              level, experience
-                       FROM couriers
-                       ORDER BY total_coins DESC
+                    """SELECT 
+                        c.user_id,
+                        COALESCE(u.full_name, c.username) as username, 
+                        c.total_coins as score, 
+                        c.total_deliveries as deliveries,
+                        c.level, 
+                        c.experience
+                       FROM couriers c
+                       LEFT JOIN t_p25272970_courier_button_site.users u ON c.user_id = u.id
+                       WHERE c.total_coins > 0
+                       ORDER BY c.total_coins DESC
                        LIMIT %s""",
                     (limit,)
                 )

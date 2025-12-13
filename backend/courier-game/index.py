@@ -43,14 +43,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute("""
                     SELECT 
                         cgp.user_id, 
-                        COALESCE(u.username, u.full_name, u.nickname, 'Игрок ' || cgp.user_id) as username,
+                        COALESCE(u.full_name, 'Игрок ' || cgp.user_id) as username,
                         cgp.level, 
                         cgp.best_score, 
                         cgp.total_orders, 
                         cgp.transport, 
                         cgp.total_earnings
                     FROM t_p25272970_courier_button_site.courier_game_progress cgp
-                    LEFT JOIN t_p25272970_courier_button_site.users u ON cgp.user_id::text = u.telegram_id
+                    LEFT JOIN t_p25272970_courier_button_site.users u ON cgp.user_id = u.id
+                    WHERE cgp.best_score > 0
                     ORDER BY cgp.best_score DESC
                     LIMIT %s
                 """, (limit,))

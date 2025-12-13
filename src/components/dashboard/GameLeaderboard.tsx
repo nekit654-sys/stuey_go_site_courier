@@ -3,8 +3,9 @@ import Icon from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
 
 const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e';
+const CITY_GAME_API = 'https://functions.poehali.dev/7f5ddcb0-dc63-46f4-a1a3-f3bbdfbea6b4';
 
-interface LeaderboardEntry {
+interface CourierLeaderboardEntry {
   user_id: number;
   username?: string;
   level: number;
@@ -14,23 +15,45 @@ interface LeaderboardEntry {
   total_earnings: number;
 }
 
+interface CityLeaderboardEntry {
+  user_id: number;
+  username: string;
+  score: number;
+  deliveries: number;
+  level: number;
+  experience: number;
+}
+
 export default function GameLeaderboard() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [activeGame, setActiveGame] = useState<'courier' | 'city'>('courier');
+  const [courierLeaderboard, setCourierLeaderboard] = useState<CourierLeaderboardEntry[]>([]);
+  const [cityLeaderboard, setCityLeaderboard] = useState<CityLeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadLeaderboard();
+    loadLeaderboards();
   }, []);
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboards = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`);
-      const data = await response.json();
-      if (data.success) {
-        setLeaderboard(data.leaderboard);
+      const [courierRes, cityRes] = await Promise.all([
+        fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`),
+        fetch(`${CITY_GAME_API}?action=leaderboard&limit=10`)
+      ]);
+
+      const courierData = await courierRes.json();
+      const cityData = await cityRes.json();
+
+      if (courierData.success && courierData.leaderboard) {
+        setCourierLeaderboard(courierData.leaderboard);
+      }
+
+      if (cityData.leaderboard) {
+        setCityLeaderboard(cityData.leaderboard);
       }
     } catch (error) {
-      console.error('Ошибка загрузки лидерборда:', error);
+      console.error('Ошибка загрузки лидербордов:', error);
     } finally {
       setIsLoading(false);
     }
@@ -49,11 +72,35 @@ export default function GameLeaderboard() {
   if (isLoading) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="text-3xl">🏆</div>
-          <div>
-            <h3 className="text-xl font-bold">Лидерборд игры</h3>
-            <p className="text-sm text-muted-foreground">Лучшие курьеры в игре "Город в движении"</p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">🏆</div>
+            <div>
+              <h3 className="text-xl font-bold">Лидерборды игр</h3>
+              <p className="text-sm text-muted-foreground">Лучшие курьеры в играх</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveGame('courier')}
+              className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                activeGame === 'courier'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              🏃 Приключения
+            </button>
+            <button
+              onClick={() => setActiveGame('city')}
+              className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                activeGame === 'city'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              🚗 Город
+            </button>
           </div>
         </div>
         <div className="text-center py-8">
@@ -64,24 +111,51 @@ export default function GameLeaderboard() {
     );
   }
 
+  const currentLeaderboard = activeGame === 'courier' ? courierLeaderboard : cityLeaderboard;
+  const isCourier = activeGame === 'courier';
+
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="text-3xl">🏆</div>
-        <div>
-          <h3 className="text-xl font-bold">Лидерборд игры</h3>
-          <p className="text-sm text-muted-foreground">Лучшие курьеры в игре "Город в движении"</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="text-3xl">🏆</div>
+          <div>
+            <h3 className="text-xl font-bold">Лидерборды игр</h3>
+            <p className="text-sm text-muted-foreground">Лучшие курьеры в играх</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveGame('courier')}
+            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+              activeGame === 'courier'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            🏃 Приключения
+          </button>
+          <button
+            onClick={() => setActiveGame('city')}
+            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+              activeGame === 'city'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            🚗 Город
+          </button>
         </div>
       </div>
 
-      {leaderboard.length === 0 ? (
+      {currentLeaderboard.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-5xl mb-4">🎮</div>
-          <p className="text-muted-foreground">Лидерборд пока пуст</p>
+          <p className="text-muted-foreground">Пока нет результатов</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {leaderboard.map((entry, index) => (
+          {currentLeaderboard.map((entry: any, index: number) => (
             <div
               key={entry.user_id}
               className={`
@@ -110,20 +184,22 @@ export default function GameLeaderboard() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Icon name="Package" size={14} />
-                      {entry.total_orders}
+                      {isCourier ? entry.total_orders : entry.deliveries}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Icon name="DollarSign" size={14} />
-                      {entry.total_earnings}₽
-                    </span>
+                    {isCourier && (
+                      <span className="flex items-center gap-1">
+                        <Icon name="DollarSign" size={14} />
+                        {entry.total_earnings}₽
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Очки и транспорт */}
+                {/* Очки */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-2xl font-bold">{entry.best_score}</p>
+                  <p className="text-2xl font-bold">{isCourier ? entry.best_score : entry.score}</p>
                   <p className="text-sm text-muted-foreground">
-                    {getTransportEmoji(entry.transport)}
+                    {isCourier ? getTransportEmoji(entry.transport) : '🪙'}
                   </p>
                 </div>
               </div>
