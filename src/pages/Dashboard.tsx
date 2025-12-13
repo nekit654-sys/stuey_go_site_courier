@@ -28,6 +28,7 @@ import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
 import MessengerSettings from '@/components/dashboard/MessengerSettings';
 import TelegramConnectCard from '@/components/dashboard/TelegramConnectCard';
+import GameLeaderboard from '@/components/dashboard/GameLeaderboard';
 
 
 interface Stats {
@@ -484,7 +485,10 @@ export default function Dashboard() {
 
             {/* Game Tab */}
             {activeTab === 'game' && user?.id && (
-              <GamesTab userId={user.id} />
+              <div className="space-y-4">
+                <GamesTab userId={user.id} />
+                <GameLeaderboard />
+              </div>
             )}
 
             {/* Profile Tab */}
