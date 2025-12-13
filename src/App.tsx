@@ -23,6 +23,7 @@ import Maintenance from "./pages/Maintenance";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
 import ResetPassword from "./pages/ResetPassword";
+import TestLogin from "./pages/TestLogin";
 import GameSelect from "./pages/GameSelect";
 
 const Game = lazy(() => import("./pages/Game"));
@@ -87,6 +88,7 @@ const MaintenanceWrapper = () => {
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
         <Route path="/admin-reset" element={<ResetAdminPasswordPage />} />
         <Route path="/reset-password-now" element={<ResetPassword />} />
+        <Route path="/test-login-now" element={<TestLogin />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

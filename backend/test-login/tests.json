@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "Test login check",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "username": "testuser",
+        "password": "testpass"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "found": false
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
