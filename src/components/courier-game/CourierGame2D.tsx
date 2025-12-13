@@ -388,21 +388,36 @@ export function CourierGame2D() {
     
     setBuildings(newBuildings);
     
-    // Создаём светофоры на перекрёстках
+    // Создаём светофоры на перекрёстках (ПО КРАЯМ ДОРОГ)
     const lights: TrafficLight[] = [];
     for (let y = 0; y < MAP_HEIGHT; y += 400) {
       for (let x = 0; x < MAP_WIDTH; x += 400) {
-        // Горизонтальный светофор
+        // Светофор для горизонтальной дороги (сверху и снизу от перекрёстка)
         lights.push({
           x: x + 30,
-          y: y + 10,
+          y: y - 10, // Над дорогой
           state: 'green',
           timer: 0,
           direction: 'horizontal'
         });
-        // Вертикальный светофор
         lights.push({
-          x: x + 10,
+          x: x + 30,
+          y: y + 70, // Под дорогой
+          state: 'green',
+          timer: 0,
+          direction: 'horizontal'
+        });
+        
+        // Светофор для вертикальной дороги (слева и справа от перекрёстка)
+        lights.push({
+          x: x - 10, // Слева от дороги
+          y: y + 30,
+          state: 'red',
+          timer: 0,
+          direction: 'vertical'
+        });
+        lights.push({
+          x: x + 70, // Справа от дороги
           y: y + 30,
           state: 'red',
           timer: 0,
