@@ -10,8 +10,12 @@ const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-
 
 const MAP_WIDTH = 3000;
 const MAP_HEIGHT = 2000;
-const CAMERA_WIDTH = 1200;
-const CAMERA_HEIGHT = 800;
+// Адаптивные размеры камеры под размер экрана
+const getViewportSize = () => {
+  const width = Math.min(window.innerWidth, 1200);
+  const height = Math.min(window.innerHeight, 800);
+  return { width, height };
+};
 
 interface LeaderboardEntry {
   user_id: number;
@@ -140,6 +144,7 @@ export function CourierGame2D() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [camera, setCamera] = useState({ x: 0, y: 0 });
+  const [viewportSize, setViewportSize] = useState(getViewportSize());
   const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
   
@@ -301,10 +306,11 @@ export function CourierGame2D() {
     osc.stop(ctx.currentTime + 0.3);
   }, []);
 
-  // Проверка мобильного устройства
+  // Проверка мобильного устройства и адаптация размеров
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
+      setViewportSize(getViewportSize());
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -528,35 +534,36 @@ export function CourierGame2D() {
     
     setOrders(initialOrders);
     
-    // Создаём машины на дорогах (В ПРЕДЕЛАХ КАРТЫ)
+    // Создаём машины на дорогах (ПРАВОСТОРОННЕЕ ДВИЖЕНИЕ, ТОЛЬКО ПО ПОЛОСАМ)
     const initialVehicles: Vehicle[] = [];
+    const colors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
+    
     for (let i = 0; i < 20; i++) {
       const isHorizontal = Math.random() > 0.5;
-      const colors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
       
       if (isHorizontal) {
+        // Горизонтальные дороги: движение вправо по нижней полосе
         const roadY = Math.floor(Math.random() * 5) * 400;
-        const lane = Math.random() > 0.5 ? -1 : 1;
         initialVehicles.push({
           x: Math.min(MAP_WIDTH - 100, Math.max(100, Math.random() * MAP_WIDTH)),
-          y: roadY + 30 + (lane > 0 ? 0 : 20),
+          y: roadY + 35, // Нижняя полоса (правостороннее движение)
           speed: 2 + Math.random() * 2,
-          angle: lane > 0 ? 0 : 180,
+          angle: 0, // Движение вправо
           direction: 'horizontal',
           color: colors[Math.floor(Math.random() * colors.length)],
-          lane
+          lane: 1 // Всегда движемся вправо
         });
       } else {
+        // Вертикальные дороги: движение вниз по правой полосе
         const roadX = Math.floor(Math.random() * 7) * 400;
-        const lane = Math.random() > 0.5 ? -1 : 1;
         initialVehicles.push({
-          x: roadX + 30 + (lane > 0 ? 0 : 20),
+          x: roadX + 35, // Правая полоса (правостороннее движение)
           y: Math.min(MAP_HEIGHT - 100, Math.max(100, Math.random() * MAP_HEIGHT)),
           speed: 2 + Math.random() * 2,
-          angle: lane > 0 ? 90 : 270,
+          angle: 90, // Движение вниз
           direction: 'vertical',
           color: colors[Math.floor(Math.random() * colors.length)],
-          lane
+          lane: 1 // Всегда движемся вниз
         });
       }
     }
@@ -813,7 +820,7 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // Обновление позиций машин с учётом светофоров, пешеходов и поворотов
+  // Обновление позиций машин с учётом светофоров, пешеходов (ПРАВОСТОРОННЕЕ ДВИЖЕНИЕ)
   useEffect(() => {
     if (gameState !== 'playing') return;
     
@@ -823,19 +830,29 @@ export function CourierGame2D() {
         const atIntersectionX = Math.abs(vehicle.x % 400) < 60;
         const atIntersectionY = Math.abs(vehicle.y % 400) < 60;
         
-        // Случайный поворот на перекрёстке (10% шанс)
-        if (atIntersectionX && atIntersectionY && Math.random() < 0.1 && !vehicle.turningAtIntersection) {
-          const newDirection = vehicle.direction === 'horizontal' ? 'vertical' : 'horizontal';
-          const newLane = Math.random() > 0.5 ? 1 : -1;
-          const newAngle = newDirection === 'horizontal' ? (newLane > 0 ? 0 : 180) : (newLane > 0 ? 90 : 270);
-          
-          return {
-            ...vehicle,
-            direction: newDirection,
-            lane: newLane,
-            angle: newAngle,
-            turningAtIntersection: true
-          };
+        // Случайный поворот направо на перекрёстке (15% шанс, правостороннее движение)
+        if (atIntersectionX && atIntersectionY && Math.random() < 0.15 && !vehicle.turningAtIntersection) {
+          if (vehicle.direction === 'horizontal') {
+            // Движемся вправо → поворачиваем направо (вниз)
+            return {
+              ...vehicle,
+              direction: 'vertical',
+              lane: 1,
+              angle: 90,
+              y: Math.floor(vehicle.y / 400) * 400 + 35,
+              turningAtIntersection: true
+            };
+          } else {
+            // Движемся вниз → поворачиваем направо (влево по карте)
+            return {
+              ...vehicle,
+              direction: 'horizontal',
+              lane: 1,
+              angle: 0,
+              x: Math.floor(vehicle.x / 400) * 400 + 35,
+              turningAtIntersection: true
+            };
+          }
         }
         
         // Сбрасываем флаг поворота если покинули перекрёсток
@@ -900,15 +917,21 @@ export function CourierGame2D() {
         let newY = vehicle.y;
         
         if (vehicle.direction === 'horizontal') {
-          newX += vehicle.speed * vehicle.lane;
-          // Телепорт машин на противоположный край ВНУТРИ карты
-          if (newX > MAP_WIDTH - 50) newX = 50;
-          if (newX < 50) newX = MAP_WIDTH - 50;
+          // Движение только вправо (правостороннее)
+          newX += vehicle.speed;
+          // Телепорт машин на противоположный край ВНУТРИ карты с сохранением полосы
+          if (newX > MAP_WIDTH - 50) {
+            newX = 50;
+            newY = Math.floor(vehicle.y / 400) * 400 + 35;
+          }
         } else {
-          newY += vehicle.speed * vehicle.lane;
-          // Телепорт машин на противоположный край ВНУТРИ карты
-          if (newY > MAP_HEIGHT - 50) newY = 50;
-          if (newY < 50) newY = MAP_HEIGHT - 50;
+          // Движение только вниз (правостороннее)
+          newY += vehicle.speed;
+          // Телепорт машин на противоположный край ВНУТРИ карты с сохранением полосы
+          if (newY > MAP_HEIGHT - 50) {
+            newY = 50;
+            newX = Math.floor(vehicle.x / 400) * 400 + 35;
+          }
         }
         
         return { ...vehicle, x: newX, y: newY };
@@ -1026,11 +1049,11 @@ export function CourierGame2D() {
       
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
-      // Обновляем камеру СИНХРОННО с движением игрока
-      const centerX = newX - CAMERA_WIDTH / 2;
-      const centerY = newY - CAMERA_HEIGHT / 2;
-      const clampedCameraX = Math.max(0, Math.min(MAP_WIDTH - CAMERA_WIDTH, centerX));
-      const clampedCameraY = Math.max(0, Math.min(MAP_HEIGHT - CAMERA_HEIGHT, centerY));
+      // Обновляем камеру СИНХРОННО с движением игрока (адаптивно)
+      const centerX = newX - viewportSize.width / 2;
+      const centerY = newY - viewportSize.height / 2;
+      const clampedCameraX = Math.max(0, Math.min(MAP_WIDTH - viewportSize.width, centerX));
+      const clampedCameraY = Math.max(0, Math.min(MAP_HEIGHT - viewportSize.height, centerY));
       setCamera({ x: clampedCameraX, y: clampedCameraY });
       
       // Очистка и фон
@@ -1069,7 +1092,7 @@ export function CourierGame2D() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights, trees]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights, trees, viewportSize]);
 
   const drawCity = (ctx: CanvasRenderingContext2D) => {
     // Рисуем траву между дорогами
@@ -1754,52 +1777,51 @@ export function CourierGame2D() {
   // Игра
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Canvas */}
+      {/* Canvas - адаптивный размер */}
       <canvas
         ref={canvasRef}
-        width={CAMERA_WIDTH}
-        height={CAMERA_HEIGHT}
+        width={viewportSize.width}
+        height={viewportSize.height}
         className="w-full h-full"
-        style={{ imageRendering: 'pixelated', outline: 'none' }}
+        style={{ imageRendering: 'pixelated', outline: 'none', maxWidth: '100vw', maxHeight: '100vh' }}
         tabIndex={0}
         autoFocus
       />
 
-      {/* HUD */}
-      <div className="absolute top-4 left-4 bg-black/80 p-4 rounded-lg text-white space-y-2 border-2 border-yellow-400">
-        <div className="flex items-center gap-2">
-          <Icon name="User" size={20} className="text-yellow-400" />
-          <span className="font-bold">Уровень {level}</span>
+      {/* HUD - компактный для мобильных */}
+      <div className="absolute top-2 left-2 bg-black/80 p-2 rounded-lg text-white space-y-1 border-2 border-yellow-400 text-xs sm:text-sm sm:p-4 sm:space-y-2 sm:top-4 sm:left-4">
+        <div className="flex items-center gap-1">
+          <Icon name="User" size={16} className="text-yellow-400" />
+          <span className="font-bold">Ур. {level}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Icon name="DollarSign" size={20} className="text-green-400" />
+        <div className="flex items-center gap-1">
+          <Icon name="DollarSign" size={16} className="text-green-400" />
           <span className="font-bold">{money}₽</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Icon name="Package" size={20} className="text-blue-400" />
+        <div className="flex items-center gap-1">
+          <Icon name="Package" size={16} className="text-blue-400" />
           <span className="font-bold">{totalOrders}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Icon name="Star" size={20} className="text-purple-400" />
-          <span className="font-bold">{experience}/{level * 100} XP</span>
+        <div className="flex items-center gap-1">
+          <Icon name="Star" size={16} className="text-purple-400" />
+          <span className="font-bold">{experience}/{level * 100}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Icon name="Truck" size={20} className="text-orange-400" />
-          <span className="font-bold capitalize">{player.transport}</span>
+        <div className="flex items-center gap-1">
+          <Icon name="Truck" size={16} className="text-orange-400" />
+          <span className="font-bold capitalize text-[10px] sm:text-xs">{player.transport}</span>
         </div>
       </div>
 
-      {/* Текущий заказ */}
+      {/* Текущий заказ - компактный для мобильных */}
       {currentOrder && (
-        <div className="absolute top-4 right-4 bg-black/80 p-4 rounded-lg text-white border-2 border-green-400">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon name="Navigation" size={20} className="text-green-400" />
-            <span className="font-bold">Текущий заказ</span>
+        <div className="absolute top-2 right-2 bg-black/80 p-2 rounded-lg text-white border-2 border-green-400 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+          <div className="flex items-center gap-1 mb-1 sm:gap-2 sm:mb-2">
+            <Icon name="Navigation" size={16} className="text-green-400" />
+            <span className="font-bold hidden sm:inline">Заказ</span>
           </div>
-          <div className="space-y-1 text-sm">
-            <p>Награда: {currentOrder.reward}₽</p>
-            <p>Осталось: {currentOrder.timeLeft}с</p>
-            <p className="text-yellow-400">Доставь в зелёную точку!</p>
+          <div className="space-y-0.5 sm:space-y-1">
+            <p className="font-bold">{currentOrder.reward}₽</p>
+            <p className="font-bold text-yellow-400">{currentOrder.timeLeft}с</p>
           </div>
         </div>
       )}
@@ -1888,22 +1910,22 @@ export function CourierGame2D() {
         />
       )}
 
-      {/* Кнопки управления */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
+      {/* Кнопки управления - компактные для мобильных */}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-2 sm:top-4">
         <Button
           onClick={() => setGameState('paused')}
-          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2 h-auto"
         >
-          <Icon name="Pause" size={20} />
-          Пауза
+          <Icon name="Pause" size={16} />
+          <span className="hidden sm:inline ml-1">Пауза</span>
         </Button>
         
         <Button
           onClick={() => setShowShop(true)}
-          className="bg-green-500 hover:bg-green-400 text-black font-bold"
+          className="bg-green-500 hover:bg-green-400 text-black font-bold text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2 h-auto"
         >
-          <Icon name="ShoppingCart" size={20} />
-          Магазин
+          <Icon name="ShoppingCart" size={16} />
+          <span className="hidden sm:inline ml-1">Магазин</span>
         </Button>
       </div>
 
