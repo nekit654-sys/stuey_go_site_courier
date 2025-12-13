@@ -19,7 +19,6 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
-import Maintenance from "./pages/Maintenance";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
 import ResetPassword from "./pages/ResetPassword";
@@ -48,20 +47,8 @@ const YandexMetrika = () => {
   return null;
 };
 
-const MaintenanceWrapper = () => {
+const AppRoutes = () => {
   const location = useLocation();
-  const [isUnlocked, setIsUnlocked] = useState(false);
-
-  useEffect(() => {
-    const bypass = localStorage.getItem('maintenance_bypass');
-    if (bypass === 'true') {
-      setIsUnlocked(true);
-    }
-  }, []);
-
-  if (!isUnlocked) {
-    return <Maintenance onUnlock={() => setIsUnlocked(true)} />;
-  }
 
   return (
     <>
@@ -114,7 +101,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <YandexMetrika />
-              <MaintenanceWrapper />
+              <AppRoutes />
             </GameProvider>
           </AuthProvider>
         </BrowserRouter>
