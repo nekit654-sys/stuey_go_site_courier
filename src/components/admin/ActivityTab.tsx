@@ -214,18 +214,26 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Icon name="Loader2" className="animate-spin" size={32} />
+      <div className="flex flex-col items-center justify-center py-12">
+        <Icon name="Loader2" className="animate-spin text-blue-500 mb-4" size={48} />
+        <p className="text-lg font-bold text-gray-700">Загрузка событий...</p>
       </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <Card className="p-4 sm:p-8 text-center border-3 border-black">
+      <Card className="p-6 sm:p-8 text-center border-3 border-black">
         <Icon name="Activity" size={48} className="mx-auto mb-4 text-gray-400" />
-        <p className="text-gray-600 font-bold">Нет событий</p>
-        <p className="text-sm text-gray-500 mt-2">События будут появляться здесь автоматически</p>
+        <p className="text-lg font-bold text-gray-700 mb-2">Нет событий</p>
+        <p className="text-sm text-gray-500 mb-4">События будут появляться здесь автоматически</p>
+        <button 
+          onClick={fetchActivities}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
+        >
+          <Icon name="RefreshCw" size={16} />
+          Обновить
+        </button>
       </Card>
     );
   }
