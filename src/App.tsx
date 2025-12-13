@@ -24,6 +24,7 @@ import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
 import GameSelect from "./pages/GameSelect";
 
 const Game = lazy(() => import("./pages/Game"));
+const Game3D = lazy(() => import("./pages/Game3D"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,15 @@ const AppRoutes = () => {
             </div>
           }>
             <Game />
+          </Suspense>
+        } />
+        <Route path="/game-3d" element={
+          <Suspense fallback={
+            <div className="w-full h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="text-white text-2xl">Загрузка 3D игры...</div>
+            </div>
+          }>
+            <Game3D />
           </Suspense>
         } />
 

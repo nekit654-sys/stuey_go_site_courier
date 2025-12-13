@@ -1,4 +1,4 @@
-import { CourierGame2D } from '@/components/courier-game/CourierGame2D';
+import { CityDeliveryRush } from '@/components/game/CityDeliveryRush';
 import { ErrorBoundary } from 'react-error-boundary';
 
 function ErrorFallback({ error }: { error: Error }) {
@@ -19,10 +19,10 @@ function ErrorFallback({ error }: { error: Error }) {
   );
 }
 
-export default function Game() {
+export default function Game3D() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <CourierGame2D />
+      <CityDeliveryRush />
     </ErrorBoundary>
   );
 }
