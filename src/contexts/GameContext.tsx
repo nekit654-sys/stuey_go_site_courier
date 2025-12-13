@@ -140,42 +140,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const openGame = (gameType: GameType = '2d') => {
-    setCurrentGame(gameType);
-    setIsGameOpen(true);
-    // Для 3D игры индикатор загрузки не нужен - у неё свой встроенный
-    setIsGameLoading(gameType === '2d');
-    setIsGameOver(false);
-    setShowRegisterPrompt(false);
-    document.body.style.overflow = 'hidden';
-    document.body.classList.add('game-modal-open');
-    
-    // Автоматический полный экран для 3D игры на мобильных
-    if (gameType === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      setTimeout(() => {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen().catch(err => {
-            console.log('Не удалось войти в полноэкранный режим:', err);
-          });
-        }
-      }, 500);
-    }
-    
-    // Показываем уведомление для 3D игры если пользователь не авторизован
-    if (gameType === '3d' && !isAuthenticated) {
-      setTimeout(() => {
-        toast.info('💡 Результаты в 3D игре сохраняются только при авторизации', {
-          description: 'Войдите в личный кабинет, чтобы сохранять прогресс',
-          duration: 5000,
-          action: {
-            label: 'Войти',
-            onClick: () => {
-              closeGame();
-              navigate('/auth');
-            }
-          }
-        });
-      }, 1000);
+    // Переход на отдельные страницы вместо модального окна
+    if (gameType === '2d') {
+      navigate('/game');
+    } else if (gameType === '3d') {
+      navigate('/game-3d');
     }
   };
 

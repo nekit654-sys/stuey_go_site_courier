@@ -39,10 +39,10 @@ export default function GameSelect() {
             <div className="relative">
               <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🏙️</div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-3 text-black">
-                City Delivery Rush
+                City Delivery Rush 3D
               </h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 font-semibold">
-                Доставляй заказы по городу, зарабатывай монеты и прокачивай транспорт!
+                3D симулятор доставок — управляй транспортом и зарабатывай монеты!
               </p>
               
               <div className="flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-gray-600 flex-wrap">
@@ -74,26 +74,26 @@ export default function GameSelect() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 opacity-10 group-hover:opacity-20 transition-opacity" />
             
             <div className="relative">
-              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🎯</div>
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🚚</div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-3 text-black">
-                Delivery Master
+                Курьер: Город в движении
               </h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 font-semibold">
-                Классическая аркада с доставками — проверь свою реакцию!
+                2D симулятор с видом сверху — доставляй заказы по всему городу!
               </p>
               
               <div className="flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-gray-600 flex-wrap">
                 <span className="flex items-center gap-1">
-                  <Icon name="Zap" size={14} />
-                  Быстрая
+                  <Icon name="Map" size={14} />
+                  Вид сверху
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon name="Target" size={14} />
-                  Аркада
+                  <Icon name="Package" size={14} />
+                  Заказы
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon name="Star" size={14} />
-                  Рекорды
+                  <Icon name="TrendingUp" size={14} />
+                  Прогресс
                 </span>
               </div>
 
