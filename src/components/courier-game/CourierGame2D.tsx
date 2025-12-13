@@ -968,26 +968,40 @@ export function CourierGame2D() {
         ctx.fillRect(road.x, road.y, 5, road.height);
         ctx.fillRect(road.x + 55, road.y, 5, road.height);
       }
-      
-      // Разметка
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([20, 20]);
-      
-      if (road.type === 'horizontal') {
-        ctx.beginPath();
-        ctx.moveTo(road.x, road.y + 30);
-        ctx.lineTo(road.x + road.width, road.y + 30);
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(road.x + 30, road.y);
-        ctx.lineTo(road.x + 30, road.y + road.height);
-        ctx.stroke();
-      }
-      
-      ctx.setLineDash([]);
     });
+    
+    // Разметка дорог (без пересечений на перекрёстках)
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([20, 20]);
+    
+    roads.forEach(road => {
+      if (road.type === 'horizontal') {
+        // Рисуем разметку сегментами, пропуская перекрёстки
+        for (let x = road.x; x < road.x + road.width; x += 60) {
+          const isIntersection = x % 400 < 60;
+          if (!isIntersection) {
+            ctx.beginPath();
+            ctx.moveTo(x, road.y + 30);
+            ctx.lineTo(Math.min(x + 60, road.x + road.width), road.y + 30);
+            ctx.stroke();
+          }
+        }
+      } else {
+        // Рисуем разметку сегментами, пропуская перекрёстки
+        for (let y = road.y; y < road.y + road.height; y += 60) {
+          const isIntersection = y % 400 < 60;
+          if (!isIntersection) {
+            ctx.beginPath();
+            ctx.moveTo(road.x + 30, y);
+            ctx.lineTo(road.x + 30, Math.min(y + 60, road.y + road.height));
+            ctx.stroke();
+          }
+        }
+      }
+    });
+    
+    ctx.setLineDash([]);
   };
 
   const drawTrafficLights = (ctx: CanvasRenderingContext2D) => {
