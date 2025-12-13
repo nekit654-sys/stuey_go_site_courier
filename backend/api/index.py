@@ -12,6 +12,7 @@ from psycopg2.extras import RealDictCursor
 import bcrypt
 import jwt
 import hashlib
+import hmac
 from datetime import datetime, timedelta
 from typing import Dict, Any
 from decimal import Decimal
@@ -1308,9 +1309,182 @@ def handle_auth(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any
     }
 
 
+def handle_telegram_login(body_data: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Обработка авторизации через Telegram Login Widget с проверкой подписи"""
+    try:
+        # Получаем данные от Telegram Widget
+        telegram_id = body_data.get('telegram_id') or body_data.get('id')
+        first_name = body_data.get('first_name', '')
+        last_name = body_data.get('last_name', '')
+        username = body_data.get('username', '')
+        photo_url = body_data.get('photo_url', '')
+        auth_date = body_data.get('auth_date')
+        hash_value = body_data.get('hash')
+        
+        print(f'>>> Telegram Login: telegram_id={telegram_id}, username={username}, auth_date={auth_date}')
+        
+        if not telegram_id:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'telegram_id обязателен'}),
+                'isBase64Encoded': False
+            }
+        
+        # Если есть hash и auth_date, проверяем подпись Telegram
+        if hash_value and auth_date:
+            bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+            if not bot_token:
+                print('>>> WARNING: TELEGRAM_BOT_TOKEN не настроен, пропускаем проверку подписи')
+            else:
+                # Создаем строку для проверки хеша
+                check_data = []
+                for key in sorted(['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username']):
+                    value = body_data.get(key)
+                    if value:
+                        check_data.append(f'{key}={value}')
+                
+                check_string = '\n'.join(check_data)
+                
+                # Создаем секретный ключ из токена бота
+                secret_key = hashlib.sha256(bot_token.encode()).digest()
+                
+                # Вычисляем HMAC-SHA256 (правильный алгоритм для Telegram)
+                computed_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
+                
+                if computed_hash != hash_value:
+                    print(f'>>> Telegram signature verification FAILED')
+                    print(f'>>> Expected: {computed_hash}')
+                    print(f'>>> Got: {hash_value}')
+                    return {
+                        'statusCode': 401,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'Неверная подпись Telegram'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Проверяем актуальность данных (не старше 24 часов)
+                current_timestamp = int(datetime.now().timestamp())
+                if current_timestamp - int(auth_date) > 86400:
+                    return {
+                        'statusCode': 401,
+                        'headers': headers,
+                        'body': json.dumps({'error': 'Данные авторизации устарели'}),
+                        'isBase64Encoded': False
+                    }
+                
+                print(f'>>> Telegram signature verified successfully')
+        
+        # Подключаемся к БД
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Ищем пользователя по telegram_id
+        cur.execute("""
+            SELECT * FROM t_p25272970_courier_button_site.users 
+            WHERE telegram_id = %s AND is_active = true
+        """, (str(telegram_id),))
+        
+        user = cur.fetchone()
+        is_new_user = False
+        referral_code = body_data.get('referral_code')
+        
+        if not user:
+            # Создаем нового пользователя
+            is_new_user = True
+            full_name = f"{first_name} {last_name}".strip() or username or f"tg_user_{telegram_id}"
+            
+            # Генерируем реферальный код
+            import uuid
+            new_referral_code = str(uuid.uuid4())[:8].upper()
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.users 
+                (telegram_id, full_name, username, avatar_url, referral_code, oauth_provider, oauth_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s) 
+                RETURNING *
+            """, (str(telegram_id), full_name, username, photo_url, new_referral_code, 'telegram', str(telegram_id)))
+            
+            user = cur.fetchone()
+            user_id = user['id']
+            
+            # Если указан реферальный код пригласителя
+            if referral_code:
+                cur.execute("""
+                    SELECT id FROM t_p25272970_courier_button_site.users 
+                    WHERE referral_code = %s
+                """, (referral_code,))
+                inviter = cur.fetchone()
+                if inviter:
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users 
+                        SET invited_by_user_id = %s 
+                        WHERE id = %s
+                    """, (inviter['id'], user_id))
+            
+            conn.commit()
+            print(f'>>> Created new Telegram user: {user_id}')
+        else:
+            user_id = user['id']
+            # Обновляем данные пользователя
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users 
+                SET username = %s, avatar_url = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (username, photo_url, user_id))
+            conn.commit()
+            print(f'>>> Updated existing Telegram user: {user_id}')
+        
+        # Генерируем JWT токен
+        token_payload = {
+            'user_id': user_id,
+            'username': username or full_name,
+            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+        }
+        token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        # Получаем обновленные данные пользователя
+        cur.execute("""
+            SELECT * FROM t_p25272970_courier_button_site.users WHERE id = %s
+        """, (user_id,))
+        user = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps(convert_decimals({
+                'success': True,
+                'token': token,
+                'user_id': user_id,
+                'username': user['full_name'],
+                'is_new_user': is_new_user,
+                'user': dict(user)
+            })),
+            'isBase64Encoded': False
+        }
+        
+    except Exception as e:
+        print(f'>>> Ошибка в handle_telegram_login: {str(e)}')
+        import traceback
+        traceback.print_exc()
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
+        }
+
+
 def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     import uuid
     import requests
+    
+    # Для Telegram используем специальную функцию с проверкой подписи
+    if provider == 'telegram':
+        return handle_telegram_login(body_data, headers)
     
     try:
         # Обмениваем code на access_token и получаем реальные данные пользователя от провайдера

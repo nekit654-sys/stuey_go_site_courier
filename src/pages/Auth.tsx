@@ -207,10 +207,15 @@ export default function Auth() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        // Передаем ВСЕ данные от Telegram для проверки подписи
+        id: telegramUser.id,
         telegram_id: telegramUser.id,
-        username: telegramUser.username || telegramUser.first_name || `tg_user_${telegramUser.id}`,
         first_name: telegramUser.first_name,
         last_name: telegramUser.last_name,
+        username: telegramUser.username,
+        photo_url: telegramUser.photo_url,
+        auth_date: telegramUser.auth_date,
+        hash: telegramUser.hash,
         referral_code: finalReferralCode,
       }),
     })
@@ -401,8 +406,14 @@ export default function Auth() {
                   <div className="space-y-4">
                     {agreedToTerms ? (
                       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border-3 border-blue-400 shadow-[0_4px_0_0_rgba(59,130,246,0.3)]">
-                        <p className="text-center text-gray-800 font-bold mb-4">
-                          Нажмите на кнопку ниже для входа через Telegram:
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <Icon name="Send" className="h-5 w-5 text-blue-600" />
+                          <p className="text-center text-gray-800 font-bold">
+                            Войдите через Telegram
+                          </p>
+                        </div>
+                        <p className="text-center text-gray-600 text-sm mb-4">
+                          Нажмите кнопку ниже для быстрого и безопасного входа
                         </p>
                         <TelegramLoginButton
                           botName="StueyGoBot"
@@ -410,6 +421,11 @@ export default function Auth() {
                           buttonSize="large"
                           cornerRadius={20}
                         />
+                        <div className="mt-4 bg-blue-100 p-3 rounded-xl border-2 border-blue-300">
+                          <p className="text-xs text-blue-800 text-center">
+                            💡 Если кнопка не появилась, обновите страницу
+                          </p>
+                        </div>
                       </div>
                     ) : (
                       <div className="bg-yellow-50 p-6 rounded-2xl border-3 border-yellow-400 shadow-[0_4px_0_0_rgba(234,179,8,0.3)]">
