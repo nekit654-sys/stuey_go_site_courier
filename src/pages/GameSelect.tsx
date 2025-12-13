@@ -189,74 +189,68 @@ export default function GameSelect() {
         </div>
 
         {/* Лидерборды игр */}
-        <div className="mt-8 sm:mt-12 md:mt-16 max-w-6xl mx-auto grid md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="mt-8 sm:mt-12 md:mt-16 max-w-6xl mx-auto grid md:grid-cols-2 gap-3 sm:gap-4">
           {/* Лидерборд "Приключения курьера" */}
-          <div className="bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
-            <div className="text-center mb-4 sm:mb-6">
-              <div className="text-3xl sm:text-4xl mb-2">🏃</div>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-black mb-1">
+          <div className="bg-white border-2 sm:border-3 border-black rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)]">
+            <div className="text-center mb-3 sm:mb-4">
+              <div className="text-2xl sm:text-3xl mb-1">🏃</div>
+              <h3 className="text-base sm:text-xl font-extrabold text-black mb-0.5 sm:mb-1">
                 Приключения курьера
               </h3>
-              <p className="text-xs sm:text-sm text-gray-700 font-semibold">
-                Топ-10 лучших игроков
+              <p className="text-[10px] sm:text-xs text-gray-700 font-semibold">
+                Топ-10 игроков
               </p>
             </div>
 
             {isLoadingCourier ? (
-              <div className="text-center py-6">
-                <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-yellow-400 border-t-transparent"></div>
-                <p className="mt-3 text-gray-600 font-semibold text-sm">Загрузка...</p>
+              <div className="text-center py-4 sm:py-6">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-yellow-400 border-t-transparent"></div>
+                <p className="mt-2 sm:mt-3 text-gray-600 font-semibold text-xs sm:text-sm">Загрузка...</p>
               </div>
             ) : courierLeaderboard.length === 0 ? (
-              <div className="text-center py-6">
-                <div className="text-4xl mb-3">🎮</div>
-                <p className="text-sm text-gray-600 font-semibold">
+              <div className="text-center py-4 sm:py-6">
+                <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🎮</div>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold">
                   Пока нет результатов
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {courierLeaderboard.map((entry, index) => (
+              <div className="space-y-1.5 sm:space-y-2">
+                {courierLeaderboard.slice(0, 5).map((entry, index) => (
                   <div
                     key={entry.user_id}
                     className={`
-                      relative bg-gradient-to-r p-2 sm:p-3 rounded-lg border-2 border-black
-                      transition-all hover:translate-x-1
+                      relative bg-gradient-to-r p-2 rounded-md sm:rounded-lg border border-black
                       ${index === 0 ? 'from-yellow-200 to-yellow-300' : ''}
                       ${index === 1 ? 'from-gray-200 to-gray-300' : ''}
                       ${index === 2 ? 'from-orange-200 to-orange-300' : ''}
                       ${index > 2 ? 'from-white to-gray-50' : ''}
                     `}
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {/* Место */}
-                      <div className="text-xl sm:text-2xl font-extrabold flex-shrink-0 w-8 sm:w-10 text-center">
+                      <div className="text-base sm:text-xl font-extrabold flex-shrink-0 w-6 sm:w-8 text-center">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                       </div>
 
                       {/* Информация */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm sm:text-base font-bold text-black truncate">
+                        <p className="text-xs sm:text-sm font-bold text-black truncate">
                           {entry.username || `Игрок ${entry.user_id}`}
                         </p>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-700 font-semibold">
-                          <span className="flex items-center gap-1">
-                            <Icon name="TrendingUp" size={12} />
-                            Ур. {entry.level}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Icon name="Package" size={12} />
-                            {entry.total_orders}
-                          </span>
+                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-700 font-semibold">
+                          <span>Ур. {entry.level}</span>
+                          <span>•</span>
+                          <span>{entry.total_orders} зак.</span>
                         </div>
                       </div>
 
                       {/* Очки */}
                       <div className="text-right flex-shrink-0">
-                        <p className="text-lg sm:text-xl font-extrabold text-black">
+                        <p className="text-base sm:text-lg font-extrabold text-black">
                           {entry.best_score}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs sm:text-sm">
                           {entry.transport === 'walk' ? '🚶' : 
                            entry.transport === 'bike' ? '🚴' :
                            entry.transport === 'moped' ? '🛵' :
@@ -269,84 +263,78 @@ export default function GameSelect() {
               </div>
             )}
 
-            <div className="mt-4 text-center">
+            <div className="mt-3 sm:mt-4 text-center">
               <button
                 onClick={() => openGame('2d')}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-2 px-6 rounded-lg border-2 border-black transition-all inline-flex items-center gap-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-2 px-6 rounded-lg border-2 border-black transition-all inline-flex items-center justify-center gap-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] text-sm sm:text-base"
               >
-                <Icon name="Gamepad2" size={18} />
+                <Icon name="Gamepad2" size={16} />
                 Играть
               </button>
             </div>
           </div>
 
           {/* Лидерборд "Город в движении" */}
-          <div className="bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
-            <div className="text-center mb-4 sm:mb-6">
-              <div className="text-3xl sm:text-4xl mb-2">🚗</div>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-black mb-1">
+          <div className="bg-white border-2 sm:border-3 border-black rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)]">
+            <div className="text-center mb-3 sm:mb-4">
+              <div className="text-2xl sm:text-3xl mb-1">🚗</div>
+              <h3 className="text-base sm:text-xl font-extrabold text-black mb-0.5 sm:mb-1">
                 Город в движении
               </h3>
-              <p className="text-xs sm:text-sm text-gray-700 font-semibold">
-                Топ-10 лучших игроков
+              <p className="text-[10px] sm:text-xs text-gray-700 font-semibold">
+                Топ-10 игроков
               </p>
             </div>
 
             {isLoadingCity ? (
-              <div className="text-center py-6">
-                <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-yellow-400 border-t-transparent"></div>
-                <p className="mt-3 text-gray-600 font-semibold text-sm">Загрузка...</p>
+              <div className="text-center py-4 sm:py-6">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-yellow-400 border-t-transparent"></div>
+                <p className="mt-2 sm:mt-3 text-gray-600 font-semibold text-xs sm:text-sm">Загрузка...</p>
               </div>
             ) : cityLeaderboard.length === 0 ? (
-              <div className="text-center py-6">
-                <div className="text-4xl mb-3">🎮</div>
-                <p className="text-sm text-gray-600 font-semibold">
+              <div className="text-center py-4 sm:py-6">
+                <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🎮</div>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold">
                   Пока нет результатов
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {cityLeaderboard.map((entry, index) => (
+              <div className="space-y-1.5 sm:space-y-2">
+                {cityLeaderboard.slice(0, 5).map((entry, index) => (
                   <div
                     key={entry.user_id || entry.username}
                     className={`
-                      relative bg-gradient-to-r p-2 sm:p-3 rounded-lg border-2 border-black
-                      transition-all hover:translate-x-1
+                      relative bg-gradient-to-r p-2 rounded-md sm:rounded-lg border border-black
                       ${index === 0 ? 'from-yellow-200 to-yellow-300' : ''}
                       ${index === 1 ? 'from-gray-200 to-gray-300' : ''}
                       ${index === 2 ? 'from-orange-200 to-orange-300' : ''}
                       ${index > 2 ? 'from-white to-gray-50' : ''}
                     `}
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {/* Место */}
-                      <div className="text-xl sm:text-2xl font-extrabold flex-shrink-0 w-8 sm:w-10 text-center">
+                      <div className="text-base sm:text-xl font-extrabold flex-shrink-0 w-6 sm:w-8 text-center">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                       </div>
 
                       {/* Информация */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm sm:text-base font-bold text-black truncate">
+                        <p className="text-xs sm:text-sm font-bold text-black truncate">
                           {entry.username}
                         </p>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-700 font-semibold">
-                          <span className="flex items-center gap-1">
-                            <Icon name="TrendingUp" size={12} />
-                            Ур. {entry.level}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Icon name="Package" size={12} />
-                            {entry.deliveries}
-                          </span>
+                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-700 font-semibold">
+                          <span>Ур. {entry.level}</span>
+                          <span>•</span>
+                          <span>{entry.deliveries} дост.</span>
                         </div>
                       </div>
 
                       {/* Монеты */}
                       <div className="text-right flex-shrink-0">
-                        <p className="text-lg sm:text-xl font-extrabold text-black">
+                        <p className="text-base sm:text-lg font-extrabold text-black">
                           {entry.score}
                         </p>
-                        <p className="text-xs text-gray-600">🪙 монет</p>
+                        <p className="text-xs sm:text-sm">🪙</p>
                       </div>
                     </div>
                   </div>
@@ -354,12 +342,12 @@ export default function GameSelect() {
               </div>
             )}
 
-            <div className="mt-4 text-center">
+            <div className="mt-3 sm:mt-4 text-center">
               <button
                 onClick={() => window.location.href = '/game.html'}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-2 px-6 rounded-lg border-2 border-black transition-all inline-flex items-center gap-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+                className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-2 px-6 rounded-lg border-2 border-black transition-all inline-flex items-center justify-center gap-2 shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] text-sm sm:text-base"
               >
-                <Icon name="Gamepad2" size={18} />
+                <Icon name="Gamepad2" size={16} />
                 Играть
               </button>
             </div>

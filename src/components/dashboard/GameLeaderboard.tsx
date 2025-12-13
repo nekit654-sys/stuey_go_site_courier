@@ -149,9 +149,9 @@ export default function GameLeaderboard() {
       </div>
 
       {currentLeaderboard.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-5xl mb-4">🎮</div>
-          <p className="text-muted-foreground">Пока нет результатов</p>
+        <div className="text-center py-6">
+          <div className="text-4xl mb-3">🎮</div>
+          <p className="text-sm text-muted-foreground">Пока нет результатов</p>
         </div>
       ) : (
         <div className="space-y-3">
