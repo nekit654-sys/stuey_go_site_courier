@@ -63,6 +63,8 @@ interface Vehicle {
   direction: 'horizontal' | 'vertical';
   color: string;
   lane: number;
+  targetDirection?: 'horizontal' | 'vertical';
+  turningAtIntersection?: boolean;
 }
 
 interface Pedestrian {
@@ -103,8 +105,8 @@ export function CourierGame2D() {
   
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
-    x: 300,
-    y: 300,
+    x: 150,
+    y: 150,
     speed: TRANSPORT_COSTS.walk.speed,
     angle: 0,
     transport: 'walk',
@@ -439,7 +441,7 @@ export function CourierGame2D() {
     
     setOrders(initialOrders);
     
-    // Создаём машины на дорогах
+    // Создаём машины на дорогах (В ПРЕДЕЛАХ КАРТЫ)
     const initialVehicles: Vehicle[] = [];
     for (let i = 0; i < 20; i++) {
       const isHorizontal = Math.random() > 0.5;
@@ -449,7 +451,7 @@ export function CourierGame2D() {
         const roadY = Math.floor(Math.random() * 5) * 400;
         const lane = Math.random() > 0.5 ? -1 : 1;
         initialVehicles.push({
-          x: Math.random() * MAP_WIDTH,
+          x: Math.min(MAP_WIDTH - 100, Math.max(100, Math.random() * MAP_WIDTH)),
           y: roadY + 30 + (lane > 0 ? 0 : 20),
           speed: 2 + Math.random() * 2,
           angle: lane > 0 ? 0 : 180,
@@ -462,7 +464,7 @@ export function CourierGame2D() {
         const lane = Math.random() > 0.5 ? -1 : 1;
         initialVehicles.push({
           x: roadX + 30 + (lane > 0 ? 0 : 20),
-          y: Math.random() * MAP_HEIGHT,
+          y: Math.min(MAP_HEIGHT - 100, Math.max(100, Math.random() * MAP_HEIGHT)),
           speed: 2 + Math.random() * 2,
           angle: lane > 0 ? 90 : 270,
           direction: 'vertical',
@@ -474,7 +476,7 @@ export function CourierGame2D() {
     
     setVehicles(initialVehicles);
     
-    // Создаём пешеходов на тротуарах
+    // Создаём пешеходов на тротуарах (СТРОГО В ПРЕДЕЛАХ КАРТЫ)
     const initialPedestrians: Pedestrian[] = [];
     for (let i = 0; i < 30; i++) {
       const colors = ['#333', '#666', '#999', '#CCC', '#FF69B4', '#00CED1', '#FFD700'];
@@ -486,7 +488,7 @@ export function CourierGame2D() {
         const roadY = Math.floor(Math.random() * 5) * 400;
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
-          x: Math.random() * MAP_WIDTH,
+          x: Math.min(MAP_WIDTH - 50, Math.max(50, Math.random() * MAP_WIDTH)),
           y: roadY + (side > 0 ? 5 : 55),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
@@ -497,7 +499,7 @@ export function CourierGame2D() {
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
           x: roadX + (side > 0 ? 5 : 55),
-          y: Math.random() * MAP_HEIGHT,
+          y: Math.min(MAP_HEIGHT - 50, Math.max(50, Math.random() * MAP_HEIGHT)),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
           color: colors[Math.floor(Math.random() * colors.length)]
@@ -719,12 +721,36 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // Обновление позиций машин с учётом светофоров
+  // Обновление позиций машин с учётом светофоров и поворотов
   useEffect(() => {
     if (gameState !== 'playing') return;
     
     const interval = setInterval(() => {
       setVehicles(prev => prev.map(vehicle => {
+        // Проверяем перекрёстки для поворотов
+        const atIntersectionX = Math.abs(vehicle.x % 400) < 60;
+        const atIntersectionY = Math.abs(vehicle.y % 400) < 60;
+        
+        // Случайный поворот на перекрёстке (10% шанс)
+        if (atIntersectionX && atIntersectionY && Math.random() < 0.1 && !vehicle.turningAtIntersection) {
+          const newDirection = vehicle.direction === 'horizontal' ? 'vertical' : 'horizontal';
+          const newLane = Math.random() > 0.5 ? 1 : -1;
+          const newAngle = newDirection === 'horizontal' ? (newLane > 0 ? 0 : 180) : (newLane > 0 ? 90 : 270);
+          
+          return {
+            ...vehicle,
+            direction: newDirection,
+            lane: newLane,
+            angle: newAngle,
+            turningAtIntersection: true
+          };
+        }
+        
+        // Сбрасываем флаг поворота если покинули перекрёсток
+        if (vehicle.turningAtIntersection && (!atIntersectionX || !atIntersectionY)) {
+          return { ...vehicle, turningAtIntersection: false };
+        }
+        
         // Проверяем светофоры впереди
         let shouldStop = false;
         
@@ -751,12 +777,14 @@ export function CourierGame2D() {
         
         if (vehicle.direction === 'horizontal') {
           newX += vehicle.speed * vehicle.lane;
-          if (newX > MAP_WIDTH) newX = -50;
-          if (newX < -50) newX = MAP_WIDTH;
+          // Телепорт машин на противоположный край ВНУТРИ карты
+          if (newX > MAP_WIDTH - 50) newX = 50;
+          if (newX < 50) newX = MAP_WIDTH - 50;
         } else {
           newY += vehicle.speed * vehicle.lane;
-          if (newY > MAP_HEIGHT) newY = -50;
-          if (newY < -50) newY = MAP_HEIGHT;
+          // Телепорт машин на противоположный край ВНУТРИ карты
+          if (newY > MAP_HEIGHT - 50) newY = 50;
+          if (newY < 50) newY = MAP_HEIGHT - 50;
         }
         
         return { ...vehicle, x: newX, y: newY };
@@ -766,7 +794,7 @@ export function CourierGame2D() {
     return () => clearInterval(interval);
   }, [gameState, trafficLights]);
 
-  // Обновление позиций пешеходов
+  // Обновление позиций пешеходов (В ПРЕДЕЛАХ КАРТЫ)
   useEffect(() => {
     if (gameState !== 'playing') return;
     
@@ -777,18 +805,33 @@ export function CourierGame2D() {
         
         let newX = ped.x;
         let newY = ped.y;
+        let newDirection = ped.direction;
         
         if (isOnHorizontalSidewalk) {
           newX += ped.speed * ped.direction;
-          if (newX > MAP_WIDTH) newX = 0;
-          if (newX < 0) newX = MAP_WIDTH;
+          // Разворачиваемся у краёв карты
+          if (newX > MAP_WIDTH - 50) {
+            newX = MAP_WIDTH - 50;
+            newDirection = -1;
+          }
+          if (newX < 50) {
+            newX = 50;
+            newDirection = 1;
+          }
         } else {
           newY += ped.speed * ped.direction;
-          if (newY > MAP_HEIGHT) newY = 0;
-          if (newY < 0) newY = MAP_HEIGHT;
+          // Разворачиваемся у краёв карты
+          if (newY > MAP_HEIGHT - 50) {
+            newY = MAP_HEIGHT - 50;
+            newDirection = -1;
+          }
+          if (newY < 50) {
+            newY = 50;
+            newDirection = 1;
+          }
         }
         
-        return { ...ped, x: newX, y: newY };
+        return { ...ped, x: newX, y: newY, direction: newDirection };
       }));
     }, 100);
     
@@ -829,6 +872,24 @@ export function CourierGame2D() {
         newY += joystickMove.y * player.speed;
       }
       
+      // Проверка коллизий со зданиями
+      let collisionDetected = false;
+      for (const building of buildings) {
+        if (newX + 15 > building.x && 
+            newX - 15 < building.x + building.width &&
+            newY + 15 > building.y && 
+            newY - 15 < building.y + building.height) {
+          collisionDetected = true;
+          break;
+        }
+      }
+      
+      if (collisionDetected) {
+        // Откатываем движение если столкнулись
+        newX = player.x;
+        newY = player.y;
+      }
+      
       newX = Math.max(20, Math.min(MAP_WIDTH - 20, newX));
       newY = Math.max(20, Math.min(MAP_HEIGHT - 20, newY));
       
@@ -855,6 +916,7 @@ export function CourierGame2D() {
       drawPedestrians(ctx);
       drawOrders(ctx);
       drawPlayer(ctx, player.x, player.y, player.transport);
+      drawDirectionArrow(ctx);
       
       ctx.restore();
       
@@ -1036,18 +1098,53 @@ export function CourierGame2D() {
         ctx.font = 'bold 16px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('🏠', order.deliveryX, order.deliveryY + 5);
-        
-        // Линия к цели
-        ctx.strokeStyle = '#00FF00';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 10]);
-        ctx.beginPath();
-        ctx.moveTo(player.x, player.y);
-        ctx.lineTo(order.deliveryX, order.deliveryY);
-        ctx.stroke();
-        ctx.setLineDash([]);
       }
     });
+  };
+
+  const drawDirectionArrow = (ctx: CanvasRenderingContext2D) => {
+    if (!currentOrder) return;
+    
+    const dx = currentOrder.deliveryX - player.x;
+    const dy = currentOrder.deliveryY - player.y;
+    const angle = Math.atan2(dy, dx);
+    const distance = Math.hypot(dx, dy);
+    
+    // Стрелка над игроком
+    ctx.save();
+    ctx.translate(player.x, player.y - 40);
+    ctx.rotate(angle);
+    
+    // Тень стрелки
+    ctx.fillStyle = '#00000088';
+    ctx.beginPath();
+    ctx.moveTo(0, -8);
+    ctx.lineTo(15, 0);
+    ctx.lineTo(0, 8);
+    ctx.fill();
+    
+    // Основная стрелка
+    ctx.fillStyle = '#00FF00';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -8);
+    ctx.lineTo(15, 0);
+    ctx.lineTo(0, 8);
+    ctx.lineTo(3, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    ctx.restore();
+    
+    // Дистанция до цели
+    ctx.fillStyle = '#000000CC';
+    ctx.fillRect(player.x - 30, player.y - 60, 60, 18);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${Math.floor(distance)}м`, player.x, player.y - 47);
   };
 
   const drawPlayer = (ctx: CanvasRenderingContext2D, x: number, y: number, transport: string) => {
@@ -1406,28 +1503,47 @@ export function CourierGame2D() {
         </div>
       )}
 
-      {/* Мини-карта */}
-      <div className="absolute bottom-4 right-4 bg-black/80 p-2 rounded-lg border-2 border-yellow-400">
-        <div className="w-48 h-32 relative bg-gray-900 rounded">
-          {/* Игрок на мини-карте */}
-          <div
-            className="absolute w-2 h-2 bg-red-500 rounded-full"
-            style={{
-              left: `${(player.x / MAP_WIDTH) * 100}%`,
-              top: `${(player.y / MAP_HEIGHT) * 100}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          />
+      {/* Мини-карта (спутниковый вид) */}
+      <div className="absolute bottom-4 right-4 bg-black/90 p-2 rounded-lg border-2 border-cyan-400 shadow-xl">
+        <div className="w-52 h-36 relative bg-green-900 rounded overflow-hidden">
+          {/* Сетка дорог на мини-карте */}
+          {roads.map((road, idx) => (
+            <div
+              key={idx}
+              className="absolute bg-gray-700"
+              style={{
+                left: road.type === 'vertical' ? `${(road.x / MAP_WIDTH) * 100}%` : '0',
+                top: road.type === 'horizontal' ? `${(road.y / MAP_HEIGHT) * 100}%` : '0',
+                width: road.type === 'horizontal' ? '100%' : '2px',
+                height: road.type === 'vertical' ? '100%' : '2px'
+              }}
+            />
+          ))}
+          
+          {/* Здания на мини-карте */}
+          {buildings.map((building, idx) => (
+            <div
+              key={idx}
+              className="absolute bg-gray-500 opacity-70"
+              style={{
+                left: `${(building.x / MAP_WIDTH) * 100}%`,
+                top: `${(building.y / MAP_HEIGHT) * 100}%`,
+                width: `${(building.width / MAP_WIDTH) * 100}%`,
+                height: `${(building.height / MAP_HEIGHT) * 100}%`
+              }}
+            />
+          ))}
           
           {/* Заказы на мини-карте */}
           {orders.filter(o => o.status === 'available').map(order => (
             <div
               key={order.id}
-              className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full"
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
               style={{
                 left: `${(order.pickupX / MAP_WIDTH) * 100}%`,
                 top: `${(order.pickupY / MAP_HEIGHT) * 100}%`,
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                boxShadow: '0 0 4px #facc15'
               }}
             />
           ))}
@@ -1435,14 +1551,32 @@ export function CourierGame2D() {
           {/* Цель на мини-карте */}
           {currentOrder && (
             <div
-              className="absolute w-1.5 h-1.5 bg-green-400 rounded-full"
+              className="absolute w-2 h-2 bg-green-400 rounded-full animate-pulse"
               style={{
                 left: `${(currentOrder.deliveryX / MAP_WIDTH) * 100}%`,
                 top: `${(currentOrder.deliveryY / MAP_HEIGHT) * 100}%`,
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                boxShadow: '0 0 4px #4ade80'
               }}
             />
           )}
+          
+          {/* Игрок на мини-карте (треугольник) */}
+          <div
+            className="absolute w-3 h-3"
+            style={{
+              left: `${(player.x / MAP_WIDTH) * 100}%`,
+              top: `${(player.y / MAP_HEIGHT) * 100}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <div className="w-3 h-3 bg-red-500 rounded-full" style={{ boxShadow: '0 0 6px #ef4444' }}></div>
+          </div>
+          
+          {/* Заголовок мини-карты */}
+          <div className="absolute top-1 left-1 text-[10px] font-bold text-cyan-400 bg-black/50 px-1 rounded">
+            🛰️ КАРТА
+          </div>
         </div>
       </div>
 
