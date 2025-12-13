@@ -104,6 +104,24 @@ const Navigation = () => {
                   </div>
                   
                   <div className="p-3 space-y-2">
+                    {/* 2D Game - ГЛАВНАЯ */}
+                    <button
+                      onClick={() => {
+                        playSound('whoosh');
+                        openGame('2d');
+                        setIsGameMenuOpen(false);
+                      }}
+                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">🚚</div>
+                        <div className="flex-1">
+                          <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
+                          <div className="text-xs text-gray-700 font-semibold">2D симулятор доставок</div>
+                        </div>
+                      </div>
+                    </button>
+
                     {/* 3D Game */}
                     <button
                       onClick={() => {
@@ -116,26 +134,8 @@ const Navigation = () => {
                       <div className="flex items-start gap-2">
                         <div className="text-2xl">🏙️</div>
                         <div className="flex-1">
-                          <div className="font-extrabold text-black text-sm mb-1">City Delivery Rush</div>
+                          <div className="font-extrabold text-black text-sm mb-1">City Rush 3D</div>
                           <div className="text-xs text-gray-700 font-semibold">3D доставки по городу</div>
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* 2D Game */}
-                    <button
-                      onClick={() => {
-                        playSound('whoosh');
-                        openGame('2d');
-                        setIsGameMenuOpen(false);
-                      }}
-                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className="text-2xl">🎯</div>
-                        <div className="flex-1">
-                          <div className="font-extrabold text-black text-sm mb-1">Delivery Master</div>
-                          <div className="text-xs text-gray-700 font-semibold">Классическая аркада</div>
                         </div>
                       </div>
                     </button>
@@ -250,6 +250,24 @@ const Navigation = () => {
               {/* Mobile Game Selection Dropdown */}
               {isMobileGameMenuOpen && (
                 <div className="mt-2 space-y-2">
+                  {/* 2D Game - ГЛАВНАЯ */}
+                  <Button
+                    onClick={() => {
+                      playSound('whoosh');
+                      openGame('2d');
+                      setIsMobileGameMenuOpen(false);
+                      handleMenuItemClick();
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
+                  >
+                    <span className="text-2xl mr-3">🚚</span>
+                    <div className="text-left">
+                      <div className="font-extrabold">Курьер: Город в движении</div>
+                      <div className="text-xs font-semibold opacity-90">2D симулятор</div>
+                    </div>
+                  </Button>
+
                   {/* 3D Game */}
                   <Button
                     onClick={() => {
@@ -263,29 +281,11 @@ const Navigation = () => {
                   >
                     <span className="text-2xl mr-3">🏙️</span>
                     <div className="text-left flex-1">
-                      <div className="font-extrabold">City Rush</div>
+                      <div className="font-extrabold">City Rush 3D</div>
                       <div className="text-xs font-semibold opacity-90">3D доставки</div>
                       {!isAuthenticated && (
                         <div className="text-xs font-bold mt-0.5 text-yellow-300">⚠️ Требуется вход</div>
                       )}
-                    </div>
-                  </Button>
-
-                  {/* 2D Game */}
-                  <Button
-                    onClick={() => {
-                      playSound('whoosh');
-                      openGame('2d');
-                      setIsMobileGameMenuOpen(false);
-                      handleMenuItemClick();
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
-                  >
-                    <span className="text-2xl mr-3">🎯</span>
-                    <div className="text-left">
-                      <div className="font-extrabold">Delivery Master</div>
-                      <div className="text-xs font-semibold opacity-90">Аркада</div>
                     </div>
                   </Button>
                 </div>
