@@ -106,7 +106,7 @@ def get_main_menu_keyboard():
             [{'text': '📊 Статистика'}, {'text': '🎁 Самобонус'}],
             [{'text': '💸 Выплата'}, {'text': '📜 История'}],
             [{'text': '🏆 Рейтинг'}, {'text': '❓ FAQ'}],
-            [{'text': '💬 Задать вопрос AI'}]
+            [{'text': '⚙️ Настройки'}, {'text': '💬 Задать вопрос AI'}]
         ],
         'resize_keyboard': True
     }
@@ -131,6 +131,17 @@ def get_stats_menu_keyboard():
             [{'text': '💰 Заработок', 'callback_data': 'stats_earnings'}],
             [{'text': '👥 Рефералы', 'callback_data': 'stats_referrals'}],
             [{'text': '📦 Заказы', 'callback_data': 'stats_orders'}],
+            [{'text': '⬅️ Назад в меню', 'callback_data': 'main_menu'}]
+        ]
+    }
+
+def get_settings_menu_keyboard(reminder_enabled: bool):
+    """Меню настроек"""
+    status = '✅ Вкл' if reminder_enabled else '❌ Выкл'
+    return {
+        'inline_keyboard': [
+            [{'text': f'🔔 Напоминания: {status}', 'callback_data': 'toggle_reminders'}],
+            [{'text': '⏰ Изменить время', 'callback_data': 'change_time'}],
             [{'text': '⬅️ Назад в меню', 'callback_data': 'main_menu'}]
         ]
     }
@@ -1047,6 +1058,52 @@ def handle_help_command(chat_id: int):
     
     send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
 
+def handle_settings_command(chat_id: int, telegram_id: int):
+    """Настройки напоминаний"""
+    courier_id = get_courier_by_telegram(telegram_id)
+    
+    if not courier_id:
+        send_telegram_message(chat_id, "❌ Аккаунт не привязан")
+        return
+    
+    update_last_interaction(telegram_id)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT reminder_enabled, reminder_time
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (courier_id,))
+        
+        courier = cursor.fetchone()
+        reminder_enabled = courier['reminder_enabled'] if courier else True
+        reminder_time = courier['reminder_time'] if courier else '09:00:00'
+        
+        hour = int(str(reminder_time).split(':')[0])
+        
+        status = '✅ Включены' if reminder_enabled else '❌ Выключены'
+        
+        text = (
+            f"⚙️ <b>Настройки напоминаний</b>\n\n"
+            f"🔔 <b>Статус:</b> {status}\n"
+            f"⏰ <b>Время:</b> {hour:02d}:00\n\n"
+            f"<b>Ежедневные напоминания помогут:</b>\n"
+            f"• Не забывать выходить на доставки\n"
+            f"• Отслеживать прогресс к бонусам\n"
+            f"• Зарабатывать стабильно\n\n"
+            f"Настрой удобное время для напоминания!"
+        )
+        
+        send_telegram_message(chat_id, text, reply_markup=get_settings_menu_keyboard(reminder_enabled))
+        log_activity(courier_id, 'settings_view')
+        
+    finally:
+        cursor.close()
+        conn.close()
+
 def handle_faq_command(chat_id: int, telegram_id: int, faq_type: str = 'menu'):
     """Обработка FAQ команд с быстрыми ответами"""
     courier_id = get_courier_by_telegram(telegram_id)
@@ -1262,8 +1319,107 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             chat_id = callback['message']['chat']['id']
             telegram_id = callback['from']['id']
             data = callback['data']
+            courier_id = get_courier_by_telegram(telegram_id)
             
-            # TODO: обработка callback кнопок (stats_earnings, stats_referrals и т.д.)
+            # Настройки напоминаний
+            if data == 'toggle_reminders':
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET reminder_enabled = NOT COALESCE(reminder_enabled, true)
+                        WHERE id = %s
+                        RETURNING reminder_enabled
+                    """, (courier_id,))
+                    result = cursor.fetchone()
+                    conn.commit()
+                    new_status = result['reminder_enabled']
+                    
+                    # Обновить сообщение
+                    cursor.execute("""
+                        SELECT reminder_time FROM t_p25272970_courier_button_site.users
+                        WHERE id = %s
+                    """, (courier_id,))
+                    courier = cursor.fetchone()
+                    reminder_time = courier['reminder_time']
+                    hour = int(str(reminder_time).split(':')[0])
+                    
+                    status = '✅ Включены' if new_status else '❌ Выключены'
+                    text = (
+                        f"⚙️ <b>Настройки напоминаний</b>\n\n"
+                        f"🔔 <b>Статус:</b> {status}\n"
+                        f"⏰ <b>Время:</b> {hour:02d}:00\n\n"
+                        f"<b>Ежедневные напоминания помогут:</b>\n"
+                        f"• Не забывать выходить на доставки\n"
+                        f"• Отслеживать прогресс к бонусам\n"
+                        f"• Зарабатывать стабильно\n\n"
+                        f"Настрой удобное время для напоминания!"
+                    )
+                    
+                    # Отправить обновлённое сообщение
+                    edit_url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText'
+                    edit_data = {
+                        'chat_id': chat_id,
+                        'message_id': callback['message']['message_id'],
+                        'text': text,
+                        'parse_mode': 'HTML',
+                        'reply_markup': get_settings_menu_keyboard(new_status)
+                    }
+                    req = urllib.request.Request(
+                        edit_url,
+                        data=json.dumps(edit_data).encode('utf-8'),
+                        headers={'Content-Type': 'application/json'}
+                    )
+                    urllib.request.urlopen(req)
+                    
+                finally:
+                    cursor.close()
+                    conn.close()
+            
+            elif data == 'change_time':
+                # Показать клавиатуру выбора времени
+                send_telegram_message(
+                    chat_id,
+                    "⏰ <b>Выбери удобное время для напоминаний:</b>\n\n"
+                    "Когда тебе удобнее получать мотивационное сообщение?",
+                    reply_markup={
+                        'inline_keyboard': [
+                            [{'text': '🌅 7:00', 'callback_data': 'set_time_7'}, {'text': '☀️ 9:00', 'callback_data': 'set_time_9'}],
+                            [{'text': '🏙 11:00', 'callback_data': 'set_time_11'}, {'text': '🌆 13:00', 'callback_data': 'set_time_13'}],
+                            [{'text': '🌇 15:00', 'callback_data': 'set_time_15'}, {'text': '🌃 17:00', 'callback_data': 'set_time_17'}],
+                            [{'text': '⬅️ Назад', 'callback_data': 'back_to_settings'}]
+                        ]
+                    }
+                )
+            
+            elif data.startswith('set_time_'):
+                hour = int(data.split('_')[-1])
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET reminder_time = %s
+                        WHERE id = %s
+                    """, (f"{hour:02d}:00:00", courier_id))
+                    conn.commit()
+                    
+                    send_telegram_message(
+                        chat_id,
+                        f"✅ Время напоминаний изменено на {hour:02d}:00!\n\n"
+                        f"Теперь каждый день в это время я буду присылать тебе мотивационное сообщение 💪"
+                    )
+                    
+                finally:
+                    cursor.close()
+                    conn.close()
+            
+            elif data == 'back_to_settings':
+                handle_settings_command(chat_id, telegram_id)
+            
+            elif data == 'main_menu':
+                send_telegram_message(chat_id, "👋 Главное меню:", reply_markup=get_main_menu_keyboard())
             
             return {
                 'statusCode': 200,
@@ -1294,6 +1450,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             handle_bonus_command(chat_id, telegram_id)
         elif text in ['/help', '❓ Помощь']:
             handle_help_command(chat_id)
+        elif text == '⚙️ Настройки':
+            handle_settings_command(chat_id, telegram_id)
         elif text in ['❓ FAQ', '⬅️ Назад в меню']:
             if text == '⬅️ Назад в меню':
                 # Вернуться в главное меню
