@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
+import TelegramLoginButton from '@/components/TelegramLoginButton';
 
 type AuthProvider = 'yandex' | 'vk' | 'telegram';
 
@@ -118,7 +119,9 @@ export default function Auth() {
     } else if (provider === 'vk') {
       handleVKAuth();
     } else if (provider === 'telegram') {
-      toast.info('Вход через Telegram временно недоступен');
+      // Telegram виджет загружается при клике на кнопку
+      setShowAuthModal(true);
+      setSelectedProvider('telegram');
     }
   };
 
@@ -135,26 +138,32 @@ export default function Auth() {
       localStorage.setItem('referral_code', referralCode);
     }
 
+    // Для Telegram не закрываем модалку - пользователь должен нажать на виджет
+    if (selectedProvider === 'telegram') {
+      return;
+    }
+
     setShowAuthModal(false);
 
     if (selectedProvider === 'yandex') {
       handleYandexAuth();
     } else if (selectedProvider === 'vk') {
       handleVKAuth();
-    } else if (selectedProvider === 'telegram') {
-      toast.info('Вход через Telegram временно недоступен');
     }
   };
 
   const skipReferral = () => {
+    // Для Telegram не закрываем модалку - пользователь должен нажать на виджет
+    if (selectedProvider === 'telegram') {
+      return;
+    }
+    
     setShowAuthModal(false);
     
     if (selectedProvider === 'yandex') {
       handleYandexAuth();
     } else if (selectedProvider === 'vk') {
       handleVKAuth();
-    } else if (selectedProvider === 'telegram') {
-      toast.info('Вход через Telegram временно недоступен');
     }
   };
 
@@ -176,24 +185,44 @@ export default function Auth() {
     window.location.href = yandexAuthUrl;
   };
 
-  const handleTelegramAuth = (telegramData: any) => {
+  const handleTelegramAuth = (telegramUser: any) => {
     setLoading(true);
+    setShowAuthModal(false);
     
-    fetch(`${API_URL}?route=auth`, {
+    console.log('[Telegram Auth] Получены данные:', telegramUser);
+    
+    // Сохраняем реферальный код если был введён вручную
+    if (manualRefCode.trim()) {
+      setReferralCode(manualRefCode.trim());
+      localStorage.setItem('referral_code', manualRefCode.trim());
+    } else if (referralCode) {
+      localStorage.setItem('referral_code', referralCode);
+    }
+    
+    const finalReferralCode = manualRefCode.trim() || referralCode || null;
+    
+    fetch(`${API_URL}?route=auth&action=telegram`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        action: 'telegram',
-        telegram_data: telegramData,
-        referral_code: referralCode,
+        telegram_id: telegramUser.id,
+        username: telegramUser.username || telegramUser.first_name || `tg_user_${telegramUser.id}`,
+        first_name: telegramUser.first_name,
+        last_name: telegramUser.last_name,
+        referral_code: finalReferralCode,
       }),
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
-          login(data.token, data.user);
+        console.log('[Telegram Auth] Ответ сервера:', data);
+        if (data.token) {
+          const user = {
+            id: data.user_id,
+            username: data.username,
+          };
+          login(data.token, user);
           localStorage.removeItem('referral_code');
           toast.success('Успешный вход через Telegram!');
           navigate('/dashboard');
@@ -202,7 +231,7 @@ export default function Auth() {
         }
       })
       .catch((error) => {
-        console.error('Telegram auth error:', error);
+        console.error('[Telegram Auth] Ошибка:', error);
         toast.error('Произошла ошибка при авторизации через Telegram');
       })
       .finally(() => {
@@ -210,13 +239,7 @@ export default function Auth() {
       });
   };
 
-  useEffect(() => {
-    (window as any).onTelegramAuth = handleTelegramAuth;
-    
-    return () => {
-      delete (window as any).onTelegramAuth;
-    };
-  }, [referralCode]);
+
 
   if (loading) {
     return (
@@ -282,11 +305,10 @@ export default function Auth() {
 
             <Button
               onClick={() => openAuthModal('telegram')}
-              className="w-full bg-[#0088cc] hover:bg-[#0077bb] text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] opacity-50 cursor-not-allowed"
-              disabled
+              className="w-full bg-[#0088cc] hover:bg-[#0077bb] text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
             >
               <Icon name="Send" className="mr-3 h-6 w-6" />
-              Telegram (скоро)
+              Войти через Telegram
             </Button>
 
             {referralCode && (
@@ -375,14 +397,39 @@ export default function Auth() {
               </div>
 
               <div className="space-y-3 pt-3">
-                <Button
-                  onClick={proceedWithAuth}
-                  disabled={!agreedToTerms}
-                  className="w-full py-6 text-lg font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  <Icon name="CheckCircle" className="mr-2 h-5 w-5" />
-                  Продолжить
-                </Button>
+                {selectedProvider === 'telegram' ? (
+                  <div className="space-y-4">
+                    {agreedToTerms ? (
+                      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border-3 border-blue-400 shadow-[0_4px_0_0_rgba(59,130,246,0.3)]">
+                        <p className="text-center text-gray-800 font-bold mb-4">
+                          Нажмите на кнопку ниже для входа через Telegram:
+                        </p>
+                        <TelegramLoginButton
+                          botName="StueyGoBot"
+                          onAuth={handleTelegramAuth}
+                          buttonSize="large"
+                          cornerRadius={20}
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-50 p-6 rounded-2xl border-3 border-yellow-400 shadow-[0_4px_0_0_rgba(234,179,8,0.3)]">
+                        <p className="text-center text-gray-800 font-bold flex items-center justify-center gap-2">
+                          <Icon name="AlertCircle" className="h-5 w-5 text-yellow-600" />
+                          Примите условия использования
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    onClick={proceedWithAuth}
+                    disabled={!agreedToTerms}
+                    className="w-full py-6 text-lg font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 text-white border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    <Icon name="CheckCircle" className="mr-2 h-5 w-5" />
+                    Продолжить
+                  </Button>
+                )}
                 
                 {!referralCode && (
                   <Button
