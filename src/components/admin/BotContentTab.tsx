@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 
 interface BotContent {
@@ -20,6 +21,15 @@ interface BotContent {
   profile_header: string;
   stats_header: string;
   help_message: string;
+  max_income_walking: number;
+  max_income_bicycle: number;
+  max_income_car: number;
+  referral_bonus_amount: number;
+  self_bonus_amount: number;
+  self_bonus_orders: number;
+  referral_activation_orders: number;
+  min_withdrawal_amount: number;
+  withdrawal_processing_days: string;
 }
 
 interface BotContentTabProps {
@@ -41,7 +51,16 @@ export default function BotContentTab({ authToken }: BotContentTabProps) {
     faq_support: '',
     profile_header: '',
     stats_header: '',
-    help_message: ''
+    help_message: '',
+    max_income_walking: 95000,
+    max_income_bicycle: 120000,
+    max_income_car: 165000,
+    referral_bonus_amount: 18000,
+    self_bonus_amount: 5000,
+    self_bonus_orders: 50,
+    referral_activation_orders: 50,
+    min_withdrawal_amount: 500,
+    withdrawal_processing_days: '1-3 рабочих дня'
   });
   
   const [loading, setLoading] = useState(true);
@@ -353,6 +372,133 @@ export default function BotContentTab({ authToken }: BotContentTabProps) {
                 onChange={(e) => handleChange('help_message', e.target.value)}
                 rows={6}
                 className="mt-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Калькулятор доходности */}
+        <Card className="border-3 border-black">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Calculator" size={20} />
+              Калькулятор доходности
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="max_income_walking">Макс. доход пешего (₽/мес)</Label>
+              <Input
+                id="max_income_walking"
+                type="number"
+                value={content.max_income_walking}
+                onChange={(e) => handleChange('max_income_walking', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="max_income_bicycle">Макс. доход вело (₽/мес)</Label>
+              <Input
+                id="max_income_bicycle"
+                type="number"
+                value={content.max_income_bicycle}
+                onChange={(e) => handleChange('max_income_bicycle', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="max_income_car">Макс. доход авто (₽/мес)</Label>
+              <Input
+                id="max_income_car"
+                type="number"
+                value={content.max_income_car}
+                onChange={(e) => handleChange('max_income_car', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="referral_bonus_amount">Бонус за друга (₽)</Label>
+              <Input
+                id="referral_bonus_amount"
+                type="number"
+                value={content.referral_bonus_amount}
+                onChange={(e) => handleChange('referral_bonus_amount', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Условия бонусов */}
+        <Card className="border-3 border-black">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Award" size={20} />
+              Условия бонусов
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="self_bonus_amount">Сумма самобонуса (₽)</Label>
+              <Input
+                id="self_bonus_amount"
+                type="number"
+                value={content.self_bonus_amount}
+                onChange={(e) => handleChange('self_bonus_amount', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="self_bonus_orders">Заказов для самобонуса</Label>
+              <Input
+                id="self_bonus_orders"
+                type="number"
+                value={content.self_bonus_orders}
+                onChange={(e) => handleChange('self_bonus_orders', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="referral_activation_orders">Заказов для активации реферала</Label>
+              <Input
+                id="referral_activation_orders"
+                type="number"
+                value={content.referral_activation_orders}
+                onChange={(e) => handleChange('referral_activation_orders', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Условия выплат */}
+        <Card className="border-3 border-black">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Wallet" size={20} />
+              Условия выплат
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="min_withdrawal_amount">Мин. сумма вывода (₽)</Label>
+              <Input
+                id="min_withdrawal_amount"
+                type="number"
+                value={content.min_withdrawal_amount}
+                onChange={(e) => handleChange('min_withdrawal_amount', Number(e.target.value))}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="withdrawal_processing_days">Срок обработки</Label>
+              <Input
+                id="withdrawal_processing_days"
+                type="text"
+                value={content.withdrawal_processing_days}
+                onChange={(e) => handleChange('withdrawal_processing_days', e.target.value)}
+                className="mt-2"
+                placeholder="Например: 1-3 рабочих дня"
               />
             </div>
           </CardContent>

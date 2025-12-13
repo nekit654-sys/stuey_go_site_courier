@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 interface Stats {
   total_referrals: number;
@@ -21,7 +22,37 @@ interface StatsCardsProps {
   stats: Stats;
 }
 
+interface ContentSettings {
+  self_bonus_amount: number;
+  self_bonus_orders: number;
+}
+
 export default function StatsCards({ stats }: StatsCardsProps) {
+  const [settings, setSettings] = useState<ContentSettings>({
+    self_bonus_amount: 5000,
+    self_bonus_orders: 50
+  });
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=content');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.content?.bonuses) {
+            setSettings({
+              self_bonus_amount: data.content.bonuses.self_bonus_amount,
+              self_bonus_orders: data.content.bonuses.self_bonus_orders
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки настроек:', error);
+      }
+    };
+    loadContent();
+  }, []);
+
   const totalEarnings = (stats.self_bonus_amount || 0) + (stats.referral_income || 0);
   
   const cards = [
@@ -29,7 +60,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       icon: 'Wallet',
       label: 'Доступно для вывода',
       value: `${stats.available_for_withdrawal?.toLocaleString('ru-RU') || '0'} ₽`,
-      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : `📦 Заказов: ${stats.self_orders_count || 0}/50`,
+      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : `📦 Заказов: ${stats.self_orders_count || 0}/${settings.self_bonus_orders}`,
       gradient: 'from-green-500 to-emerald-600',
       iconBg: 'bg-green-400',
       delay: 0,
@@ -55,8 +86,8 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     {
       icon: 'Gift',
       label: 'Самобонус',
-      value: stats.self_bonus_completed ? '✅ Получен' : `${stats.self_orders_count || 0}/50`,
-      subtext: stats.self_bonus_completed ? '5000₽ выполнено' : `Ещё ${Math.max(0, 50 - (stats.self_orders_count || 0))} заказов до 5000₽`,
+      value: stats.self_bonus_completed ? '✅ Получен' : `${stats.self_orders_count || 0}/${settings.self_bonus_orders}`,
+      subtext: stats.self_bonus_completed ? `${settings.self_bonus_amount.toLocaleString('ru-RU')}₽ выполнено` : `Ещё ${Math.max(0, settings.self_bonus_orders - (stats.self_orders_count || 0))} заказов до ${settings.self_bonus_amount.toLocaleString('ru-RU')}₽`,
       gradient: 'from-orange-500 to-red-600',
       iconBg: 'bg-orange-400',
       delay: 0.3,

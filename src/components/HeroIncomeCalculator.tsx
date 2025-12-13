@@ -1,19 +1,49 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 import { useMagicEffect } from '@/hooks/useMagicEffect';
 import { useSound } from '@/hooks/useSound';
 
 type CourierType = 'walking' | 'bicycle' | 'car';
 
+interface ContentSettings {
+  max_income_walking: number;
+  max_income_bicycle: number;
+  max_income_car: number;
+  referral_bonus_amount: number;
+}
+
 const HeroIncomeCalculator = () => {
   const [days, setDays] = useState(15);
   const [hours, setHours] = useState(8);
   const [referralBonus, setReferralBonus] = useState(false);
   const [courierType, setCourierType] = useState<CourierType>('walking');
+  const [settings, setSettings] = useState<ContentSettings>({
+    max_income_walking: 95000,
+    max_income_bicycle: 120000,
+    max_income_car: 165000,
+    referral_bonus_amount: 18000
+  });
   const { triggerMagicEffect } = useMagicEffect();
   const { playSound } = useSound();
 
   const referralLink = "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=content');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.content?.calculator) {
+            setSettings(data.content.calculator);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки настроек калькулятора:', error);
+      }
+    };
+    loadContent();
+  }, []);
 
   const handleMagicClick = (event: React.MouseEvent) => {
     playSound('success');
@@ -23,9 +53,9 @@ const HeroIncomeCalculator = () => {
   };
 
   const courierTypeSettings = {
-    walking: { maxIncome: 95000, label: 'Пеший', icon: 'User' },
-    bicycle: { maxIncome: 120000, label: 'Вело', icon: 'Bike' },
-    car: { maxIncome: 165000, label: 'Авто', icon: 'Car' }
+    walking: { maxIncome: settings.max_income_walking, label: 'Пеший', icon: 'User' },
+    bicycle: { maxIncome: settings.max_income_bicycle, label: 'Вело', icon: 'Bike' },
+    car: { maxIncome: settings.max_income_car, label: 'Авто', icon: 'Car' }
   };
 
   const calculateIncome = useCallback((daysValue: number, hoursValue: number, withBonus: boolean, type: CourierType) => {
@@ -34,8 +64,8 @@ const HeroIncomeCalculator = () => {
     const maxHours = 12;
     
     const income = (daysValue / maxDays) * (hoursValue / maxHours) * maxIncome;
-    return Math.round(income) + (withBonus ? 18000 : 0);
-  }, []);
+    return Math.round(income) + (withBonus ? settings.referral_bonus_amount : 0);
+  }, [settings, courierTypeSettings]);
 
   const income = useMemo(() => 
     calculateIncome(days, hours, referralBonus, courierType),
@@ -132,7 +162,7 @@ const HeroIncomeCalculator = () => {
           <div className="flex items-center gap-2">
             <Icon name="UserPlus" size={20} className="text-black" />
             <span className="text-black font-extrabold">Приведи друга</span>
-            <span className="text-black font-extrabold">+18 000 ₽</span>
+            <span className="text-black font-extrabold">+{settings.referral_bonus_amount.toLocaleString('ru-RU')} ₽</span>
           </div>
         </label>
       </div>

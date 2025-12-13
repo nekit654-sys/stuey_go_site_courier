@@ -138,6 +138,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return handle_company_stats(event, headers)
     elif route == 'bonus-users':
         return handle_bonus_users(event, headers)
+    elif route == 'content':
+        return handle_content(event, headers)
     else:
         return handle_main(event, headers)
 
@@ -5187,6 +5189,98 @@ def handle_company_stats(event: Dict[str, Any], headers: Dict[str, str]) -> Dict
         'body': json.dumps(stats),
         'isBase64Encoded': False
     }
+
+
+def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Публичный endpoint для получения контента (для калькулятора и компонентов)"""
+    method = event.get('httpMethod', 'GET')
+    
+    if method != 'GET':
+        return {
+            'statusCode': 405,
+            'headers': headers,
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    try:
+        conn = psycopg2.connect(os.environ['DATABASE_URL'], cursor_factory=RealDictCursor)
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT 
+                max_income_walking, max_income_bicycle, max_income_car,
+                referral_bonus_amount, self_bonus_amount, self_bonus_orders,
+                referral_activation_orders, min_withdrawal_amount, withdrawal_processing_days,
+                bonus_title, bonus_description, referral_title, referral_description
+            FROM t_p25272970_courier_button_site.bot_content 
+            WHERE id = 1
+        """)
+        
+        row = cur.fetchone()
+        
+        if row:
+            content = {
+                'calculator': {
+                    'max_income_walking': row['max_income_walking'],
+                    'max_income_bicycle': row['max_income_bicycle'],
+                    'max_income_car': row['max_income_car'],
+                    'referral_bonus_amount': row['referral_bonus_amount']
+                },
+                'bonuses': {
+                    'self_bonus_amount': row['self_bonus_amount'],
+                    'self_bonus_orders': row['self_bonus_orders'],
+                    'referral_activation_orders': row['referral_activation_orders'],
+                    'bonus_title': row['bonus_title'],
+                    'bonus_description': row['bonus_description'],
+                    'referral_title': row['referral_title'],
+                    'referral_description': row['referral_description']
+                },
+                'withdrawal': {
+                    'min_withdrawal_amount': row['min_withdrawal_amount'],
+                    'withdrawal_processing_days': row['withdrawal_processing_days']
+                }
+            }
+        else:
+            content = {
+                'calculator': {
+                    'max_income_walking': 95000,
+                    'max_income_bicycle': 120000,
+                    'max_income_car': 165000,
+                    'referral_bonus_amount': 18000
+                },
+                'bonuses': {
+                    'self_bonus_amount': 5000,
+                    'self_bonus_orders': 50,
+                    'referral_activation_orders': 50,
+                    'bonus_title': '🎁 Самобонус',
+                    'bonus_description': 'Выполни 50 заказов и получи 5000₽',
+                    'referral_title': '👥 Реферальная программа',
+                    'referral_description': 'Приглашай друзей и зарабатывай!'
+                },
+                'withdrawal': {
+                    'min_withdrawal_amount': 500,
+                    'withdrawal_processing_days': '1-3 рабочих дня'
+                }
+            }
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'content': content}),
+            'isBase64Encoded': False
+        }
+        
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': str(e)}),
+            'isBase64Encoded': False
+        }
 
 
 def handle_bonus_users(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:

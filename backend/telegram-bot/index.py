@@ -22,13 +22,15 @@ BOT_USERNAME = os.environ.get('BOT_USERNAME', 'StueyGoBot')
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
-def get_bot_content(cursor) -> Dict[str, str]:
+def get_bot_content(cursor) -> Dict[str, Any]:
     """Получает актуальный контент бота из БД"""
     cursor.execute("""
         SELECT welcome_message, start_message, bonus_title, bonus_description, 
                bonus_conditions, referral_title, referral_description, referral_conditions,
                faq_earnings, faq_withdrawal, faq_support, profile_header, 
-               stats_header, help_message
+               stats_header, help_message,
+               self_bonus_amount, self_bonus_orders, referral_activation_orders,
+               min_withdrawal_amount, withdrawal_processing_days
         FROM t_p25272970_courier_button_site.bot_content 
         WHERE id = 1
     """)
@@ -48,9 +50,20 @@ def get_bot_content(cursor) -> Dict[str, str]:
             'faq_support': row['faq_support'],
             'profile_header': row['profile_header'],
             'stats_header': row['stats_header'],
-            'help_message': row['help_message']
+            'help_message': row['help_message'],
+            'self_bonus_amount': row['self_bonus_amount'] or 5000,
+            'self_bonus_orders': row['self_bonus_orders'] or 50,
+            'referral_activation_orders': row['referral_activation_orders'] or 50,
+            'min_withdrawal_amount': row['min_withdrawal_amount'] or 500,
+            'withdrawal_processing_days': row['withdrawal_processing_days'] or '1-3 рабочих дня'
         }
-    return {}
+    return {
+        'self_bonus_amount': 5000,
+        'self_bonus_orders': 50,
+        'referral_activation_orders': 50,
+        'min_withdrawal_amount': 500,
+        'withdrawal_processing_days': '1-3 рабочих дня'
+    }
 
 def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', reply_markup: Optional[Dict] = None):
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage'
@@ -154,7 +167,7 @@ def log_activity(courier_id: Optional[int], action: str, details: Optional[Dict]
         cursor.close()
         conn.close()
 
-def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
+def ask_yandex_gpt(question: str, context: Dict[str, Any], cursor) -> str:
     """Спросить YandexGPT о чём угодно"""
     if not YANDEX_GPT_API_KEY or not YANDEX_FOLDER_ID:
         return "🤖 AI-ассистент временно недоступен. Используйте команды из меню."
@@ -166,26 +179,33 @@ def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
     close_to_active = context.get('close_to_active', 0)
     need_motivation = context.get('need_motivation', 0)
     never_worked = context.get('never_worked', 0)
-    orders_to_bonus = max(0, 50 - total_orders)
+    bot_settings = get_bot_content(cursor)
+    self_bonus_orders = bot_settings.get('self_bonus_orders', 50)
+    self_bonus_amount = bot_settings.get('self_bonus_amount', 5000)
+    orders_to_bonus = max(0, self_bonus_orders - total_orders)
     can_withdraw = balance >= 500
+    
+    min_withdrawal = bot_settings.get('min_withdrawal_amount', 500)
+    can_withdraw = balance >= min_withdrawal
+    referral_bonus_amount = bot_settings.get('self_bonus_amount', 5000)
     
     system_prompt = f"""Ты — персональный AI-ассистент рекрутера для курьера Stuey.Go. Твоя миссия — не просто отвечать на вопросы, а быть наставником, который ведёт курьера к успеху и мотивирует зарабатывать больше!
 
 📊 ПОЛНАЯ СТАТИСТИКА КУРЬЕРА:
-- 💰 Баланс: {balance:.0f}₽ {'✅ Можно выводить!' if can_withdraw else '⚠️ Минимум для вывода: 500₽'}
-- 📦 Выполнено заказов: {total_orders} {'✅ Самобонус получен!' if total_orders >= 50 else f'🔥 До самобонуса 5000₽ осталось: {orders_to_bonus} заказов!'}
+- 💰 Баланс: {balance:.0f}₽ {'✅ Можно выводить!' if can_withdraw else f'⚠️ Минимум для вывода: {min_withdrawal}₽'}
+- 📦 Выполнено заказов: {total_orders} {'✅ Самобонус получен!' if total_orders >= self_bonus_orders else f'🔥 До самобонуса {self_bonus_amount}₽ осталось: {orders_to_bonus} заказов!'}
 - 👥 Всего рефералов: {referrals}
-- ⭐ Активных рефералов (50+ заказов): {active_referrals} (заработано: {active_referrals * 5000}₽)
-- 🔥 Близко к активации (40-49 заказов): {close_to_active} человек (потенциал: {close_to_active * 5000}₽)
+- ⭐ Активных рефералов ({self_bonus_orders}+ заказов): {active_referrals} (заработано: {active_referrals * referral_bonus_amount}₽)
+- 🔥 Близко к активации (40-49 заказов): {close_to_active} человек (потенциал: {close_to_active * referral_bonus_amount}₽)
 - ⚠️ Нужна мотивация (1-9 заказов): {need_motivation} человек
 - 😴 Ещё не начали работать: {never_worked} человек
-- 🎯 Потенциальный заработок от ВСЕХ рефералов: {(referrals - active_referrals) * 5000}₽
+- 🎯 Потенциальный заработок от ВСЕХ рефералов: {(referrals - active_referrals) * referral_bonus_amount}₽
 
 🎯 РЕФЕРАЛЬНАЯ ПРОГРАММА:
-1. **Стартовый самобонус** — 5000₽ за первые 50 заказов (разовый)
-2. **Реферальный бонус** — 5000₽ за КАЖДОГО реферала, выполнившего 50 заказов (без ограничений!)
-3. **Выплаты** — от 500₽ через СБП, обработка 1-3 дня
-4. **Потенциал заработка** — НЕОГРАНИЧЕННЫЙ! 10 рефералов = 50,000₽, 100 рефералов = 500,000₽
+1. **Стартовый самобонус** — {self_bonus_amount}₽ за первые {self_bonus_orders} заказов (разовый)
+2. **Реферальный бонус** — {referral_bonus_amount}₽ за КАЖДОГО реферала, выполнившего {self_bonus_orders} заказов (без ограничений!)
+3. **Выплаты** — от {min_withdrawal}₽ через СБП, обработка {bot_settings.get('withdrawal_processing_days', '1-3 дня')}
+4. **Потенциал заработка** — НЕОГРАНИЧЕННЫЙ! 10 рефералов = {10 * referral_bonus_amount:,}₽, 100 рефералов = {100 * referral_bonus_amount:,}₽
 
 💡 ТВОЯ РОЛЬ КАК АССИСТЕНТА-РЕКРУТЕРА:
 1. **Анализируй ситуацию** — смотри на статистику и давай персональные советы
@@ -201,13 +221,13 @@ def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
 → "💰 У тебя уже {balance:.0f}₽! Хочешь вывести деньги? Нажми 💸 Выплата"
 
 Если осталось 1-5 заказов до самобонуса:
-→ "🔥 ОСТАЛОСЬ ВСЕГО {orders_to_bonus} ЗАКАЗОВ ДО 5000₽! Ты почти у цели!"
+→ "🔥 ОСТАЛОСЬ ВСЕГО {orders_to_bonus} ЗАКАЗОВ ДО {self_bonus_amount}₽! Ты почти у цели!"
 
 Если 0 активных рефералов, но есть рефералы:
-→ "👥 У тебя {referrals} рефералов! Напиши им, поддержи — когда они сделают 50 заказов, ты получишь {referrals * 5000}₽!"
+→ "👥 У тебя {referrals} рефералов! Напиши им, поддержи — когда они сделают {self_bonus_orders} заказов, ты получишь {referrals * referral_bonus_amount}₽!"
 
 Если близко к активации {close_to_active} > 0:
-→ "🔥 У тебя {close_to_active} {'реферал' if close_to_active == 1 else 'реферала'} почти у цели (40-49 заказов)! Напиши им, поддержи — скоро получишь +{close_to_active * 5000}₽!"
+→ "🔥 У тебя {close_to_active} {'реферал' if close_to_active == 1 else 'реферала'} почти у цели (40-49 заказов)! Напиши им, поддержи — скоро получишь +{close_to_active * referral_bonus_amount}₽!"
 
 Если нужна мотивация {need_motivation} > 0:
 → "⚡ {need_motivation} твоих рефералов только начали (1-9 заказов). Позвони им, расскажи как ты зарабатываешь — мотивируй на активность!"
@@ -216,7 +236,7 @@ def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
 → "😴 {never_worked} {'человек' if never_worked == 1 else 'людей'} зарегистрировались, но ещё не начали. Напиши им прямо сейчас!"
 
 Если активных рефералов > 0:
-→ "⭐ Красавчик! {active_referrals} активных рефералов принесли тебе {active_referrals * 5000}₽! Продолжай делиться ссылкой!"
+→ "⭐ Красавчик! {active_referrals} активных рефералов принесли тебе {active_referrals * referral_bonus_amount}₽! Продолжай делиться ссылкой!"
 
 Если курьер долго не заходил:
 → "С возвращением! Давай проверим твой прогресс и наметим план на сегодня! 🚀"
@@ -236,13 +256,13 @@ def ask_yandex_gpt(question: str, context: Dict[str, Any]) -> str:
 
 ✅ ПРИМЕРЫ ОТЛИЧНЫХ ОТВЕТОВ:
 Вопрос: "Сколько я заработал?"
-Ответ: "💰 На твоём балансе {balance:.0f}₽! {'Можешь смело выводить через 💸 Выплата!' if can_withdraw else f'Ещё {500 - balance:.0f}₽ и сможешь вывести деньги!'} Продолжай в том же духе! 🔥"
+Ответ: "💰 На твоём балансе {balance:.0f}₽! {'Можешь смело выводить через 💸 Выплата!' if can_withdraw else f'Ещё {min_withdrawal - balance:.0f}₽ и сможешь вывести деньги!'} Продолжай в том же духе! 🔥"
 
 Вопрос: "Когда получу самобонус?"
-Ответ: "🎁 До самобонуса 5000₽ осталось {orders_to_bonus} {'ЗАКАЗ' if orders_to_bonus == 1 else 'ЗАКАЗА' if orders_to_bonus < 5 else 'ЗАКАЗОВ'}! {'🚀 Вперёд, ты почти у цели!' if orders_to_bonus <= 5 else '💪 В среднем 3-4 заказа в день, значит через пару дней получишь деньги!'}"
+Ответ: "🎁 До самобонуса {self_bonus_amount}₽ осталось {orders_to_bonus} {'ЗАКАЗ' if orders_to_bonus == 1 else 'ЗАКАЗА' if orders_to_bonus < 5 else 'ЗАКАЗОВ'}! {'🚀 Вперёд, ты почти у цели!' if orders_to_bonus <= 5 else '💪 В среднем 3-4 заказа в день, значит через пару дней получишь деньги!'}"
 
 Вопрос: "Как зарабатывать больше?"
-Ответ: "💡 Лучший способ — рефералы! У тебя уже {referrals} {'реферал' if referrals == 1 else 'реферала'}. Каждый активный реферал = 5000₽ БЕЗ ОГРАНИЧЕНИЙ! Пригласи ещё 10 друзей и заработаешь 50,000₽! Поделись ссылкой в чатах курьеров прямо сейчас! 🚀"
+Ответ: "💡 Лучший способ — рефералы! У тебя уже {referrals} {'реферал' if referrals == 1 else 'реферала'}. Каждый активный реферал = {referral_bonus_amount}₽ БЕЗ ОГРАНИЧЕНИЙ! Пригласи ещё 10 друзей и заработаешь {10 * referral_bonus_amount:,}₽! Поделись ссылкой в чатах курьеров прямо сейчас! 🚀"
 """
 
     try:
@@ -896,8 +916,14 @@ def handle_text_message(chat_id: int, telegram_id: int, text: str):
     except:
         pass
     
-    # Спросить YandexGPT
-    answer = ask_yandex_gpt(text, context)
+    # Спросить YandexGPT с доступом к настройкам из БД
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        answer = ask_yandex_gpt(text, context, cursor)
+    finally:
+        cursor.close()
+        conn.close()
     
     send_telegram_message(chat_id, answer, reply_markup=get_main_menu_keyboard())
     log_activity(courier_id, 'ai_question', {'question': text[:100], 'answer': answer[:100]})

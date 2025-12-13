@@ -520,27 +520,44 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # Получение контента бота
         if method == 'POST' and body_data.get('action') == 'get_bot_content':
             cursor.execute("""
-                SELECT * FROM t_p25272970_courier_button_site.bot_content 
+                SELECT 
+                    welcome_message, start_message, bonus_title, bonus_description, 
+                    bonus_conditions, referral_title, referral_description, referral_conditions,
+                    faq_earnings, faq_withdrawal, faq_support, profile_header, 
+                    stats_header, help_message, updated_at,
+                    max_income_walking, max_income_bicycle, max_income_car,
+                    referral_bonus_amount, self_bonus_amount, self_bonus_orders,
+                    referral_activation_orders, min_withdrawal_amount, withdrawal_processing_days
+                FROM t_p25272970_courier_button_site.bot_content 
                 WHERE id = 1
             """)
             row = cursor.fetchone()
             if row:
                 content = {
-                    'welcome_message': row[1],
-                    'start_message': row[2],
-                    'bonus_title': row[3],
-                    'bonus_description': row[4],
-                    'bonus_conditions': row[5],
-                    'referral_title': row[6],
-                    'referral_description': row[7],
-                    'referral_conditions': row[8],
-                    'faq_earnings': row[9],
-                    'faq_withdrawal': row[10],
-                    'faq_support': row[11],
-                    'profile_header': row[12],
-                    'stats_header': row[13],
-                    'help_message': row[14],
-                    'updated_at': row[16].isoformat() if row[16] else None
+                    'welcome_message': row[0],
+                    'start_message': row[1],
+                    'bonus_title': row[2],
+                    'bonus_description': row[3],
+                    'bonus_conditions': row[4],
+                    'referral_title': row[5],
+                    'referral_description': row[6],
+                    'referral_conditions': row[7],
+                    'faq_earnings': row[8],
+                    'faq_withdrawal': row[9],
+                    'faq_support': row[10],
+                    'profile_header': row[11],
+                    'stats_header': row[12],
+                    'help_message': row[13],
+                    'updated_at': row[14].isoformat() if row[14] else None,
+                    'max_income_walking': row[15],
+                    'max_income_bicycle': row[16],
+                    'max_income_car': row[17],
+                    'referral_bonus_amount': row[18],
+                    'self_bonus_amount': row[19],
+                    'self_bonus_orders': row[20],
+                    'referral_activation_orders': row[21],
+                    'min_withdrawal_amount': row[22],
+                    'withdrawal_processing_days': row[23]
                 }
             else:
                 content = {}
@@ -573,7 +590,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'faq_support': 'faq_support',
                 'profile_header': 'profile_header',
                 'stats_header': 'stats_header',
-                'help_message': 'help_message'
+                'help_message': 'help_message',
+                'max_income_walking': 'max_income_walking',
+                'max_income_bicycle': 'max_income_bicycle',
+                'max_income_car': 'max_income_car',
+                'referral_bonus_amount': 'referral_bonus_amount',
+                'self_bonus_amount': 'self_bonus_amount',
+                'self_bonus_orders': 'self_bonus_orders',
+                'referral_activation_orders': 'referral_activation_orders',
+                'min_withdrawal_amount': 'min_withdrawal_amount',
+                'withdrawal_processing_days': 'withdrawal_processing_days'
             }
             
             for field_key, db_field in field_mapping.items():
