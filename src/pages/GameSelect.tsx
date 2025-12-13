@@ -23,13 +23,14 @@ export default function GameSelect() {
 
       <div className="relative z-10 max-w-6xl w-full px-2 sm:px-4">
         <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-rubik text-center mb-2 sm:mb-4 text-black px-2">
-          🚚 Приключения курьера
+          🎮 Игры для курьеров
         </h1>
         <p className="text-sm sm:text-lg md:text-xl text-center mb-6 sm:mb-8 md:mb-12 font-bold text-gray-800 px-2">
           Стань лучшим курьером города!
         </p>
 
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-4 sm:gap-6">
+          {/* 2D Game - Курьер: Город в движении */}
           <button
             onClick={() => openGame('2d')}
             className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden w-full"
@@ -65,6 +66,48 @@ export default function GameSelect() {
               </div>
 
               <div className="mt-4 sm:mt-6 bg-yellow-400 text-black font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl border-2 border-black inline-flex items-center gap-2 text-sm sm:text-base">
+                <Icon name="Play" size={18} />
+                Играть сейчас
+              </div>
+            </div>
+          </button>
+
+          {/* 3D Game - Приключения курьера */}
+          <button
+            onClick={() => openGame('3d')}
+            className="group relative bg-white border-3 sm:border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-[0_6px_0_0_rgba(0,0,0,1)] sm:shadow-[0_8px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 overflow-hidden w-full"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-10 group-hover:opacity-20 transition-opacity" />
+            
+            <div className="relative">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🏙️</div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-3 text-black">
+                Приключения курьера
+              </h2>
+              <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 font-semibold">
+                3D гонки по городу — собирай монеты и уворачивайся от машин!
+              </p>
+              
+              <div className="flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-gray-600 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <Icon name="Box" size={14} />
+                  3D графика
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Zap" size={14} />
+                  Быстрые гонки
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Coins" size={14} />
+                  Монеты
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Star" size={14} />
+                  Рекорды
+                </span>
+              </div>
+
+              <div className="mt-4 sm:mt-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl border-2 border-black inline-flex items-center gap-2 text-sm sm:text-base">
                 <Icon name="Play" size={18} />
                 Играть сейчас
               </div>
