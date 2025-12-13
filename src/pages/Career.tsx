@@ -3,12 +3,25 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { useSound } from "@/hooks/useSound";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PayoutForm from "@/components/PayoutForm";
+
+const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e';
+
+interface LeaderboardEntry {
+  user_id: number;
+  level: number;
+  best_score: number;
+  total_orders: number;
+  transport: string;
+  total_earnings: number;
+}
 
 const Career = () => {
   const { playSound } = useSound();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   const steps = [
     {
@@ -167,6 +180,27 @@ const Career = () => {
     playSound("click");
   };
 
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const response = await fetch(`${COURIER_GAME_API}?action=leaderboard&limit=10`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setLeaderboard(data.leaderboard);
+        }
+      } catch (error) {
+        console.error('Leaderboard error:', error);
+      } finally {
+        setLoadingLeaderboard(false);
+      }
+    };
+
+    loadLeaderboard();
+    const interval = setInterval(loadLeaderboard, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
       <Navigation />
@@ -308,7 +342,78 @@ const Career = () => {
             </div>
           </div>
 
-          {/* Блок 4: FAQ */}
+          {/* Блок 4: Лидерборд курьеров */}
+          <div className="mb-12 md:mb-20">
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12 text-gray-800">
+              🏆 Топ-10 <span className="text-yellow-500">курьеров</span>
+            </h2>
+            <div className="max-w-4xl mx-auto bg-white rounded-xl border-4 border-black p-6 md:p-8" style={{boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.9)'}}>
+              {loadingLeaderboard ? (
+                <div className="text-center py-8">
+                  <Icon name="Loader2" size={32} className="animate-spin mx-auto text-yellow-500" />
+                  <p className="mt-4 text-gray-600">Загрузка рейтинга...</p>
+                </div>
+              ) : leaderboard.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">Пока нет результатов. Стань первым!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {leaderboard.map((entry, index) => (
+                    <div
+                      key={entry.user_id}
+                      className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:translate-x-1 ${
+                        index < 3 ? 'bg-yellow-50 border-yellow-400' : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-3xl font-bold w-12 text-center">
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-lg text-gray-800">
+                          Курьер #{entry.user_id}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+                          <span>
+                            {entry.transport === 'walk' ? '🚶' : entry.transport === 'bike' ? '🚴' : entry.transport === 'moped' ? '🛵' : '🚗'}
+                            {' '}
+                            {entry.transport === 'walk' ? 'Пешком' : entry.transport === 'bike' ? 'Велосипед' : entry.transport === 'moped' ? 'Мопед' : 'Автомобиль'}
+                          </span>
+                          <span>•</span>
+                          <span>📊 Уровень {entry.level}</span>
+                          <span>•</span>
+                          <span>📦 {entry.total_orders} заказов</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-green-600">
+                          ${entry.best_score}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          заработано
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="mt-6 pt-6 border-t-2 border-gray-200 text-center">
+                <p className="text-sm text-gray-600 mb-4">
+                  Хочешь попасть в топ? Играй в игру "Курьер: Город в движении"!
+                </p>
+                <Button
+                  onClick={() => window.location.href = '/game'}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold px-6 py-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+                >
+                  <Icon name="Gamepad2" size={20} className="mr-2" />
+                  Играть сейчас
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Блок 5: FAQ */}
           <div className="mb-12 md:mb-20">
             <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12 text-gray-800">
               Часто задаваемые <span className="text-yellow-500">вопросы</span>
@@ -345,7 +450,7 @@ const Career = () => {
             </div>
           </div>
 
-          {/* Блок 5: CTA */}
+          {/* Блок 6: CTA */}
           <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl md:rounded-2xl p-6 md:p-8 text-center border-4 border-black shadow-[6px_6px_0_0_rgba(0,0,0,0.9)]">
             <h2 className="text-2xl md:text-3xl font-black text-black mb-3 md:mb-4 drop-shadow-[2px_2px_0_rgba(255,255,255,0.5)]">
               Готовы начать?
