@@ -5102,8 +5102,9 @@ def handle_startup_notification(event: Dict[str, Any], headers: Dict[str, str]) 
         
         eligible = (
             data 
-            and data['orders_completed'] >= 30 
-            and not data['startup_bonus_notified']
+            and data.get('orders_completed') is not None
+            and data.get('orders_completed', 0) >= 30 
+            and not data.get('startup_bonus_notified', False)
             and not has_request
             and not self_bonus_paid
         )
