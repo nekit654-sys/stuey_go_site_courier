@@ -1249,6 +1249,7 @@
       <button id="rulesBtn" role="menuitem">📖 Правила</button>
       <button id="toggleMusicBtn" role="menuitem">🔊 Музыка: ВКЛ</button>
       <button id="becomeBtn" role="menuitem">Подать заявку</button>
+      <button id="exitGameBtn" role="menuitem" style="background-color: #dc2626 !important; color: #fff !important;">❌ Выход</button>
     </div>
 
     <!-- Футер меню -->
@@ -2504,6 +2505,10 @@
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
       console.log('Popup blocked or failed to open');
     }
+  });
+  
+  document.getElementById('exitGameBtn').addEventListener('click', () => {
+    window.location.href = '/';
   });
   
   toggleMusicBtn.addEventListener('click', () => {

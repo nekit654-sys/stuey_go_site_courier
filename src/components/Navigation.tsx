@@ -103,29 +103,12 @@ const Navigation = () => {
                   </div>
                   
                   <div className="p-3 space-y-2">
-                    {/* 2D Game - Курьер */}
+                    {/* Приключения курьера - /game */}
                     <button
                       onClick={() => {
                         playSound('whoosh');
                         openGame('2d');
                         setIsGameMenuOpen(false);
-                      }}
-                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className="text-2xl">🚚</div>
-                        <div className="flex-1">
-                          <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
-                          <div className="text-xs text-gray-700 font-semibold">2D симулятор доставок</div>
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* HTML Game - Приключения курьера */}
-                    <button
-                      onClick={() => {
-                        playSound('whoosh');
-                        window.location.href = '/game.html';
                       }}
                       className="w-full text-left bg-gradient-to-br from-orange-100 to-red-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
                     >
@@ -134,6 +117,23 @@ const Navigation = () => {
                         <div className="flex-1">
                           <div className="font-extrabold text-black text-sm mb-1">Приключения курьера</div>
                           <div className="text-xs text-gray-700 font-semibold">2D раннер</div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Курьер: Город в движении - /game.html */}
+                    <button
+                      onClick={() => {
+                        playSound('whoosh');
+                        window.location.href = '/game.html';
+                      }}
+                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">🚚</div>
+                        <div className="flex-1">
+                          <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
+                          <div className="text-xs text-gray-700 font-semibold">2D симулятор</div>
                         </div>
                       </div>
                     </button>
@@ -230,12 +230,12 @@ const Navigation = () => {
                   handleMenuItemClick();
                 }}
                 variant="ghost"
-                className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
+                className="w-full justify-start bg-gradient-to-b from-orange-400 to-orange-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-orange-500 hover:to-orange-600"
               >
-                <span className="text-2xl mr-3">🚚</span>
-                <div className="text-left">
-                  <div className="font-extrabold">Курьер: Город в движении</div>
-                  <div className="text-xs font-semibold opacity-90">2D симулятор</div>
+                <span className="text-2xl mr-3">🏃</span>
+                <div className="text-left flex-1">
+                  <div className="font-extrabold">Приключения курьера</div>
+                  <div className="text-xs font-semibold opacity-90">2D раннер</div>
                 </div>
               </Button>
 
@@ -245,12 +245,12 @@ const Navigation = () => {
                   window.location.href = '/game.html';
                 }}
                 variant="ghost"
-                className="w-full justify-start bg-gradient-to-b from-orange-400 to-orange-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-orange-500 hover:to-orange-600"
+                className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
               >
-                <span className="text-2xl mr-3">🏃</span>
-                <div className="text-left flex-1">
-                  <div className="font-extrabold">Приключения курьера</div>
-                  <div className="text-xs font-semibold opacity-90">2D раннер</div>
+                <span className="text-2xl mr-3">🚚</span>
+                <div className="text-left">
+                  <div className="font-extrabold">Курьер: Город в движении</div>
+                  <div className="text-xs font-semibold opacity-90">2D симулятор</div>
                 </div>
               </Button>
             </div>
