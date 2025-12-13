@@ -1002,6 +1002,32 @@ export function CourierGame2D() {
     });
     
     ctx.setLineDash([]);
+    
+    // Пешеходные переходы (зебры) на перекрёстках
+    ctx.fillStyle = '#FFF';
+    for (let y = 0; y < MAP_HEIGHT; y += 400) {
+      for (let x = 0; x < MAP_WIDTH; x += 400) {
+        // Зебра сверху перекрёстка (горизонтальная)
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(x + 10 + i * 8, y + 8, 6, 10);
+        }
+        
+        // Зебра снизу перекрёстка (горизонтальная)
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(x + 10 + i * 8, y + 42, 6, 10);
+        }
+        
+        // Зебра слева перекрёстка (вертикальная)
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(x + 8, y + 10 + i * 8, 10, 6);
+        }
+        
+        // Зебра справа перекрёстка (вертикальная)
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(x + 42, y + 10 + i * 8, 10, 6);
+        }
+      }
+    }
   };
 
   const drawTrafficLights = (ctx: CanvasRenderingContext2D) => {
