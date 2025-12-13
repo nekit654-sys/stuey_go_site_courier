@@ -6,7 +6,7 @@ import ContentTab from './ContentTab';
 import ActivityTab from './ActivityTab';
 import AdminsTab from './AdminsTab';
 import VisitAnalytics from './VisitAnalytics';
-import BotContentTab from './BotContentTab';
+
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 import { Courier } from './payments/types';
 
@@ -80,7 +80,7 @@ export default function CompactAdminTabs({
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
-      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-7' : 'grid-cols-6'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
+      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
         <button
           onClick={() => onTabChange('activity')}
           className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
@@ -135,17 +135,7 @@ export default function CompactAdminTabs({
           <Icon name="Image" size={16} />
           <span>Контент</span>
         </button>
-        <button
-          onClick={() => onTabChange('bot')}
-          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
-            activeTab === 'bot'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
-              : 'bg-transparent text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          <Icon name="Bot" size={16} />
-          <span>Бот</span>
-        </button>
+
         <button
           onClick={() => onTabChange('visits')}
           className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
@@ -211,9 +201,7 @@ export default function CompactAdminTabs({
         <ContentTab authToken={authToken} />
       )}
 
-      {activeTab === 'bot' && (
-        <BotContentTab authToken={authToken} />
-      )}
+
 
       {activeTab === 'visits' && (
         <VisitAnalytics authToken={authToken} />
@@ -235,7 +223,7 @@ export default function CompactAdminTabs({
       )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 sm:hidden">
-        <div className={`grid ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-6'} h-16`}>
+        <div className={`grid ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} h-16`}>
           <button
             onClick={() => onTabChange('activity')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
@@ -292,18 +280,6 @@ export default function CompactAdminTabs({
           >
             <Icon name="Image" size={20} />
             <span className="text-[10px] font-bold">Контент</span>
-          </button>
-
-          <button
-            onClick={() => onTabChange('bot')}
-            className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
-              activeTab === 'bot' 
-                ? 'bg-yellow-400 text-black' 
-                : 'bg-white text-gray-600 active:bg-gray-100'
-            }`}
-          >
-            <Icon name="Bot" size={20} />
-            <span className="text-[10px] font-bold">Бот</span>
           </button>
 
           <button
