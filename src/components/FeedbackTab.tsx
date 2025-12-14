@@ -125,7 +125,7 @@ const FeedbackTab: React.FC = () => {
     }
 
     if (!formData.screenshot) {
-      alert('Пожалуйста, загрузите скриншот 30 заказов');
+      alert('Пожалуйста, загрузите скриншот 50 заказов');
       return;
     }
 
@@ -220,9 +220,9 @@ const FeedbackTab: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Icon name="Gift" size={24} className="text-yellow-300" />
-                    <h2 className="text-2xl font-extrabold" style={{textShadow: '2px 2px 0 rgba(0, 0, 0, 0.2)'}}>Получить 3000₽</h2>
+                    <h2 className="text-2xl font-extrabold" style={{textShadow: '2px 2px 0 rgba(0, 0, 0, 0.2)'}}>Получить 5000₽</h2>
                   </div>
-                  <p className="text-green-50 text-sm font-bold">За первые 30 выполненных заказов</p>
+                  <p className="text-green-50 text-sm font-bold">За первые 50 выполненных заказов</p>
                 </div>
                 <button
                   onClick={handleCloseModal}
@@ -315,7 +315,7 @@ const FeedbackTab: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-extrabold text-black mb-2">
-                      Скриншот 30 выполненных заказов <span className="text-red-500">*</span>
+                      Скриншот 50 выполненных заказов <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-3 border-dashed border-gray-400 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
                       <div className="space-y-2 text-center">
