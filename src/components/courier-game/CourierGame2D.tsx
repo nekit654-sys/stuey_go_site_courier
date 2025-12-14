@@ -189,35 +189,27 @@ export function CourierGame2D() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Запрос fullscreen при старте игры на мобильных
+  // Запрос fullscreen при открытии игры (меню или играем)
   useEffect(() => {
-    if (gameState === 'playing' && window.innerWidth < 768) {
-      const elem = document.documentElement;
-      
-      // Пробуем разные методы для fullscreen
-      const requestFullscreen = elem.requestFullscreen || 
-        (elem as any).webkitRequestFullscreen || 
-        (elem as any).mozRequestFullScreen || 
-        (elem as any).msRequestFullscreen;
-      
-      if (requestFullscreen) {
-        requestFullscreen.call(elem).catch((err: any) => {
-          console.log('Fullscreen request failed:', err);
-        });
-      }
-      
-      // Блокируем прокрутку на мобильных
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.height = '100%';
-    } else {
-      // Разблокируем прокрутку
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
+    const elem = document.documentElement;
+    
+    // Пробуем разные методы для fullscreen
+    const requestFullscreen = elem.requestFullscreen || 
+      (elem as any).webkitRequestFullscreen || 
+      (elem as any).mozRequestFullScreen || 
+      (elem as any).msRequestFullscreen;
+    
+    if (requestFullscreen) {
+      requestFullscreen.call(elem).catch((err: any) => {
+        console.log('Fullscreen request failed:', err);
+      });
     }
+    
+    // Блокируем прокрутку
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
     
     return () => {
       document.body.style.overflow = '';
@@ -225,7 +217,7 @@ export function CourierGame2D() {
       document.body.style.width = '';
       document.body.style.height = '';
     };
-  }, [gameState]);
+  }, []);
 
   // Звук взятия заказа (короткий бип)
   const playPickupSound = useCallback(() => {
@@ -1863,7 +1855,7 @@ export function CourierGame2D() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-black">
         <div className="text-white text-2xl">Загрузка...</div>
       </div>
     );
@@ -1873,7 +1865,7 @@ export function CourierGame2D() {
   if (gameState === 'menu') {
     return (
       <div 
-        className="min-h-screen flex items-center justify-center relative overflow-hidden"
+        className="fixed inset-0 w-screen h-screen flex items-center justify-center relative overflow-y-auto"
         style={{
           backgroundImage: 'url(https://cdn.poehali.dev/files/i.jpg)',
           backgroundSize: 'cover',
@@ -1884,7 +1876,7 @@ export function CourierGame2D() {
         <div className="absolute inset-0 bg-black/60" />
         
         {/* Меню */}
-        <div className="relative z-10 text-center space-y-6">
+        <div className="relative z-10 text-center space-y-6 py-8 px-4">
           {/* Логотип */}
           <div className="mb-12">
             <h1 className="text-7xl font-bold text-yellow-400 mb-2" style={{
@@ -2105,8 +2097,8 @@ export function CourierGame2D() {
 
   // Игра
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden" style={{ touchAction: 'none' }}>
-      {/* Canvas - полноэкранный размер для мобильных */}
+    <div className="fixed inset-0 w-screen h-screen bg-black overflow-hidden" style={{ touchAction: 'none' }}>
+      {/* Canvas - полноэкранный размер */}
       <canvas
         ref={canvasRef}
         width={window.innerWidth}
