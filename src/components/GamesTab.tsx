@@ -123,7 +123,7 @@ export default function GamesTab({ userId }: GamesTabProps) {
           }`}
         >
           <Icon name="Zap" className="mr-1 sm:mr-2 h-3 w-3 sm:h-5 sm:w-5" />
-          2D Игра
+          Мини-игра
         </Button>
         <Button
           onClick={() => setActiveGame('html')}
