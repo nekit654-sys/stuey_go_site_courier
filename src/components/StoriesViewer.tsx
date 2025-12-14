@@ -141,8 +141,12 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
 
             <div className="flex items-center justify-between relative z-50">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-yellow-400 rounded-full border-3 border-black flex items-center justify-center">
-                  <Icon name="Zap" size={20} className="text-black" />
+                <div className="w-10 h-10 bg-white rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
+                  <img 
+                    src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
+                    alt="Stuey Go Logo" 
+                    className="w-8 h-8 rounded object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-extrabold text-white text-sm drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
