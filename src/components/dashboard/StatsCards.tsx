@@ -60,7 +60,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       icon: 'Wallet',
       label: 'Доступно для вывода',
       value: `${stats.available_for_withdrawal?.toLocaleString('ru-RU') || '0'} ₽`,
-      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : `📦 Заказов: ${stats.self_orders_count || 0}/${settings.self_bonus_orders}`,
+      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : '',
       gradient: 'from-green-500 to-emerald-600',
       iconBg: 'bg-green-400',
       delay: 0,
