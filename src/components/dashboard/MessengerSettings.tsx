@@ -218,53 +218,53 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Информационная карточка */}
-      <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-3 border-blue-200 rounded-2xl shadow-[0_5px_0_0_rgba(59,130,246,0.3)] p-4 sm:p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-            <Icon name="Bell" className="text-white" size={24} />
+      <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-3 border-blue-200 rounded-2xl shadow-[0_5px_0_0_rgba(59,130,246,0.3)] p-3 sm:p-6">
+        <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+            <Icon name="Bell" className="text-white" size={20} />
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-blue-900 mb-2">Зачем подключать Telegram-бота?</h3>
-            <ul className="space-y-2 text-sm text-blue-800">
-              <li className="flex items-start gap-2">
-                <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
-                <span><strong>Уведомления о новых рефералах</strong> — узнавайте мгновенно, когда кто-то регистрируется по вашей ссылке</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg font-bold text-blue-900 mb-2">Зачем подключать Telegram-бота?</h3>
+            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800">
+              <li className="flex items-start gap-1.5 sm:gap-2">
+                <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                <span className="break-words"><strong>Уведомления о новых рефералах</strong> — узнавайте мгновенно, когда кто-то регистрируется по вашей ссылке</span>
               </li>
-              <li className="flex items-start gap-2">
-                <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
-                <span><strong>Статус выплат</strong> — получайте уведомления о статусе ваших заявок на вывод</span>
+              <li className="flex items-start gap-1.5 sm:gap-2">
+                <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                <span className="break-words"><strong>Статус выплат</strong> — получайте уведомления о статусе ваших заявок на вывод</span>
               </li>
-              <li className="flex items-start gap-2">
-                <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
-                <span><strong>Быстрый доступ к статистике</strong> — проверяйте заработок прямо из Telegram</span>
+              <li className="flex items-start gap-1.5 sm:gap-2">
+                <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                <span className="break-words"><strong>Быстрый доступ к статистике</strong> — проверяйте заработок прямо из Telegram</span>
               </li>
             </ul>
           </div>
         </div>
       </Card>
 
-      <Card className="p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Icon name="MessageSquare" className="text-primary" size={24} />
+      <Card className="p-3 sm:p-6">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Icon name="MessageSquare" className="text-primary" size={20} />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold">Подключение мессенджера</h2>
-            <p className="text-muted-foreground">Telegram-бот для уведомлений и быстрого доступа</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg sm:text-2xl font-bold truncate">Подключение мессенджера</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">Telegram-бот для уведомлений и быстрого доступа</p>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="p-6 border-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Icon name="Send" className="text-blue-500" size={24} />
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+          <Card className="p-3 sm:p-6 border-2">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                <Icon name="Send" className="text-blue-500" size={20} />
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">Telegram</h3>
-                <p className="text-sm text-muted-foreground">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold truncate">Telegram</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {connections.telegram?.connected
                     ? `@${connections.telegram.username || 'Подключен'}`
                     : 'Не подключен'}
@@ -325,59 +325,59 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
                 </Button>
 
                 {linkCode && selectedMessenger === 'telegram' && (
-                  <div className="space-y-4 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-300 shadow-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-blue-900">📱 Ваш код для подключения:</span>
-                      <span className="text-xs text-blue-700 font-semibold bg-blue-200 px-2 py-1 rounded-full">
+                  <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-300 shadow-lg">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-blue-900 truncate">📱 Ваш код:</span>
+                      <span className="text-xs text-blue-700 font-semibold bg-blue-200 px-2 py-1 rounded-full whitespace-nowrap">
                         ⏱️ {getTimeRemaining()}
                       </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                      <code className="flex-1 text-2xl sm:text-3xl font-black text-center py-3 sm:py-4 px-3 sm:px-4 bg-white rounded-lg border-3 border-blue-500 tracking-widest text-blue-600 shadow-[0_3px_0_0_rgba(59,130,246,1)] break-all">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                      <code className="flex-1 text-xl sm:text-2xl md:text-3xl font-black text-center py-2 sm:py-3 md:py-4 px-2 sm:px-3 md:px-4 bg-white rounded-lg border-3 border-blue-500 tracking-wider sm:tracking-widest text-blue-600 shadow-[0_3px_0_0_rgba(59,130,246,1)] break-all">
                         {linkCode}
                       </code>
                       <Button 
                         onClick={copyCode} 
-                        className="bg-blue-500 hover:bg-blue-600 text-white border-3 border-blue-700 shadow-[0_3px_0_0_rgba(29,78,216,1)] hover:shadow-[0_1px_0_0_rgba(29,78,216,1)] hover:translate-y-[2px] w-full sm:w-auto sm:min-w-[48px]"
+                        className="bg-blue-500 hover:bg-blue-600 text-white border-3 border-blue-700 shadow-[0_3px_0_0_rgba(29,78,216,1)] hover:shadow-[0_1px_0_0_rgba(29,78,216,1)] hover:translate-y-[2px] w-full sm:w-auto sm:min-w-[48px] py-2"
                         size="icon"
                       >
                         <Icon name="Copy" size={16} />
-                        <span className="ml-2 sm:hidden">Скопировать</span>
+                        <span className="ml-2 sm:hidden text-sm">Скопировать</span>
                       </Button>
                     </div>
-                    <div className="space-y-3 text-xs sm:text-sm bg-white/80 p-3 sm:p-4 rounded-lg border-2 border-blue-200">
-                      <p className="font-bold text-blue-900 flex items-center gap-2 text-sm sm:text-base">
-                        <Icon name="Info" size={16} className="text-blue-600 flex-shrink-0" />
+                    <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm bg-white/80 p-2.5 sm:p-3 md:p-4 rounded-lg border-2 border-blue-200">
+                      <p className="font-bold text-blue-900 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
+                        <Icon name="Info" size={14} className="text-blue-600 flex-shrink-0" />
                         <span>Как подключить (3 шага):</span>
                       </p>
-                      <ol className="space-y-2 text-blue-800">
-                        <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">1.</span>
-                          <span className="leading-relaxed">Нажмите кнопку <strong>"Открыть @StueyGoBot"</strong> ниже (откроется Telegram)</span>
+                      <ol className="space-y-1.5 sm:space-y-2 text-blue-800">
+                        <li className="flex items-start gap-1.5 sm:gap-2">
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5 text-xs sm:text-sm">1.</span>
+                          <span className="leading-relaxed text-xs sm:text-sm break-words">Нажмите кнопку <strong>"Открыть @StueyGoBot"</strong> ниже (откроется Telegram)</span>
                         </li>
-                        <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">2.</span>
-                          <span className="leading-relaxed">В боте нажмите кнопку <strong>"START"</strong> или <strong>"/start"</strong></span>
+                        <li className="flex items-start gap-1.5 sm:gap-2">
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5 text-xs sm:text-sm">2.</span>
+                          <span className="leading-relaxed text-xs sm:text-sm break-words">В боте нажмите кнопку <strong>"START"</strong> или <strong>"/start"</strong></span>
                         </li>
-                        <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">3.</span>
-                          <span className="leading-relaxed">Отправьте боту код: <code className="px-2 py-1 bg-blue-100 rounded font-bold text-blue-700 break-all inline-block">{linkCode}</code></span>
+                        <li className="flex items-start gap-1.5 sm:gap-2">
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5 text-xs sm:text-sm">3.</span>
+                          <span className="leading-relaxed text-xs sm:text-sm break-words">Отправьте боту код: <code className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-blue-100 rounded font-bold text-blue-700 break-all inline-block text-xs sm:text-sm">{linkCode}</code></span>
                         </li>
                       </ol>
-                      <div className="mt-3 p-2 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
-                        <p className="text-xs text-yellow-800 flex items-start sm:items-center gap-2">
-                          <Icon name="Clock" size={14} className="text-yellow-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-                          <span className="leading-relaxed">Код действует <strong>10 минут</strong>. Успейте подключиться!</span>
+                      <div className="mt-2 sm:mt-3 p-1.5 sm:p-2 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+                        <p className="text-xs text-yellow-800 flex items-start sm:items-center gap-1.5 sm:gap-2">
+                          <Icon name="Clock" size={12} className="text-yellow-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                          <span className="leading-relaxed break-words">Код действует <strong>10 минут</strong>. Успейте подключиться!</span>
                         </p>
                       </div>
                     </div>
                     <Button 
                       onClick={() => openBot('telegram')} 
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-black text-base sm:text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-4 sm:py-6 px-4"
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-black text-sm sm:text-base md:text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-3 sm:py-4 md:py-6 px-3 sm:px-4"
                       size="lg"
                     >
-                      <Icon name="Send" size={20} className="mr-2 flex-shrink-0" />
-                      <span className="truncate">Открыть @StueyGoBot в Telegram</span>
+                      <Icon name="Send" size={16} className="mr-1.5 sm:mr-2 flex-shrink-0" />
+                      <span className="truncate">Открыть @StueyGoBot</span>
                     </Button>
                   </div>
                 )}
@@ -385,14 +385,14 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
             )}
           </Card>
 
-          <Card className="p-6 border-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Icon name="MessageCircle" className="text-green-500" size={24} />
+          <Card className="p-3 sm:p-6 border-2">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <Icon name="MessageCircle" className="text-green-500" size={20} />
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">WhatsApp</h3>
-                <p className="text-sm text-muted-foreground">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold truncate">WhatsApp</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {connections.whatsapp?.connected
                     ? 'Подключен'
                     : 'Не подключен'}
