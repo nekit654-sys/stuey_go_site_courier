@@ -13,8 +13,7 @@ import GamesTab from '@/components/GamesTab';
 import StartupPayoutModal from '@/components/StartupPayoutModal';
 import StartupBonusNotification from '@/components/StartupBonusNotification';
 import InviterCard from '@/components/InviterCard';
-import StoriesCarousel from '@/components/StoriesCarousel';
-import StoriesViewer from '@/components/StoriesViewer';
+
 import ProfileHeader from '@/components/ProfileHeader';
 import StatsCards from '@/components/dashboard/StatsCards';
 import ReferralsGrid from '@/components/dashboard/ReferralsGrid';
@@ -78,9 +77,7 @@ export default function Dashboard() {
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
-  const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
-  const [stories, setStories] = useState<any[]>([]);
-  const [showStories, setShowStories] = useState(false);
+
   const [showNewCourierNotification, setShowNewCourierNotification] = useState(false);
   const [telegramConnected, setTelegramConnected] = useState(false);
 
@@ -94,7 +91,7 @@ export default function Dashboard() {
       fetchStats();
       fetchReferrals();
       fetchWithdrawalRequests();
-      fetchStories();
+
       checkTelegramConnection();
       setLoading(false);
     }
@@ -256,32 +253,7 @@ export default function Dashboard() {
     localStorage.setItem('new_courier_notification_dismissed', 'true');
   };
 
-  const fetchStories = async () => {
-    try {
-      const userId = localStorage.getItem('story_user_id') || `guest_${Date.now()}`;
-      if (!localStorage.getItem('story_user_id')) {
-        localStorage.setItem('story_user_id', userId);
-      }
 
-      const response = await fetch(
-        `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`
-      );
-      const data = await response.json();
-
-      const activeStories = (data.stories || []).filter((s: any) => s.isActive);
-      console.log('[Dashboard] Fetched stories:', activeStories.length);
-      setStories(activeStories);
-    } catch (error) {
-      console.error('Error fetching stories:', error);
-    }
-  };
-
-  const handleStoryClick = (storyId: number) => {
-    console.log('[Dashboard] Story clicked:', storyId, 'Stories count:', stories.length);
-    setSelectedStoryId(storyId);
-    setShowStories(true);
-    console.log('[Dashboard] showStories set to true');
-  };
 
   if (loading) {
     return (
@@ -297,18 +269,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
-      {showStories && stories.length > 0 && (
-        <StoriesViewer
-          stories={stories}
-          initialStoryId={selectedStoryId || undefined}
-          onClose={() => {
-            setShowStories(false);
-            setSelectedStoryId(null);
-          }}
-        />
-      )}
-
-      {/* Navigation */}
+      {/* Navigation */
       <DashboardNav 
         onSettings={() => setActiveTab('profile')}
         onLogout={logout}
@@ -326,12 +287,7 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Stories Carousel - Full Width */}
-      <div className="w-full">
-        <StoriesCarousel onStoryClick={handleStoryClick} />
-      </div>
-
-      {/* New Courier Notification - под историями */}
+      {/* New Courier Notification */}
       {showNewCourierNotification && (
         <div className="container mx-auto px-3 sm:px-4 max-w-7xl pt-2">
           <NewCourierNotification 
