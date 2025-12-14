@@ -10,7 +10,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     { id: 'stats' as const, icon: 'BarChart3', label: 'Главная' },
     { id: 'referrals' as const, icon: 'Users', label: 'Рефералы' },
     { id: 'withdrawals' as const, icon: 'Wallet', label: 'Выплаты' },
-    { id: 'game' as const, icon: 'Gamepad2', label: 'Игра' },
+    { id: 'game' as const, icon: 'Gamepad2', label: 'Мини-игра' },
     { id: 'settings' as const, icon: 'Settings', label: 'Настройки' },
   ];
 

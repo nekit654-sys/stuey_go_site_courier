@@ -10,6 +10,7 @@ const COURIER_GAME_API = 'https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-
 
 const MAP_WIDTH = 3000;
 const MAP_HEIGHT = 2000;
+const WALL_THICKNESS = 100; // Толщина невидимых стен
 // Адаптивные размеры камеры под размер экрана
 const getViewportSize = () => {
   const width = Math.min(window.innerWidth, 1200);
@@ -559,7 +560,7 @@ export function CourierGame2D() {
     
     // Создаём начальные заказы У ВХОДА В ЗДАНИЯ (доступные с дороги)
     const initialOrders: Order[] = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       const pickupBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
       let deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
       
@@ -595,6 +596,12 @@ export function CourierGame2D() {
       const pickupPoint = getEntrancePoint(pickupBuilding);
       const deliveryPoint = getEntrancePoint(deliveryBuilding);
       
+      // Ограничиваем начальные точки заказов внутри стен
+      pickupPoint.x = Math.max(WALL_THICKNESS + 30, Math.min(MAP_WIDTH - WALL_THICKNESS - 30, pickupPoint.x));
+      pickupPoint.y = Math.max(WALL_THICKNESS + 30, Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, pickupPoint.y));
+      deliveryPoint.x = Math.max(WALL_THICKNESS + 30, Math.min(MAP_WIDTH - WALL_THICKNESS - 30, deliveryPoint.x));
+      deliveryPoint.y = Math.max(WALL_THICKNESS + 30, Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, deliveryPoint.y));
+      
       initialOrders.push({
         id: `order-${i}`,
         pickupX: pickupPoint.x,
@@ -624,7 +631,7 @@ export function CourierGame2D() {
         // Горизонтальные дороги: движение вправо по нижней полосе
         const roadY = Math.floor(Math.random() * 5) * 400;
         initialVehicles.push({
-          x: Math.min(MAP_WIDTH - 100, Math.max(100, Math.random() * MAP_WIDTH)),
+          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 50, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
           y: roadY + 35, // Нижняя полоса (правостороннее движение)
           speed: 2 + Math.random() * 2,
           angle: 0, // Движение вправо
@@ -637,7 +644,7 @@ export function CourierGame2D() {
         const roadX = Math.floor(Math.random() * 7) * 400;
         initialVehicles.push({
           x: roadX + 35, // Правая полоса (правостороннее движение)
-          y: Math.min(MAP_HEIGHT - 100, Math.max(100, Math.random() * MAP_HEIGHT)),
+          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 50, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
           speed: 2 + Math.random() * 2,
           angle: 90, // Движение вниз
           direction: 'vertical',
@@ -661,7 +668,7 @@ export function CourierGame2D() {
         const roadY = Math.floor(Math.random() * 5) * 400;
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
-          x: Math.min(MAP_WIDTH - 50, Math.max(50, Math.random() * MAP_WIDTH)),
+          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 30, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
           y: roadY + (side > 0 ? 5 : 55),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
@@ -672,7 +679,7 @@ export function CourierGame2D() {
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
           x: roadX + (side > 0 ? 5 : 55),
-          y: Math.min(MAP_HEIGHT - 50, Math.max(50, Math.random() * MAP_HEIGHT)),
+          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 30, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
           color: colors[Math.floor(Math.random() * colors.length)]
@@ -825,8 +832,9 @@ export function CourierGame2D() {
     
     const interval = setInterval(() => {
       
-      // Генерируем новые СЛУЧАЙНЫЕ заказы если их мало (макс 5 активных)
-      if (orders.filter(o => o.status === 'available').length < 5 && buildings.length > 0) {
+      // Генерируем новые СЛУЧАЙНЫЕ заказы если их мало (минимум 3, макс 8 активных)
+      const availableOrders = orders.filter(o => o.status === 'available').length;
+      if (availableOrders < 3 && buildings.length > 0) {
         // СЛУЧАЙНОЕ ЗДАНИЕ ДЛЯ ЗАБОРА (ресторан/магазин)
         const pickupBuilding = buildings[Math.floor(Math.random() * buildings.length)];
         
@@ -863,6 +871,12 @@ export function CourierGame2D() {
         const pickupPoint = getEntrancePoint(pickupBuilding);
         const deliveryPoint = getEntrancePoint(deliveryBuilding);
         
+        // Ограничиваем точки заказов внутри стен
+        pickupPoint.x = Math.max(WALL_THICKNESS + 30, Math.min(MAP_WIDTH - WALL_THICKNESS - 30, pickupPoint.x));
+        pickupPoint.y = Math.max(WALL_THICKNESS + 30, Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, pickupPoint.y));
+        deliveryPoint.x = Math.max(WALL_THICKNESS + 30, Math.min(MAP_WIDTH - WALL_THICKNESS - 30, deliveryPoint.x));
+        deliveryPoint.y = Math.max(WALL_THICKNESS + 30, Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, deliveryPoint.y));
+        
         // Рассчитываем награду по дистанции
         const distance = Math.hypot(deliveryPoint.x - pickupPoint.x, deliveryPoint.y - pickupPoint.y);
         const baseReward = 50;
@@ -884,7 +898,7 @@ export function CourierGame2D() {
           deliveryBuilding: buildings.indexOf(deliveryBuilding)
         }]);
       }
-    }, 8000); // Новый заказ каждые 8 секунд
+    }, 5000); // Новый заказ каждые 5 секунд для поддержания активности
     
     return () => clearInterval(interval);
   }, [orders, gameState, buildings, currentOrder]);
@@ -1039,17 +1053,17 @@ export function CourierGame2D() {
         if (vehicle.direction === 'horizontal') {
           // Движение только вправо (правостороннее)
           newX += vehicle.speed;
-          // Телепорт машин на противоположный край ВНУТРИ карты с сохранением полосы
-          if (newX > MAP_WIDTH - 50) {
-            newX = 50;
+          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы
+          if (newX > MAP_WIDTH - WALL_THICKNESS) {
+            newX = WALL_THICKNESS + 50;
             newY = Math.floor(vehicle.y / 400) * 400 + 35;
           }
         } else {
           // Движение только вниз (правостороннее)
           newY += vehicle.speed;
-          // Телепорт машин на противоположный край ВНУТРИ карты с сохранением полосы
-          if (newY > MAP_HEIGHT - 50) {
-            newY = 50;
+          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы
+          if (newY > MAP_HEIGHT - WALL_THICKNESS) {
+            newY = WALL_THICKNESS + 50;
             newX = Math.floor(vehicle.x / 400) * 400 + 35;
           }
         }
@@ -1076,24 +1090,24 @@ export function CourierGame2D() {
         
         if (isOnHorizontalSidewalk) {
           newX += ped.speed * ped.direction;
-          // Разворачиваемся у краёв карты
-          if (newX > MAP_WIDTH - 50) {
-            newX = MAP_WIDTH - 50;
+          // Разворачиваемся у стен карты
+          if (newX > MAP_WIDTH - WALL_THICKNESS) {
+            newX = MAP_WIDTH - WALL_THICKNESS;
             newDirection = -1;
           }
-          if (newX < 50) {
-            newX = 50;
+          if (newX < WALL_THICKNESS) {
+            newX = WALL_THICKNESS;
             newDirection = 1;
           }
         } else {
           newY += ped.speed * ped.direction;
-          // Разворачиваемся у краёв карты
-          if (newY > MAP_HEIGHT - 50) {
-            newY = MAP_HEIGHT - 50;
+          // Разворачиваемся у стен карты
+          if (newY > MAP_HEIGHT - WALL_THICKNESS) {
+            newY = MAP_HEIGHT - WALL_THICKNESS;
             newDirection = -1;
           }
-          if (newY < 50) {
-            newY = 50;
+          if (newY < WALL_THICKNESS) {
+            newY = WALL_THICKNESS;
             newDirection = 1;
           }
         }
@@ -1172,8 +1186,9 @@ export function CourierGame2D() {
         newY = player.y;
       }
       
-      newX = Math.max(20, Math.min(MAP_WIDTH - 20, newX));
-      newY = Math.max(20, Math.min(MAP_HEIGHT - 20, newY));
+      // Усиленные границы карты - игрок не может выйти за пределы
+      newX = Math.max(WALL_THICKNESS, Math.min(MAP_WIDTH - WALL_THICKNESS, newX));
+      newY = Math.max(WALL_THICKNESS, Math.min(MAP_HEIGHT - WALL_THICKNESS, newY));
       
       const distance = Math.hypot(newX - lastPositionRef.current.x, newY - lastPositionRef.current.y);
       if (distance > 0) {
@@ -1228,6 +1243,44 @@ export function CourierGame2D() {
     // Рисуем траву между дорогами
     ctx.fillStyle = '#90EE90';
     ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    
+    // Визуальные границы карты (лес/стены по краям)
+    ctx.fillStyle = '#2d5016'; // Тёмно-зелёный лес
+    // Верхняя стена
+    ctx.fillRect(0, 0, MAP_WIDTH, WALL_THICKNESS);
+    // Нижняя стена
+    ctx.fillRect(0, MAP_HEIGHT - WALL_THICKNESS, MAP_WIDTH, WALL_THICKNESS);
+    // Левая стена
+    ctx.fillRect(0, 0, WALL_THICKNESS, MAP_HEIGHT);
+    // Правая стена
+    ctx.fillRect(MAP_WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, MAP_HEIGHT);
+    
+    // Деревья на границах для красоты
+    ctx.fillStyle = '#1a3d0a';
+    for (let i = 0; i < MAP_WIDTH; i += 80) {
+      // Верхние деревья
+      ctx.fillRect(i, 10, 20, 80);
+      ctx.beginPath();
+      ctx.arc(i + 10, 30, 35, 0, Math.PI * 2);
+      ctx.fill();
+      // Нижние деревья
+      ctx.fillRect(i, MAP_HEIGHT - 90, 20, 80);
+      ctx.beginPath();
+      ctx.arc(i + 10, MAP_HEIGHT - 60, 35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (let i = 0; i < MAP_HEIGHT; i += 80) {
+      // Левые деревья
+      ctx.fillRect(10, i, 80, 20);
+      ctx.beginPath();
+      ctx.arc(30, i + 10, 35, 0, Math.PI * 2);
+      ctx.fill();
+      // Правые деревья
+      ctx.fillRect(MAP_WIDTH - 90, i, 80, 20);
+      ctx.beginPath();
+      ctx.arc(MAP_WIDTH - 60, i + 10, 35, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
     // Рисуем дороги БЕЗ серых полос на перекрёстках
     roads.forEach(road => {

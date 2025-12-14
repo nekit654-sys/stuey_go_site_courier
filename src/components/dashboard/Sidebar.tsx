@@ -15,7 +15,7 @@ export default function Sidebar({ activeTab, onTabChange, stats, user }: Sidebar
     { id: 'friends', icon: 'Heart', label: 'Друзья', badge: 'NEW', isNew: true },
     { id: 'messages', icon: 'MessageCircle', label: 'Сообщения', badge: '3', isNew: true },
     { id: 'referrals', icon: 'Users', label: 'Рефералы', badge: stats?.total_referrals || 0 },
-    { id: 'game', icon: 'Trophy', label: 'Игра', badge: null },
+    { id: 'game', icon: 'Trophy', label: 'Мини-игра', badge: null },
     { id: 'withdrawals', icon: 'Wallet', label: 'Выплаты', badge: null },
     { id: 'settings', icon: 'Settings', label: 'Настройки', badge: null },
   ];
