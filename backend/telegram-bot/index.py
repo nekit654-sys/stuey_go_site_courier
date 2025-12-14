@@ -1515,7 +1515,7 @@ def handle_settings_command(chat_id: int, telegram_id: int):
         
         # Проверяем статус подключения Telegram
         cursor.execute("""
-            SELECT messenger_username as username, connected_at as created_at
+            SELECT messenger_username as username, created_at
             FROM t_p25272970_courier_button_site.messenger_connections
             WHERE courier_id = %s AND messenger_type = 'telegram' AND is_verified = true
         """, (courier_id,))
