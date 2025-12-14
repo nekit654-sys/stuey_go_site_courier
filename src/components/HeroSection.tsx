@@ -120,8 +120,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         {/* Главный контент */}
         <div className="backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-6 sm:p-10 shadow-[0_8px_0_0_rgba(0,0,0,0.8)] my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-extrabold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
-            <span className="text-white">Работай курьером — </span>
-            <span className="text-yellow-400">строй свой график!</span>
+            <span className="text-white">Твоя свобода, твой доход — </span>
+            <span className="text-yellow-400">работай курьером!</span>
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-extrabold text-white text-base drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
