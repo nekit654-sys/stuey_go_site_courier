@@ -125,7 +125,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-extrabold text-white text-base drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
-            Зарабатывай от 40 000₽ до 100 000₽ в месяц —<br />
+            Зарабатывай от 40 000₽ до 165 000₽ в месяц —<br />
             твой график, твой транспорт, твои правила!
           </p>
 
