@@ -23,35 +23,35 @@ export default function WithdrawalsTimeline({ requests, loading }: WithdrawalsTi
   const getStatusBadge = (status: string) => {
     const configs = {
       pending: {
-        bg: 'bg-yellow-500',
+        bg: 'bg-yellow-400',
         icon: 'Clock',
         text: 'Ожидает',
-        border: 'border-yellow-600',
+        textColor: 'text-black',
       },
       approved: {
-        bg: 'bg-blue-500',
+        bg: 'bg-blue-400',
         icon: 'CheckCircle',
         text: 'Одобрено',
-        border: 'border-blue-600',
+        textColor: 'text-white',
       },
       paid: {
-        bg: 'bg-green-500',
+        bg: 'bg-green-400',
         icon: 'DollarSign',
         text: 'Выплачено',
-        border: 'border-green-600',
+        textColor: 'text-black',
       },
       rejected: {
         bg: 'bg-red-500',
         icon: 'XCircle',
         text: 'Отклонено',
-        border: 'border-red-600',
+        textColor: 'text-white',
       },
     };
 
     const config = configs[status as keyof typeof configs] || configs.pending;
 
     return (
-      <Badge className={`${config.bg} text-white border-2 ${config.border} shadow-md px-3 py-1`}>
+      <Badge className={`${config.bg} ${config.textColor} border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] px-3 py-1 font-extrabold`}>
         <Icon name={config.icon as any} className="h-3 w-3 mr-1" />
         {config.text}
       </Badge>
@@ -122,20 +122,20 @@ export default function WithdrawalsTimeline({ requests, loading }: WithdrawalsTi
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                  <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
+                  <div className="bg-gradient-to-br from-purple-100 to-pink-100 border-3 border-black rounded-xl p-3 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
                     <div className="flex items-center gap-2 mb-1">
-                      <Icon name="Phone" className="h-4 w-4 text-gray-600" />
-                      <span className="text-xs font-bold text-gray-500">Телефон СБП</span>
+                      <Icon name="Phone" className="h-4 w-4 text-purple-700" />
+                      <span className="text-xs font-bold text-purple-700">Телефон СБП</span>
                     </div>
                     <div className="text-sm font-black text-black">
                       {request.sbp_phone}
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
+                  <div className="bg-gradient-to-br from-blue-100 to-cyan-100 border-3 border-black rounded-xl p-3 shadow-[0_3px_0_0_rgba(0,0,0,1)]">
                     <div className="flex items-center gap-2 mb-1">
-                      <Icon name="Building" className="h-4 w-4 text-gray-600" />
-                      <span className="text-xs font-bold text-gray-500">Банк</span>
+                      <Icon name="Building" className="h-4 w-4 text-blue-700" />
+                      <span className="text-xs font-bold text-blue-700">Банк</span>
                     </div>
                     <div className="text-sm font-black text-black">
                       {request.sbp_bank_name}
@@ -157,12 +157,12 @@ export default function WithdrawalsTimeline({ requests, loading }: WithdrawalsTi
                 </div>
 
                 {request.admin_comment && (
-                  <div className="mt-3 p-3 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                  <div className="mt-3 p-3 bg-gradient-to-br from-orange-100 to-yellow-100 border-3 border-black rounded-xl shadow-[0_3px_0_0_rgba(0,0,0,1)]">
                     <div className="flex items-start gap-2">
-                      <Icon name="MessageCircle" className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <Icon name="MessageCircle" className="h-4 w-4 text-orange-700 flex-shrink-0 mt-0.5" />
                       <div>
-                        <div className="text-xs font-bold text-blue-900 mb-1">Комментарий администратора:</div>
-                        <div className="text-sm text-blue-800">{request.admin_comment}</div>
+                        <div className="text-xs font-extrabold text-orange-900 mb-1">Комментарий администратора:</div>
+                        <div className="text-sm font-bold text-black">{request.admin_comment}</div>
                       </div>
                     </div>
                   </div>

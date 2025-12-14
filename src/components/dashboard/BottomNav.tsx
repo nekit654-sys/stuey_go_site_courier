@@ -15,16 +15,16 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   ];
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-black shadow-[0_-8px_16px_rgba(0,0,0,0.1)] z-50">
-      <div className="flex justify-around items-center px-2 py-2 safe-area-inset-bottom">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-black shadow-[0_-6px_0_0_rgba(0,0,0,1)] z-50">
+      <div className="flex justify-around items-center px-2 py-3 safe-area-inset-bottom">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all ${
               activeTab === tab.id
-                ? 'bg-yellow-400 text-black'
-                : 'text-black/60 hover:text-black hover:bg-black/5'
+                ? 'bg-yellow-400 text-black border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] -translate-y-1'
+                : 'text-black/60 hover:text-black hover:bg-black/5 active:translate-y-[2px]'
             }`}
           >
             <Icon 
@@ -33,7 +33,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 activeTab === tab.id ? 'text-black' : 'text-black/60'
               }`} 
             />
-            <span className={`text-[10px] font-bold ${
+            <span className={`text-[10px] font-extrabold ${
               activeTab === tab.id ? 'text-black' : 'text-black/60'
             }`}>
               {tab.label}
