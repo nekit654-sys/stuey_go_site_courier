@@ -95,6 +95,41 @@ export default function PaymentDistributionsTab({ authToken }: PaymentDistributi
     paid: { label: 'Выплачено', color: 'bg-green-100 text-green-800' },
   };
 
+  const exportToExcel = () => {
+    // Конвертируем данные в CSV формат
+    const csvRows = [
+      ['ID', 'Тип', 'Получатель', 'Курьер', 'Сумма', 'Процент', 'Статус', 'Дата создания', 'Дата выплаты'].join(',')
+    ];
+
+    filteredDistributions.forEach((dist) => {
+      const row = [
+        dist.id,
+        typeConfig[dist.recipient_type].label,
+        `"${dist.recipient_name || `ID ${dist.recipient_id}`}"`,
+        `"${dist.courier_name || '-'}"`,
+        dist.amount.toFixed(2),
+        dist.percentage.toFixed(1),
+        statusConfig[dist.payment_status].label,
+        new Date(dist.created_at).toLocaleDateString('ru-RU'),
+        dist.paid_at ? new Date(dist.paid_at).toLocaleDateString('ru-RU') : '-'
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `payment_distributions_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <Card>
@@ -241,10 +276,21 @@ export default function PaymentDistributionsTab({ authToken }: PaymentDistributi
       {/* Таблица распределений */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon name="Database" className="text-green-600" />
-            История распределений ({filteredDistributions.length})
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Database" className="text-green-600" />
+              История распределений ({filteredDistributions.length})
+            </CardTitle>
+            <Button
+              onClick={exportToExcel}
+              variant="outline"
+              className="flex items-center gap-2"
+              disabled={filteredDistributions.length === 0}
+            >
+              <Icon name="Download" size={16} />
+              Экспорт в Excel
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredDistributions.length === 0 ? (

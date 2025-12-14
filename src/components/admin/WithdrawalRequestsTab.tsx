@@ -118,6 +118,41 @@ export default function WithdrawalRequestsTab({ authToken }: WithdrawalRequestsT
     .filter((r) => r.status === 'pending')
     .reduce((sum, r) => sum + r.amount, 0);
 
+  const exportToExcel = () => {
+    const csvRows = [
+      ['ID', 'Курьер', 'Телефон курьера', 'Сумма', 'СБП телефон', 'Банк', 'Статус', 'Комментарий', 'Создана', 'Обработана'].join(',')
+    ];
+
+    requests.forEach((req) => {
+      const row = [
+        req.id,
+        `"${req.courier_name}"`,
+        req.courier_phone,
+        req.amount.toFixed(2),
+        req.sbp_phone,
+        `"${req.sbp_bank_name}"`,
+        statusConfig[req.status].label,
+        `"${req.admin_comment || '-'}"`,
+        new Date(req.created_at).toLocaleDateString('ru-RU'),
+        req.processed_at ? new Date(req.processed_at).toLocaleDateString('ru-RU') : '-'
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `withdrawal_requests_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <Card>
@@ -204,10 +239,21 @@ export default function WithdrawalRequestsTab({ authToken }: WithdrawalRequestsT
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon name="Wallet" className="text-green-600" />
-            Заявки на вывод средств
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Wallet" className="text-green-600" />
+              Заявки на вывод средств
+            </CardTitle>
+            <Button
+              onClick={exportToExcel}
+              variant="outline"
+              size="sm"
+              disabled={requests.length === 0}
+            >
+              <Icon name="Download" className="mr-2 h-4 w-4" />
+              Экспорт в Excel
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {requests.length === 0 ? (
