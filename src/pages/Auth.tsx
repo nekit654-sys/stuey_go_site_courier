@@ -300,13 +300,19 @@ export default function Auth() {
               Войти через Яндекс
             </Button>
 
-            <Button
-              onClick={() => openAuthModal('vk')}
-              className="w-full bg-[#0077FF] hover:bg-[#0066DD] text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
-            >
-              <Icon name="Globe" className="mr-3 h-6 w-6" />
-              Войти через ВКонтакте
-            </Button>
+            <div className="relative">
+              <Button
+                onClick={() => openAuthModal('vk')}
+                disabled
+                className="w-full bg-gray-400 text-white font-extrabold text-lg py-7 rounded-2xl border-4 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] cursor-not-allowed opacity-60"
+              >
+                <Icon name="Globe" className="mr-3 h-6 w-6" />
+                Войти через ВКонтакте
+              </Button>
+              <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-black px-3 py-1 rounded-full border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] rotate-12">
+                СКОРО
+              </div>
+            </div>
 
             <Button
               onClick={() => openAuthModal('telegram')}
