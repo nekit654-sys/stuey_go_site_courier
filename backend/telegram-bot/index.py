@@ -142,6 +142,7 @@ def get_settings_menu_keyboard(reminder_enabled: bool):
         'inline_keyboard': [
             [{'text': f'🔔 Напоминания: {status}', 'callback_data': 'toggle_reminders'}],
             [{'text': '⏰ Изменить время', 'callback_data': 'change_time'}],
+            [{'text': '🔗 Отвязать аккаунт', 'callback_data': 'unlink_account'}],
             [{'text': '⬅️ Назад в меню', 'callback_data': 'main_menu'}]
         ]
     }
@@ -1441,7 +1442,7 @@ def handle_settings_command(chat_id: int, telegram_id: int):
     
     try:
         cursor.execute("""
-            SELECT reminder_enabled, reminder_time
+            SELECT reminder_enabled, reminder_time, full_name
             FROM t_p25272970_courier_button_site.users
             WHERE id = %s
         """, (courier_id,))
@@ -1449,24 +1450,77 @@ def handle_settings_command(chat_id: int, telegram_id: int):
         courier = cursor.fetchone()
         reminder_enabled = courier['reminder_enabled'] if courier else True
         reminder_time = courier['reminder_time'] if courier else '09:00:00'
+        full_name = courier['full_name'] if courier else 'Неизвестно'
         
         hour = int(str(reminder_time).split(':')[0])
         
         status = '✅ Включены' if reminder_enabled else '❌ Выключены'
         
+        # Проверяем статус подключения Telegram
+        cursor.execute("""
+            SELECT username, created_at
+            FROM t_p25272970_courier_button_site.messenger_connections
+            WHERE courier_id = %s AND messenger_type = 'telegram' AND is_verified = true
+        """, (courier_id,))
+        
+        tg_connection = cursor.fetchone()
+        tg_username = tg_connection['username'] if tg_connection else 'Неизвестно'
+        connected_date = tg_connection['created_at'].strftime('%d.%m.%Y') if tg_connection else 'Неизвестно'
+        
         text = (
-            f"⚙️ <b>Настройки напоминаний</b>\n\n"
-            f"🔔 <b>Статус:</b> {status}\n"
+            f"⚙️ <b>Настройки</b>\n\n"
+            f"👤 <b>Привязанный аккаунт:</b>\n"
+            f"• Имя: {full_name}\n"
+            f"• Telegram: @{tg_username}\n"
+            f"• Подключен: {connected_date}\n\n"
+            f"🔔 <b>Напоминания:</b> {status}\n"
             f"⏰ <b>Время:</b> {hour:02d}:00\n\n"
             f"<b>Ежедневные напоминания помогут:</b>\n"
             f"• Не забывать выходить на доставки\n"
             f"• Отслеживать прогресс к бонусам\n"
-            f"• Зарабатывать стабильно\n\n"
-            f"Настрой удобное время для напоминания!"
+            f"• Зарабатывать стабильно"
         )
         
         send_telegram_message(chat_id, text, reply_markup=get_settings_menu_keyboard(reminder_enabled))
         log_activity(courier_id, 'settings_view')
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+def handle_unlink_account(chat_id: int, telegram_id: int):
+    """Отвязка Telegram аккаунта"""
+    courier_id = get_courier_by_telegram(telegram_id)
+    
+    if not courier_id:
+        send_telegram_message(chat_id, "❌ Аккаунт не привязан")
+        return
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Удаляем связь с Telegram
+        cursor.execute("""
+            DELETE FROM t_p25272970_courier_button_site.messenger_connections
+            WHERE courier_id = %s AND messenger_type = 'telegram'
+        """, (courier_id,))
+        conn.commit()
+        
+        text = (
+            "✅ <b>Аккаунт отвязан</b>\n\n"
+            "Telegram-бот больше не привязан к вашему профилю.\n\n"
+            "Чтобы снова подключиться:\n"
+            "1. Перейдите в личный кабинет на сайте\n"
+            "2. Откройте раздел 'Настройки'\n"
+            "3. Сгенерируйте новый код подключения\n"
+            "4. Отправьте код мне командой /start КОД\n\n"
+            "До встречи! 👋"
+        )
+        
+        # Удаляем клавиатуру
+        send_telegram_message(chat_id, text, reply_markup={'remove_keyboard': True})
+        log_activity(courier_id, 'unlink_account', {'telegram_id': telegram_id})
         
     finally:
         cursor.close()
@@ -1792,6 +1846,25 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             elif data == 'back_to_settings':
                 handle_settings_command(chat_id, telegram_id)
             
+            elif data == 'unlink_account':
+                # Запрос подтверждения отвязки
+                send_telegram_message(
+                    chat_id,
+                    "⚠️ <b>Отвязать аккаунт?</b>\n\n"
+                    "Вы уверены, что хотите отвязать Telegram от вашего профиля?\n\n"
+                    "После отвязки:\n"
+                    "• Вы перестанете получать уведомления\n"
+                    "• Потеряете доступ к статистике в боте\n"
+                    "• Придётся заново привязывать аккаунт\n\n"
+                    "Для подтверждения отправьте команду:\n"
+                    "<code>/unlink</code>",
+                    reply_markup={
+                        'inline_keyboard': [
+                            [{'text': '⬅️ Отмена', 'callback_data': 'back_to_settings'}]
+                        ]
+                    }
+                )
+            
             elif data == 'stats_earnings':
                 # Детальная статистика заработка
                 conn = get_db_connection()
@@ -1987,6 +2060,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             handle_bonus_command(chat_id, telegram_id)
         elif text in ['/help', '❓ Помощь']:
             handle_help_command(chat_id)
+        elif text == '/unlink':
+            handle_unlink_account(chat_id, telegram_id)
         elif text == '⚙️ Настройки':
             handle_settings_command(chat_id, telegram_id)
         elif text in ['❓ FAQ', '⬅️ Назад в меню']:

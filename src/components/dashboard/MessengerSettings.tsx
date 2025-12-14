@@ -277,25 +277,35 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
 
             {connections.telegram?.connected ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Icon name="Check" className="text-green-500" size={16} />
-                  <span>Подключено {new Date(connections.telegram.connected_at!).toLocaleDateString()}</span>
+                <div className="p-3 bg-green-50 border-2 border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon name="CheckCircle" className="text-green-500 flex-shrink-0" size={18} />
+                    <span className="text-sm font-bold text-green-900">✅ Telegram подключен!</span>
+                  </div>
+                  <div className="text-xs text-green-700 space-y-1">
+                    {connections.telegram.username && (
+                      <p>👤 Аккаунт: <strong>@{connections.telegram.username}</strong></p>
+                    )}
+                    <p>📅 Подключено: <strong>{new Date(connections.telegram.connected_at!).toLocaleDateString('ru-RU')}</strong></p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     onClick={() => openBot('telegram')}
                     className="flex-1"
                     variant="default"
                   >
-                    <Icon name="ExternalLink" size={16} className="mr-2" />
+                    <Icon name="Send" size={16} className="mr-2" />
                     Открыть бота
                   </Button>
                   <Button
                     onClick={() => unlinkMessenger('telegram')}
                     variant="outline"
-                    size="icon"
+                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
-                    <Icon name="Unlink" size={16} />
+                    <Icon name="Unlink" size={16} className="mr-2" />
+                    Отвязать
                   </Button>
                 </div>
               </div>
@@ -385,7 +395,15 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
             )}
           </Card>
 
-          <Card className="p-3 sm:p-6 border-2">
+          <Card className="p-3 sm:p-6 border-2 relative overflow-hidden opacity-60">
+            {/* Оверлей "Скоро" */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
+              <div className="bg-white border-3 border-gray-400 rounded-2xl shadow-lg px-4 sm:px-6 py-3 sm:py-4 transform -rotate-3">
+                <p className="text-base sm:text-xl font-black text-gray-700 text-center">🚧 Скоро</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold text-center mt-1">В разработке</p>
+              </div>
+            </div>
+            
             <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
                 <Icon name="MessageCircle" className="text-green-500" size={20} />
@@ -393,97 +411,24 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
               <div className="flex-1 min-w-0">
                 <h3 className="text-base sm:text-lg font-semibold truncate">WhatsApp</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  {connections.whatsapp?.connected
-                    ? 'Подключен'
-                    : 'Не подключен'}
+                  Скоро будет доступен
                 </p>
               </div>
-              {connections.whatsapp?.connected && (
-                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-              )}
             </div>
 
-            {connections.whatsapp?.connected ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Icon name="Check" className="text-green-500" size={16} />
-                  <span>Подключено {new Date(connections.whatsapp.connected_at!).toLocaleDateString()}</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => openBot('whatsapp')}
-                    className="flex-1"
-                    variant="default"
-                  >
-                    <Icon name="ExternalLink" size={16} className="mr-2" />
-                    Открыть бота
-                  </Button>
-                  <Button
-                    onClick={() => unlinkMessenger('whatsapp')}
-                    variant="outline"
-                    size="icon"
-                  >
-                    <Icon name="Unlink" size={16} />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Button
-                  onClick={() => generateLinkCode('whatsapp')}
-                  disabled={isGeneratingCode || (selectedMessenger === 'whatsapp' && linkCode !== null)}
-                  className="w-full"
-                >
-                  {isGeneratingCode && selectedMessenger === 'whatsapp' ? (
-                    <>
-                      <Icon name="Loader2" size={16} className="mr-2 animate-spin" />
-                      Генерация...
-                    </>
-                  ) : linkCode && selectedMessenger === 'whatsapp' ? (
-                    <>
-                      <Icon name="Check" size={16} className="mr-2" />
-                      Код сгенерирован
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="Link" size={16} className="mr-2" />
-                      Подключить WhatsApp
-                    </>
-                  )}
-                </Button>
-
-                {linkCode && selectedMessenger === 'whatsapp' && (
-                  <div className="space-y-3 p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Ваш код:</span>
-                      <span className="text-xs text-muted-foreground">
-                        Истекает через {getTimeRemaining()}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-2xl font-bold text-center py-3 px-4 bg-background rounded-lg border-2 border-primary tracking-wider">
-                        {linkCode}
-                      </code>
-                      <Button onClick={copyCode} variant="outline" size="icon">
-                        <Icon name="Copy" size={16} />
-                      </Button>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="font-medium">Инструкция:</p>
-                      <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                        <li>Откройте WhatsApp</li>
-                        <li>Найдите наш бот</li>
-                        <li>Отправьте: <code className="px-1 py-0.5 bg-background rounded">START {linkCode}</code></li>
-                      </ol>
-                    </div>
-                    <Button onClick={() => openBot('whatsapp')} variant="outline" className="w-full">
-                      <Icon name="ExternalLink" size={16} className="mr-2" />
-                      Открыть WhatsApp бота
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="space-y-3">
+              <Button
+                disabled
+                className="w-full"
+                variant="outline"
+              >
+                <Icon name="Lock" size={16} className="mr-2" />
+                Подключить WhatsApp
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                WhatsApp-бот находится в разработке. Следите за обновлениями!
+              </p>
+            </div>
           </Card>
         </div>
       </Card>
