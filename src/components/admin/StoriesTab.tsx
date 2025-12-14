@@ -256,12 +256,12 @@ export default function StoriesTab() {
             onClick={async () => {
               await createInitialStories();
               fetchStories();
-              toast.success('3 истории созданы!');
+              toast.success('5 историй созданы!');
             }}
             className="w-full sm:w-auto bg-green-400 hover:bg-green-500 text-black font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none"
           >
             <Icon name="Sparkles" size={20} className="mr-2" />
-            Создать 3 готовые истории
+            Создать 5 готовых историй
           </Button>
           
           <Button

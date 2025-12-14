@@ -24,7 +24,7 @@ const Contacts = () => {
       description: "Быстрые ответы на вопросы",
       icon: "MessageCircle",
       contact: "@StueyGoBot",
-      action: "https://t.me/StueyGoBot",
+      action: "https://t.me/StueyGoBot?start=support",
     },
     {
       title: "Центры поддержки",
