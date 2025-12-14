@@ -125,7 +125,7 @@ const FAQ = () => {
             Не нашли ответ на свой вопрос?
           </p>
           <a
-            href="https://t.me/stuey_go_bot"
+            href="https://t.me/StueyGoBot"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-extrabold px-8 py-4 rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150 text-lg"
