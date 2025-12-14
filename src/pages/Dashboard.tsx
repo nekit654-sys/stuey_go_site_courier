@@ -323,11 +323,19 @@ export default function Dashboard() {
                   />
                 )}
 
-                <StatsCards stats={stats} />
-                <ReferralMotivation 
-                  totalReferrals={stats?.total_referrals || 0}
-                  onShowReferrals={() => setActiveTab('referrals')}
-                />
+                {stats ? (
+                  <>
+                    <StatsCards stats={stats} />
+                    <ReferralMotivation 
+                      totalReferrals={stats.total_referrals || 0}
+                      onShowReferrals={() => setActiveTab('referrals')}
+                    />
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center py-12">
+                    <Icon name="Loader2" className="animate-spin h-8 w-8 text-purple-600" />
+                  </div>
+                )}
                 <EarningsCalculator />
               </div>
             )}
