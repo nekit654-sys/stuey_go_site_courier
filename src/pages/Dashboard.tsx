@@ -363,6 +363,29 @@ export default function Dashboard() {
                   isConnected={telegramConnected}
                 />
 
+                {/* Кнопка подать заявку в Яндекс.Доставку */}
+                <Card className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 border-4 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="bg-white p-3 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                        <Icon name="Briefcase" className="h-8 w-8 text-yellow-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-black text-black mb-1">Стань курьером!</h3>
+                        <p className="text-sm font-bold text-black/80">Зарегистрируйся в Яндекс.Доставке</p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => window.open('https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank', '_blank')}
+                      className="w-full bg-black hover:bg-gray-900 text-yellow-400 font-black text-lg border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] py-6 transition-all"
+                      size="lg"
+                    >
+                      <Icon name="Rocket" size={20} className="mr-2" />
+                      Подать заявку
+                    </Button>
+                  </div>
+                </Card>
+
                 {/* Startup Bonus Notification */}
                 {user?.id && (
                   <StartupBonusNotification 
