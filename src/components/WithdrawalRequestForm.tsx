@@ -84,8 +84,8 @@ export default function WithdrawalRequestForm({
 
     const withdrawAmount = parseFloat(amount);
 
-    if (withdrawAmount < 1000) {
-      toast.error('Минимальная сумма для вывода — 1000₽');
+    if (withdrawAmount < 5000) {
+      toast.error('Минимальная сумма для вывода — 5000₽');
       return;
     }
 

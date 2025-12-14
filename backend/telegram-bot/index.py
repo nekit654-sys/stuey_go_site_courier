@@ -54,14 +54,14 @@ def get_bot_content(cursor) -> Dict[str, Any]:
             'self_bonus_amount': row['self_bonus_amount'] or 5000,
             'self_bonus_orders': row['self_bonus_orders'] or 50,
             'referral_activation_orders': row['referral_activation_orders'] or 50,
-            'min_withdrawal_amount': row['min_withdrawal_amount'] or 500,
+            'min_withdrawal_amount': row['min_withdrawal_amount'] or 5000,
             'withdrawal_processing_days': row['withdrawal_processing_days'] or '1-3 рабочих дня'
         }
     return {
         'self_bonus_amount': 5000,
         'self_bonus_orders': 50,
         'referral_activation_orders': 50,
-        'min_withdrawal_amount': 500,
+        'min_withdrawal_amount': 5000,
         'withdrawal_processing_days': '1-3 рабочих дня'
     }
 
@@ -208,9 +208,7 @@ def ask_yandex_gpt(question: str, context: Dict[str, Any], cursor) -> str:
     self_bonus_orders = bot_settings.get('self_bonus_orders', 50)
     self_bonus_amount = bot_settings.get('self_bonus_amount', 5000)
     orders_to_bonus = max(0, self_bonus_orders - total_orders)
-    can_withdraw = balance >= 500
-    
-    min_withdrawal = bot_settings.get('min_withdrawal_amount', 500)
+    min_withdrawal = bot_settings.get('min_withdrawal_amount', 5000)
     can_withdraw = balance >= min_withdrawal
     referral_bonus_amount = bot_settings.get('self_bonus_amount', 5000)
     
@@ -846,7 +844,7 @@ def handle_start_command(chat_id: int, telegram_id: int, username: Optional[str]
             )
             
             # Добавить мотивирующую подсказку
-            if balance >= 500:
+            if balance >= 5000:
                 text += "✅ <b>Можешь вывести деньги!</b> Нажми 💸 Выплата\n\n"
             elif total_orders < 50:
                 orders_left = 50 - total_orders
@@ -1029,6 +1027,244 @@ def handle_bonus_command(chat_id: int, telegram_id: int):
         
         send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
         log_activity(courier_id, 'view_bonus', {'current': current, 'target': target})
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+def handle_withdrawal_command(chat_id: int, telegram_id: int):
+    """Обработка заявки на выплату"""
+    courier_id = get_courier_by_telegram(telegram_id)
+    
+    if not courier_id:
+        send_telegram_message(chat_id, "❌ Аккаунт не привязан")
+        return
+    
+    update_last_interaction(telegram_id)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Получаем данные курьера
+        cursor.execute("""
+            SELECT u.id, u.full_name, u.phone
+            FROM t_p25272970_courier_button_site.users u
+            WHERE u.id = %s
+        """, (courier_id,))
+        
+        user = cursor.fetchone()
+        
+        if not user:
+            send_telegram_message(chat_id, "❌ Пользователь не найден")
+            return
+        
+        # Проверяем pending заявки
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount), 0) as reserved_amount
+            FROM t_p25272970_courier_button_site.withdrawal_requests
+            WHERE courier_id = %s AND status IN ('pending', 'approved')
+        """, (courier_id,))
+        
+        reserved = cursor.fetchone()
+        reserved_amount = float(reserved['reserved_amount'] or 0)
+        
+        # Получаем доступный баланс
+        cursor.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN payment_status = 'pending' AND amount > 0 THEN amount ELSE 0 END), 0) as total_pending
+            FROM t_p25272970_courier_button_site.payment_distributions
+            WHERE recipient_id = %s
+        """, (courier_id,))
+        
+        balance = cursor.fetchone()
+        total_pending = float(balance['total_pending'] or 0)
+        available = max(0, total_pending - reserved_amount)
+        
+        # Получаем настройки бота
+        bot_settings = get_bot_content(cursor)
+        min_withdrawal = bot_settings.get('min_withdrawal_amount', 5000)
+        
+        # Проверяем, достаточно ли средств
+        if available < min_withdrawal:
+            text = (
+                f"💰 <b>Вывод средств</b>\n\n"
+                f"На твоём балансе: <b>{available:.2f}₽</b>\n"
+                f"Минимальная сумма для вывода: <b>{min_withdrawal:,}₽</b>\n\n"
+                f"❌ Недостаточно средств для вывода\n\n"
+                f"💡 Продолжай работать! Ещё {min_withdrawal - available:.0f}₽ и сможешь вывести деньги!"
+            )
+            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+            log_activity(courier_id, 'withdrawal_insufficient', {'available': available, 'min': min_withdrawal})
+            return
+        
+        # Проверяем наличие телефона
+        if not user.get('phone'):
+            text = (
+                f"💰 <b>Вывод средств</b>\n\n"
+                f"Доступно для вывода: <b>{available:.2f}₽</b>\n\n"
+                f"⚠️ Для вывода средств нужно указать номер телефона в личном кабинете\n\n"
+                f"👉 Открой <a href='https://stuey-go.ru/dashboard'>личный кабинет</a> и заполни данные в настройках"
+            )
+            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+            log_activity(courier_id, 'withdrawal_no_phone')
+            return
+        
+        # Показываем меню с суммой
+        text = (
+            f"💰 <b>Вывод средств</b>\n\n"
+            f"Доступно для вывода: <b>{available:.2f}₽</b>\n\n"
+            f"Выберите сумму для вывода:"
+        )
+        
+        keyboard = {
+            'inline_keyboard': [
+                [{'text': f'💰 Вывести всё ({available:.0f}₽)', 'callback_data': f'withdraw_{int(available)}'}],
+                [{'text': f'💸 Вывести {min_withdrawal}₽', 'callback_data': f'withdraw_{min_withdrawal}'}] if available >= min_withdrawal * 2 else [],
+                [{'text': '⬅️ Назад в меню', 'callback_data': 'main_menu'}]
+            ]
+        }
+        
+        # Удаляем пустые строки
+        keyboard['inline_keyboard'] = [row for row in keyboard['inline_keyboard'] if row]
+        
+        send_telegram_message(chat_id, text, reply_markup=keyboard)
+        log_activity(courier_id, 'withdrawal_menu_view', {'available': available})
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+def handle_withdrawal_history_command(chat_id: int, telegram_id: int):
+    """История выплат"""
+    courier_id = get_courier_by_telegram(telegram_id)
+    
+    if not courier_id:
+        send_telegram_message(chat_id, "❌ Аккаунт не привязан")
+        return
+    
+    update_last_interaction(telegram_id)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT 
+                id,
+                amount,
+                status,
+                sbp_phone,
+                admin_comment,
+                created_at,
+                processed_at
+            FROM t_p25272970_courier_button_site.withdrawal_requests
+            WHERE courier_id = %s
+            ORDER BY created_at DESC
+            LIMIT 5
+        """, (courier_id,))
+        
+        requests = cursor.fetchall()
+        
+        if not requests:
+            text = (
+                "📜 <b>История выплат</b>\n\n"
+                "У тебя пока нет заявок на выплату\n\n"
+                "💡 Как только накопишь 5000₽, сможешь подать заявку через 💸 Выплата"
+            )
+            send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+            return
+        
+        text = "📜 <b>История выплат</b>\n\n"
+        
+        for req in requests:
+            status_emoji = {
+                'pending': '⏳',
+                'approved': '✅',
+                'paid': '💰',
+                'rejected': '❌'
+            }
+            status_text = {
+                'pending': 'На рассмотрении',
+                'approved': 'Одобрена',
+                'paid': 'Выплачена',
+                'rejected': 'Отклонена'
+            }
+            
+            emoji = status_emoji.get(req['status'], '❓')
+            status = status_text.get(req['status'], req['status'])
+            date = req['created_at'].strftime('%d.%m.%Y')
+            
+            text += f"{emoji} <b>{req['amount']:.0f}₽</b> — {status}\n"
+            text += f"   📅 {date}\n"
+            if req['admin_comment']:
+                text += f"   💬 {req['admin_comment']}\n"
+            text += "\n"
+        
+        send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+        log_activity(courier_id, 'withdrawal_history_view')
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+def handle_rating_command(chat_id: int, telegram_id: int):
+    """Рейтинг курьеров"""
+    courier_id = get_courier_by_telegram(telegram_id)
+    
+    if not courier_id:
+        send_telegram_message(chat_id, "❌ Аккаунт не привязан")
+        return
+    
+    update_last_interaction(telegram_id)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Топ по заказам
+        cursor.execute("""
+            SELECT 
+                u.full_name,
+                u.total_orders
+            FROM t_p25272970_courier_button_site.users u
+            WHERE u.total_orders > 0
+            ORDER BY u.total_orders DESC
+            LIMIT 10
+        """)
+        
+        top_orders = cursor.fetchall()
+        
+        # Позиция текущего курьера
+        cursor.execute("""
+            SELECT 
+                COUNT(*) + 1 as position,
+                u.total_orders
+            FROM t_p25272970_courier_button_site.users u
+            WHERE u.total_orders > (
+                SELECT total_orders FROM t_p25272970_courier_button_site.users WHERE id = %s
+            )
+        """, (courier_id,))
+        
+        my_position = cursor.fetchone()
+        
+        text = "🏆 <b>Рейтинг курьеров</b>\n\n"
+        text += "Топ по количеству заказов:\n\n"
+        
+        medals = ['🥇', '🥈', '🥉']
+        for i, courier in enumerate(top_orders):
+            medal = medals[i] if i < 3 else f"{i+1}."
+            name = courier['full_name'] or 'Курьер'
+            orders = courier['total_orders']
+            text += f"{medal} {name} — {orders} заказов\n"
+        
+        if my_position:
+            text += f"\n📊 <b>Твоя позиция:</b> #{my_position['position']} ({my_position['total_orders']} заказов)\n"
+        
+        text += "\n💪 Продолжай работать и поднимайся в рейтинге!"
+        
+        send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+        log_activity(courier_id, 'rating_view')
         
     finally:
         cursor.close()
@@ -1418,6 +1654,78 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             elif data == 'back_to_settings':
                 handle_settings_command(chat_id, telegram_id)
             
+            elif data.startswith('withdraw_'):
+                # Обработка создания заявки на выплату
+                amount = int(data.split('_')[1])
+                
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    # Получаем данные курьера
+                    cursor.execute("""
+                        SELECT u.id, u.full_name, u.phone
+                        FROM t_p25272970_courier_button_site.users u
+                        WHERE u.id = %s
+                    """, (courier_id,))
+                    
+                    user = cursor.fetchone()
+                    
+                    if not user or not user.get('phone'):
+                        send_telegram_message(chat_id, "❌ Номер телефона не указан. Добавьте его в личном кабинете.")
+                        return
+                    
+                    # Проверяем доступный баланс
+                    cursor.execute("""
+                        SELECT COALESCE(SUM(amount), 0) as reserved_amount
+                        FROM t_p25272970_courier_button_site.withdrawal_requests
+                        WHERE courier_id = %s AND status IN ('pending', 'approved')
+                    """, (courier_id,))
+                    
+                    reserved = cursor.fetchone()
+                    reserved_amount = float(reserved['reserved_amount'] or 0)
+                    
+                    cursor.execute("""
+                        SELECT 
+                            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND amount > 0 THEN amount ELSE 0 END), 0) as total_pending
+                        FROM t_p25272970_courier_button_site.payment_distributions
+                        WHERE recipient_id = %s
+                    """, (courier_id,))
+                    
+                    balance = cursor.fetchone()
+                    total_pending = float(balance['total_pending'] or 0)
+                    available = max(0, total_pending - reserved_amount)
+                    
+                    if amount > available:
+                        send_telegram_message(chat_id, f"❌ Недостаточно средств. Доступно: {available:.2f}₽")
+                        return
+                    
+                    # Создаем заявку на вывод
+                    cursor.execute("""
+                        INSERT INTO t_p25272970_courier_button_site.withdrawal_requests
+                        (courier_id, amount, sbp_phone, sbp_bank_name, status, created_at)
+                        VALUES (%s, %s, %s, %s, 'pending', NOW())
+                        RETURNING id
+                    """, (courier_id, amount, user['phone'], 'Не указан'))
+                    
+                    request_id = cursor.fetchone()['id']
+                    conn.commit()
+                    
+                    text = (
+                        f"✅ <b>Заявка на выплату создана!</b>\n\n"
+                        f"💰 Сумма: <b>{amount:.0f}₽</b>\n"
+                        f"📱 Телефон СБП: {user['phone']}\n"
+                        f"📝 Номер заявки: #{request_id}\n\n"
+                        f"⏳ Заявка будет обработана в течение 1-3 рабочих дней\n\n"
+                        f"📜 Смотри историю выплат: 📜 История"
+                    )
+                    
+                    send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
+                    log_activity(courier_id, 'withdrawal_created', {'amount': amount, 'request_id': request_id})
+                    
+                finally:
+                    cursor.close()
+                    conn.close()
+            
             elif data == 'main_menu':
                 send_telegram_message(chat_id, "👋 Главное меню:", reply_markup=get_main_menu_keyboard())
             
@@ -1467,6 +1775,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             handle_faq_command(chat_id, telegram_id, 'howto')
         elif text == '👥 Реферальная программа':
             handle_faq_command(chat_id, telegram_id, 'referral')
+        elif text in ['💸 Выплата', '📜 История']:
+            if text == '💸 Выплата':
+                handle_withdrawal_command(chat_id, telegram_id)
+            else:
+                handle_withdrawal_history_command(chat_id, telegram_id)
+        elif text == '🏆 Рейтинг':
+            handle_rating_command(chat_id, telegram_id)
         elif text == '💬 Задать вопрос AI':
             # Подсказка для AI вопроса
             send_telegram_message(
