@@ -26,30 +26,30 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
     {
       type: "Пеший курьер",
       icon: "User",
-      description: "Доставка пешком",
-      benefits: ["💰 1500-2500₽/день", "🎁 Старт без вложений", "🏠 Работа рядом с домом"],
-      bgColor: "bg-yellow-50 hover:bg-yellow-100",
-      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
+      description: "Лучший старт для новичков",
+      income: "От 1500₽/день",
+      benefits: ["Старт без вложений", "Работа рядом с домом", "Никаких затрат на транспорт"],
+      isPopular: false,
     },
     {
       type: "Вело курьер",
       icon: "Bike",
-      description: "Доставка на велосипеде",
-      benefits: ["💰 2500-4000₽/день", "⚡ До 3 заказов в час", "🚴 Быстрее = больше денег"],
-      bgColor: "bg-yellow-50 hover:bg-yellow-100",
-      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
+      description: "Баланс скорости и дохода",
+      income: "До 4000₽/день",
+      benefits: ["До 3 заказов в час", "Быстрое перемещение", "Оптимальный заработок"],
+      isPopular: true,
     },
     {
       type: "Авто курьер",
       icon: "Car",
-      description: "Доставка на автомобиле",
+      description: "Максимальный доход",
+      income: "До 8000₽/день",
       benefits: [
-        "💰 4000-8000₽/день",
-        "🔥 Максимум заказов",
-        "☔ Работа в любую погоду",
+        "Больше всего заказов",
+        "Работа в любую погоду",
+        "Дальние расстояния",
       ],
-      bgColor: "bg-yellow-50 hover:bg-yellow-100",
-      buttonColor: "bg-yellow-500 hover:bg-yellow-600",
+      isPopular: false,
     },
   ];
 
@@ -78,21 +78,30 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
       <div className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-extrabold text-center mb-4 text-black font-rubik drop-shadow-[2px_2px_0_rgba(251,191,36,0.3)]">
-            Выбери свой способ доставки!
+            Выбери свой транспорт
           </h2>
         <p className="text-xl text-center mb-12 text-gray-600 max-w-2xl mx-auto">
-          Выбери свой транспорт и начни зарабатывать
+          Начни зарабатывать уже сегодня — любой способ доставки подойдёт!
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
           {courierTypes.map((courier, index) => (
             <Card
               key={index}
-              className="bg-white border-3 border-black transition-all duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] rounded-2xl"
+              className={`bg-white border-3 border-black transition-all duration-150 shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] rounded-2xl relative ${
+                courier.isPopular ? 'md:scale-105 ring-4 ring-yellow-400' : ''
+              }`}
             >
+              {courier.isPopular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-extrabold px-4 py-2 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] text-sm whitespace-nowrap">
+                  ⭐ ПОПУЛЯРНЫЙ ВЫБОР
+                </div>
+              )}
               <CardContent className="p-8 text-center flex flex-col h-full">
                 <div className="mb-6 flex justify-center">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] ${
+                    courier.isPopular ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : 'bg-yellow-400'
+                  }`}>
                     <Icon
                       name={courier.icon}
                       size={48}
@@ -100,38 +109,44 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
                     />
                   </div>
                 </div>
-                <h3 className="text-2xl font-extrabold mb-3 text-black font-rubik">
+                <h3 className="text-2xl font-extrabold mb-2 text-black font-rubik">
                   {courier.type}
                 </h3>
-                <p className="text-gray-700 mb-6 text-lg font-medium">
+                <div className="text-3xl font-extrabold text-yellow-500 mb-3">
+                  {courier.income}
+                </div>
+                <p className="text-gray-600 mb-6 text-base font-medium">
                   {courier.description}
                 </p>
 
-                <div className="space-y-3 mb-8 flex-grow">
+                <div className="space-y-3 flex-grow">
                   {courier.benefits.map((benefit, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-center gap-2 text-gray-700"
+                      className="flex items-center gap-2 text-gray-700 text-left"
                     >
                       <Icon
                         name="Check"
-                        size={16}
-                        className="text-yellow-500 relative z-20"
+                        size={18}
+                        className="text-green-500 flex-shrink-0"
                       />
-                      <span>{benefit}</span>
+                      <span className="text-sm">{benefit}</span>
                     </div>
                   ))}
                 </div>
-
-                <Button
-                  onClick={(e) => handleMagicClick(e, courier.type)}
-                  className="w-full bg-yellow-400 text-black font-extrabold py-4 px-6 text-lg rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
-                >
-                  Заполнить заявку
-                </Button>
               </CardContent>
             </Card>
           ))}
+        </div>
+        
+        <div className="text-center">
+          <Button
+            onClick={(e) => handleMagicClick(e, 'any')}
+            className="bg-yellow-400 text-black font-extrabold py-6 px-12 text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
+          >
+            <Icon name="Rocket" size={24} className="mr-2" />
+            Подать заявку
+          </Button>
         </div>
         </div>
       </div>
