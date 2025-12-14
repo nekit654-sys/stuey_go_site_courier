@@ -18,10 +18,10 @@ const HeroIncomeCalculator = () => {
   const [referralBonus, setReferralBonus] = useState(false);
   const [courierType, setCourierType] = useState<CourierType>('walking');
   const [settings, setSettings] = useState<ContentSettings>({
-    max_income_walking: 95000,
-    max_income_bicycle: 120000,
-    max_income_car: 165000,
-    referral_bonus_amount: 18000
+    max_income_walking: 60000,
+    max_income_bicycle: 80000,
+    max_income_car: 100000,
+    referral_bonus_amount: 12000
   });
   const { triggerMagicEffect } = useMagicEffect();
   const { playSound } = useSound();
@@ -79,10 +79,10 @@ const HeroIncomeCalculator = () => {
         <div className="inline-block bg-yellow-400 border-3 border-black rounded-2xl px-3 sm:px-6 py-3 sm:py-4 shadow-[0_4px_0_0_rgba(0,0,0,1)] mb-4 max-w-full">
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             <Icon name="Calculator" size={24} className="text-black sm:w-8 sm:h-8 flex-shrink-0" />
-            <h3 className="text-lg sm:text-2xl font-extrabold text-black leading-tight">Калькулятор доходности</h3>
+            <h3 className="text-lg sm:text-2xl font-extrabold text-black leading-tight">Калькулятор заработка</h3>
           </div>
         </div>
-        <p className="text-white font-extrabold text-base sm:text-lg">Рассчитай свой заработок курьера</p>
+        <p className="text-white font-extrabold text-base sm:text-lg">Рассчитай свой примерный доход</p>
       </div>
 
       {/* Кнопки типов курьеров */}
@@ -242,17 +242,17 @@ const HeroIncomeCalculator = () => {
         <div className="text-center">
           <div className="text-black font-extrabold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2 flex-wrap">
             <Icon name="BadgeDollarSign" size={24} className="text-black flex-shrink-0" />
-            <span className="leading-tight">Минимальная гарантированная ставка от 320 рублей/час!</span>
+            <span className="leading-tight">Стабильная ставка от 250₽/час</span>
           </div>
           <div className="text-black font-medium text-xs sm:text-sm mt-1">
-            Выплаты самозанятым — ежедневно!
+            Быстрые выплаты для самозанятых
           </div>
         </div>
       </div>
 
       {/* Сноска о зависимости дохода */}
       <p className="text-xs md:text-sm text-white font-bold mt-4 text-center drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
-        * Доход зависит от количества отработанных часов и региона работы
+        * Итоговый доход зависит от количества заказов, региона и времени работы. Расчёт является примерным.
       </p>
 
       <style dangerouslySetInnerHTML={{ __html: `
