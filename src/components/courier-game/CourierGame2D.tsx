@@ -826,26 +826,25 @@ export function CourierGame2D() {
     };
   }, [gameState]);
 
-  // Автоматическая система назначения заказов
+  // Система генерации новых заказов
   useEffect(() => {
     if (gameState !== 'playing') return;
     
     const interval = setInterval(() => {
-      // Автоматически назначаем новые заказы когда нет активного
-      if (!currentOrder && orders.filter(o => o.status === 'available').length > 0) {
-        const availableOrders = orders.filter(o => o.status === 'available');
-        const nextOrder = availableOrders[0];
-        setCurrentOrder(nextOrder);
-        toast.info(`📦 Новый заказ! Едем забирать посылку`, { duration: 3000 });
-      }
       
-      // Генерируем новые заказы если их мало
-      if (orders.filter(o => o.status === 'available').length < 3 && buildings.length > 0) {
+      // Генерируем новые СЛУЧАЙНЫЕ заказы если их мало (макс 5 активных)
+      if (orders.filter(o => o.status === 'available').length < 5 && buildings.length > 0) {
+        // СЛУЧАЙНОЕ ЗДАНИЕ ДЛЯ ЗАБОРА (ресторан/магазин)
         const pickupBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+        
+        // СЛУЧАЙНОЕ ЗДАНИЕ ДЛЯ ДОСТАВКИ (клиент)
         let deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
         
-        while (deliveryBuilding === pickupBuilding && buildings.length > 1) {
+        // Убедимся что клиент в ДРУГОМ здании
+        let attempts = 0;
+        while (deliveryBuilding === pickupBuilding && buildings.length > 1 && attempts < 10) {
           deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+          attempts++;
         }
         
         // Функция для получения входа в здание (на дороге)
@@ -871,22 +870,28 @@ export function CourierGame2D() {
         const pickupPoint = getEntrancePoint(pickupBuilding);
         const deliveryPoint = getEntrancePoint(deliveryBuilding);
         
+        // Рассчитываем награду по дистанции
+        const distance = Math.hypot(deliveryPoint.x - pickupPoint.x, deliveryPoint.y - pickupPoint.y);
+        const baseReward = 50;
+        const distanceBonus = Math.floor(distance / 10); // +10₽ за каждые 100 пикселей
+        const reward = baseReward + distanceBonus + Math.floor(Math.random() * 30);
+        
         setOrders(prev => [...prev, {
-          id: `order-${Date.now()}`,
+          id: `order-${Date.now()}-${Math.random()}`,
           pickupX: pickupPoint.x,
           pickupY: pickupPoint.y,
           deliveryX: deliveryPoint.x,
           deliveryY: deliveryPoint.y,
-          reward: 30 + Math.floor(Math.random() * 70),
-          timeLimit: 120,
-          timeLeft: 120,
+          reward: reward,
+          timeLimit: 180, // 3 минуты на доставку
+          timeLeft: 180,
           type: ['food', 'documents', 'fragile'][Math.floor(Math.random() * 3)] as any,
           status: 'available',
           pickupBuilding: buildings.indexOf(pickupBuilding),
           deliveryBuilding: buildings.indexOf(deliveryBuilding)
         }]);
       }
-    }, 5000);
+    }, 8000); // Новый заказ каждые 8 секунд
     
     return () => clearInterval(interval);
   }, [orders, gameState, buildings, currentOrder]);
@@ -1507,21 +1512,22 @@ export function CourierGame2D() {
     orders.forEach(order => {
       if (order.status === 'delivered') return;
       
-      // Маркер взятия
+      // ДОСТУПНЫЕ ЗАКАЗЫ (желтые маркеры) - ЗАБРАТЬ в ресторане/магазине
       if (!currentOrder || currentOrder.id !== order.id) {
-        // Радиус взаимодействия (полупрозрачный круг)
         const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
+        
+        // Радиус взаимодействия
         if (distToPickup < 100) {
-          ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+          ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
           ctx.beginPath();
           ctx.arc(order.pickupX, order.pickupY, 50, 0, Math.PI * 2);
           ctx.fill();
           
-          // Пульсирующая граница при приближении
+          // Анимированная граница при приближении
           if (distToPickup < 50) {
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.9)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 8]);
             ctx.beginPath();
             ctx.arc(order.pickupX, order.pickupY, 50, 0, Math.PI * 2);
             ctx.stroke();
@@ -1529,49 +1535,59 @@ export function CourierGame2D() {
           }
         }
         
-        // Маркер заказа
+        // Большой яркий маркер
         ctx.fillStyle = '#FFD700';
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 10;
         ctx.beginPath();
-        ctx.arc(order.pickupX, order.pickupY, 15, 0, Math.PI * 2);
+        ctx.arc(order.pickupX, order.pickupY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
         
-        // Обводка
+        // Черная обводка
         ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(order.pickupX, order.pickupY, 15, 0, Math.PI * 2);
+        ctx.arc(order.pickupX, order.pickupY, 18, 0, Math.PI * 2);
         ctx.stroke();
         
-        // Иконка
+        // Иконка заказа
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 20px Arial';
+        ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('📦', order.pickupX, order.pickupY + 2);
         
-        // Награда
-        ctx.fillStyle = '#000000CC';
-        ctx.fillRect(order.pickupX - 20, order.pickupY - 35, 40, 20);
+        // Табличка с наградой и типом
+        ctx.fillStyle = '#000000DD';
+        ctx.fillRect(order.pickupX - 30, order.pickupY - 42, 60, 24);
+        
         ctx.fillStyle = '#FFD700';
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText(`${order.reward}₽`, order.pickupX, order.pickupY - 25);
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(`${order.reward}₽`, order.pickupX, order.pickupY - 30);
+        
+        // Тип заказа
+        const orderIcons = { food: '🍕', documents: '📄', fragile: '📦' };
+        ctx.font = '12px Arial';
+        ctx.fillText(orderIcons[order.type] || '📦', order.pickupX, order.pickupY - 50);
       }
       
-      // Маркер доставки (если заказ взят)
+      // АКТИВНЫЙ ЗАКАЗ (зеленый маркер) - ДОСТАВИТЬ клиенту
       if (currentOrder?.id === order.id) {
-        // Радиус взаимодействия доставки
         const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
+        
+        // Радиус взаимодействия
         if (distToDelivery < 100) {
-          ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.15)';
           ctx.beginPath();
           ctx.arc(order.deliveryX, order.deliveryY, 50, 0, Math.PI * 2);
           ctx.fill();
           
-          // Пульсирующая граница при приближении
+          // Анимированная граница при приближении
           if (distToDelivery < 50) {
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.9)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 8]);
             ctx.beginPath();
             ctx.arc(order.deliveryX, order.deliveryY, 50, 0, Math.PI * 2);
             ctx.stroke();
@@ -1579,25 +1595,36 @@ export function CourierGame2D() {
           }
         }
         
-        // Маркер доставки
+        // Большой зеленый маркер клиента
         ctx.fillStyle = '#00FF00';
+        ctx.shadowColor = '#00FF00';
+        ctx.shadowBlur = 10;
         ctx.beginPath();
-        ctx.arc(order.deliveryX, order.deliveryY, 15, 0, Math.PI * 2);
+        ctx.arc(order.deliveryX, order.deliveryY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
         
-        // Обводка
+        // Черная обводка
         ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(order.deliveryX, order.deliveryY, 15, 0, Math.PI * 2);
+        ctx.arc(order.deliveryX, order.deliveryY, 18, 0, Math.PI * 2);
         ctx.stroke();
         
-        // Иконка
+        // Иконка клиента
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 20px Arial';
+        ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('🏠', order.deliveryX, order.deliveryY + 2);
+        
+        // Табличка "КЛИЕНТ"
+        ctx.fillStyle = '#000000DD';
+        ctx.fillRect(order.deliveryX - 35, order.deliveryY - 42, 70, 24);
+        
+        ctx.fillStyle = '#00FF00';
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText('КЛИЕНТ', order.deliveryX, order.deliveryY - 30);
       }
     });
   };
@@ -1691,34 +1718,43 @@ export function CourierGame2D() {
       const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
       const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
       
-      // УВЕЛИЧЕН РАДИУС ВЗАИМОДЕЙСТВИЯ до 50 пикселей
+      // ШАГ 1: ЗАБРАТЬ ЗАКАЗ (подъезжаем к ресторану/магазину)
       if (distToPickup < 50 && order.status === 'available' && !currentOrder) {
         setCurrentOrder(order);
         setOrders(prev => prev.map(o => 
           o.id === order.id ? { ...o, status: 'picked' as const } : o
         ));
         playPickupSound();
-        toast.success(`📦 Заказ взят! Доставь за ${order.timeLeft}с`, { duration: 2000 });
+        toast.success(`📦 Заказ забран! Везём клиенту!`, { 
+          duration: 3000,
+          description: `Награда: ${order.reward}₽ | Время: ${order.timeLeft}с`
+        });
       }
       
-      // УВЕЛИЧЕН РАДИУС ДОСТАВКИ до 50 пикселей
+      // ШАГ 2: ДОСТАВИТЬ КЛИЕНТУ (подъезжаем к дому клиента)
       if (distToDelivery < 50 && order.status === 'picked' && currentOrder?.id === order.id) {
         const reward = order.reward;
         const exp = Math.floor(reward / 2);
+        const distance = Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY));
         
+        // Начисляем награды
         setMoney(m => m + reward);
         setExperience(e => e + exp);
         setTotalOrders(t => t + 1);
-        setTotalDistance(d => d + Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY)));
+        setTotalDistance(d => d + distance);
         setTotalEarnings(e => e + reward);
         setCurrentOrder(null);
         
+        // Помечаем заказ доставленным
         setOrders(prev => prev.map(o => 
           o.id === order.id ? { ...o, status: 'delivered' as const } : o
         ));
         
         playDeliverySound();
-        toast.success(`🎉 Доставлено! +${reward}₽ +${exp} XP`, { duration: 3000 });
+        toast.success(`🎉 Доставлено клиенту!`, { 
+          duration: 4000,
+          description: `+${reward}₽ | +${exp} XP | ${distance}м пройдено`
+        });
         
         // Проверка повышения уровня
         const newExp = experience + exp;
@@ -1767,6 +1803,19 @@ export function CourierGame2D() {
     if (canvasRef.current) {
       canvasRef.current.focus();
     }
+    
+    // Подсказка при старте
+    setTimeout(() => {
+      toast.info('🎮 Управление: WASD или Джойстик', { duration: 3000 });
+    }, 500);
+    
+    setTimeout(() => {
+      toast.info('📦 Шаг 1: Подъезжай к желтым маркерам (ЗАБРАТЬ ЗАКАЗ)', { duration: 4000 });
+    }, 3500);
+    
+    setTimeout(() => {
+      toast.info('🏠 Шаг 2: Доставь заказ к зелёному маркеру (ДОМ КЛИЕНТА)', { duration: 4000 });
+    }, 7500);
   };
 
   const quitGame = async () => {
@@ -1871,9 +1920,37 @@ export function CourierGame2D() {
             </Button>
           </div>
 
+          {/* Как играть */}
+          <div className="mt-8 bg-blue-900/80 p-4 rounded-lg border-4 border-blue-400 max-w-md mx-auto">
+            <div className="text-white space-y-2">
+              <p className="font-bold text-lg mb-2 text-center text-blue-300">📋 КАК ИГРАТЬ</p>
+              <div className="text-sm text-left space-y-1.5 bg-black/30 p-3 rounded">
+                <p className="flex items-center gap-2">
+                  <span className="text-yellow-400 font-bold">1️⃣</span>
+                  <span>Подъезжай к <strong className="text-yellow-400">желтым маркерам</strong> 📦</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="text-yellow-400 font-bold">2️⃣</span>
+                  <span>Забирай заказ из ресторана/магазина</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="text-green-400 font-bold">3️⃣</span>
+                  <span>Доставляй к <strong className="text-green-400">зелёному маркеру</strong> 🏠</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="text-green-400 font-bold">4️⃣</span>
+                  <span>Получай деньги и опыт! 💰</span>
+                </p>
+              </div>
+              <p className="text-xs text-center text-blue-200 mt-2">
+                🎮 Управление: WASD или виртуальный джойстик
+              </p>
+            </div>
+          </div>
+          
           {/* Предупреждение о регистрации */}
           {!isAuthenticated && (
-            <div className="mt-8 bg-red-900/80 p-4 rounded-lg border-4 border-red-500 max-w-md mx-auto">
+            <div className="mt-4 bg-red-900/80 p-4 rounded-lg border-4 border-red-500 max-w-md mx-auto">
               <div className="flex items-start gap-3">
                 <Icon name="AlertTriangle" size={24} className="text-yellow-400 flex-shrink-0 mt-1" />
                 <div className="text-white">
@@ -2035,40 +2112,52 @@ export function CourierGame2D() {
         )}
       </div>
 
-      {/* Текущий заказ - компактный для мобильных */}
+      {/* Активный заказ - ВЕЗЁМ КЛИЕНТУ */}
       {currentOrder && (
-        <div className="absolute top-2 right-2 bg-black/80 p-2 rounded-lg text-white border-2 border-green-400 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
-          <div className="flex items-center gap-1 mb-1 sm:gap-2 sm:mb-2">
-            <Icon name="Navigation" size={16} className="text-green-400" />
-            <span className="font-bold hidden sm:inline">Доставка</span>
+        <div className="absolute top-2 right-2 bg-gradient-to-br from-green-600 to-green-800 p-3 rounded-xl text-white border-3 border-green-400 shadow-lg text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="TruckIcon" size={20} className="text-yellow-400 animate-pulse" />
+            <span className="font-extrabold text-lg">ВЕЗЁМ КЛИЕНТУ</span>
           </div>
-          <div className="space-y-0.5 sm:space-y-1">
-            <div className="flex items-center gap-1">
-              <Icon name="DollarSign" size={14} className="text-green-400" />
-              <p className="font-bold">{currentOrder.reward}₽</p>
+          <div className="space-y-1.5 bg-black/30 p-2 rounded-lg">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <Icon name="DollarSign" size={14} className="text-yellow-400" />
+                <span className="text-xs opacity-80">Награда:</span>
+              </div>
+              <p className="font-bold text-yellow-400">{currentOrder.reward}₽</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Icon name="Clock" size={14} className="text-yellow-400" />
-              <p className="font-bold text-yellow-400">{currentOrder.timeLeft}с</p>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <Icon name="Clock" size={14} className="text-red-400" />
+                <span className="text-xs opacity-80">Время:</span>
+              </div>
+              <p className="font-bold text-red-400">{currentOrder.timeLeft}с</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Icon name="Target" size={14} className="text-cyan-400" />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <Icon name="Navigation" size={14} className="text-cyan-400" />
+                <span className="text-xs opacity-80">До дома:</span>
+              </div>
               <p className="font-bold text-cyan-400">
                 {Math.floor(Math.hypot(currentOrder.deliveryX - player.x, currentOrder.deliveryY - player.y))}м
               </p>
             </div>
           </div>
+          <div className="mt-2 text-center text-[10px] bg-white/20 rounded px-2 py-1">
+            🏠 Доставь заказ клиенту!
+          </div>
         </div>
       )}
       
-      {/* Ближайший заказ (если нет активного) */}
+      {/* Доступные заказы - ЗАБРАТЬ ЗАКАЗ */}
       {!currentOrder && orders.filter(o => o.status === 'available').length > 0 && (
-        <div className="absolute top-2 right-2 bg-black/80 p-2 rounded-lg text-white border-2 border-yellow-400 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
-          <div className="flex items-center gap-1 mb-1 sm:gap-2 sm:mb-2">
-            <Icon name="Package" size={16} className="text-yellow-400" />
-            <span className="font-bold hidden sm:inline">Заказ</span>
+        <div className="absolute top-2 right-2 bg-gradient-to-br from-yellow-600 to-orange-600 p-3 rounded-xl text-white border-3 border-yellow-400 shadow-lg text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="Package" size={20} className="text-white animate-bounce" />
+            <span className="font-extrabold text-lg">ЗАБРАТЬ ЗАКАЗ</span>
           </div>
-          <div className="space-y-0.5 sm:space-y-1">
+          <div className="space-y-1.5 bg-black/30 p-2 rounded-lg">
             {(() => {
               const nearestOrder = orders
                 .filter(o => o.status === 'available')
@@ -2079,19 +2168,31 @@ export function CourierGame2D() {
                 })[0];
               
               const dist = Math.floor(Math.hypot(nearestOrder.pickupX - player.x, nearestOrder.pickupY - player.y));
+              const orderIcons = { food: '🍕', documents: '📄', fragile: '📦' };
               
               return (
                 <>
-                  <div className="flex items-center gap-1">
-                    <Icon name="DollarSign" size={14} className="text-yellow-400" />
-                    <p className="font-bold">{nearestOrder.reward}₽</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="text-lg">{orderIcons[nearestOrder.type]}</span>
+                      <span className="text-xs opacity-80">Награда:</span>
+                    </div>
+                    <p className="font-bold text-yellow-300">{nearestOrder.reward}₽</p>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Icon name="MapPin" size={14} className="text-cyan-400" />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1">
+                      <Icon name="MapPin" size={14} className="text-cyan-400" />
+                      <span className="text-xs opacity-80">До точки:</span>
+                    </div>
                     <p className="font-bold text-cyan-400">{dist}м</p>
                   </div>
+                  <div className="text-center text-[9px] bg-white/20 rounded px-2 py-1 mt-1">
+                    📦 Всего заказов: {orders.filter(o => o.status === 'available').length}
+                  </div>
                   {dist < 50 && (
-                    <p className="text-[10px] text-green-400 font-bold animate-pulse">📦 Подъезжай ближе!</p>
+                    <div className="text-center text-[10px] text-green-300 font-bold animate-pulse mt-2 bg-green-900/50 rounded px-2 py-1">
+                      ✅ Подъезжай для взятия!
+                    </div>
                   )}
                 </>
               );
