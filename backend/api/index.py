@@ -2336,18 +2336,45 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             # Если не нашли по external_id, ищем по ФИО, городу и последним 4 цифрам телефона
             if not courier:
                 referral_name = f"{first_name} {last_name}".strip()
-                last_4_digits = phone[-4:] if len(phone) >= 4 else phone
+                last_4_digits = phone[-4:] if len(phone) >= 4 else ''
                 
-                cur.execute("""
-                    SELECT id, invited_by_user_id, full_name, phone, city 
-                    FROM t_p25272970_courier_button_site.users
-                    WHERE LOWER(full_name) = LOWER(%s)
-                    AND LOWER(city) = LOWER(%s)
-                    AND phone LIKE %s
-                    LIMIT 1
-                """, (referral_name, city, f'%{last_4_digits}'))
+                # УЛУЧШЕНО: Попытка 1 - точное совпадение ФИО + Город + Телефон
+                if last_4_digits:
+                    cur.execute("""
+                        SELECT id, invited_by_user_id, full_name, phone, city 
+                        FROM t_p25272970_courier_button_site.users
+                        WHERE LOWER(full_name) = LOWER(%s)
+                        AND LOWER(city) = LOWER(%s)
+                        AND phone LIKE %s
+                        LIMIT 1
+                    """, (referral_name, city, f'%{last_4_digits}'))
+                    courier = cur.fetchone()
                 
-                courier = cur.fetchone()
+                # УЛУЧШЕНО: Попытка 2 - точное совпадение ФИО + Город (БЕЗ телефона)
+                if not courier:
+                    cur.execute("""
+                        SELECT id, invited_by_user_id, full_name, phone, city 
+                        FROM t_p25272970_courier_button_site.users
+                        WHERE LOWER(full_name) = LOWER(%s)
+                        AND LOWER(city) = LOWER(%s)
+                        AND (external_id IS NULL OR external_id = '')
+                        LIMIT 1
+                    """, (referral_name, city))
+                    courier = cur.fetchone()
+                
+                # УЛУЧШЕНО: Попытка 3 - транслитерация + город (для случаев Иван → Ivan)
+                if not courier and first_name and last_name:
+                    # Пробуем перевернуть имя и фамилию (в CSV может быть "Фамилия Имя")
+                    reversed_name = f"{last_name} {first_name}".strip()
+                    cur.execute("""
+                        SELECT id, invited_by_user_id, full_name, phone, city 
+                        FROM t_p25272970_courier_button_site.users
+                        WHERE LOWER(full_name) = LOWER(%s)
+                        AND LOWER(city) = LOWER(%s)
+                        AND (external_id IS NULL OR external_id = '')
+                        LIMIT 1
+                    """, (reversed_name, city))
+                    courier = cur.fetchone()
                 
                 if not courier:
                     # Ищем похожих курьеров: ФИО должно быть похоже + город + последние 4 цифры
@@ -4181,6 +4208,77 @@ def handle_admin(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, An
                 }),
                 'isBase64Encoded': False
             }
+        
+        elif action == 'payment_distributions':
+            # НОВЫЙ ENDPOINT: История распределений выплат
+            auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+            if not auth_token:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Unauthorized'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = verify_token(auth_token)
+            if not token_data['valid']:
+                return {
+                    'statusCode': 401,
+                    'headers': headers,
+                    'body': json.dumps({'error': token_data.get('error', 'Invalid token')}),
+                    'isBase64Encoded': False
+                }
+            
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Получаем все payment_distributions с информацией о получателях и курьерах
+            cur.execute("""
+                SELECT 
+                    pd.id,
+                    pd.earning_id,
+                    pd.recipient_type,
+                    pd.recipient_id,
+                    pd.amount,
+                    pd.percentage,
+                    pd.description,
+                    pd.payment_status,
+                    pd.paid_at,
+                    pd.created_at,
+                    recipient.full_name as recipient_name,
+                    recipient.phone as recipient_phone,
+                    ce.courier_id,
+                    courier.full_name as courier_name,
+                    courier.phone as courier_phone,
+                    ce.total_amount as earning_amount,
+                    ce.orders_count,
+                    ce.period_start,
+                    ce.period_end
+                FROM t_p25272970_courier_button_site.payment_distributions pd
+                LEFT JOIN t_p25272970_courier_button_site.users recipient 
+                    ON pd.recipient_id = recipient.id
+                LEFT JOIN t_p25272970_courier_button_site.courier_earnings ce 
+                    ON pd.earning_id = ce.id
+                LEFT JOIN t_p25272970_courier_button_site.users courier 
+                    ON ce.courier_id = courier.id
+                ORDER BY pd.created_at DESC
+                LIMIT 1000
+            """)
+            
+            distributions = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'distributions': convert_decimals([dict(d) for d in distributions])
+                }),
+                'isBase64Encoded': False
+            }
+        
         else:
             return {
                 'statusCode': 400,

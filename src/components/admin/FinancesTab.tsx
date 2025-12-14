@@ -5,6 +5,7 @@ import AdminFinances from './AdminFinances';
 import CompanyStatsCard from './CompanyStatsCard';
 import BonusManagementTab from './BonusManagementTab';
 import RevenueChart from './RevenueChart';
+import PaymentDistributionsTab from './PaymentDistributionsTab';
 
 interface FinancesTabProps {
   authToken: string;
@@ -21,7 +22,7 @@ export default function FinancesTab({
 }: FinancesTabProps) {
   return (
     <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="overview" className="flex items-center gap-2">
           <Icon name="BarChart3" size={16} />
           <span className="hidden sm:inline">Оборот</span>
@@ -29,6 +30,10 @@ export default function FinancesTab({
         <TabsTrigger value="payments" className="flex items-center gap-2">
           <Icon name="Upload" size={16} />
           <span className="hidden sm:inline">CSV</span>
+        </TabsTrigger>
+        <TabsTrigger value="distributions" className="flex items-center gap-2">
+          <Icon name="Database" size={16} />
+          <span className="hidden sm:inline">Распределения</span>
         </TabsTrigger>
         <TabsTrigger value="bonus" className="flex items-center gap-2">
           <Icon name="Gift" size={16} />
@@ -52,6 +57,10 @@ export default function FinancesTab({
           isLoadingCouriers={isLoadingCouriers}
           onRefreshCouriers={onRefreshCouriers}
         />
+      </TabsContent>
+
+      <TabsContent value="distributions" className="space-y-4 sm:space-y-6">
+        <PaymentDistributionsTab authToken={authToken} />
       </TabsContent>
 
       <TabsContent value="bonus" className="space-y-4 sm:space-y-6">
