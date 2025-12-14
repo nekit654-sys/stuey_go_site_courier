@@ -113,7 +113,8 @@ const TRANSPORT_COSTS = {
 export function CourierGame2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
-  const { userTelegramId, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const userTelegramId = user?.oauth_id || user?.id;
   
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
@@ -731,12 +732,13 @@ export function CourierGame2D() {
     if (!isAuthenticated || !userTelegramId) return;
 
     try {
-      await fetch(COURIER_GAME_API, {
+      const response = await fetch(COURIER_GAME_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'save',
           user_id: userTelegramId,
+          username: user?.full_name || user?.nickname || `Курьер ${userTelegramId}`,
           level,
           money,
           experience,
@@ -747,10 +749,15 @@ export function CourierGame2D() {
           best_score: money + experience
         })
       });
+      
+      const data = await response.json();
+      if (data.success) {
+        console.log('✅ Прогресс сохранён:', data);
+      }
     } catch (error) {
       console.error('Save error:', error);
     }
-  }, [isAuthenticated, userTelegramId, level, money, experience, totalOrders, totalDistance, totalEarnings, player.transport]);
+  }, [isAuthenticated, userTelegramId, user, level, money, experience, totalOrders, totalDistance, totalEarnings, player.transport]);
 
   // Автосохранение
   useEffect(() => {
@@ -1502,28 +1509,95 @@ export function CourierGame2D() {
       
       // Маркер взятия
       if (!currentOrder || currentOrder.id !== order.id) {
+        // Радиус взаимодействия (полупрозрачный круг)
+        const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
+        if (distToPickup < 100) {
+          ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+          ctx.beginPath();
+          ctx.arc(order.pickupX, order.pickupY, 50, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Пульсирующая граница при приближении
+          if (distToPickup < 50) {
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(order.pickupX, order.pickupY, 50, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+        
+        // Маркер заказа
         ctx.fillStyle = '#FFD700';
         ctx.beginPath();
-        ctx.arc(order.pickupX, order.pickupY, 12, 0, Math.PI * 2);
+        ctx.arc(order.pickupX, order.pickupY, 15, 0, Math.PI * 2);
         ctx.fill();
         
+        // Обводка
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(order.pickupX, order.pickupY, 15, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Иконка
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('📦', order.pickupX, order.pickupY + 5);
+        ctx.textBaseline = 'middle';
+        ctx.fillText('📦', order.pickupX, order.pickupY + 2);
+        
+        // Награда
+        ctx.fillStyle = '#000000CC';
+        ctx.fillRect(order.pickupX - 20, order.pickupY - 35, 40, 20);
+        ctx.fillStyle = '#FFD700';
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText(`${order.reward}₽`, order.pickupX, order.pickupY - 25);
       }
       
       // Маркер доставки (если заказ взят)
       if (currentOrder?.id === order.id) {
+        // Радиус взаимодействия доставки
+        const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
+        if (distToDelivery < 100) {
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
+          ctx.beginPath();
+          ctx.arc(order.deliveryX, order.deliveryY, 50, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Пульсирующая граница при приближении
+          if (distToDelivery < 50) {
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(order.deliveryX, order.deliveryY, 50, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+        
+        // Маркер доставки
         ctx.fillStyle = '#00FF00';
         ctx.beginPath();
-        ctx.arc(order.deliveryX, order.deliveryY, 12, 0, Math.PI * 2);
+        ctx.arc(order.deliveryX, order.deliveryY, 15, 0, Math.PI * 2);
         ctx.fill();
         
+        // Обводка
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(order.deliveryX, order.deliveryY, 15, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Иконка
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('🏠', order.deliveryX, order.deliveryY + 5);
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🏠', order.deliveryX, order.deliveryY + 2);
       }
     });
   };
@@ -1617,22 +1691,25 @@ export function CourierGame2D() {
       const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
       const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
       
-      if (distToPickup < 30 && order.status === 'available' && !currentOrder) {
+      // УВЕЛИЧЕН РАДИУС ВЗАИМОДЕЙСТВИЯ до 50 пикселей
+      if (distToPickup < 50 && order.status === 'available' && !currentOrder) {
         setCurrentOrder(order);
         setOrders(prev => prev.map(o => 
           o.id === order.id ? { ...o, status: 'picked' as const } : o
         ));
         playPickupSound();
-        toast.success(`Заказ взят! Доставь за ${order.timeLeft}с`);
+        toast.success(`📦 Заказ взят! Доставь за ${order.timeLeft}с`, { duration: 2000 });
       }
       
-      if (distToDelivery < 30 && order.status === 'picked' && currentOrder?.id === order.id) {
+      // УВЕЛИЧЕН РАДИУС ДОСТАВКИ до 50 пикселей
+      if (distToDelivery < 50 && order.status === 'picked' && currentOrder?.id === order.id) {
         const reward = order.reward;
         const exp = Math.floor(reward / 2);
         
         setMoney(m => m + reward);
         setExperience(e => e + exp);
         setTotalOrders(t => t + 1);
+        setTotalDistance(d => d + Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY)));
         setTotalEarnings(e => e + reward);
         setCurrentOrder(null);
         
@@ -1641,13 +1718,25 @@ export function CourierGame2D() {
         ));
         
         playDeliverySound();
-        toast.success(`+${reward}₽ +${exp} XP`);
+        toast.success(`🎉 Доставлено! +${reward}₽ +${exp} XP`, { duration: 3000 });
         
-        if (experience + exp >= level * 100) {
+        // Проверка повышения уровня
+        const newExp = experience + exp;
+        if (newExp >= level * 100) {
           setLevel(l => l + 1);
           setExperience(0);
           playLevelUpSound();
-          toast.success(`🎉 Уровень ${level + 1}!`);
+          toast.success(`🎊 Уровень ${level + 1}! Новые возможности!`, { duration: 4000 });
+          
+          // Автосохранение при повышении уровня
+          saveProgress();
+        } else {
+          setExperience(newExp);
+        }
+        
+        // Автосохранение после каждых 3 заказов
+        if ((totalOrders + 1) % 3 === 0) {
+          saveProgress();
         }
       }
     });
@@ -1680,9 +1769,13 @@ export function CourierGame2D() {
     }
   };
 
-  const quitGame = () => {
-    saveProgress();
-    navigate('/');
+  const quitGame = async () => {
+    if (isAuthenticated) {
+      toast.info('💾 Сохранение прогресса...', { duration: 1000 });
+      await saveProgress();
+      toast.success('✅ Прогресс сохранён!', { duration: 2000 });
+    }
+    setTimeout(() => navigate('/'), 500);
   };
 
   if (isLoading) {
@@ -1947,11 +2040,62 @@ export function CourierGame2D() {
         <div className="absolute top-2 right-2 bg-black/80 p-2 rounded-lg text-white border-2 border-green-400 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
           <div className="flex items-center gap-1 mb-1 sm:gap-2 sm:mb-2">
             <Icon name="Navigation" size={16} className="text-green-400" />
+            <span className="font-bold hidden sm:inline">Доставка</span>
+          </div>
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="flex items-center gap-1">
+              <Icon name="DollarSign" size={14} className="text-green-400" />
+              <p className="font-bold">{currentOrder.reward}₽</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon name="Clock" size={14} className="text-yellow-400" />
+              <p className="font-bold text-yellow-400">{currentOrder.timeLeft}с</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon name="Target" size={14} className="text-cyan-400" />
+              <p className="font-bold text-cyan-400">
+                {Math.floor(Math.hypot(currentOrder.deliveryX - player.x, currentOrder.deliveryY - player.y))}м
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Ближайший заказ (если нет активного) */}
+      {!currentOrder && orders.filter(o => o.status === 'available').length > 0 && (
+        <div className="absolute top-2 right-2 bg-black/80 p-2 rounded-lg text-white border-2 border-yellow-400 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+          <div className="flex items-center gap-1 mb-1 sm:gap-2 sm:mb-2">
+            <Icon name="Package" size={16} className="text-yellow-400" />
             <span className="font-bold hidden sm:inline">Заказ</span>
           </div>
           <div className="space-y-0.5 sm:space-y-1">
-            <p className="font-bold">{currentOrder.reward}₽</p>
-            <p className="font-bold text-yellow-400">{currentOrder.timeLeft}с</p>
+            {(() => {
+              const nearestOrder = orders
+                .filter(o => o.status === 'available')
+                .sort((a, b) => {
+                  const distA = Math.hypot(a.pickupX - player.x, a.pickupY - player.y);
+                  const distB = Math.hypot(b.pickupX - player.x, b.pickupY - player.y);
+                  return distA - distB;
+                })[0];
+              
+              const dist = Math.floor(Math.hypot(nearestOrder.pickupX - player.x, nearestOrder.pickupY - player.y));
+              
+              return (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Icon name="DollarSign" size={14} className="text-yellow-400" />
+                    <p className="font-bold">{nearestOrder.reward}₽</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Icon name="MapPin" size={14} className="text-cyan-400" />
+                    <p className="font-bold text-cyan-400">{dist}м</p>
+                  </div>
+                  {dist < 50 && (
+                    <p className="text-[10px] text-green-400 font-bold animate-pulse">📦 Подъезжай ближе!</p>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
