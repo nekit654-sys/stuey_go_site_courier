@@ -55,14 +55,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[AuthContext] Initializing...');
     const savedToken = localStorage.getItem('auth_token');
     const savedUser = localStorage.getItem('user_data');
 
+    console.log('[AuthContext] Saved data:', { 
+      hasToken: !!savedToken, 
+      hasUser: !!savedUser,
+      token: savedToken?.substring(0, 20) + '...'
+    });
+
     if (savedToken && savedUser) {
+      const userData = JSON.parse(savedUser);
+      console.log('[AuthContext] Restoring session for user:', userData.id);
       setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+      setUser(userData);
       
       verifyToken(savedToken);
+    } else {
+      console.log('[AuthContext] No saved session found');
     }
   }, []);
 

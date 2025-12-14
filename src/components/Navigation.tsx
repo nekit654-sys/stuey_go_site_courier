@@ -143,7 +143,13 @@ const Navigation = () => {
             </div>
 
             {/* Login/Profile Button */}
-            <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+            <Link 
+              to={isAuthenticated ? "/dashboard" : "/auth"}
+              onClick={(e) => {
+                console.log('[Navigation] Button clicked:', { isAuthenticated, target: isAuthenticated ? '/dashboard' : '/auth' });
+                playSound('click');
+              }}
+            >
               <Button
                 onMouseEnter={() => playSound('hover')}
                 className="
