@@ -16,6 +16,7 @@ import hmac
 from datetime import datetime, timedelta
 from typing import Dict, Any
 from decimal import Decimal
+import requests
 
 JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = 'HS256'
@@ -32,6 +33,34 @@ def log_activity(conn, event_type: str, message: str, data: Dict = None):
         (event_type, message, data_json)
     )
     cur.close()
+
+def send_telegram_notification(telegram_id: str, message: str) -> bool:
+    """Отправка уведомления в Telegram курьеру"""
+    try:
+        bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+        if not bot_token:
+            print('>>> WARNING: TELEGRAM_BOT_TOKEN не настроен, пропускаем отправку уведомления')
+            return False
+        
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+        payload = {
+            'chat_id': telegram_id,
+            'text': message,
+            'parse_mode': 'HTML'
+        }
+        
+        response = requests.post(url, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            print(f'>>> Telegram уведомление отправлено: chat_id={telegram_id}')
+            return True
+        else:
+            print(f'>>> Ошибка отправки Telegram уведомления: {response.status_code} - {response.text}')
+            return False
+            
+    except Exception as e:
+        print(f'>>> Исключение при отправке Telegram уведомления: {str(e)}')
+        return False
 
 def convert_decimals(obj: Any) -> Any:
     if isinstance(obj, dict):
@@ -3655,6 +3684,16 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 }
             )
         
+        # Получаем информацию о курьере для отправки уведомления
+        cur.execute("""
+            SELECT u.telegram_id, u.full_name, wr.amount, wr.sbp_phone
+            FROM t_p25272970_courier_button_site.withdrawal_requests wr
+            JOIN t_p25272970_courier_button_site.users u ON wr.courier_id = u.id
+            WHERE wr.id = %s
+        """, (request_id,))
+        
+        courier_info = cur.fetchone()
+        
         # Обновляем статус заявки
         cur.execute("""
             UPDATE t_p25272970_courier_button_site.withdrawal_requests
@@ -3665,6 +3704,40 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
         conn.commit()
         cur.close()
         conn.close()
+        
+        # Отправляем уведомление в Telegram (если у курьера есть telegram_id)
+        if courier_info and courier_info.get('telegram_id'):
+            telegram_id = courier_info['telegram_id']
+            courier_name = courier_info.get('full_name', 'Курьер')
+            amount = float(courier_info['amount'])
+            
+            # Формируем текст уведомления в зависимости от статуса
+            if new_status == 'approved':
+                notification_text = (
+                    f"✅ <b>Заявка на вывод одобрена</b>\n\n"
+                    f"Сумма: <b>{amount:.2f} ₽</b>\n"
+                    f"Телефон СБП: {courier_info.get('sbp_phone', '-')}\n\n"
+                    f"Средства будут переведены в ближайшее время."
+                )
+            elif new_status == 'rejected':
+                notification_text = (
+                    f"❌ <b>Заявка на вывод отклонена</b>\n\n"
+                    f"Сумма: <b>{amount:.2f} ₽</b>\n"
+                    f"Причина: {admin_comment or 'не указана'}\n\n"
+                    f"Для уточнения обратитесь в поддержку."
+                )
+            elif new_status == 'paid':
+                notification_text = (
+                    f"💰 <b>Выплата выполнена!</b>\n\n"
+                    f"Сумма: <b>{amount:.2f} ₽</b>\n"
+                    f"Телефон СБП: {courier_info.get('sbp_phone', '-')}\n\n"
+                    f"Средства переведены на ваш счёт."
+                )
+            else:
+                notification_text = None
+            
+            if notification_text:
+                send_telegram_notification(telegram_id, notification_text)
         
         return {
             'statusCode': 200,
