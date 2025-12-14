@@ -23,8 +23,8 @@ const Contacts = () => {
       title: "Telegram",
       description: "Быстрые ответы на вопросы",
       icon: "MessageCircle",
-      contact: "@YandexEdaCourier",
-      action: "https://t.me/YandexEdaCourier",
+      contact: "@StueyGoBot",
+      action: "https://t.me/StueyGoBot",
     },
     {
       title: "Центры поддержки",

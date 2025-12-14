@@ -56,7 +56,7 @@ export async function createInitialStories() {
       description: "Есть вопросы? Пиши в Telegram! Ответим за 5 минут, помогаем 24/7",
       imageUrl: "https://cdn.poehali.dev/files/f7d91ef6-30ea-482e-89db-b5857fec9312.jpg",
       buttonText: "Написать в поддержку",
-      buttonLink: "https://t.me/YandexEdaCourier",
+      buttonLink: "https://t.me/StueyGoBot",
       position: 4,
       animationType: "jumping",
       animationConfig: {
