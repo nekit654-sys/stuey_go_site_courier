@@ -22,7 +22,11 @@ interface ConnectionStatus {
   whatsapp: MessengerConnection | null;
 }
 
-export default function MessengerSettings() {
+interface MessengerSettingsProps {
+  onConnectionChange?: () => void;
+}
+
+export default function MessengerSettings({ onConnectionChange }: MessengerSettingsProps) {
   const { user } = useAuth();
   const [connections, setConnections] = useState<ConnectionStatus>({
     telegram: null,
@@ -93,6 +97,9 @@ export default function MessengerSettings() {
           setCodeExpiry(null);
           setSelectedMessenger(null);
           toast.success(`${selectedMessenger === 'telegram' ? 'Telegram' : 'WhatsApp'} успешно подключен!`);
+          if (onConnectionChange) {
+            onConnectionChange();
+          }
         }
       } else {
         console.error('API returned error:', data.error);
@@ -163,6 +170,9 @@ export default function MessengerSettings() {
         fetchConnectionStatus();
         setLinkCode(null);
         setSelectedMessenger(null);
+        if (onConnectionChange) {
+          onConnectionChange();
+        }
       } else {
         toast.error(data.error || 'Ошибка отключения');
       }

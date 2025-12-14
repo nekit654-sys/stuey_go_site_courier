@@ -77,6 +77,7 @@ export default function Dashboard() {
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
   const [showNewCourierNotification, setShowNewCourierNotification] = useState(false);
   const [telegramConnected, setTelegramConnected] = useState(false);
+  const [telegramUsername, setTelegramUsername] = useState<string>('');
 
   useEffect(() => {
     console.log('[Dashboard] Mount:', { isAuthenticated, userId: user?.id });
@@ -108,9 +109,38 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success && data.connections?.telegram?.connected) {
         setTelegramConnected(true);
+        setTelegramUsername(data.connections.telegram.username || '');
+      } else {
+        setTelegramConnected(false);
+        setTelegramUsername('');
       }
     } catch (error) {
       console.error('Error checking Telegram connection:', error);
+    }
+  };
+
+  const handleTelegramUnlink = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=unlink', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': user?.id?.toString() || ''
+        },
+        body: JSON.stringify({ messenger_type: 'telegram' })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setTelegramConnected(false);
+        setTelegramUsername('');
+        toast.success('Telegram отключен');
+      } else {
+        toast.error(data.error || 'Ошибка отключения');
+      }
+    } catch (error) {
+      console.error('Error unlinking Telegram:', error);
+      toast.error('Ошибка подключения к серверу');
     }
   };
 
@@ -146,6 +176,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeTab === 'profile' && isAuthenticated) {
       refreshUserData();
+    }
+    if (activeTab === 'stats' && isAuthenticated) {
+      checkTelegramConnection();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -312,6 +345,8 @@ export default function Dashboard() {
                 <TelegramConnectCard 
                   onConnect={() => setActiveTab('settings')} 
                   isConnected={telegramConnected}
+                  onUnlink={handleTelegramUnlink}
+                  telegramUsername={telegramUsername}
                 />
 
                 {stats && (user?.total_orders || 0) === 0 && (
@@ -381,7 +416,7 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'settings' && (
-              <MessengerSettings />
+              <MessengerSettings onConnectionChange={checkTelegramConnection} />
             )}
           </div>
         </div>
