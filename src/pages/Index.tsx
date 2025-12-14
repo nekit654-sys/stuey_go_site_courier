@@ -3,7 +3,6 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
-import Benefits from "@/components/Benefits";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import StoriesViewer from "@/components/StoriesViewer";
@@ -104,7 +103,6 @@ const Index = () => {
         <HeroSection onStoryClick={handleStoryClick} />
       </div>
       <CourierTypes onOpenPayoutModal={() => setShowPayoutModal(true)} />
-      <Benefits />
       <FAQ />
       <Footer />
       
