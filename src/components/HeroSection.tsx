@@ -125,7 +125,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-extrabold text-white text-base drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
-            От 1 500₽ до 6 200₽ в день —<br />
+            От 2 000₽ до 8 200₽ в день —<br />
             ваш график, ваш транспорт, ваши правила!
           </p>
 
