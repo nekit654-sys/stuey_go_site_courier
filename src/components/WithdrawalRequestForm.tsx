@@ -145,7 +145,7 @@ export default function WithdrawalRequestForm({
           <span className="text-xs sm:text-sm font-bold text-black/70">Доступно для вывода:</span>
           <span className="text-xl sm:text-2xl font-extrabold text-black">{availableBalance.toFixed(2)} ₽</span>
         </div>
-        <p className="text-xs font-bold text-black/70">Минимальная сумма вывода: 1000₽</p>
+        <p className="text-xs font-bold text-black/70">Минимум: 5000₽</p>
       </div>
 
       <input
@@ -160,7 +160,7 @@ export default function WithdrawalRequestForm({
           <Input
             id="amount"
             type="number"
-            min="1000"
+            min="5000"
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
