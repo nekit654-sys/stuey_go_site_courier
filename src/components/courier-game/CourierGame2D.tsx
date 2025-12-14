@@ -148,6 +148,7 @@ export function CourierGame2D() {
   const [viewportSize, setViewportSize] = useState(getViewportSize());
   const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [canInteract, setCanInteract] = useState<{ type: 'pickup' | 'delivery' | null, orderId: string | null }>({ type: null, orderId: null });
   
   const keys = useRef<{ [key: string]: boolean }>({});
   const animationFrameId = useRef<number>();
@@ -806,7 +807,7 @@ export function CourierGame2D() {
       }
       
       if (e.key === ' ' && gameState === 'playing') {
-        checkOrderCollisions();
+        handleInteraction();
       }
     };
 
@@ -1714,68 +1715,101 @@ export function CourierGame2D() {
   };
 
   const checkOrderCollisions = () => {
+    let interactionAvailable = false;
+    let interactionType: 'pickup' | 'delivery' | null = null;
+    let interactionOrderId: string | null = null;
+    
     orders.forEach(order => {
       const distToPickup = Math.hypot(player.x - order.pickupX, player.y - order.pickupY);
       const distToDelivery = Math.hypot(player.x - order.deliveryX, player.y - order.deliveryY);
       
-      // ШАГ 1: ЗАБРАТЬ ЗАКАЗ (подъезжаем к ресторану/магазину)
+      // Проверяем возможность взять заказ
       if (distToPickup < 50 && order.status === 'available' && !currentOrder) {
-        setCurrentOrder(order);
-        setOrders(prev => prev.map(o => 
-          o.id === order.id ? { ...o, status: 'picked' as const } : o
-        ));
-        playPickupSound();
-        toast.success(`📦 Заказ забран! Везём клиенту!`, { 
-          duration: 3000,
-          description: `Награда: ${order.reward}₽ | Время: ${order.timeLeft}с`
-        });
+        interactionAvailable = true;
+        interactionType = 'pickup';
+        interactionOrderId = order.id;
       }
       
-      // ШАГ 2: ДОСТАВИТЬ КЛИЕНТУ (подъезжаем к дому клиента)
+      // Проверяем возможность доставить заказ
       if (distToDelivery < 50 && order.status === 'picked' && currentOrder?.id === order.id) {
-        const reward = order.reward;
-        const exp = Math.floor(reward / 2);
-        const distance = Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY));
-        
-        // Начисляем награды
-        setMoney(m => m + reward);
-        setExperience(e => e + exp);
-        setTotalOrders(t => t + 1);
-        setTotalDistance(d => d + distance);
-        setTotalEarnings(e => e + reward);
-        setCurrentOrder(null);
-        
-        // Помечаем заказ доставленным
-        setOrders(prev => prev.map(o => 
-          o.id === order.id ? { ...o, status: 'delivered' as const } : o
-        ));
-        
-        playDeliverySound();
-        toast.success(`🎉 Доставлено клиенту!`, { 
-          duration: 4000,
-          description: `+${reward}₽ | +${exp} XP | ${distance}м пройдено`
-        });
-        
-        // Проверка повышения уровня
-        const newExp = experience + exp;
-        if (newExp >= level * 100) {
-          setLevel(l => l + 1);
-          setExperience(0);
-          playLevelUpSound();
-          toast.success(`🎊 Уровень ${level + 1}! Новые возможности!`, { duration: 4000 });
-          
-          // Автосохранение при повышении уровня
-          saveProgress();
-        } else {
-          setExperience(newExp);
-        }
-        
-        // Автосохранение после каждых 3 заказов
-        if ((totalOrders + 1) % 3 === 0) {
-          saveProgress();
-        }
+        interactionAvailable = true;
+        interactionType = 'delivery';
+        interactionOrderId = order.id;
       }
     });
+    
+    // Обновляем состояние возможности взаимодействия
+    if (interactionAvailable) {
+      setCanInteract({ type: interactionType, orderId: interactionOrderId });
+    } else {
+      setCanInteract({ type: null, orderId: null });
+    }
+  };
+  
+  const handleInteraction = () => {
+    if (!canInteract.type || !canInteract.orderId) return;
+    
+    const order = orders.find(o => o.id === canInteract.orderId);
+    if (!order) return;
+    
+    if (canInteract.type === 'pickup') {
+      // ЗАБРАТЬ ЗАКАЗ
+      setCurrentOrder(order);
+      setOrders(prev => prev.map(o => 
+        o.id === order.id ? { ...o, status: 'picked' as const } : o
+      ));
+      playPickupSound();
+      toast.success(`📦 Заказ забран! Везём клиенту!`, { 
+        duration: 3000,
+        description: `Награда: ${order.reward}₽ | Время: ${order.timeLeft}с`
+      });
+      setCanInteract({ type: null, orderId: null });
+    } else if (canInteract.type === 'delivery') {
+      // ДОСТАВИТЬ ЗАКАЗ
+      const reward = order.reward;
+      const exp = Math.floor(reward / 2);
+      const distance = Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY));
+      
+      // Начисляем награды
+      setMoney(m => m + reward);
+      setExperience(e => e + exp);
+      setTotalOrders(t => t + 1);
+      setTotalDistance(d => d + distance);
+      setTotalEarnings(e => e + reward);
+      setCurrentOrder(null);
+      
+      // Помечаем заказ доставленным
+      setOrders(prev => prev.map(o => 
+        o.id === order.id ? { ...o, status: 'delivered' as const } : o
+      ));
+      
+      playDeliverySound();
+      toast.success(`🎉 Доставлено клиенту!`, { 
+        duration: 4000,
+        description: `+${reward}₽ | +${exp} XP | ${distance}м пройдено`
+      });
+      
+      // Проверка повышения уровня
+      const newExp = experience + exp;
+      if (newExp >= level * 100) {
+        setLevel(l => l + 1);
+        setExperience(0);
+        playLevelUpSound();
+        toast.success(`🎊 Уровень ${level + 1}! Новые возможности!`, { duration: 4000 });
+        
+        // Автосохранение при повышении уровня
+        saveProgress();
+      } else {
+        setExperience(newExp);
+      }
+      
+      // Автосохранение после каждых 3 заказов
+      if ((totalOrders + 1) % 3 === 0) {
+        saveProgress();
+      }
+      
+      setCanInteract({ type: null, orderId: null });
+    }
   };
 
   const buyTransport = (transport: keyof typeof TRANSPORT_COSTS) => {
@@ -1810,11 +1844,11 @@ export function CourierGame2D() {
     }, 500);
     
     setTimeout(() => {
-      toast.info('📦 Шаг 1: Подъезжай к желтым маркерам (ЗАБРАТЬ ЗАКАЗ)', { duration: 4000 });
+      toast.info('📦 Шаг 1: Подъезжай к желтым маркерам и нажми ПРОБЕЛ', { duration: 4000 });
     }, 3500);
     
     setTimeout(() => {
-      toast.info('🏠 Шаг 2: Доставь заказ к зелёному маркеру (ДОМ КЛИЕНТА)', { duration: 4000 });
+      toast.info('🏠 Шаг 2: Доставь заказ и нажми ПРОБЕЛ у клиента', { duration: 4000 });
     }, 7500);
   };
 
@@ -1931,7 +1965,7 @@ export function CourierGame2D() {
                 </p>
                 <p className="flex items-center gap-2">
                   <span className="text-yellow-400 font-bold">2️⃣</span>
-                  <span>Забирай заказ из ресторана/магазина</span>
+                  <span>Нажми <strong className="text-yellow-400">ПРОБЕЛ</strong> или <strong className="text-yellow-400">кнопку</strong> для взятия</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <span className="text-green-400 font-bold">3️⃣</span>
@@ -1939,11 +1973,11 @@ export function CourierGame2D() {
                 </p>
                 <p className="flex items-center gap-2">
                   <span className="text-green-400 font-bold">4️⃣</span>
-                  <span>Получай деньги и опыт! 💰</span>
+                  <span>Нажми <strong className="text-green-400">ПРОБЕЛ</strong> у клиента для доставки 💰</span>
                 </p>
               </div>
               <p className="text-xs text-center text-blue-200 mt-2">
-                🎮 Управление: WASD или виртуальный джойстик
+                🎮 Управление: WASD + ПРОБЕЛ или джойстик + кнопка
               </p>
             </div>
           </div>
@@ -2147,6 +2181,11 @@ export function CourierGame2D() {
           <div className="mt-2 text-center text-[10px] bg-white/20 rounded px-2 py-1">
             🏠 Доставь заказ клиенту!
           </div>
+          {canInteract.type === 'delivery' && (
+            <div className="mt-2 text-center text-[10px] text-white font-bold animate-pulse bg-white/30 rounded px-2 py-1">
+              ⌨️ ПРОБЕЛ для доставки!
+            </div>
+          )}
         </div>
       )}
       
@@ -2191,7 +2230,7 @@ export function CourierGame2D() {
                   </div>
                   {dist < 50 && (
                     <div className="text-center text-[10px] text-green-300 font-bold animate-pulse mt-2 bg-green-900/50 rounded px-2 py-1">
-                      ✅ Подъезжай для взятия!
+                      ⌨️ Нажми ПРОБЕЛ для взятия!
                     </div>
                   )}
                 </>
@@ -2277,6 +2316,34 @@ export function CourierGame2D() {
           </div>
         </div>
       </div>
+
+      {/* Кнопка взаимодействия (забрать/доставить) */}
+      {canInteract.type && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+          <Button
+            onClick={handleInteraction}
+            className={`h-20 w-20 rounded-full font-bold text-lg shadow-2xl border-4 ${
+              canInteract.type === 'pickup' 
+                ? 'bg-yellow-500 hover:bg-yellow-400 border-yellow-300 text-black' 
+                : 'bg-green-500 hover:bg-green-400 border-green-300 text-white'
+            }`}
+            style={{
+              boxShadow: canInteract.type === 'pickup' 
+                ? '0 0 30px rgba(234, 179, 8, 0.8)' 
+                : '0 0 30px rgba(34, 197, 94, 0.8)'
+            }}
+          >
+            <div className="flex flex-col items-center">
+              <span className="text-3xl mb-1">
+                {canInteract.type === 'pickup' ? '📦' : '🏠'}
+              </span>
+              <span className="text-[10px] leading-tight">
+                {canInteract.type === 'pickup' ? 'ЗАБРАТЬ' : 'ДОСТАВИТЬ'}
+              </span>
+            </div>
+          </Button>
+        </div>
+      )}
 
       {/* Мобильный джойстик - ВСЕГДА показываем на touch-устройствах */}
       {isMobile && (
