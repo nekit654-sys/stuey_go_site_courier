@@ -363,7 +363,7 @@ export default function Dashboard() {
                   isConnected={telegramConnected}
                 />
 
-                {/* Кнопка подать заявку в Яндекс.Доставку - показываем только если нет заказов */}
+                {/* Кнопка подать заявку в Яндекс.Еду - показываем только если нет заказов */}
                 {(user?.total_orders || 0) === 0 && (
                   <Card className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 border-4 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all overflow-hidden">
                     <div className="p-6">
@@ -373,7 +373,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-black text-black mb-1">Стань курьером!</h3>
-                          <p className="text-sm font-bold text-black/80">Зарегистрируйся в Яндекс.Доставке</p>
+                          <p className="text-sm font-bold text-black/80">Зарегистрируйся в Яндекс.Еде</p>
                         </div>
                       </div>
                       <Button
