@@ -358,9 +358,10 @@ export default function Dashboard() {
             {activeTab === 'stats' && (
               <div className="space-y-3 sm:space-y-4">
                 {/* Telegram Connect Card - показываем только если не подключен */}
-                {!telegramConnected && (
-                  <TelegramConnectCard onConnect={() => setActiveTab('settings')} />
-                )}
+                <TelegramConnectCard 
+                  onConnect={() => setActiveTab('settings')} 
+                  isConnected={telegramConnected}
+                />
 
                 {/* Startup Bonus Notification */}
                 {user?.id && (

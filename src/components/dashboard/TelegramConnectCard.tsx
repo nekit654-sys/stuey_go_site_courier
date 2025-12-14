@@ -5,9 +5,10 @@ import { useState, useEffect } from 'react';
 
 interface TelegramConnectCardProps {
   onConnect: () => void;
+  isConnected?: boolean;
 }
 
-export default function TelegramConnectCard({ onConnect }: TelegramConnectCardProps) {
+export default function TelegramConnectCard({ onConnect, isConnected = false }: TelegramConnectCardProps) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function TelegramConnectCard({ onConnect }: TelegramConnectCardPr
     localStorage.setItem('telegram_connect_dismissed', 'true');
   };
 
-  if (dismissed) return null;
+  if (dismissed || isConnected) return null;
 
   return (
     <Card className="relative bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 border-3 border-blue-700 rounded-2xl shadow-[0_8px_0_0_rgba(29,78,216,1)] p-6 overflow-hidden">
@@ -81,11 +82,11 @@ export default function TelegramConnectCard({ onConnect }: TelegramConnectCardPr
         {/* Кнопка подключения */}
         <Button
           onClick={onConnect}
-          className="w-full bg-white hover:bg-gray-100 text-blue-600 font-black text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-6 transition-all"
+          className="w-full bg-white hover:bg-gray-100 text-blue-600 font-black text-base sm:text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-6 transition-all"
           size="lg"
         >
-          <Icon name="Send" size={20} className="mr-2" />
-          Подключить бота прямо сейчас
+          <Icon name="Send" size={20} className="mr-2 flex-shrink-0" />
+          <span className="truncate">Подключить бота</span>
         </Button>
 
         {/* Подсказка */}
