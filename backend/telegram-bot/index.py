@@ -1653,6 +1653,94 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             elif data == 'back_to_settings':
                 handle_settings_command(chat_id, telegram_id)
             
+            elif data == 'stats_earnings':
+                # Детальная статистика заработка
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    context = get_courier_context(courier_id)
+                    balance = context['balance']
+                    total_earnings = context['total_earnings']
+                    referral_earnings = context['referral_earnings']
+                    
+                    text = (
+                        f"💰 <b>Детальный заработок</b>\n\n"
+                        f"📊 <b>Текущий баланс:</b> {balance:,.0f}₽\n"
+                        f"💵 <b>Всего заработано:</b> {total_earnings:,.0f}₽\n"
+                        f"👥 <b>От рефералов:</b> {referral_earnings:,.0f}₽\n"
+                        f"💪 <b>За свою работу:</b> {(total_earnings - referral_earnings):,.0f}₽\n\n"
+                        f"🔥 Продолжай работать и приглашать друзей!\n"
+                        f"Каждый активный реферал = от 18,000₽+"
+                    )
+                    
+                    send_telegram_message(chat_id, text, reply_markup=get_stats_menu_keyboard())
+                finally:
+                    cursor.close()
+                    conn.close()
+            
+            elif data == 'stats_referrals':
+                # Детальная статистика рефералов
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    context = get_courier_context(courier_id)
+                    referrals = context['referrals']
+                    active_referrals = context['active_referrals']
+                    close_to_active = context['close_to_active']
+                    need_motivation = context['need_motivation']
+                    never_worked = context['never_worked']
+                    
+                    text = (
+                        f"👥 <b>Твои рефералы</b>\n\n"
+                        f"📊 <b>Всего рефералов:</b> {referrals}\n"
+                        f"✅ <b>Активных (50+ заказов):</b> {active_referrals}\n"
+                        f"🔥 <b>Близко к активации (40-49):</b> {close_to_active}\n"
+                        f"⚠️ <b>Начали работу (1-9):</b> {need_motivation}\n"
+                        f"😴 <b>Ещё не начали:</b> {never_worked}\n\n"
+                    )
+                    
+                    if active_referrals > 0:
+                        text += f"⭐ <b>Отлично!</b> {active_referrals} активных приносят тебе доход!\n\n"
+                    
+                    if close_to_active > 0:
+                        text += f"🔥 У тебя {close_to_active} почти у цели! Напиши им, поддержи!\n\n"
+                    
+                    if need_motivation > 0 or never_worked > 0:
+                        text += f"💡 <b>Совет:</b> Напиши неактивным рефералам, мотивируй их!\n\n"
+                    
+                    text += f"💰 Потенциал заработка от всех: от {referrals * 18000:,}₽+"
+                    
+                    send_telegram_message(chat_id, text, reply_markup=get_stats_menu_keyboard())
+                finally:
+                    cursor.close()
+                    conn.close()
+            
+            elif data == 'stats_orders':
+                # Детальная статистика заказов
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    context = get_courier_context(courier_id)
+                    total_orders = context['total_orders']
+                    
+                    text = (
+                        f"📦 <b>Статистика заказов</b>\n\n"
+                        f"📊 <b>Всего выполнено:</b> {total_orders} заказов\n\n"
+                    )
+                    
+                    if total_orders < 50:
+                        orders_left = 50 - total_orders
+                        text += f"🎁 До самобонуса 5,000₽ осталось: <b>{orders_left} заказов</b>\n\n"
+                        text += f"💪 Продолжай работать — деньги уже близко!"
+                    else:
+                        text += f"✅ Самобонус получен! Отличная работа!\n\n"
+                        text += f"🚀 Теперь сфокусируйся на рефералах — они приносят от 18,000₽+ за каждого активного!"
+                    
+                    send_telegram_message(chat_id, text, reply_markup=get_stats_menu_keyboard())
+                finally:
+                    cursor.close()
+                    conn.close()
+            
             elif data.startswith('withdraw_'):
                 # Обработка создания заявки на выплату
                 amount = int(data.split('_')[1])
