@@ -314,11 +314,11 @@ export default function Dashboard() {
                   isConnected={telegramConnected}
                 />
 
-                {(user?.total_orders || 0) === 0 && (
+                {stats && (user?.total_orders || 0) === 0 && (
                   <StartupBonusNotification
                     fullName={user.full_name}
-                    selfBonusAmount={stats?.self_bonus_amount || 5000}
-                    selfOrdersCount={stats?.self_orders_count || 0}
+                    selfBonusAmount={stats.self_bonus_amount || 5000}
+                    selfOrdersCount={stats.self_orders_count || 0}
                     onClose={() => {}}
                   />
                 )}
