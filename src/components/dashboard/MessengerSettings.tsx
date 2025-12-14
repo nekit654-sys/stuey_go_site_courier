@@ -322,51 +322,52 @@ export default function MessengerSettings() {
                         ⏱️ {getTimeRemaining()}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-3xl font-black text-center py-4 px-4 bg-white rounded-lg border-3 border-blue-500 tracking-widest text-blue-600 shadow-[0_3px_0_0_rgba(59,130,246,1)]">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <code className="flex-1 text-2xl sm:text-3xl font-black text-center py-3 sm:py-4 px-3 sm:px-4 bg-white rounded-lg border-3 border-blue-500 tracking-widest text-blue-600 shadow-[0_3px_0_0_rgba(59,130,246,1)] break-all">
                         {linkCode}
                       </code>
                       <Button 
                         onClick={copyCode} 
-                        className="bg-blue-500 hover:bg-blue-600 text-white border-3 border-blue-700 shadow-[0_3px_0_0_rgba(29,78,216,1)] hover:shadow-[0_1px_0_0_rgba(29,78,216,1)] hover:translate-y-[2px]"
+                        className="bg-blue-500 hover:bg-blue-600 text-white border-3 border-blue-700 shadow-[0_3px_0_0_rgba(29,78,216,1)] hover:shadow-[0_1px_0_0_rgba(29,78,216,1)] hover:translate-y-[2px] w-full sm:w-auto sm:min-w-[48px]"
                         size="icon"
                       >
                         <Icon name="Copy" size={16} />
+                        <span className="ml-2 sm:hidden">Скопировать</span>
                       </Button>
                     </div>
-                    <div className="space-y-3 text-sm bg-white/80 p-4 rounded-lg border-2 border-blue-200">
-                      <p className="font-bold text-blue-900 flex items-center gap-2">
-                        <Icon name="Info" size={16} className="text-blue-600" />
-                        Как подключить (3 шага):
+                    <div className="space-y-3 text-xs sm:text-sm bg-white/80 p-3 sm:p-4 rounded-lg border-2 border-blue-200">
+                      <p className="font-bold text-blue-900 flex items-center gap-2 text-sm sm:text-base">
+                        <Icon name="Info" size={16} className="text-blue-600 flex-shrink-0" />
+                        <span>Как подключить (3 шага):</span>
                       </p>
                       <ol className="space-y-2 text-blue-800">
                         <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0">1.</span>
-                          <span>Нажмите кнопку <strong>"Открыть @StueyGoBot"</strong> ниже (откроется Telegram)</span>
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">1.</span>
+                          <span className="leading-relaxed">Нажмите кнопку <strong>"Открыть @StueyGoBot"</strong> ниже (откроется Telegram)</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0">2.</span>
-                          <span>В боте нажмите кнопку <strong>"START"</strong> или <strong>"/start"</strong></span>
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">2.</span>
+                          <span className="leading-relaxed">В боте нажмите кнопку <strong>"START"</strong> или <strong>"/start"</strong></span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="font-black text-blue-600 flex-shrink-0">3.</span>
-                          <span>Отправьте боту код: <code className="px-2 py-1 bg-blue-100 rounded font-bold text-blue-700">{linkCode}</code></span>
+                          <span className="font-black text-blue-600 flex-shrink-0 mt-0.5">3.</span>
+                          <span className="leading-relaxed">Отправьте боту код: <code className="px-2 py-1 bg-blue-100 rounded font-bold text-blue-700 break-all inline-block">{linkCode}</code></span>
                         </li>
                       </ol>
                       <div className="mt-3 p-2 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
-                        <p className="text-xs text-yellow-800 flex items-center gap-2">
-                          <Icon name="Clock" size={14} className="text-yellow-600" />
-                          <span>Код действует <strong>10 минут</strong>. Успейте подключиться!</span>
+                        <p className="text-xs text-yellow-800 flex items-start sm:items-center gap-2">
+                          <Icon name="Clock" size={14} className="text-yellow-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                          <span className="leading-relaxed">Код действует <strong>10 минут</strong>. Успейте подключиться!</span>
                         </p>
                       </div>
                     </div>
                     <Button 
                       onClick={() => openBot('telegram')} 
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-black text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-6"
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-black text-base sm:text-lg border-3 border-blue-700 shadow-[0_5px_0_0_rgba(29,78,216,1)] hover:shadow-[0_2px_0_0_rgba(29,78,216,1)] hover:translate-y-[3px] py-4 sm:py-6 px-4"
                       size="lg"
                     >
-                      <Icon name="Send" size={20} className="mr-2" />
-                      Открыть @StueyGoBot в Telegram
+                      <Icon name="Send" size={20} className="mr-2 flex-shrink-0" />
+                      <span className="truncate">Открыть @StueyGoBot в Telegram</span>
                     </Button>
                   </div>
                 )}

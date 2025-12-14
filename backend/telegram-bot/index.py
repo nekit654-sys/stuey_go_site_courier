@@ -599,24 +599,20 @@ def verify_and_link_code(chat_id: int, telegram_id: int, username: Optional[str]
             WHERE code = %s
         """, (code,))
         
+        # Получить данные курьера из users (основная таблица)
         cursor.execute("""
-            SELECT full_name FROM t_p25272970_courier_button_site.users 
+            SELECT full_name, city FROM t_p25272970_courier_button_site.users 
             WHERE id = %s
         """, (courier_id,))
         
-        courier = cursor.fetchone()
-        
-        # Получить данные курьера для приветствия
-        cursor.execute("""
-            SELECT first_name, city FROM t_p25272970_courier_button_site.couriers
-            WHERE id = %s
-        """, (courier_id,))
-        courier_data = cursor.fetchone()
+        user_data = cursor.fetchone()
         
         conn.commit()
         
-        first_name = courier_data.get('first_name') if courier_data else courier.get('full_name', 'друг')
-        city = courier_data.get('city', 'твой город') if courier_data else 'твой город'
+        # Извлечь имя (первое слово из full_name)
+        full_name = user_data.get('full_name', 'друг') if user_data else 'друг'
+        first_name = full_name.split()[0] if full_name and ' ' in full_name else full_name
+        city = user_data.get('city', 'твой город') if user_data else 'твой город'
         
         # Приветственное сообщение с мотивацией
         text = (
@@ -637,12 +633,12 @@ def verify_and_link_code(chat_id: int, telegram_id: int, username: Optional[str]
         
         send_telegram_message(chat_id, text, reply_markup=get_main_menu_keyboard())
         
-        # Установить начальный этап онбординга
+        # Обновить время последнего взаимодействия в messenger_connections
         cursor.execute("""
-            UPDATE t_p25272970_courier_button_site.couriers
-            SET onboarding_stage = 0, last_notification_sent = NOW()
-            WHERE id = %s
-        """, (courier_id,))
+            UPDATE t_p25272970_courier_button_site.messenger_connections
+            SET last_interaction_at = NOW()
+            WHERE messenger_type = 'telegram' AND messenger_user_id = %s
+        """, (str(telegram_id),))
         conn.commit()
         
         log_activity(courier_id, 'link_success', {'username': username})
