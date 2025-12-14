@@ -1420,8 +1420,7 @@ def handle_rating_command(chat_id: int, telegram_id: int):
         # Позиция текущего курьера
         cursor.execute("""
             SELECT 
-                COUNT(*) + 1 as position,
-                u.total_orders
+                COUNT(*) + 1 as position
             FROM t_p25272970_courier_button_site.users u
             WHERE u.total_orders > (
                 SELECT total_orders FROM t_p25272970_courier_button_site.users WHERE id = %s
@@ -1429,6 +1428,15 @@ def handle_rating_command(chat_id: int, telegram_id: int):
         """, (courier_id,))
         
         my_position = cursor.fetchone()
+        
+        # Получить total_orders текущего курьера отдельно
+        cursor.execute("""
+            SELECT total_orders
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
+        """, (courier_id,))
+        
+        my_orders = cursor.fetchone()
         
         text = "🏆 <b>Рейтинг курьеров</b>\n\n"
         text += "Топ по количеству заказов:\n\n"
@@ -1440,8 +1448,8 @@ def handle_rating_command(chat_id: int, telegram_id: int):
             orders = courier['total_orders']
             text += f"{medal} {name} — {orders} заказов\n"
         
-        if my_position:
-            text += f"\n📊 <b>Твоя позиция:</b> #{my_position['position']} ({my_position['total_orders']} заказов)\n"
+        if my_position and my_orders:
+            text += f"\n📊 <b>Твоя позиция:</b> #{my_position['position']} ({my_orders['total_orders']} заказов)\n"
         
         text += "\n💪 Продолжай работать и поднимайся в рейтинге!"
         
@@ -1507,7 +1515,7 @@ def handle_settings_command(chat_id: int, telegram_id: int):
         
         # Проверяем статус подключения Telegram
         cursor.execute("""
-            SELECT username, created_at
+            SELECT messenger_username as username, connected_at as created_at
             FROM t_p25272970_courier_button_site.messenger_connections
             WHERE courier_id = %s AND messenger_type = 'telegram' AND is_verified = true
         """, (courier_id,))
