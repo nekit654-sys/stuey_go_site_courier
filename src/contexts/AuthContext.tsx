@@ -94,10 +94,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = (authToken: string, userData: User) => {
+    console.log('[AuthContext] Login called:', { token: authToken?.substring(0, 10) + '...', userId: userData?.id });
     setToken(authToken);
     setUser(userData);
     localStorage.setItem('auth_token', authToken);
     localStorage.setItem('user_data', JSON.stringify(userData));
+    console.log('[AuthContext] Login complete, user:', userData);
   };
 
   const logout = () => {

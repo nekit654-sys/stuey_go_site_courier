@@ -201,12 +201,15 @@ export default function Auth() {
     
     const finalReferralCode = manualRefCode.trim() || referralCode || null;
     
-    fetch(`${API_URL}?route=auth&action=telegram`, {
+    const apiUrl = 'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=auth';
+    
+    fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        action: 'telegram',
         // Передаем ВСЕ данные от Telegram для проверки подписи
         id: telegramUser.id,
         telegram_id: telegramUser.id,
@@ -222,17 +225,21 @@ export default function Auth() {
       .then((res) => res.json())
       .then((data) => {
         console.log('[Telegram Auth] Ответ сервера:', data);
-        if (data.token) {
-          const user = {
-            id: data.user_id,
-            username: data.username,
-          };
-          login(data.token, user);
+        if (data.success && data.token && data.user) {
+          login(data.token, data.user);
           localStorage.removeItem('referral_code');
-          toast.success('Успешный вход через Telegram!');
+          
+          if (data.is_new_user) {
+            toast.success('Добро пожаловать! Регистрация завершена.');
+          } else {
+            toast.success('Вход выполнен!');
+          }
+          
           navigate('/dashboard');
         } else {
-          toast.error(data.error || 'Ошибка авторизации через Telegram');
+          const errorMsg = data.error || 'Ошибка авторизации через Telegram';
+          console.error('[Telegram Auth] Ошибка:', errorMsg);
+          toast.error(errorMsg);
         }
       })
       .catch((error) => {

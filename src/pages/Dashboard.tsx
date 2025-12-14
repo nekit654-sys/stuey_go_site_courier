@@ -79,12 +79,16 @@ export default function Dashboard() {
   const [telegramConnected, setTelegramConnected] = useState(false);
 
   useEffect(() => {
+    console.log('[Dashboard] Mount:', { isAuthenticated, userId: user?.id });
+    
     if (!isAuthenticated) {
+      console.log('[Dashboard] Not authenticated, redirecting to /auth');
       navigate('/auth');
       return;
     }
 
     if (user) {
+      console.log('[Dashboard] User found, loading data...');
       fetchStats();
       fetchReferrals();
       fetchWithdrawalRequests();
@@ -250,6 +254,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
+    console.log('[Dashboard] Loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
         <Icon name="Loader2" className="h-8 w-8 animate-spin text-black" />
@@ -258,8 +263,12 @@ export default function Dashboard() {
   }
 
   if (!user) {
+    console.log('[Dashboard] No user, redirecting...');
+    navigate('/auth');
     return null;
   }
+  
+  console.log('[Dashboard] Rendering dashboard for user:', user.id);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
