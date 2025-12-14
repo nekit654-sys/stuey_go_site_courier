@@ -167,6 +167,64 @@ export function CourierGame2D() {
     };
   }, []);
 
+  // Определение мобильного устройства и fullscreen
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setViewportSize(getViewportSize());
+      
+      // Обновляем размер canvas при изменении размера окна
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Запрос fullscreen при старте игры на мобильных
+  useEffect(() => {
+    if (gameState === 'playing' && window.innerWidth < 768) {
+      const elem = document.documentElement;
+      
+      // Пробуем разные методы для fullscreen
+      const requestFullscreen = elem.requestFullscreen || 
+        (elem as any).webkitRequestFullscreen || 
+        (elem as any).mozRequestFullScreen || 
+        (elem as any).msRequestFullscreen;
+      
+      if (requestFullscreen) {
+        requestFullscreen.call(elem).catch((err: any) => {
+          console.log('Fullscreen request failed:', err);
+        });
+      }
+      
+      // Блокируем прокрутку на мобильных
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+    } else {
+      // Разблокируем прокрутку
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+    };
+  }, [gameState]);
+
   // Звук взятия заказа (короткий бип)
   const playPickupSound = useCallback(() => {
     if (!audioContextRef.current) return;
@@ -505,7 +563,7 @@ export function CourierGame2D() {
     
     setTrees(newTrees);
     
-    // Создаём начальные заказы ТОЛЬКО В ЗДАНИЯХ
+    // Создаём начальные заказы У ВХОДА В ЗДАНИЯ (доступные с дороги)
     const initialOrders: Order[] = [];
     for (let i = 0; i < 3; i++) {
       const pickupBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
@@ -516,12 +574,39 @@ export function CourierGame2D() {
         deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
       }
       
+      // Размещаем точки У ВХОДА В ЗДАНИЕ (на ближайшей дороге)
+      // Находим ближайшую точку на дороге к зданию
+      const getEntrancePoint = (building: Building) => {
+        const centerX = building.x + building.width / 2;
+        const centerY = building.y + building.height / 2;
+        
+        // Определяем, к какой дороге ближе здание
+        const nearestRoadX = Math.round(centerX / 400) * 400;
+        const nearestRoadY = Math.round(centerY / 400) * 400;
+        
+        const distToVerticalRoad = Math.abs(centerX - nearestRoadX);
+        const distToHorizontalRoad = Math.abs(centerY - nearestRoadY);
+        
+        if (distToVerticalRoad < distToHorizontalRoad) {
+          // Ближе к вертикальной дороге
+          const roadX = centerX < nearestRoadX ? nearestRoadX - 30 : nearestRoadX + 30;
+          return { x: roadX, y: centerY };
+        } else {
+          // Ближе к горизонтальной дороге
+          const roadY = centerY < nearestRoadY ? nearestRoadY - 30 : nearestRoadY + 30;
+          return { x: centerX, y: roadY };
+        }
+      };
+      
+      const pickupPoint = getEntrancePoint(pickupBuilding);
+      const deliveryPoint = getEntrancePoint(deliveryBuilding);
+      
       initialOrders.push({
         id: `order-${i}`,
-        pickupX: pickupBuilding.x + pickupBuilding.width / 2,
-        pickupY: pickupBuilding.y + pickupBuilding.height / 2,
-        deliveryX: deliveryBuilding.x + deliveryBuilding.width / 2,
-        deliveryY: deliveryBuilding.y + deliveryBuilding.height / 2,
+        pickupX: pickupPoint.x,
+        pickupY: pickupPoint.y,
+        deliveryX: deliveryPoint.x,
+        deliveryY: deliveryPoint.y,
         reward: 30 + Math.floor(Math.random() * 70),
         timeLimit: 120,
         timeLeft: 120,
@@ -756,12 +841,35 @@ export function CourierGame2D() {
           deliveryBuilding = buildings[Math.floor(Math.random() * buildings.length)];
         }
         
+        // Функция для получения входа в здание (на дороге)
+        const getEntrancePoint = (building: Building) => {
+          const centerX = building.x + building.width / 2;
+          const centerY = building.y + building.height / 2;
+          
+          const nearestRoadX = Math.round(centerX / 400) * 400;
+          const nearestRoadY = Math.round(centerY / 400) * 400;
+          
+          const distToVerticalRoad = Math.abs(centerX - nearestRoadX);
+          const distToHorizontalRoad = Math.abs(centerY - nearestRoadY);
+          
+          if (distToVerticalRoad < distToHorizontalRoad) {
+            const roadX = centerX < nearestRoadX ? nearestRoadX - 30 : nearestRoadX + 30;
+            return { x: roadX, y: centerY };
+          } else {
+            const roadY = centerY < nearestRoadY ? nearestRoadY - 30 : nearestRoadY + 30;
+            return { x: centerX, y: roadY };
+          }
+        };
+        
+        const pickupPoint = getEntrancePoint(pickupBuilding);
+        const deliveryPoint = getEntrancePoint(deliveryBuilding);
+        
         setOrders(prev => [...prev, {
           id: `order-${Date.now()}`,
-          pickupX: pickupBuilding.x + pickupBuilding.width / 2,
-          pickupY: pickupBuilding.y + pickupBuilding.height / 2,
-          deliveryX: deliveryBuilding.x + deliveryBuilding.width / 2,
-          deliveryY: deliveryBuilding.y + deliveryBuilding.height / 2,
+          pickupX: pickupPoint.x,
+          pickupY: pickupPoint.y,
+          deliveryX: deliveryPoint.x,
+          deliveryY: deliveryPoint.y,
           reward: 30 + Math.floor(Math.random() * 70),
           timeLimit: 120,
           timeLeft: 120,
@@ -1109,7 +1217,7 @@ export function CourierGame2D() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights, trees, viewportSize]);
+  }, [player, orders, currentOrder, joystickMove, buildings, vehicles, pedestrians, camera, gameState, roads, trafficLights, trees]);
 
   const drawCity = (ctx: CanvasRenderingContext2D) => {
     // Рисуем траву между дорогами
@@ -1793,12 +1901,12 @@ export function CourierGame2D() {
 
   // Игра
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Canvas - адаптивный размер, БЕЗ tabIndex */}
+    <div className="relative w-full h-screen bg-black overflow-hidden" style={{ touchAction: 'none' }}>
+      {/* Canvas - полноэкранный размер для мобильных */}
       <canvas
         ref={canvasRef}
-        width={viewportSize.width}
-        height={viewportSize.height}
+        width={window.innerWidth}
+        height={window.innerHeight}
         className="w-full h-full"
         style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       />
