@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CourierTypes from "@/components/CourierTypes";
+import SocialProof from "@/components/SocialProof";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import StoriesViewer from "@/components/StoriesViewer";
@@ -85,6 +86,12 @@ const Index = () => {
     setShowStories(true);
   };
 
+  const referralLink = "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
+
+  const handleBecomeClick = () => {
+    window.open(referralLink, "_blank");
+  };
+
   return (
     <div className="min-h-screen">
       {showStories && stories.length > 0 && (
@@ -103,8 +110,20 @@ const Index = () => {
         <HeroSection onStoryClick={handleStoryClick} />
       </div>
       <CourierTypes onOpenPayoutModal={() => setShowPayoutModal(true)} />
+      <SocialProof />
       <FAQ />
       <Footer />
+      
+      {/* Липкая CTA-кнопка на мобильных */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur border-t-3 border-black z-40 lg:hidden shadow-[0_-4px_0_0_rgba(0,0,0,0.1)]">
+        <button
+          onClick={handleBecomeClick}
+          className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-extrabold px-6 py-4 rounded-2xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] transition-all duration-150 text-lg flex items-center justify-center gap-2"
+        >
+          <span>🚀</span>
+          <span>Стать курьером</span>
+        </button>
+      </div>
       
       {showPayoutModal && (
         <StartupPayoutModal

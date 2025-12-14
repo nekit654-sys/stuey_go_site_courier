@@ -9,20 +9,36 @@ const PromoMarquee = ({ onOpenPayoutModal }: PromoMarqueeProps) => {
   const messages = (
     <>
       <span className="inline-flex items-center gap-3 px-8">
-        <Icon name="Rocket" size={28} className="text-black" />
-        Старт без опыта — заработай с первого дня!
+        <Icon name="Zap" size={28} className="text-black" />
+        Первая выплата через 1 день работы!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="DollarSign" size={28} className="text-black" />
-        Бонус 5000₽ за первые 50 заказов — жми и заполни заявку!
+        Бонус 5000₽ — регистрируйся сейчас!
+      </span>
+      <span className="inline-flex items-center gap-3 px-8">
+        <Icon name="Users" size={28} className="text-black" />
+        2,847 курьеров уже зарабатывают с нами!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="Rocket" size={28} className="text-black" />
-        Старт без опыта — заработай с первого дня!
+        Без опыта — получи доход с первого дня!
+      </span>
+      <span className="inline-flex items-center gap-3 px-8">
+        <Icon name="Zap" size={28} className="text-black" />
+        Первая выплата через 1 день работы!
       </span>
       <span className="inline-flex items-center gap-3 px-8">
         <Icon name="DollarSign" size={28} className="text-black" />
-        Бонус 5000₽ за первые 50 заказов — жми и заполни заявку!
+        Бонус 5000₽ — регистрируйся сейчас!
+      </span>
+      <span className="inline-flex items-center gap-3 px-8">
+        <Icon name="Users" size={28} className="text-black" />
+        2,847 курьеров уже зарабатывают с нами!
+      </span>
+      <span className="inline-flex items-center gap-3 px-8">
+        <Icon name="Rocket" size={28} className="text-black" />
+        Без опыта — получи доход с первого дня!
       </span>
     </>
   );
