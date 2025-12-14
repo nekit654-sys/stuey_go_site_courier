@@ -119,6 +119,24 @@ const FAQ = () => {
             );
           })}
         </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 mb-6 text-lg font-medium">
+            Не нашли ответ на свой вопрос?
+          </p>
+          <a
+            href="https://t.me/stuey_go_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-extrabold px-8 py-4 rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150 text-lg"
+          >
+            <Icon name="MessageCircle" size={24} />
+            Задать вопрос в Telegram
+          </a>
+          <p className="text-gray-500 mt-4 text-sm">
+            Наш бот ответит на любой вопрос за секунды! 🚀
+          </p>
+        </div>
       </div>
     </section>
   );
