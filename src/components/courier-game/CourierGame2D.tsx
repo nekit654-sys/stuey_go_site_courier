@@ -137,7 +137,7 @@ export function CourierGame2D() {
   const [roads, setRoads] = useState<Road[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [pedestrians, setPedestrians] = useState<Pedestrian[]>([]);
-  const [joystickMove, setJoystickMove] = useState({ x: 0, y: 0 });
+  const joystickMove = useRef({ x: 0, y: 0 });
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
@@ -145,6 +145,7 @@ export function CourierGame2D() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
   const [camera, setCamera] = useState({ x: 0, y: 0 });
   const [viewportSize, setViewportSize] = useState(getViewportSize());
   const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
@@ -176,6 +177,7 @@ export function CourierGame2D() {
     
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
+      setIsPortrait(window.innerHeight > window.innerWidth);
       setViewportSize(getViewportSize());
       
       // Обновляем размер canvas при изменении размера окна
@@ -1151,18 +1153,24 @@ export function CourierGame2D() {
         moved = true;
       }
       
-      // Джойстик управление
-      if (joystickMove.x !== 0 || joystickMove.y !== 0) {
-        newX += joystickMove.x * player.speed;
-        newY += joystickMove.y * player.speed;
+      // Джойстик управление (приоритет над клавиатурой)
+      const joyX = joystickMove.current.x;
+      const joyY = joystickMove.current.y;
+      const joyMagnitude = Math.sqrt(joyX * joyX + joyY * joyY);
+      
+      if (joyMagnitude > 0.1) {
+        // Перезаписываем движение от клавиатуры
+        newX = player.x + joyX * player.speed;
+        newY = player.y + joyY * player.speed;
         moved = true;
       }
       
       // Отладка: логируем только когда двигаемся
-      if (moved && Math.random() < 0.01) { // Логируем 1% кадров чтобы не засорять консоль
+      if (moved && Math.random() < 0.05) { // Логируем 5% кадров чтобы не засорять консоль
         console.log('[Player] Moving:', { 
           keys: keys.current, 
-          joystick: joystickMove, 
+          joystick: joystickMove.current, 
+          joyMagnitude,
           oldPos: { x: player.x, y: player.y },
           newPos: { x: newX, y: newY }
         });
@@ -2160,8 +2168,12 @@ export function CourierGame2D() {
         style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       />
 
-      {/* HUD - компактный для мобильных */}
-      <div className="absolute top-2 left-2 bg-black/80 p-2 rounded-lg text-white space-y-1 border-2 border-yellow-400 text-xs sm:text-sm sm:p-4 sm:space-y-2 sm:top-4 sm:left-4">
+      {/* HUD - адаптивный для ориентации */}
+      <div className={`absolute bg-black/80 p-2 rounded-lg text-white border-2 border-yellow-400 ${
+        isPortrait 
+          ? 'top-2 left-2 space-y-0.5 text-[10px]' // Вертикальная: супер компактный
+          : 'top-2 left-2 space-y-1 text-xs sm:text-sm sm:p-4 sm:space-y-2 sm:top-4 sm:left-4'
+      }`}>
         <div className="flex items-center gap-1">
           <Icon name="User" size={16} className="text-yellow-400" />
           <span className="font-bold">Ур. {level}</span>
@@ -2183,17 +2195,21 @@ export function CourierGame2D() {
           <span className="font-bold capitalize text-[10px] sm:text-xs">{player.transport}</span>
         </div>
         {/* Индикатор джойстика для отладки */}
-        {isMobile && (joystickMove.x !== 0 || joystickMove.y !== 0) && (
+        {isMobile && (joystickMove.current.x !== 0 || joystickMove.current.y !== 0) && (
           <div className="flex items-center gap-1 text-[10px] text-cyan-400">
             <Icon name="Gamepad2" size={12} />
-            <span>{joystickMove.x.toFixed(2)}, {joystickMove.y.toFixed(2)}</span>
+            <span>{joystickMove.current.x.toFixed(2)}, {joystickMove.current.y.toFixed(2)}</span>
           </div>
         )}
       </div>
 
-      {/* Активный заказ - ВЕЗЁМ КЛИЕНТУ */}
+      {/* Активный заказ - адаптивная панель */}
       {currentOrder && (
-        <div className="absolute top-2 right-2 bg-gradient-to-br from-green-600 to-green-800 p-3 rounded-xl text-white border-3 border-green-400 shadow-lg text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+        <div className={`absolute bg-gradient-to-br from-green-600 to-green-800 rounded-xl text-white border-3 border-green-400 shadow-lg ${
+          isPortrait
+            ? 'bottom-44 left-2 right-2 p-2 text-[10px]' // Вертикальная: над джойстиком
+            : 'top-2 right-2 p-3 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4'
+        }`}>
           <div className="flex items-center gap-2 mb-2">
             <Icon name="TruckIcon" size={20} className="text-yellow-400 animate-pulse" />
             <span className="font-extrabold text-lg">ВЕЗЁМ КЛИЕНТУ</span>
@@ -2234,9 +2250,13 @@ export function CourierGame2D() {
         </div>
       )}
       
-      {/* Доступные заказы - ЗАБРАТЬ ЗАКАЗ */}
+      {/* Доступные заказы - адаптивная панель */}
       {!currentOrder && orders.filter(o => o.status === 'available').length > 0 && (
-        <div className="absolute top-2 right-2 bg-gradient-to-br from-yellow-600 to-orange-600 p-3 rounded-xl text-white border-3 border-yellow-400 shadow-lg text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4">
+        <div className={`absolute bg-gradient-to-br from-yellow-600 to-orange-600 rounded-xl text-white border-3 border-yellow-400 shadow-lg ${
+          isPortrait
+            ? 'bottom-44 left-2 right-2 p-2 text-[10px]' // Вертикальная: над джойстиком
+            : 'top-2 right-2 p-3 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4'
+        }`}>
           <div className="flex items-center gap-2 mb-2">
             <Icon name="Package" size={20} className="text-white animate-bounce" />
             <span className="font-extrabold text-lg">ЗАБРАТЬ ЗАКАЗ</span>
@@ -2285,9 +2305,15 @@ export function CourierGame2D() {
         </div>
       )}
 
-      {/* Мини-карта (спутниковый вид) */}
-      <div className="absolute bottom-4 right-4 bg-black/90 p-2 rounded-lg border-2 border-cyan-400 shadow-xl">
-        <div className="w-52 h-36 relative bg-green-900 rounded overflow-hidden">
+      {/* Мини-карта - адаптивная позиция и размер */}
+      <div className={`absolute bg-black/90 p-2 rounded-lg border-2 border-cyan-400 shadow-xl ${
+        isPortrait 
+          ? 'top-16 right-2' // Вертикальная: сверху справа
+          : 'bottom-4 right-4' // Горизонтальная: внизу справа
+      }`}>
+        <div className={`relative bg-green-900 rounded overflow-hidden ${
+          isPortrait ? 'w-32 h-24' : 'w-52 h-36'
+        }`}>
           {/* Сетка дорог на мини-карте */}
           {roads.map((road, idx) => (
             <div
@@ -2362,12 +2388,18 @@ export function CourierGame2D() {
         </div>
       </div>
 
-      {/* Кнопка взаимодействия (забрать/доставить) */}
+      {/* Кнопка взаимодействия - адаптивная позиция */}
       {canInteract.type && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+        <div className={`absolute z-50 animate-bounce ${
+          isPortrait 
+            ? 'bottom-24 left-1/2 -translate-x-1/2' // Вертикальная: по центру выше джойстика
+            : 'bottom-24 left-1/2 -translate-x-1/2' // Горизонтальная: обычное место
+        }`}>
           <Button
             onClick={handleInteraction}
-            className={`h-20 w-20 rounded-full font-bold text-lg shadow-2xl border-4 ${
+            className={`${
+              isPortrait ? 'h-16 w-16' : 'h-20 w-20'
+            } rounded-full font-bold text-lg shadow-2xl border-4 ${
               canInteract.type === 'pickup' 
                 ? 'bg-yellow-500 hover:bg-yellow-400 border-yellow-300 text-black' 
                 : 'bg-green-500 hover:bg-green-400 border-green-300 text-white'
@@ -2379,24 +2411,29 @@ export function CourierGame2D() {
             }}
           >
             <div className="flex flex-col items-center">
-              <span className="text-3xl mb-1">
+              <span className={isPortrait ? 'text-2xl' : 'text-3xl mb-1'}>
                 {canInteract.type === 'pickup' ? '📦' : '🏠'}
               </span>
-              <span className="text-[10px] leading-tight">
-                {canInteract.type === 'pickup' ? 'ЗАБРАТЬ' : 'ДОСТАВИТЬ'}
-              </span>
+              {!isPortrait && (
+                <span className="text-[10px] leading-tight">
+                  {canInteract.type === 'pickup' ? 'ЗАБРАТЬ' : 'ДОСТАВИТЬ'}
+                </span>
+              )}
             </div>
           </Button>
         </div>
       )}
 
-      {/* Мобильный джойстик - ВСЕГДА показываем на touch-устройствах */}
+      {/* Мобильный джойстик - адаптивная позиция для портретной/альбомной ориентации */}
       {isMobile && (
-        <div className="absolute bottom-4 left-4 z-50">
+        <div className={`absolute z-50 ${
+          isPortrait 
+            ? 'bottom-24 left-4' // Вертикальная: выше, чтобы не загораживать кнопку
+            : 'bottom-4 left-4'   // Горизонтальная: обычное место
+        }`}>
           <MobileJoystick
             onMove={(x, y) => {
-              console.log('Joystick move:', x, y);
-              setJoystickMove({ x, y });
+              joystickMove.current = { x, y };
             }}
           />
         </div>

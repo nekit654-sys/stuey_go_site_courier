@@ -103,14 +103,20 @@ export function MobileJoystick({ onMove }: JoystickProps) {
     };
   }, [isDragging]);
 
-  // Проверка мобильного устройства
+  // Проверка мобильного устройства и ориентации
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isPortrait = window.innerHeight > window.innerWidth;
+  
   if (!isMobile) return null;
+
+  // Адаптивный размер: меньше для вертикальной ориентации
+  const joystickSize = isPortrait ? 'w-24 h-24' : 'w-32 h-32';
+  const stickSize = isPortrait ? 'w-12 h-12' : 'w-16 h-16';
 
   return (
     <div
       ref={containerRef}
-      className="w-32 h-32 bg-black/40 rounded-full border-4 border-yellow-400 backdrop-blur-sm relative"
+      className={`${joystickSize} bg-black/40 rounded-full border-4 border-yellow-400 backdrop-blur-sm relative`}
       style={{
         touchAction: 'none'
       }}
@@ -122,7 +128,7 @@ export function MobileJoystick({ onMove }: JoystickProps) {
       
       {/* Джойстик */}
       <div
-        className="absolute w-16 h-16 bg-yellow-400 rounded-full border-4 border-black shadow-lg"
+        className={`absolute ${stickSize} bg-yellow-400 rounded-full border-4 border-black shadow-lg`}
         style={{
           left: '50%',
           top: '50%',
