@@ -549,15 +549,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Stories Viewer */}
-      {selectedStoryId && stories.length > 0 && (
-        <StoriesViewer
-          stories={stories}
-          initialStoryId={selectedStoryId}
-          onClose={() => setSelectedStoryId(null)}
-        />
-      )}
-
       <style dangerouslySetInnerHTML={{ __html: `
         .scrollbar-hide {
           -ms-overflow-style: none;
