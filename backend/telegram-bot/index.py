@@ -193,44 +193,49 @@ def log_activity(courier_id: Optional[int], action: str, details: Optional[Dict]
         conn.close()
 
 def search_web(query: str) -> str:
-    """Поиск информации в интернете через Tavily API"""
+    """Поиск информации в интернете через Yandex Search API"""
     try:
-        tavily_api_key = os.environ.get('TAVILY_API_KEY', '')
-        if not tavily_api_key:
+        yandex_search_api_key = os.environ.get('YANDEX_SEARCH_API_KEY', '')
+        yandex_folder_id = os.environ.get('YANDEX_FOLDER_ID', '')
+        
+        if not yandex_search_api_key or not yandex_folder_id:
+            print('⚠️ Yandex Search API key or folder ID not found')
             return ""
         
-        url = 'https://api.tavily.com/search'
-        data = {
-            'api_key': tavily_api_key,
-            'query': query,
-            'search_depth': 'basic',
-            'max_results': 3,
-            'include_answer': True
-        }
+        url = f'https://yandex.com/search/xml?folderid={yandex_folder_id}&apikey={yandex_search_api_key}&query={urllib.parse.quote(query)}&l10n=ru&sortby=rlv&filter=none&maxpassages=2&groupby=attr%3D%22%22.mode%3Dflat.groups-on-page%3D3'
         
-        print(f'🔍 Searching web for: {query}')
+        print(f'🔍 Searching Yandex for: {query}')
         
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(data).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
+        req = urllib.request.Request(url)
         
         with urllib.request.urlopen(req, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
+            xml_response = response.read().decode('utf-8')
             
-            if 'answer' in result and result['answer']:
-                print(f'✅ Web search answer: {result["answer"][:100]}...')
-                return result['answer']
+            # Парсим XML вручную (простой парсинг для passages)
+            passages = []
+            import re
+            passage_matches = re.findall(r'<passage>(.*?)</passage>', xml_response, re.DOTALL)
             
-            if 'results' in result and result['results']:
-                snippets = [r['content'][:200] for r in result['results'][:2]]
-                return ' '.join(snippets)
+            for passage in passage_matches[:3]:
+                # Убираем HTML теги
+                clean_passage = re.sub(r'<[^>]+>', '', passage)
+                # Убираем лишние пробелы
+                clean_passage = ' '.join(clean_passage.split())
+                if clean_passage:
+                    passages.append(clean_passage)
             
+            if passages:
+                result = ' '.join(passages[:2])
+                print(f'✅ Yandex search found {len(passages)} passages: {result[:100]}...')
+                return result
+            
+            print('⚠️ No passages found in Yandex search')
             return ""
     
     except Exception as e:
-        print(f'❌ Web search error: {e}')
+        print(f'❌ Yandex search error: {e}')
+        import traceback
+        traceback.print_exc()
         return ""
 
 def detect_search_intent(question: str, courier_city: str = None) -> Optional[Dict[str, Any]]:
