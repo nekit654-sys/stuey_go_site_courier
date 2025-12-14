@@ -24,13 +24,14 @@ const WhatsAppButton: React.FC = () => {
     window.open(telegramUrl, '_blank');
   };
 
-  // На главной странице - выше липкой CTA-кнопки на мобильных, в личном кабинете - выше меню
+  // На главной странице скрываем на мобильных (кнопка в нижней панели), в личном кабинете - выше меню
+  const isIndexPage = location.pathname === '/';
   const buttonPosition = location.pathname === '/dashboard' 
     ? 'bottom-24 lg:bottom-6' 
-    : 'bottom-24 lg:bottom-6';
+    : 'bottom-6';
 
   return (
-    <div className={`fixed ${buttonPosition} right-6 z-50`}>
+    <div className={`fixed ${buttonPosition} right-6 z-50 ${isIndexPage ? 'hidden lg:block' : ''}`}>
 
       {/* Кнопка Telegram поддержки */}
       <button
