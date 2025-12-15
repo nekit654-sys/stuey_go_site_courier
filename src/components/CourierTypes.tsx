@@ -138,6 +138,16 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
             </Card>
           ))}
         </div>
+
+        <div className="flex justify-center">
+          <Button
+            onClick={(e) => handleMagicClick(e, 'general')}
+            size="lg"
+            className="bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-extrabold text-xl px-12 py-6 rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150"
+          >
+            Подать заявку
+          </Button>
+        </div>
         </div>
       </div>
     </section>
