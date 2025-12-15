@@ -1,22 +1,49 @@
 {
   "tests": [
     {
-      "name": "Telegram webhook test",
+      "name": "Telegram /start command for new user",
       "method": "POST",
       "path": "/",
       "body": {
         "message": {
           "message_id": 1,
           "from": {
-            "id": 12345678,
-            "first_name": "Test",
-            "username": "testuser"
+            "id": 999999999,
+            "first_name": "Новичок",
+            "username": "newbie"
           },
           "chat": {
-            "id": 12345678,
+            "id": 999999999,
             "type": "private"
           },
-          "text": "/help"
+          "text": "/start"
+        }
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "ok": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Telegram callback query test",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "callback_query": {
+          "id": "test123",
+          "from": {
+            "id": 999999999,
+            "first_name": "Test"
+          },
+          "message": {
+            "message_id": 100,
+            "chat": {
+              "id": 999999999,
+              "type": "private"
+            }
+          },
+          "data": "earnings"
         }
       },
       "expectedStatus": 200,
