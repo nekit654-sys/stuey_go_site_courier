@@ -2614,15 +2614,14 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 """, (external_id, creator_username, referral_name, phone, city, 
                       actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename, earning_id))
                 
-                # Синхронизировать данные в таблицу couriers для умного рекрутинга
+                # Обновляем данные в users если нужно
                 cur.execute("""
-                    UPDATE t_p25272970_courier_button_site.couriers
-                    SET first_name = COALESCE(first_name, %s),
-                        last_name = COALESCE(last_name, %s),
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET full_name = COALESCE(full_name, %s),
                         phone = COALESCE(phone, %s),
                         city = COALESCE(city, %s)
                     WHERE id = %s
-                """, (first_name, last_name, phone, city, courier_id))
+                """, (referral_name, phone, city, courier_id))
                 
                 duplicates += 1
             else:
@@ -2637,16 +2636,6 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                       actual_orders, actual_reward, csv_period_start, csv_period_end, csv_filename))
                 
                 earning_id = cur.fetchone()['id']
-                
-                # Синхронизировать данные в таблицу couriers для умного рекрутинга
-                cur.execute("""
-                    UPDATE t_p25272970_courier_button_site.couriers
-                    SET first_name = COALESCE(first_name, %s),
-                        last_name = COALESCE(last_name, %s),
-                        phone = COALESCE(phone, %s),
-                        city = COALESCE(city, %s)
-                    WHERE id = %s
-                """, (first_name, last_name, phone, city, courier_id))
             
             # Получаем имя курьера для логирования
             cur.execute("""

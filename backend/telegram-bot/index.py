@@ -112,8 +112,8 @@ def get_courier_stats(courier_id: int) -> Dict[str, Any]:
     
     try:
         cursor.execute("""
-            SELECT first_name, last_name, city, phone 
-            FROM t_p25272970_courier_button_site.couriers
+            SELECT full_name, city, phone, referral_code
+            FROM t_p25272970_courier_button_site.users
             WHERE id = %s
         """, (courier_id,))
         
@@ -121,7 +121,7 @@ def get_courier_stats(courier_id: int) -> Dict[str, Any]:
         if not courier:
             return {'name': 'Курьер', 'city': 'Не указан', 'total_earned': 0, 'self_bonus_progress': 0, 'invited_count': 0, 'active_referrals': 0, 'total_referral_earned': 0}
         
-        name = f"{courier['first_name'] or ''} {courier['last_name'] or ''}".strip() or 'Курьер'
+        name = courier['full_name'] or 'Курьер'
         
         cursor.execute("""
             SELECT COALESCE(SUM(total_amount), 0) as total_earned
@@ -141,19 +141,27 @@ def get_courier_stats(courier_id: int) -> Dict[str, Any]:
         
         cursor.execute("""
             SELECT COUNT(*) as invited_count
-            FROM t_p25272970_courier_button_site.referrals
-            WHERE referrer_id = %s
+            FROM t_p25272970_courier_button_site.users
+            WHERE invited_by_user_id = %s
         """, (courier_id,))
         refs = cursor.fetchone()
         invited_count = refs['invited_count'] if refs else 0
         
         cursor.execute("""
             SELECT 
-                COUNT(*) FILTER (WHERE bonus_paid = true) as active_count,
-                COALESCE(SUM(bonus_amount) FILTER (WHERE bonus_paid = true), 0) as total_referral_earned
-            FROM t_p25272970_courier_button_site.referrals
-            WHERE referrer_id = %s
-        """, (courier_id,))
+                COUNT(*) FILTER (WHERE total_orders >= 50) as active_count,
+                COALESCE(
+                    (SELECT SUM(pd.amount) 
+                     FROM t_p25272970_courier_button_site.payment_distributions pd
+                     WHERE pd.recipient_id = %s 
+                       AND pd.recipient_type = 'courier_referrer' 
+                       AND pd.payment_status = 'paid'
+                       AND pd.amount > 0), 
+                    0
+                ) as total_referral_earned
+            FROM t_p25272970_courier_button_site.users
+            WHERE invited_by_user_id = %s
+        """, (courier_id, courier_id))
         active = cursor.fetchone()
         active_referrals = active['active_count'] if active else 0
         total_referral_earned = float(active['total_referral_earned']) if active else 0
@@ -182,14 +190,13 @@ def get_courier_referral_code(courier_id: int) -> str:
     
     try:
         cursor.execute("""
-            SELECT phone FROM t_p25272970_courier_button_site.couriers
+            SELECT referral_code FROM t_p25272970_courier_button_site.users
             WHERE id = %s
         """, (courier_id,))
         
         result = cursor.fetchone()
-        if result and result['phone']:
-            phone = result['phone'].replace('+', '').replace(' ', '').replace('-', '')
-            return phone[-6:] if len(phone) >= 6 else f'USER{courier_id}'
+        if result and result['referral_code']:
+            return result['referral_code']
         return f'USER{courier_id}'
     except Exception as e:
         print(f'Error getting ref code: {e}')
