@@ -30,6 +30,7 @@ import { ScreenNavigationArrow } from './ScreenNavigationArrow';
 import { OrderHUD, OrderHUDMobile } from './OrderHUD';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { generateCityBuildings, type BuildingData } from './CityData';
 import { collisionSystem } from './CollisionSystem';
 
@@ -61,6 +62,7 @@ interface Order {
 
 export function CityDeliveryRush() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { settings, currentFps } = usePerformanceSettings();
   const { orders, activeOrder, acceptOrder, completeOrder, cancelOrder } = useFoodOrders();
   const [gameStarted, setGameStarted] = useState(false);
@@ -902,6 +904,13 @@ export function CityDeliveryRush() {
         </div>
         
         <div className={`flex gap-1 sm:gap-2 ${isMobile && !isLandscape ? 'w-full justify-center' : ''}`}>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gray-700 hover:bg-gray-800 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-gray-900 transition-colors"
+          >
+            ←
+          </button>
+
           <button
             onClick={() => setShowSkillTree(true)}
             className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-purple-800 transition-colors"
