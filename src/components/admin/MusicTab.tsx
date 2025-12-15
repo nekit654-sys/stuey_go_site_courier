@@ -63,10 +63,10 @@ export default function MusicTab({ authToken }: MusicTabProps) {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 2 * 1024 * 1024) {
       toast({
         title: 'Ошибка',
-        description: 'Размер файла не должен превышать 10 МБ',
+        description: 'Размер файла не должен превышать 2 МБ. Используйте сжатый MP3 файл.',
         variant: 'destructive',
       });
       return;
@@ -107,6 +107,13 @@ export default function MusicTab({ authToken }: MusicTabProps) {
             });
 
             console.log('✅ Ответ получен, status:', response.status);
+            
+            // Обработка ошибки 413 - файл слишком большой
+            if (response.status === 413) {
+              reject(new Error('Файл слишком большой. Используйте файл до 2 МБ или сожмите MP3.'));
+              return;
+            }
+            
             const data = await response.json();
             console.log('📄 Данные ответа:', data);
 
@@ -227,7 +234,7 @@ export default function MusicTab({ authToken }: MusicTabProps) {
         <CardContent className="space-y-4">
           {/* Загрузка файла */}
           <div className="space-y-2">
-            <Label htmlFor="music-file">Загрузить музыку (MP3, до 10 МБ)</Label>
+            <Label htmlFor="music-file">Загрузить музыку (MP3, до 2 МБ)</Label>
             <div className="flex gap-2">
               <Input
                 id="music-file"

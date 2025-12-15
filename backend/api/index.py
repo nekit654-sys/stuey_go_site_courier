@@ -188,6 +188,13 @@ def handle_referrals(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str
         auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
         if auth_token:
             return get_admin_referral_stats(headers)
+        else:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'error': 'Admin token required'}),
+                'isBase64Encoded': False
+            }
     
     user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
     
