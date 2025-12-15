@@ -5,6 +5,7 @@ import { API_URL } from '@/config/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame } from '@/contexts/GameContext';
 import { useNavigate } from 'react-router-dom';
+import GameLeaderboard from '@/components/dashboard/GameLeaderboard';
 
 interface Game2DStats {
   game_high_score: number;
@@ -341,6 +342,9 @@ export default function GamesTab({ userId }: GamesTabProps) {
           </div>
         </>
       )}
+
+      {/* Общий лидерборд */}
+      <GameLeaderboard />
     </div>
   );
 }

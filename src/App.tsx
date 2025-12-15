@@ -17,7 +17,7 @@ import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Leaderboard from "./pages/Leaderboard";
+
 import NotFound from "./pages/NotFound";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import ResetAdminPasswordPage from "./pages/ResetAdminPasswordPage";
@@ -79,7 +79,6 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
         <Route path="/admin-reset" element={<ResetAdminPasswordPage />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -223,7 +223,7 @@ def get_registered_keyboard():
             [{'text': '📊 Моя статистика', 'callback_data': 'my_stats'}],
             [{'text': '💰 Реферальная ссылка', 'callback_data': 'referral_link'}],
             [{'text': '💸 Вывести деньги', 'callback_data': 'withdrawal'}],
-            [{'text': '🎮 Игры', 'callback_data': 'games'}],
+            [{'text': '🎮 Играть в игры', 'web_app': {'url': 'https://stuey-go.ru/games'}}],
             [{'text': '⚙️ Настройки', 'callback_data': 'settings'}]
         ]
     }
@@ -359,20 +359,7 @@ https://stuey-go.ru?ref={ref_code}
         }
         return text, keyboard
     
-    elif callback_data == 'games':
-        text = """🎮 <b>Игры</b>
 
-Раздел с играми находится в разработке!
-
-Скоро здесь появятся:
-• Мини-игры с бонусами
-• Рейтинг курьеров
-• Ежедневные челленджи
-
-Следи за обновлениями! 🚀"""
-        
-        keyboard = {'inline_keyboard': [[{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]]}
-        return text, keyboard
     
     elif callback_data == 'settings':
         text = """⚙️ <b>Настройки</b>

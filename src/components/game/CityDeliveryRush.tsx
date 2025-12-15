@@ -7,7 +7,7 @@ import { MiniMap } from './GPSNavigation';
 import { GPSMap } from './GPSMap';
 import { RoundMiniMap } from './RoundMiniMap';
 import { OrderInfoPanel } from './OrderInfoPanel';
-import { Leaderboard } from './Leaderboard';
+
 import { CourierProfile } from './CourierProfile';
 import { SoundManager } from './SoundManager';
 import { usePerformanceSettings, PerformanceMonitor } from './PerformanceManager';
@@ -67,7 +67,7 @@ export function CityDeliveryRush() {
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
+
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState(0.3);
   const [sfxVolume, setSfxVolume] = useState(0.5);
@@ -908,12 +908,7 @@ export function CityDeliveryRush() {
           >
             🌟
           </button>
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm border-2 border-yellow-700 transition-colors"
-          >
-            🏆
-          </button>
+
           <button
             onClick={() => {
               if (sessionStats.deliveriesCompleted > 0) {
@@ -1051,9 +1046,7 @@ export function CityDeliveryRush() {
         />
       )}
       
-      {showLeaderboard && (
-        <Leaderboard onClose={() => setShowLeaderboard(false)} />
-      )}
+
       
       {/* Туториал */}
       {showTutorial && activeOrder && (
