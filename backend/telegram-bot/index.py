@@ -225,27 +225,43 @@ def get_courier_stats(courier_id: int) -> Dict[str, Any]:
         cursor.close()
         conn.close()
 
+def get_reply_keyboard(is_registered: bool = False):
+    """Постоянная клавиатура внизу экрана (reply keyboard)"""
+    if is_registered:
+        return {
+            'keyboard': [
+                ['📊 Статистика', '💰 Реферальная ссылка'],
+                ['💸 Заработок', '🎮 Игры'],
+                ['⚙️ Настройки', '❓ Помощь']
+            ],
+            'resize_keyboard': True,
+            'persistent': True
+        }
+    else:
+        return {
+            'keyboard': [
+                ['🚀 Зарегистрироваться'],
+                ['💰 Заработок', '📋 Требования'],
+                ['🎁 Реферальная программа', '🔗 Привязать аккаунт'],
+                ['❓ FAQ']
+            ],
+            'resize_keyboard': True,
+            'persistent': True
+        }
+
 def get_main_menu_keyboard(is_registered: bool = False):
-    """Главное меню: для новичков - упор на регистрацию, для зарегистрированных - функционал"""
+    """Inline меню для быстрых действий"""
     if is_registered:
         return {
             'inline_keyboard': [
-                [{'text': '📊 Моя статистика', 'callback_data': 'stats'}],
-                [{'text': '💰 Реферальная ссылка', 'callback_data': 'referral'}],
-                [{'text': '💸 Заработок', 'callback_data': 'earnings_detail'}],
-                [{'text': '🎮 Играть в игры', 'web_app': {'url': f'{WEBSITE_URL}/games'}}],
-                [{'text': '❓ Помощь', 'callback_data': 'help'}]
+                [{'text': '💸 Подать заявку на вывод', 'url': f'{WEBSITE_URL}/dashboard'}],
+                [{'text': '🌐 Открыть сайт', 'url': WEBSITE_URL}]
             ]
         }
     else:
         return {
             'inline_keyboard': [
-                [{'text': '🚀 ЗАРЕГИСТРИРОВАТЬСЯ', 'url': WEBSITE_URL}],
-                [{'text': '💰 Сколько можно заработать?', 'callback_data': 'earnings'}],
-                [{'text': '📋 Требования и условия', 'callback_data': 'requirements'}],
-                [{'text': '🎁 Реферальная программа (до 360,000₽)', 'callback_data': 'referral_info'}],
-                [{'text': '🔗 Уже зарегистрирован? Привязать Telegram', 'callback_data': 'link_account'}],
-                [{'text': '❓ FAQ', 'callback_data': 'faq'}]
+                [{'text': '🚀 ЗАРЕГИСТРИРОВАТЬСЯ СЕЙЧАС', 'url': WEBSITE_URL}]
             ]
         }
 
@@ -617,15 +633,69 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             text = message.get('text', '')
             
             if text.startswith('/start'):
-                response_text, keyboard = handle_start_command(telegram_id, username, first_name)
-                send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                response_text, inline_keyboard = handle_start_command(telegram_id, username, first_name)
+                courier = get_courier_by_telegram(telegram_id)
+                reply_keyboard = get_reply_keyboard(is_registered=bool(courier))
+                
+                # Отправляем сообщение с reply keyboard
+                send_telegram_message(chat_id, response_text, reply_markup=reply_keyboard)
+                # Отправляем inline кнопки отдельным сообщением если есть
+                if inline_keyboard:
+                    send_telegram_message(chat_id, "Быстрые действия:", reply_markup=inline_keyboard)
             
             else:
                 courier = get_courier_by_telegram(telegram_id)
+                # Обработка текстовых команд из reply keyboard
                 if courier:
-                    send_telegram_message(chat_id, "Используй кнопки меню ниже! 👇", reply_markup=get_main_menu_keyboard(is_registered=True))
+                    if text == '📊 Статистика':
+                        response_text, keyboard = handle_registered_callbacks('stats', telegram_id)
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '💰 Реферальная ссылка':
+                        response_text, keyboard = handle_registered_callbacks('referral', telegram_id)
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '💸 Заработок':
+                        response_text, keyboard = handle_registered_callbacks('earnings_detail', telegram_id)
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '🎮 Игры':
+                        games_keyboard = {
+                            'inline_keyboard': [
+                                [{'text': '🎮 Открыть игры', 'url': f'{WEBSITE_URL}/games'}],
+                                [{'text': '◀️ Назад', 'callback_data': 'menu'}]
+                            ]
+                        }
+                        send_telegram_message(chat_id, "🎮 <b>ИГРЫ И РАЗВЛЕЧЕНИЯ</b>\n\nОткрой мини-игры и зарабатывай бонусы! 🎁", reply_markup=games_keyboard)
+                    elif text == '⚙️ Настройки':
+                        settings_text = f"""⚙️ <b>НАСТРОЙКИ</b>\n\n<b>Твой Telegram ID:</b> <code>{telegram_id}</code>\n\nЗдесь скоро появятся дополнительные настройки!"""
+                        send_telegram_message(chat_id, settings_text)
+                    elif text == '❓ Помощь':
+                        response_text, keyboard = handle_registered_callbacks('help', telegram_id)
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    else:
+                        send_telegram_message(chat_id, "Используй кнопки меню ниже! 👇")
                 else:
-                    send_telegram_message(chat_id, f"Привет! Нажми /start чтобы начать! 🚀")
+                    # Незарегистрированные
+                    if text == '🚀 Зарегистрироваться':
+                        reg_keyboard = {'inline_keyboard': [[{'text': '🚀 Перейти на сайт', 'url': WEBSITE_URL}]]}
+                        send_telegram_message(chat_id, f"👉 Регистрируйся на сайте и начинай зарабатывать!\n\n{WEBSITE_URL}", reply_markup=reg_keyboard)
+                    elif text == '💰 Заработок':
+                        response_text, keyboard = handle_newbie_callbacks('earnings')
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '📋 Требования':
+                        response_text, keyboard = handle_newbie_callbacks('requirements')
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '🎁 Реферальная программа':
+                        response_text, keyboard = handle_newbie_callbacks('referral_info')
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text == '🔗 Привязать аккаунт':
+                        code = create_verification_code(telegram_id)
+                        text_msg = f"""🔗 <b>ПРИВЯЗКА TELEGRAM</b>\n\n<b>Твой Telegram ID:</b> <code>{telegram_id}</code>\n\n<b>Код привязки:</b> <code>{code}</code>\n\nВведи этот код в личном кабинете на сайте!"""
+                        link_keyboard = {'inline_keyboard': [[{'text': '🌐 Открыть личный кабинет', 'url': f'{WEBSITE_URL}/dashboard'}]]}
+                        send_telegram_message(chat_id, text_msg, reply_markup=link_keyboard)
+                    elif text == '❓ FAQ':
+                        response_text, keyboard = handle_newbie_callbacks('faq')
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    else:
+                        send_telegram_message(chat_id, f"Привет! Нажми /start чтобы начать! 🚀")
         
         elif 'callback_query' in body:
             callback_query = body['callback_query']
