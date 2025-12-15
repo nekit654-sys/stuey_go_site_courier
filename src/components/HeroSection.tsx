@@ -133,9 +133,17 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
             <HeroIncomeCalculator />
           </div>
 
-          {!isAuthenticated && (
-            <div className="flex items-center justify-center">
-              <Link to="/auth">
+          <div className="hidden lg:flex flex-col sm:flex-row gap-4 items-center justify-center max-w-2xl mx-auto">
+            <Button
+              onClick={handleBecomeClick}
+              className="bg-yellow-400 text-black font-extrabold py-6 px-8 sm:px-12 text-lg sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full sm:w-auto"
+            >
+              <Icon name="Rocket" size={24} className="mr-2" />
+              <span className="whitespace-nowrap">Подать заявку</span>
+            </Button>
+            
+            {!isAuthenticated && (
+              <Link to="/auth" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   className="bg-white/90 hover:bg-white text-black font-extrabold py-6 px-8 sm:px-12 text-lg sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full sm:w-auto"
@@ -144,8 +152,8 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
                   <span className="whitespace-nowrap">Уже курьер? Войти</span>
                 </Button>
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </section>
