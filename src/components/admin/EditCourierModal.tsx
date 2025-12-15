@@ -107,32 +107,32 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl border-4 border-black shadow-[0_8px_0_0_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500 border-b-4 border-black p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="bg-blue-600 border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-black/10 rounded-2xl border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                <Icon name="UserCog" size={32} className="text-black" />
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Icon name="UserCog" size={32} className="text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-extrabold text-black">Редактирование курьера</h2>
-                <p className="text-black/80 font-bold">ID: #{courier.id}</p>
+                <h2 className="text-2xl font-semibold text-white">Редактирование курьера</h2>
+                <p className="text-white/90 font-medium">ID: #{courier.id}</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="bg-black/10 hover:bg-black/20 border-2 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[0_1px_0_0_rgba(0,0,0,1)]"
+              className="bg-white/10 hover:bg-white/20 border border-white/30 hover:bg-white/30"
             >
-              <Icon name="X" size={24} className="text-black" />
+              <Icon name="X" size={24} className="text-white" />
             </Button>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <Label htmlFor="full_name" className="text-base font-extrabold text-black">
+            <Label htmlFor="full_name" className="text-base font-semibold text-gray-900">
               ФИО *
             </Label>
             <Input
@@ -147,7 +147,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="phone" className="text-base font-extrabold text-black">
+              <Label htmlFor="phone" className="text-base font-semibold text-gray-900">
                 Телефон
               </Label>
               <Input
@@ -155,11 +155,11 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="mt-2 border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px]"
+                className="mt-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
-              <Label htmlFor="city" className="text-base font-extrabold text-black">
+              <Label htmlFor="city" className="text-base font-semibold text-gray-900">
                 Город
               </Label>
               <Input
@@ -167,13 +167,13 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                 type="text"
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="mt-2 border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px]"
+                className="mt-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="email" className="text-base font-extrabold text-black">
+            <Label htmlFor="email" className="text-base font-semibold text-gray-900">
               Email
             </Label>
             <Input
@@ -186,7 +186,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
           </div>
 
           <div>
-            <Label htmlFor="external_id" className="text-base font-extrabold text-black">
+            <Label htmlFor="external_id" className="text-base font-semibold text-gray-900">
               External ID
             </Label>
             <Input
@@ -199,7 +199,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
           </div>
 
           <div>
-            <Label htmlFor="referral_code_input" className="text-base font-extrabold text-black">
+            <Label htmlFor="referral_code_input" className="text-base font-semibold text-gray-900">
               Реферальный код (кто пригласил)
             </Label>
             <div className="flex gap-2 mt-2">
@@ -215,19 +215,19 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                     setReferrerName('');
                   }}
                   placeholder="Введите код реферера"
-                  className={`border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px] ${
+                  className={`border shadow-sm focus:ring-2 focus:ring-blue-500 ${
                     codeStatus === 'valid' ? 'bg-green-50 border-green-500' : 
-                    codeStatus === 'invalid' ? 'bg-red-50 border-red-500' : ''
+                    codeStatus === 'invalid' ? 'bg-red-50 border-red-500' : 'border-gray-300'
                   }`}
                 />
                 {codeStatus === 'valid' && referrerName && (
-                  <div className="absolute top-full left-0 mt-1 text-xs text-green-600 font-bold flex items-center gap-1">
+                  <div className="absolute top-full left-0 mt-1 text-xs text-green-600 font-semibold flex items-center gap-1">
                     <Icon name="CheckCircle" size={12} />
                     {referrerName}
                   </div>
                 )}
                 {codeStatus === 'invalid' && (
-                  <div className="absolute top-full left-0 mt-1 text-xs text-red-600 font-bold flex items-center gap-1">
+                  <div className="absolute top-full left-0 mt-1 text-xs text-red-600 font-semibold flex items-center gap-1">
                     <Icon name="XCircle" size={12} />
                     Код не найден
                   </div>
@@ -237,7 +237,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                 type="button"
                 onClick={() => checkReferralCode(formData.referral_code_input)}
                 disabled={!formData.referral_code_input.trim() || isCheckingCode}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-extrabold border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold border border-blue-700 shadow-sm"
               >
                 {isCheckingCode ? (
                   <Icon name="Loader2" size={18} className="animate-spin" />
@@ -253,7 +253,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="total_orders" className="text-base font-extrabold text-black">
+              <Label htmlFor="total_orders" className="text-base font-semibold text-gray-900">
                 Всего заказов
               </Label>
               <Input
@@ -261,11 +261,11 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                 type="number"
                 value={formData.total_orders}
                 onChange={(e) => setFormData({ ...formData, total_orders: parseInt(e.target.value) || 0 })}
-                className="mt-2 border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px]"
+                className="mt-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
-              <Label htmlFor="total_earnings" className="text-base font-extrabold text-black">
+              <Label htmlFor="total_earnings" className="text-base font-semibold text-gray-900">
                 Всего заработано (₽)
               </Label>
               <Input
@@ -273,7 +273,7 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
                 type="number"
                 value={formData.total_earnings}
                 onChange={(e) => setFormData({ ...formData, total_earnings: parseFloat(e.target.value) || 0 })}
-                className="mt-2 border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] focus:shadow-[0_1px_0_0_rgba(0,0,0,1)] focus:translate-y-[2px]"
+                className="mt-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -284,27 +284,27 @@ export default function EditCourierModal({ courier, onClose, onSave }: EditCouri
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-5 h-5 border-3 border-black"
+              className="w-5 h-5 border border-gray-300 rounded"
             />
-            <Label htmlFor="is_active" className="text-base font-extrabold text-black cursor-pointer">
+            <Label htmlFor="is_active" className="text-base font-semibold text-gray-900 cursor-pointer">
               Активен
             </Label>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t-2 border-black/20">
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={isSaving}
-              className="flex-1 border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px]"
+              className="flex-1 border border-gray-300 shadow-sm hover:bg-gray-50"
             >
               Отмена
             </Button>
             <Button
               type="submit"
               disabled={isSaving}
-              className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold border-3 border-black shadow-[0_5px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[5px] active:shadow-none transition-all"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold border border-blue-700 shadow-sm transition-colors"
             >
               {isSaving ? (
                 <>

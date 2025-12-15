@@ -171,7 +171,7 @@ const FeedbackTab: React.FC = () => {
   };
 
   // Скрываем на странице админки
-  if (location.pathname === '/dashboard' || location.pathname === '/login' || location.pathname === '/auth') {
+  if (location.pathname === '/dashboard' || location.pathname === '/ask' || location.pathname === '/auth') {
     return null;
   }
 
