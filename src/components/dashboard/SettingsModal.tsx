@@ -302,7 +302,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader className="pb-2">
           <DialogTitle className="text-base sm:text-2xl font-bold">Настройки</DialogTitle>
         </DialogHeader>
