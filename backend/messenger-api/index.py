@@ -145,6 +145,85 @@ def unlink_messenger(courier_id: int, messenger_type: str) -> Dict[str, Any]:
         cursor.close()
         conn.close()
 
+def telegram_webapp_auth(telegram_id: int, first_name: str, last_name: Optional[str], username: Optional[str]) -> Dict[str, Any]:
+    """Авторизация пользователя через Telegram Web App"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Ищем привязанного курьера
+        cursor.execute("""
+            SELECT courier_id FROM t_p25272970_courier_button_site.messenger_connections
+            WHERE messenger_type = 'telegram' 
+            AND messenger_user_id = %s 
+            AND is_verified = true
+        """, (str(telegram_id),))
+        
+        connection = cursor.fetchone()
+        
+        if not connection:
+            return {
+                'success': False, 
+                'error': 'Telegram не привязан к аккаунту. Привяжите в настройках сайта.'
+            }
+        
+        courier_id = connection['courier_id']
+        
+        # Получаем данные курьера
+        cursor.execute("""
+            SELECT 
+                id, full_name, email, phone, city, avatar_url, 
+                referral_code, total_orders, invited_by_user_id
+            FROM t_p25272970_courier_button_site.couriers
+            WHERE id = %s
+        """, (courier_id,))
+        
+        courier = cursor.fetchone()
+        
+        if not courier:
+            return {'success': False, 'error': 'Курьер не найден'}
+        
+        # Генерируем токен авторизации
+        import secrets
+        token = secrets.token_urlsafe(32)
+        
+        # Сохраняем сессию (можно добавить таблицу sessions если нужно)
+        cursor.execute("""
+            UPDATE t_p25272970_courier_button_site.messenger_connections
+            SET last_interaction_at = NOW()
+            WHERE courier_id = %s AND messenger_type = 'telegram'
+        """, (courier_id,))
+        
+        conn.commit()
+        
+        # Формируем данные пользователя
+        user_data = {
+            'id': courier['id'],
+            'oauth_provider': 'telegram',
+            'oauth_id': str(telegram_id),
+            'full_name': courier['full_name'],
+            'email': courier['email'],
+            'phone': courier['phone'],
+            'city': courier['city'],
+            'avatar_url': courier['avatar_url'],
+            'referral_code': courier['referral_code'],
+            'total_orders': courier['total_orders'] or 0,
+            'invited_by_user_id': courier['invited_by_user_id'],
+            'is_verified': True
+        }
+        
+        return {
+            'success': True,
+            'token': token,
+            'user': user_data
+        }
+        
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
 def verify_link_code(code: str, messenger_type: str, messenger_user_id: str, messenger_username: Optional[str]) -> Dict[str, Any]:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -317,6 +396,29 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 result = unlink_messenger(courier_id, messenger_type)
+                
+                return {
+                    'statusCode': 200 if result['success'] else 400,
+                    'headers': cors_headers(),
+                    'body': json.dumps(result),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'telegram_webapp_auth':
+                telegram_id = body.get('telegram_id')
+                first_name = body.get('first_name', '')
+                last_name = body.get('last_name')
+                username = body.get('username')
+                
+                if not telegram_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': cors_headers(),
+                        'body': json.dumps({'success': False, 'error': 'Отсутствует telegram_id'}),
+                        'isBase64Encoded': False
+                    }
+                
+                result = telegram_webapp_auth(telegram_id, first_name, last_name, username)
                 
                 return {
                     'statusCode': 200 if result['success'] else 400,

@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Приключения курьера</title>
 
+<!-- Telegram Web App SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <!-- Предзагрузка критических ресурсов -->
 <link rel="preload" href="https://cdn.poehali.dev/files/d91aa39a-b906-481f-95ef-6c750cb6a76a.png" as="image" />
-<link rel="preload" href="https://cdn.poehali.dev/files/6f16d2d4-f371-4b0f-a43e-c70a6de7b033.jpg" as="image" />
+<link rel="preload" href="https://cdn.poehali.dev/files/6f16d2d4-f371-4b0f-a43e-c70a6де7b033.jpg" as="image" />
 
 <style>
   /* --- Сброс и базовые стили --- */
@@ -1371,6 +1374,48 @@
 
 <script>
 (() => {
+  // === АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM WEB APP ===
+  let userId = null;
+  let userFullName = 'Гость';
+  let isAuthenticated = false;
+
+  // Проверяем, запущено ли из Telegram
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    
+    const telegramUser = tg.initDataUnsafe.user;
+    if (telegramUser) {
+      console.log('[Game] Обнаружен Telegram пользователь:', telegramUser.id);
+      
+      // Авторизуемся через backend
+      fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=telegram_webapp_auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: telegramUser.id,
+          first_name: telegramUser.first_name,
+          last_name: telegramUser.last_name,
+          username: telegramUser.username,
+          init_data: tg.initData
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          userId = data.user.id;
+          userFullName = data.user.full_name;
+          isAuthenticated = true;
+          console.log('[Game] Авторизация успешна:', userFullName);
+        } else {
+          console.warn('[Game] Telegram не привязан к аккаунту');
+        }
+      })
+      .catch(err => console.error('[Game] Ошибка авторизации:', err));
+    }
+  }
+
   // Элементы
   const welcomeScreen = document.getElementById('welcomeScreen');
   const mainMenu = document.getElementById('mainMenu');

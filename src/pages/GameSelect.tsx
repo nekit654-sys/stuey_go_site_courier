@@ -1,12 +1,105 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { useGame } from '@/contexts/GameContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/config/api';
+
+// Telegram Web App SDK types
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp: {
+        initData: string;
+        initDataUnsafe: {
+          user?: {
+            id: number;
+            first_name: string;
+            last_name?: string;
+            username?: string;
+          };
+        };
+        ready: () => void;
+        expand: () => void;
+      };
+    };
+  }
+}
 
 export default function GameSelect() {
   const navigate = useNavigate();
   const { openGame } = useGame();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  useEffect(() => {
+    const authenticateFromTelegram = async () => {
+      if (isAuthenticated || isAuthenticating) return;
+      
+      const telegram = window.Telegram?.WebApp;
+      if (!telegram || !telegram.initData) {
+        console.log('[GameSelect] Не запущено через Telegram Web App');
+        return;
+      }
+
+      const telegramUser = telegram.initDataUnsafe.user;
+      if (!telegramUser) {
+        console.log('[GameSelect] Нет данных пользователя Telegram');
+        return;
+      }
+
+      console.log('[GameSelect] Обнаружен Telegram пользователь:', telegramUser.id);
+      setIsAuthenticating(true);
+
+      try {
+        const response = await fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=telegram_webapp_auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegram_id: telegramUser.id,
+            first_name: telegramUser.first_name,
+            last_name: telegramUser.last_name,
+            username: telegramUser.username,
+            init_data: telegram.initData
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success && data.token && data.user) {
+          console.log('[GameSelect] Автоматическая авторизация успешна:', data.user.id);
+          login(data.token, data.user);
+          telegram.expand();
+        } else {
+          console.error('[GameSelect] Ошибка авторизации:', data.error);
+        }
+      } catch (error) {
+        console.error('[GameSelect] Ошибка при авторизации через Telegram:', error);
+      } finally {
+        setIsAuthenticating(false);
+      }
+    };
+
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready();
+    }
+    
+    authenticateFromTelegram();
+  }, [isAuthenticated, isAuthenticating, login]);
+
+  if (isAuthenticating) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 border-4 border-black shadow-2xl">
+          <div className="text-center">
+            <Icon name="Loader2" className="h-12 w-12 animate-spin text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-black">Авторизация...</h2>
+            <p className="text-gray-600 mt-2">Подключаем ваш Telegram аккаунт</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-yellow-300 to-white flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
