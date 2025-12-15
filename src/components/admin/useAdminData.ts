@@ -143,24 +143,24 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
 
   const loadAllCouriers = async () => {
     setIsLoadingCouriers(true);
-    console.log('Загрузка курьеров, токен:', authToken ? 'есть' : 'НЕТ');
+    console.log('📦 Загрузка курьеров из нового API, токен:', authToken ? 'есть' : 'НЕТ');
     try {
-      const response = await fetch(`${API_URL}?route=couriers&action=list`, {
+      const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
         headers: {
           'X-Auth-Token': authToken
         }
       });
-      console.log('Ответ от API курьеров:', response.status);
+      console.log('✅ Ответ от API курьеров:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Курьеры получены:', data.couriers?.length || 0);
+        console.log('📊 Курьеры получены:', data.couriers?.length || 0, data);
         setAllCouriers(data.couriers || []);
       } else {
         const errorData = await response.json();
-        console.error('Ошибка загрузки курьеров:', response.status, errorData);
+        console.error('❌ Ошибка загрузки курьеров:', response.status, errorData);
       }
     } catch (error) {
-      console.error('Ошибка загрузки курьеров:', error);
+      console.error('❌ Исключение при загрузке курьеров:', error);
     } finally {
       setIsLoadingCouriers(false);
     }

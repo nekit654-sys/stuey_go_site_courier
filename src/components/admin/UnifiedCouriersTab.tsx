@@ -11,6 +11,7 @@ import ReferralsListTab from './couriers/ReferralsListTab';
 import TopReferrersTab from './couriers/TopReferrersTab';
 import EditCourierModal from './EditCourierModal';
 import { toast } from 'sonner';
+import { ADMIN_API, AUTO_REFRESH_INTERVALS } from '@/config/admin-api';
 
 interface Courier {
   id: number;
@@ -105,7 +106,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=couriers&action=update',
+        `${ADMIN_API.LEGACY_API}?route=couriers&action=update`,
         {
           method: 'PUT',
           headers: {
@@ -142,7 +143,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
     try {
       const response = await fetch(
-        'https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=couriers&action=delete',
+        `${ADMIN_API.LEGACY_API}?route=couriers&action=delete`,
         {
           method: 'DELETE',
           headers: {
@@ -174,7 +175,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
       onRefresh();
       onRefreshReferrals();
       setLastUpdate(new Date());
-    }, 10000);
+    }, AUTO_REFRESH_INTERVALS.COURIERS);
 
     return () => clearInterval(interval);
   }, [onRefresh, onRefreshReferrals]);

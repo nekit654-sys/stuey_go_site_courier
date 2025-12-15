@@ -141,8 +141,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             payouts_referrers = cursor.fetchone()
             
             cursor.execute("""
-                SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_active = true) as active
-                FROM t_p25272970_courier_button_site.users
+                SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE support_status != 'inactive') as active
+                FROM t_p25272970_courier_button_site.couriers
             """)
             couriers = cursor.fetchone()
             
@@ -452,18 +452,25 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         if method == 'GET' and action == 'get_all_couriers':
-            # Получение всех пользователей (курьеров)
+            # Получение всех курьеров из таблицы couriers
             cursor.execute("""
                 SELECT 
-                    id, 
-                    full_name, 
-                    phone, 
-                    city, 
-                    vehicle_type,
-                    oauth_provider,
-                    created_at
-                FROM t_p25272970_courier_button_site.users 
-                ORDER BY created_at DESC
+                    c.id,
+                    COALESCE(c.first_name || ' ' || c.last_name, c.username, 'Без имени') as full_name,
+                    c.phone,
+                    c.city,
+                    c.current_vehicle,
+                    c.registration_source,
+                    c.created_at,
+                    c.total_deliveries,
+                    c.level,
+                    (
+                        SELECT COUNT(*) 
+                        FROM t_p25272970_courier_button_site.couriers c2 
+                        WHERE c2.user_id = c.id
+                    ) as referral_count
+                FROM t_p25272970_courier_button_site.couriers c
+                ORDER BY c.created_at DESC
             """)
             
             rows = cursor.fetchall()
@@ -477,7 +484,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'city': row[3],
                     'vehicle_type': row[4],
                     'oauth_provider': row[5],
-                    'created_at': row[6].isoformat() if row[6] else None
+                    'created_at': row[6].isoformat() if row[6] else None,
+                    'total_orders': row[7] or 0,
+                    'level': row[8] or 1,
+                    'invited_count': row[9] or 0
                 })
             
             return {
@@ -553,17 +563,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         elif method == 'DELETE' and action == 'delete_all_users':
-            # Удаление всех пользователей и связанных данных
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.referrals")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.referral_progress")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_self_bonus_tracking")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.payout_requests")
+            # Удаление всех курьеров и связанных данных
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.messenger_connections")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_achievements")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.users")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_game_progress")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.leaderboard")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.withdrawal_requests")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings_snapshot")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.bot_activity_log")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.couriers")
             
+            log_activity(cursor, 'all_users_deleted', 'Все курьеры и связанные данные удалены', {})
             conn.commit()
             
             return {

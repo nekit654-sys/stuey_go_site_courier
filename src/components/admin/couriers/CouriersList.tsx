@@ -86,15 +86,9 @@ export default function CouriersList({
             <p className="text-lg font-bold text-gray-700 mb-2">
               {searchQuery || filterReferrals ? 'Курьеры не найдены' : 'Нет зарегистрированных курьеров'}
             </p>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500">
               {!searchQuery && !filterReferrals && 'Курьеры появятся здесь после регистрации через сайт или Telegram'}
             </p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors"
-            >
-              Обновить страницу
-            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
