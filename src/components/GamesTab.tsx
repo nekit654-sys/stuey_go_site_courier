@@ -36,11 +36,7 @@ interface CourierGameLeaderboardEntry {
   total_earnings: number;
 }
 
-interface GamesTabProps {
-  userId: number;
-}
-
-export default function GamesTab({ userId }: GamesTabProps) {
+export default function GamesTab() {
   const { user, isAuthenticated } = useAuth();
   const { openGame } = useGame();
   const navigate = useNavigate();
@@ -52,21 +48,25 @@ export default function GamesTab({ userId }: GamesTabProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
-    fetchLeaderboards();
-    
-    const interval = setInterval(() => {
+    if (user?.id) {
       fetchStats();
       fetchLeaderboards();
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, [userId]);
+      
+      const interval = setInterval(() => {
+        fetchStats();
+        fetchLeaderboards();
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [user?.id]);
 
   const fetchStats = async () => {
+    if (!user?.id) return;
+    
     try {
       const response2D = await fetch(`${API_URL}?route=game&action=my_stats`, {
-        headers: { 'X-User-Id': userId.toString() },
+        headers: { 'X-User-Id': user.id.toString() },
       });
 
       const data2D = await response2D.json();
