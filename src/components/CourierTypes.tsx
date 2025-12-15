@@ -138,16 +138,6 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
             </Card>
           ))}
         </div>
-        
-        <div className="text-center">
-          <Button
-            onClick={(e) => handleMagicClick(e, 'any')}
-            className="bg-yellow-400 text-black font-extrabold py-6 px-12 text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150"
-          >
-            <Icon name="Rocket" size={24} className="mr-2" />
-            Подать заявку
-          </Button>
-        </div>
         </div>
       </div>
     </section>
