@@ -1,23 +1,19 @@
 """
 Telegram бот для курьеров Stuey.Go
-FAQ-бот для новичков, полноценный помощник для зарегистрированных
+FAQ-бот для новичков, базовое меню для зарегистрированных
 """
 
 import json
 import os
-import re
-from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import urllib.request
-import urllib.parse
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 YANDEX_GPT_API_KEY = os.environ.get('YANDEX_GPT_API_KEY', '')
 YANDEX_FOLDER_ID = os.environ.get('YANDEX_FOLDER_ID', '')
-BOT_USERNAME = os.environ.get('BOT_USERNAME', 'StueyGoBot')
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
@@ -42,10 +38,53 @@ def send_telegram_message(chat_id: int, text: str, parse_mode: str = 'HTML', rep
     
     try:
         with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            return result
+            return json.loads(response.read().decode('utf-8'))
     except Exception as e:
         print(f'Error sending message: {e}')
+        return None
+
+def edit_telegram_message(chat_id: int, message_id: int, text: str, parse_mode: str = 'HTML', reply_markup: Optional[Dict] = None):
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText'
+    
+    data = {
+        'chat_id': chat_id,
+        'message_id': message_id,
+        'text': text,
+        'parse_mode': parse_mode
+    }
+    
+    if reply_markup:
+        data['reply_markup'] = reply_markup
+    
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode('utf-8'),
+        headers={'Content-Type': 'application/json'}
+    )
+    
+    try:
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        print(f'Error editing message: {e}')
+        return None
+
+def answer_callback_query(callback_query_id: str):
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery'
+    
+    data = {'callback_query_id': callback_query_id}
+    
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode('utf-8'),
+        headers={'Content-Type': 'application/json'}
+    )
+    
+    try:
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        print(f'Error answering callback: {e}')
         return None
 
 def get_courier_by_telegram(telegram_id: int) -> Optional[int]:
@@ -60,110 +99,12 @@ def get_courier_by_telegram(telegram_id: int) -> Optional[int]:
         
         result = cursor.fetchone()
         return result['courier_id'] if result else None
+    except Exception as e:
+        print(f'Error getting courier: {e}')
+        return None
     finally:
         cursor.close()
         conn.close()
-
-def get_courier_stats(courier_id: int, cursor) -> Dict[str, Any]:
-    """Получает статистику курьера из реальных таблиц"""
-    cursor.execute("""
-        SELECT name, city, phone FROM t_p25272970_courier_button_site.couriers
-        WHERE id = %s
-    """, (courier_id,))
-    
-    courier = cursor.fetchone()
-    if not courier:
-        return {
-            'name': 'Курьер',
-            'city': 'Не указан',
-            'total_orders': 0,
-            'total_earned': 0,
-            'self_bonus_progress': 0,
-            'invited_count': 0,
-            'active_referrals': 0,
-            'total_referral_earned': 0
-        }
-    
-    cursor.execute("""
-        SELECT SUM(amount) as total_earned
-        FROM t_p25272970_courier_button_site.courier_earnings
-        WHERE courier_id = %s
-    """, (courier_id,))
-    earnings = cursor.fetchone()
-    total_earned = float(earnings['total_earned']) if earnings and earnings['total_earned'] else 0
-    
-    cursor.execute("""
-        SELECT orders_completed
-        FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
-        WHERE courier_id = %s
-    """, (courier_id,))
-    bonus_tracking = cursor.fetchone()
-    self_bonus_progress = bonus_tracking['orders_completed'] if bonus_tracking else 0
-    
-    cursor.execute("""
-        SELECT COUNT(*) as invited_count
-        FROM t_p25272970_courier_button_site.referrals
-        WHERE referrer_id = %s
-    """, (courier_id,))
-    referrals = cursor.fetchone()
-    invited_count = referrals['invited_count'] if referrals else 0
-    
-    cursor.execute("""
-        SELECT COUNT(*) as active_count, COALESCE(SUM(bonus_earned), 0) as total_referral_earned
-        FROM t_p25272970_courier_button_site.referrals
-        WHERE referrer_id = %s AND status = 'active'
-    """, (courier_id,))
-    active_refs = cursor.fetchone()
-    active_referrals = active_refs['active_count'] if active_refs else 0
-    total_referral_earned = float(active_refs['total_referral_earned']) if active_refs and active_refs['total_referral_earned'] else 0
-    
-    return {
-        'name': courier['name'] or 'Курьер',
-        'city': courier['city'] or 'Не указан',
-        'total_orders': 0,
-        'total_earned': total_earned,
-        'self_bonus_progress': self_bonus_progress,
-        'invited_count': invited_count,
-        'active_referrals': active_referrals,
-        'total_referral_earned': total_referral_earned
-    }
-
-def ask_yandex_gpt(question: str, system_prompt: str) -> str:
-    """Спросить YandexGPT"""
-    url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion'
-    
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Api-Key {YANDEX_GPT_API_KEY}',
-        'x-folder-id': YANDEX_FOLDER_ID
-    }
-    
-    data = {
-        'modelUri': f'gpt://{YANDEX_FOLDER_ID}/yandexgpt-lite/latest',
-        'completionOptions': {
-            'stream': False,
-            'temperature': 0.6,
-            'maxTokens': 500
-        },
-        'messages': [
-            {'role': 'system', 'text': system_prompt},
-            {'role': 'user', 'text': question}
-        ]
-    }
-    
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(data).encode('utf-8'),
-        headers=headers
-    )
-    
-    try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            return result['result']['alternatives'][0]['message']['text']
-    except Exception as e:
-        print(f'YandexGPT error: {e}')
-        return 'Извините, не удалось получить ответ. Попробуйте позже или напишите в поддержку.'
 
 def get_newbie_keyboard():
     """Клавиатура для новичков"""
@@ -190,12 +131,11 @@ def get_registered_keyboard():
     """Клавиатура для зарегистрированных"""
     return {
         'inline_keyboard': [
-            [{'text': '📊 Моя статистика', 'callback_data': 'my_stats'}],
+            [{'text': '📊 Моя статистика', 'url': 'https://stuey-go.ru/dashboard'}],
             [{'text': '💰 Реферальная ссылка', 'callback_data': 'referral_link'}],
-            [{'text': '💸 Вывести деньги', 'callback_data': 'withdrawal'}],
+            [{'text': '💸 Вывести деньги', 'url': 'https://stuey-go.ru/withdrawal'}],
             [{'text': '🎮 Игры', 'callback_data': 'games'}],
-            [{'text': '🤖 Написать поддержке', 'callback_data': 'support_ai'}],
-            [{'text': '⚙️ Настройки', 'callback_data': 'settings'}]
+            [{'text': '⚙️ Настройки', 'url': 'https://stuey-go.ru/settings'}]
         ]
     }
 
@@ -271,50 +211,33 @@ def handle_newbie_callback(callback_data: str) -> tuple[str, Dict]:
     
     return "", {}
 
-def handle_registered_callback(callback_data: str, courier_id: int) -> tuple[str, Dict]:
-    """Обработка callback для зарегистрированных"""
-    
+def get_courier_referral_code(courier_id: int) -> str:
+    """Получить реферальный код курьера"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        if callback_data == 'my_stats':
-            stats = get_courier_stats(courier_id, cursor)
-            
-            total_earned = stats['total_earned'] + stats['total_referral_earned']
-            orders_left = 50 - stats['self_bonus_progress']
-            
-            text = f"""📊 <b>Твоя статистика</b>
-
-💰 <b>Заработано:</b> {total_earned:,}₽
-   • От доставок: {stats['total_earned']:,}₽
-   • От рефералов: {stats['total_referral_earned']:,}₽
-
-📦 <b>Заказов выполнено:</b> {stats['total_orders']}
-
-🎁 <b>Самобонус:</b>
-   До бонуса осталось: {orders_left} заказов
-
-👥 <b>Приглашено друзей:</b> {stats['invited_count']}
-   Активных: {stats['active_referrals']}"""
-            
-            keyboard = {
-                'inline_keyboard': [
-                    [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                ]
-            }
-            return text, keyboard
+        cursor.execute("""
+            SELECT referral_code FROM t_p25272970_courier_button_site.couriers
+            WHERE id = %s
+        """, (courier_id,))
         
-        elif callback_data == 'referral_link':
-            cursor.execute("""
-                SELECT referral_code FROM t_p25272970_courier_button_site.couriers
-                WHERE id = %s
-            """, (courier_id,))
-            
-            result = cursor.fetchone()
-            ref_code = result['referral_code'] if result else 'XXXXX'
-            
-            text = f"""💰 <b>Твоя реферальная ссылка:</b>
+        result = cursor.fetchone()
+        return result['referral_code'] if result and result['referral_code'] else 'XXXXX'
+    except Exception as e:
+        print(f'Error getting referral code: {e}')
+        return 'XXXXX'
+    finally:
+        cursor.close()
+        conn.close()
+
+def handle_registered_callback(callback_data: str, courier_id: int) -> tuple[str, Dict]:
+    """Обработка callback для зарегистрированных"""
+    
+    if callback_data == 'referral_link':
+        ref_code = get_courier_referral_code(courier_id)
+        
+        text = f"""💰 <b>Твоя реферальная ссылка:</b>
 
 https://stuey-go.ru?ref={ref_code}
 
@@ -324,36 +247,16 @@ https://stuey-go.ru?ref={ref_code}
 3. Ты получаешь от 18,000₽ за каждого активного!
 
 <b>Без ограничений!</b> Приглашай сколько хочешь! 🚀"""
-            
-            keyboard = {
-                'inline_keyboard': [
-                    [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                ]
-            }
-            return text, keyboard
         
-        elif callback_data == 'withdrawal':
-            text = """💸 <b>Вывод денег</b>
-
-Подать заявку на вывод можно на сайте stuey-go.ru
-
-<b>Условия:</b>
-• Минимальная сумма: 5,000₽
-• Выплаты через СБП на любую карту
-• Обработка: 1-3 рабочих дня
-
-Для подачи заявки перейди на сайт! 👇"""
-            
-            keyboard = {
-                'inline_keyboard': [
-                    [{'text': '💸 Подать заявку на вывод', 'url': 'https://stuey-go.ru/withdrawal'}],
-                    [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                ]
-            }
-            return text, keyboard
-        
-        elif callback_data == 'games':
-            text = """🎮 <b>Игры</b>
+        keyboard = {
+            'inline_keyboard': [
+                [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
+            ]
+        }
+        return text, keyboard
+    
+    elif callback_data == 'games':
+        text = """🎮 <b>Игры</b>
 
 Раздел с играми находится в разработке!
 
@@ -363,50 +266,28 @@ https://stuey-go.ru?ref={ref_code}
 • Ежедневные челленджи
 
 Следи за обновлениями! 🚀"""
-            
-            keyboard = {
-                'inline_keyboard': [
-                    [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                ]
-            }
-            return text, keyboard
         
-        elif callback_data == 'settings':
-            text = """⚙️ <b>Настройки</b>
+        keyboard = {
+            'inline_keyboard': [
+                [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
+            ]
+        }
+        return text, keyboard
+    
+    elif callback_data == 'main_menu':
+        text = """👋 С возвращением!
 
-🔔 Уведомления: Включены
-⏰ Напоминания: 10:00 МСК
-🔗 Аккаунт: Подключён
+📊 <b>Быстрый доступ:</b>
+• Статистика - на сайте stuey-go.ru
+• Реферальная ссылка - кнопка ниже
+• Вывод денег - на сайте
+• Игры - скоро!
 
-Изменить настройки можно на сайте stuey-go.ru"""
-            
-            keyboard = {
-                'inline_keyboard': [
-                    [{'text': '⚙️ Открыть настройки', 'url': 'https://stuey-go.ru/settings'}],
-                    [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                ]
-            }
-            return text, keyboard
+Выбери действие:"""
         
-        elif callback_data == 'main_menu':
-            stats = get_courier_stats(courier_id, cursor)
-            total_earned = stats['total_earned'] + stats['total_referral_earned']
-            orders_left = 50 - stats['self_bonus_progress']
-            
-            text = f"""👋 С возвращением, {stats['name']}!
-
-📊 <b>Твоя статистика:</b>
-• Заработано: {total_earned:,}₽
-• Приглашено друзей: {stats['invited_count']}
-• До самобонуса: {orders_left} заказов"""
-            
-            return text, get_registered_keyboard()
-        
-        return "", {}
-        
-    finally:
-        cursor.close()
-        conn.close()
+        return text, get_registered_keyboard()
+    
+    return "", {}
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
@@ -438,24 +319,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if text == '/start':
                 if courier_id:
-                    conn = get_db_connection()
-                    cursor = conn.cursor()
-                    try:
-                        stats = get_courier_stats(courier_id, cursor)
-                        total_earned = stats['total_earned'] + stats['total_referral_earned']
-                        orders_left = 50 - stats['self_bonus_progress']
-                        
-                        welcome_text = f"""👋 С возвращением, {stats['name']}!
+                    welcome_text = """👋 С возвращением!
 
-📊 <b>Твоя статистика:</b>
-• Заработано: {total_earned:,}₽
-• Приглашено друзей: {stats['invited_count']}
-• До самобонуса: {orders_left} заказов"""
-                        
-                        send_telegram_message(chat_id, welcome_text, reply_markup=get_registered_keyboard())
-                    finally:
-                        cursor.close()
-                        conn.close()
+📊 <b>Быстрый доступ:</b>
+• Статистика - на сайте stuey-go.ru
+• Реферальная ссылка - кнопка ниже
+• Вывод денег - на сайте
+• Игры - скоро!
+
+Выбери действие:"""
+                    
+                    send_telegram_message(chat_id, welcome_text, reply_markup=get_registered_keyboard())
                 else:
                     welcome_text = """👋 Привет! Я бот-помощник Stuey.Go
 
@@ -464,25 +338,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 🎁 От 18,000₽ за каждого приглашённого друга"""
                     
                     send_telegram_message(chat_id, welcome_text, reply_markup=get_newbie_keyboard())
-            
-            elif courier_id and text:
-                system_prompt = """Ты - помощник поддержки Stuey.Go для зарегистрированных курьеров.
-
-Отвечай:
-- Кратко и по делу (2-3 предложения)
-- Дружелюбно и профессионально
-- На вопросы про работу, выплаты, рефералов
-- Если не знаешь ответ - советуй написать на support@stuey-go.ru"""
-                
-                response = ask_yandex_gpt(text, system_prompt)
-                send_telegram_message(chat_id, response)
-            
-            elif not courier_id and text:
-                response = """Чтобы задать вопрос, сначала зарегистрируйся на stuey-go.ru и подключи Telegram-аккаунт! 
-
-После регистрации я смогу помочь с любыми вопросами про работу курьером! 🚀"""
-                
-                send_telegram_message(chat_id, response, reply_markup=get_newbie_keyboard())
         
         elif 'callback_query' in body:
             callback = body['callback_query']
@@ -490,100 +345,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             message_id = callback['message']['message_id']
             callback_data = callback['data']
             telegram_id = callback['from']['id']
+            callback_query_id = callback['id']
             
             courier_id = get_courier_by_telegram(telegram_id)
             
+            response_text = ""
+            keyboard = {}
+            
             if callback_data.startswith('newbie_'):
                 response_text, keyboard = handle_newbie_callback(callback_data)
-                
-                if response_text:
-                    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText'
-                    data = {
-                        'chat_id': chat_id,
-                        'message_id': message_id,
-                        'text': response_text,
-                        'parse_mode': 'HTML',
-                        'reply_markup': keyboard
-                    }
-                    
-                    req = urllib.request.Request(
-                        url,
-                        data=json.dumps(data).encode('utf-8'),
-                        headers={'Content-Type': 'application/json'}
-                    )
-                    
-                    with urllib.request.urlopen(req) as response:
-                        pass
-            
             elif courier_id:
-                if callback_data == 'support_ai':
-                    text = """🤖 <b>Написать поддержке</b>
-
-Теперь ты можешь задать любой вопрос текстом, и я отвечу!
-
-Например:
-• Как увеличить заработок?
-• Когда придут деньги за реферала?
-• Как работает самобонус?
-
-Просто напиши свой вопрос! 👇"""
-                    
-                    keyboard = {
-                        'inline_keyboard': [
-                            [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
-                        ]
-                    }
-                    
-                    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText'
-                    data = {
-                        'chat_id': chat_id,
-                        'message_id': message_id,
-                        'text': text,
-                        'parse_mode': 'HTML',
-                        'reply_markup': keyboard
-                    }
-                    
-                    req = urllib.request.Request(
-                        url,
-                        data=json.dumps(data).encode('utf-8'),
-                        headers={'Content-Type': 'application/json'}
-                    )
-                    
-                    with urllib.request.urlopen(req) as response:
-                        pass
-                else:
-                    response_text, keyboard = handle_registered_callback(callback_data, courier_id)
-                    
-                    if response_text:
-                        url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText'
-                        data = {
-                            'chat_id': chat_id,
-                            'message_id': message_id,
-                            'text': response_text,
-                            'parse_mode': 'HTML',
-                            'reply_markup': keyboard
-                        }
-                        
-                        req = urllib.request.Request(
-                            url,
-                            data=json.dumps(data).encode('utf-8'),
-                            headers={'Content-Type': 'application/json'}
-                        )
-                        
-                        with urllib.request.urlopen(req) as response:
-                            pass
+                response_text, keyboard = handle_registered_callback(callback_data, courier_id)
             
-            url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery'
-            data = {'callback_query_id': callback['id']}
+            if response_text:
+                edit_telegram_message(chat_id, message_id, response_text, reply_markup=keyboard)
             
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(data).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
-            )
-            
-            with urllib.request.urlopen(req) as response:
-                pass
+            answer_callback_query(callback_query_id)
         
         return {
             'statusCode': 200,
