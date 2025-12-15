@@ -1,6 +1,6 @@
 """
 Telegram бот для курьеров Stuey.Go
-FAQ-бот для новичков, базовое меню для зарегистрированных
+FAQ-бот для новичков, полноценный помощник для зарегистрированных
 """
 
 import json
@@ -106,8 +106,99 @@ def get_courier_by_telegram(telegram_id: int) -> Optional[int]:
         cursor.close()
         conn.close()
 
+def get_courier_stats(courier_id: int) -> Dict[str, Any]:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT first_name, last_name, city, phone 
+            FROM t_p25272970_courier_button_site.couriers
+            WHERE id = %s
+        """, (courier_id,))
+        
+        courier = cursor.fetchone()
+        if not courier:
+            return {'name': 'Курьер', 'city': 'Не указан', 'total_earned': 0, 'self_bonus_progress': 0, 'invited_count': 0, 'active_referrals': 0, 'total_referral_earned': 0}
+        
+        name = f"{courier['first_name'] or ''} {courier['last_name'] or ''}".strip() or 'Курьер'
+        
+        cursor.execute("""
+            SELECT COALESCE(SUM(total_amount), 0) as total_earned
+            FROM t_p25272970_courier_button_site.courier_earnings
+            WHERE courier_id = %s AND status = 'processed'
+        """, (courier_id,))
+        earnings = cursor.fetchone()
+        total_earned = float(earnings['total_earned']) if earnings else 0
+        
+        cursor.execute("""
+            SELECT COALESCE(orders_completed, 0) as orders_completed
+            FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+            WHERE courier_id = %s
+        """, (courier_id,))
+        bonus = cursor.fetchone()
+        self_bonus_progress = bonus['orders_completed'] if bonus else 0
+        
+        cursor.execute("""
+            SELECT COUNT(*) as invited_count
+            FROM t_p25272970_courier_button_site.referrals
+            WHERE referrer_id = %s
+        """, (courier_id,))
+        refs = cursor.fetchone()
+        invited_count = refs['invited_count'] if refs else 0
+        
+        cursor.execute("""
+            SELECT 
+                COUNT(*) FILTER (WHERE bonus_paid = true) as active_count,
+                COALESCE(SUM(bonus_amount) FILTER (WHERE bonus_paid = true), 0) as total_referral_earned
+            FROM t_p25272970_courier_button_site.referrals
+            WHERE referrer_id = %s
+        """, (courier_id,))
+        active = cursor.fetchone()
+        active_referrals = active['active_count'] if active else 0
+        total_referral_earned = float(active['total_referral_earned']) if active else 0
+        
+        return {
+            'name': name,
+            'city': courier['city'] or 'Не указан',
+            'total_earned': total_earned,
+            'self_bonus_progress': self_bonus_progress,
+            'invited_count': invited_count,
+            'active_referrals': active_referrals,
+            'total_referral_earned': total_referral_earned
+        }
+    except Exception as e:
+        print(f'Error getting stats: {e}')
+        import traceback
+        traceback.print_exc()
+        return {'name': 'Курьер', 'city': 'Не указан', 'total_earned': 0, 'self_bonus_progress': 0, 'invited_count': 0, 'active_referrals': 0, 'total_referral_earned': 0}
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_courier_referral_code(courier_id: int) -> str:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT phone FROM t_p25272970_courier_button_site.couriers
+            WHERE id = %s
+        """, (courier_id,))
+        
+        result = cursor.fetchone()
+        if result and result['phone']:
+            phone = result['phone'].replace('+', '').replace(' ', '').replace('-', '')
+            return phone[-6:] if len(phone) >= 6 else f'USER{courier_id}'
+        return f'USER{courier_id}'
+    except Exception as e:
+        print(f'Error getting ref code: {e}')
+        return f'USER{courier_id}'
+    finally:
+        cursor.close()
+        conn.close()
+
 def get_newbie_keyboard():
-    """Клавиатура для новичков"""
     return {
         'inline_keyboard': [
             [{'text': '🚀 ЗАРЕГИСТРИРОВАТЬСЯ', 'url': 'https://stuey-go.ru'}],
@@ -119,7 +210,6 @@ def get_newbie_keyboard():
     }
 
 def get_newbie_back_keyboard():
-    """Кнопка назад + регистрация для новичков"""
     return {
         'inline_keyboard': [
             [{'text': '🚀 ЗАРЕГИСТРИРОВАТЬСЯ', 'url': 'https://stuey-go.ru'}],
@@ -128,20 +218,17 @@ def get_newbie_back_keyboard():
     }
 
 def get_registered_keyboard():
-    """Клавиатура для зарегистрированных"""
     return {
         'inline_keyboard': [
-            [{'text': '📊 Моя статистика', 'url': 'https://stuey-go.ru/dashboard'}],
+            [{'text': '📊 Моя статистика', 'callback_data': 'my_stats'}],
             [{'text': '💰 Реферальная ссылка', 'callback_data': 'referral_link'}],
-            [{'text': '💸 Вывести деньги', 'url': 'https://stuey-go.ru/withdrawal'}],
+            [{'text': '💸 Вывести деньги', 'callback_data': 'withdrawal'}],
             [{'text': '🎮 Игры', 'callback_data': 'games'}],
-            [{'text': '⚙️ Настройки', 'url': 'https://stuey-go.ru/settings'}]
+            [{'text': '⚙️ Настройки', 'callback_data': 'settings'}]
         ]
     }
 
 def handle_newbie_callback(callback_data: str) -> tuple[str, Dict]:
-    """Обработка callback для новичков"""
-    
     if callback_data == 'newbie_menu':
         text = """👋 Привет! Я бот-помощник Stuey.Go
 
@@ -211,30 +298,31 @@ def handle_newbie_callback(callback_data: str) -> tuple[str, Dict]:
     
     return "", {}
 
-def get_courier_referral_code(courier_id: int) -> str:
-    """Получить реферальный код курьера"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    try:
-        cursor.execute("""
-            SELECT referral_code FROM t_p25272970_courier_button_site.couriers
-            WHERE id = %s
-        """, (courier_id,))
-        
-        result = cursor.fetchone()
-        return result['referral_code'] if result and result['referral_code'] else 'XXXXX'
-    except Exception as e:
-        print(f'Error getting referral code: {e}')
-        return 'XXXXX'
-    finally:
-        cursor.close()
-        conn.close()
-
 def handle_registered_callback(callback_data: str, courier_id: int) -> tuple[str, Dict]:
-    """Обработка callback для зарегистрированных"""
+    if callback_data == 'my_stats':
+        stats = get_courier_stats(courier_id)
+        
+        total_earned = stats['total_earned'] + stats['total_referral_earned']
+        orders_left = max(0, 50 - stats['self_bonus_progress'])
+        
+        text = f"""📊 <b>Твоя статистика</b>
+
+💰 <b>Заработано всего:</b> {total_earned:,.0f}₽
+   • От доставок: {stats['total_earned']:,.0f}₽
+   • От рефералов: {stats['total_referral_earned']:,.0f}₽
+
+🎁 <b>Самобонус:</b>
+   Выполнено заказов: {stats['self_bonus_progress']}
+   До бонуса осталось: {orders_left} заказов
+
+👥 <b>Рефералы:</b>
+   Всего приглашено: {stats['invited_count']}
+   Активных (с бонусом): {stats['active_referrals']}"""
+        
+        keyboard = {'inline_keyboard': [[{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]]}
+        return text, keyboard
     
-    if callback_data == 'referral_link':
+    elif callback_data == 'referral_link':
         ref_code = get_courier_referral_code(courier_id)
         
         text = f"""💰 <b>Твоя реферальная ссылка:</b>
@@ -248,8 +336,24 @@ https://stuey-go.ru?ref={ref_code}
 
 <b>Без ограничений!</b> Приглашай сколько хочешь! 🚀"""
         
+        keyboard = {'inline_keyboard': [[{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]]}
+        return text, keyboard
+    
+    elif callback_data == 'withdrawal':
+        text = """💸 <b>Вывод денег</b>
+
+Подать заявку на вывод можно на сайте stuey-go.ru в разделе "Выплаты".
+
+<b>Условия:</b>
+• Минимальная сумма: 5,000₽
+• Выплаты через СБП на любую карту
+• Обработка: 1-3 рабочих дня
+
+Для подачи заявки перейди на сайт! 👇"""
+        
         keyboard = {
             'inline_keyboard': [
+                [{'text': '💸 Подать заявку на вывод', 'url': 'https://stuey-go.ru/withdrawal'}],
                 [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
             ]
         }
@@ -267,41 +371,51 @@ https://stuey-go.ru?ref={ref_code}
 
 Следи за обновлениями! 🚀"""
         
+        keyboard = {'inline_keyboard': [[{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]]}
+        return text, keyboard
+    
+    elif callback_data == 'settings':
+        text = """⚙️ <b>Настройки</b>
+
+Управление настройками доступно на сайте stuey-go.ru
+
+<b>Что можно настроить:</b>
+• Уведомления в боте
+• Напоминания о работе
+• Персональные данные
+• Отвязать Telegram-аккаунт
+
+Перейди на сайт для изменения настроек! 👇"""
+        
         keyboard = {
             'inline_keyboard': [
+                [{'text': '⚙️ Открыть настройки', 'url': 'https://stuey-go.ru/settings'}],
                 [{'text': '◀️ Назад в меню', 'callback_data': 'main_menu'}]
             ]
         }
         return text, keyboard
     
     elif callback_data == 'main_menu':
-        text = """👋 С возвращением!
+        stats = get_courier_stats(courier_id)
+        total_earned = stats['total_earned'] + stats['total_referral_earned']
+        orders_left = max(0, 50 - stats['self_bonus_progress'])
+        
+        text = f"""👋 С возвращением, {stats['name']}!
 
-📊 <b>Быстрый доступ:</b>
-• Статистика - на сайте stuey-go.ru
-• Реферальная ссылка - кнопка ниже
-• Вывод денег - на сайте
-• Игры - скоро!
-
-Выбери действие:"""
+📊 <b>Твоя статистика:</b>
+• Заработано: {total_earned:,.0f}₽
+• Приглашено друзей: {stats['invited_count']}
+• До самобонуса: {orders_left} заказов"""
         
         return text, get_registered_keyboard()
     
     return "", {}
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    """
-    Обработчик Telegram webhook
-    """
-    
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type'
-            },
+            'headers': {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type'},
             'body': '',
             'isBase64Encoded': False
         }
@@ -319,15 +433,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if text == '/start':
                 if courier_id:
-                    welcome_text = """👋 С возвращением!
+                    stats = get_courier_stats(courier_id)
+                    total_earned = stats['total_earned'] + stats['total_referral_earned']
+                    orders_left = max(0, 50 - stats['self_bonus_progress'])
+                    
+                    welcome_text = f"""👋 С возвращением, {stats['name']}!
 
-📊 <b>Быстрый доступ:</b>
-• Статистика - на сайте stuey-go.ru
-• Реферальная ссылка - кнопка ниже
-• Вывод денег - на сайте
-• Игры - скоро!
-
-Выбери действие:"""
+📊 <b>Твоя статистика:</b>
+• Заработано: {total_earned:,.0f}₽
+• Приглашено друзей: {stats['invited_count']}
+• До самобонуса: {orders_left} заказов"""
                     
                     send_telegram_message(chat_id, welcome_text, reply_markup=get_registered_keyboard())
                 else:
