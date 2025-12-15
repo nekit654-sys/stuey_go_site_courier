@@ -393,8 +393,9 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <WithdrawalRequestForm
                   userId={user.id}
-                  token={token || ''}
-                  availableAmount={stats?.available_for_withdrawal || 0}
+                  availableBalance={stats?.available_for_withdrawal || 0}
+                  userPhone={user.sbp_phone}
+                  userBankName={user.sbp_bank_name}
                   onSuccess={handleWithdrawalSuccess}
                 />
                 <WithdrawalsTimeline

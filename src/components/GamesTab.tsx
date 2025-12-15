@@ -204,7 +204,7 @@ export default function GamesTab() {
                   <div
                     key={player.id}
                     className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                      player.id === userId
+                      player.id === user?.id
                         ? 'bg-yellow-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
                         : 'bg-white border-black'
                     }`}
@@ -215,7 +215,7 @@ export default function GamesTab() {
                     <div className="flex-1 min-w-0">
                       <div className="font-extrabold text-black truncate text-sm sm:text-base">
                         {player.full_name}
-                        {player.id === userId && (
+                        {player.id === user?.id && (
                           <span className="ml-2 text-xs bg-black text-yellow-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
                         )}
                       </div>
@@ -299,7 +299,7 @@ export default function GamesTab() {
                   <div
                     key={player.user_id}
                     className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                      player.user_id === userId
+                      player.user_id === user?.id
                         ? 'bg-blue-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
                         : index === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-black'
                         : index === 1 ? 'bg-gradient-to-r from-gray-200 to-gray-300 border-black'
@@ -313,7 +313,7 @@ export default function GamesTab() {
                     <div className="flex-1 min-w-0">
                       <div className="font-extrabold text-black truncate text-sm sm:text-base">
                         {player.username || `Игрок ${player.user_id}`}
-                        {player.user_id === userId && (
+                        {player.user_id === user?.id && (
                           <span className="ml-2 text-xs bg-black text-blue-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
                         )}
                       </div>
