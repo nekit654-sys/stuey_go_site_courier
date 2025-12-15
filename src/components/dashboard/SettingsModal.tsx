@@ -302,115 +302,116 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Настройки</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[calc(100vw-1rem)] sm:w-full">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Настройки</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Профиль</TabsTrigger>
-            <TabsTrigger value="messengers">Уведомления</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10">
+            <TabsTrigger value="profile" className="text-sm sm:text-base">Профиль</TabsTrigger>
+            <TabsTrigger value="messengers" className="text-sm sm:text-base">Уведомления</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-4 mt-4">
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                    <Icon name="User" className="text-white" size={20} />
+          <TabsContent value="profile" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
+                <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 sm:w-10 sm:h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Icon name="User" className="text-white" size={18} />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Личные данные</h3>
-                    <p className="text-sm text-gray-500">Управление информацией профиля</p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold truncate">Личные данные</h3>
+                    <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Управление информацией профиля</p>
                   </div>
                 </div>
                 {!isEditingProfile && (
-                  <Button onClick={handleProfileEdit} size="sm">
-                    <Icon name="Edit" size={16} className="mr-2" />
-                    Редактировать
+                  <Button onClick={handleProfileEdit} size="sm" className="flex-shrink-0">
+                    <Icon name="Edit" size={14} className="sm:mr-2" />
+                    <span className="hidden sm:inline">Редактировать</span>
                   </Button>
                 )}
               </div>
 
               {isEditingProfile ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label htmlFor="full_name">ФИО</Label>
+                    <Label htmlFor="full_name" className="text-sm">ФИО</Label>
                     <Input
                       id="full_name"
                       value={profileData.full_name}
                       onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
                       placeholder="Иванов Иван Иванович"
-                      className="mt-1"
+                      className="mt-1 h-10 sm:h-11 text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">Телефон</Label>
+                    <Label htmlFor="phone" className="text-sm">Телефон</Label>
                     <Input
                       id="phone"
                       value={profileData.phone}
                       onChange={(e) => setProfileData({ ...profileData, phone: formatPhoneInput(e.target.value) })}
                       placeholder="+7 (999) 999-99-99"
-                      className="mt-1"
+                      className="mt-1 h-10 sm:h-11 text-sm sm:text-base"
+                      inputMode="tel"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="city">Город</Label>
+                    <Label htmlFor="city" className="text-sm">Город</Label>
                     <Input
                       id="city"
                       value={profileData.city}
                       onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
                       placeholder="Москва"
-                      className="mt-1"
+                      className="mt-1 h-10 sm:h-11 text-sm sm:text-base"
                     />
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button onClick={handleProfileSave} disabled={isSavingProfile} className="flex-1">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button onClick={handleProfileSave} disabled={isSavingProfile} className="flex-1 h-10 sm:h-11 text-sm sm:text-base">
                       {isSavingProfile ? (
                         <>
                           <Icon name="Loader2" className="animate-spin mr-2" size={16} />
-                          Сохранение...
+                          <span className="text-sm sm:text-base">Сохранение...</span>
                         </>
                       ) : (
                         <>
                           <Icon name="Check" size={16} className="mr-2" />
-                          Сохранить
+                          <span className="text-sm sm:text-base">Сохранить</span>
                         </>
                       )}
                     </Button>
-                    <Button onClick={handleProfileCancel} variant="outline" disabled={isSavingProfile} className="flex-1">
+                    <Button onClick={handleProfileCancel} variant="outline" disabled={isSavingProfile} className="flex-1 h-10 sm:h-11 text-sm sm:text-base">
                       <Icon name="X" size={16} className="mr-2" />
-                      Отмена
+                      <span className="text-sm sm:text-base">Отмена</span>
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Icon name="User" size={18} className="text-gray-500" />
-                    <div>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+                    <Icon name="User" size={16} className="text-gray-500 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-500">ФИО</p>
-                      <p className="text-sm font-medium">{user?.full_name || 'Не указано'}</p>
+                      <p className="text-sm font-medium truncate">{user?.full_name || 'Не указано'}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Icon name="Phone" size={18} className="text-gray-500" />
-                    <div>
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+                    <Icon name="Phone" size={16} className="text-gray-500 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-500">Телефон</p>
-                      <p className="text-sm font-medium">{user?.phone ? formatPhoneInput(user.phone) : 'Не указано'}</p>
+                      <p className="text-sm font-medium truncate">{user?.phone ? formatPhoneInput(user.phone) : 'Не указано'}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Icon name="MapPin" size={18} className="text-gray-500" />
-                    <div>
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+                    <Icon name="MapPin" size={16} className="text-gray-500 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-500">Город</p>
-                      <p className="text-sm font-medium">{user?.city || 'Не указано'}</p>
+                      <p className="text-sm font-medium truncate">{user?.city || 'Не указано'}</p>
                     </div>
                   </div>
                 </div>
@@ -418,25 +419,25 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
             </Card>
           </TabsContent>
 
-          <TabsContent value="messengers" className="space-y-4 mt-4">
-            <Card className="p-4 bg-blue-50 border-blue-200">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                  <Icon name="Bell" className="text-white" size={20} />
+          <TabsContent value="messengers" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+            <Card className="p-3 sm:p-4 bg-blue-50 border-blue-200">
+              <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                  <Icon name="Bell" className="text-white" size={18} />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-blue-900 mb-2">Зачем подключать бота?</h3>
-                  <ul className="space-y-2 text-sm text-blue-800">
-                    <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-blue-900 mb-2">Зачем подключать бота?</h3>
+                  <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800">
+                    <li className="flex items-start gap-1.5 sm:gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
                       <span>Уведомления о новых рефералах</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                    <li className="flex items-start gap-1.5 sm:gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
                       <span>Статус выплат</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <Icon name="Check" className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
+                    <li className="flex items-start gap-1.5 sm:gap-2">
+                      <Icon name="Check" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5 text-blue-600" />
                       <span>Статистика в реальном времени</span>
                     </li>
                   </ul>
@@ -444,46 +445,46 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
               </div>
             </Card>
 
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                    <Icon name="MessageCircle" className="text-white" size={20} />
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                    <Icon name="MessageCircle" className="text-white" size={18} />
                   </div>
-                  <div>
-                    <h3 className="font-bold">Telegram</h3>
-                    <p className="text-sm text-gray-500">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-sm sm:text-base truncate">Telegram</h3>
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">
                       {connections.telegram?.connected ? 'Подключен' : 'Не подключен'}
                     </p>
                   </div>
                 </div>
 
                 {connections.telegram?.connected ? (
-                  <Button onClick={() => unlinkMessenger('telegram')} variant="destructive" size="sm">
-                    <Icon name="Unlink" size={16} className="mr-2" />
-                    Отключить
+                  <Button onClick={() => unlinkMessenger('telegram')} variant="destructive" size="sm" className="flex-shrink-0 h-9 text-xs sm:text-sm">
+                    <Icon name="Unlink" size={14} className="sm:mr-2" />
+                    <span className="hidden sm:inline">Отключить</span>
                   </Button>
                 ) : (
-                  <Button onClick={() => generateLinkCode('telegram')} disabled={isGeneratingCode} size="sm">
-                    <Icon name="Link" size={16} className="mr-2" />
-                    Подключить
+                  <Button onClick={() => generateLinkCode('telegram')} disabled={isGeneratingCode} size="sm" className="flex-shrink-0 h-9 text-xs sm:text-sm">
+                    <Icon name="Link" size={14} className="sm:mr-2" />
+                    <span className="hidden sm:inline">Подключить</span>
                   </Button>
                 )}
               </div>
 
               {linkCode && selectedMessenger === 'telegram' && (
-                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm font-bold text-green-900 mb-2">Код для подключения:</p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <code className="flex-1 text-2xl font-mono font-bold text-green-700 bg-white px-4 py-2 rounded border border-green-300">
+                <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-xs sm:text-sm font-bold text-green-900 mb-2">Код для подключения:</p>
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <code className="flex-1 text-lg sm:text-2xl font-mono font-bold text-green-700 bg-white px-3 sm:px-4 py-2 rounded border border-green-300 text-center">
                       {linkCode}
                     </code>
-                    <Button onClick={copyCode} size="sm" variant="outline">
-                      <Icon name="Copy" size={16} />
+                    <Button onClick={copyCode} size="sm" variant="outline" className="flex-shrink-0 h-10 w-10 sm:w-auto sm:px-4">
+                      <Icon name="Copy" size={14} />
                     </Button>
                   </div>
-                  <p className="text-xs text-green-700 mb-2">Действителен: {getTimeRemaining()}</p>
-                  <Button onClick={() => openBot('telegram')} className="w-full" size="sm">
+                  <p className="text-xs text-green-700 mb-2 text-center sm:text-left">Действителен: {getTimeRemaining()}</p>
+                  <Button onClick={() => openBot('telegram')} className="w-full h-10 text-sm sm:text-base" size="sm">
                     <Icon name="ExternalLink" size={16} className="mr-2" />
                     Открыть бота
                   </Button>
@@ -491,10 +492,10 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
               )}
 
               {connections.telegram?.connected && connections.telegram.username && (
-                <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-800">
-                    <Icon name="Check" size={16} className="inline mr-1" />
-                    Подключен как <strong>@{connections.telegram.username}</strong>
+                <div className="mt-2 sm:mt-3 p-2.5 sm:p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs sm:text-sm text-green-800 flex items-center gap-1">
+                    <Icon name="Check" size={14} className="flex-shrink-0" />
+                    <span className="truncate">Подключен как <strong>@{connections.telegram.username}</strong></span>
                   </p>
                 </div>
               )}
