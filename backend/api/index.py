@@ -23,7 +23,7 @@ JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 720
 
 login_attempts = {}
-# v1.1 - добавлена поддержка музыки
+# v1.2 - добавлено логирование загрузки музыки
 
 def log_activity(conn, event_type: str, message: str, data: Dict = None):
     """Логирование события в таблицу activity_log"""
@@ -5913,11 +5913,15 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             import boto3
             import base64
             
+            print('>>> Начинаем обработку загрузки музыки')
             body = json.loads(event.get('body', '{}'))
             file_data = body.get('file', '')
             filename = body.get('filename', 'music.mp3')
             
+            print(f'>>> Filename: {filename}, Data length: {len(file_data) if file_data else 0}')
+            
             if not file_data:
+                print('>>> ERROR: Нет данных файла')
                 return {
                     'statusCode': 400,
                     'headers': headers,
@@ -5929,10 +5933,23 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             if ',' in file_data:
                 file_data = file_data.split(',', 1)[1]
             
+            print(f'>>> Base64 data length after cleanup: {len(file_data)}')
+            
             # Декодируем base64
-            file_bytes = base64.b64decode(file_data)
+            try:
+                file_bytes = base64.b64decode(file_data)
+                print(f'>>> Decoded file size: {len(file_bytes)} bytes ({len(file_bytes) / 1024 / 1024:.2f} MB)')
+            except Exception as e:
+                print(f'>>> ERROR decoding base64: {str(e)}')
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': f'Ошибка декодирования: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
             
             # Загружаем в S3
+            print('>>> Инициализируем S3 клиент')
             s3 = boto3.client('s3',
                 endpoint_url='https://bucket.poehali.dev',
                 aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
@@ -5944,18 +5961,32 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             ext = filename.split('.')[-1] if '.' in filename else 'mp3'
             key = f'music/background-{uuid.uuid4()}.{ext}'
             
+            print(f'>>> Generated S3 key: {key}')
+            
             # Определяем content type
             content_type = 'audio/mpeg' if ext.lower() == 'mp3' else f'audio/{ext.lower()}'
             
-            s3.put_object(
-                Bucket='files',
-                Key=key,
-                Body=file_bytes,
-                ContentType=content_type
-            )
+            print(f'>>> Uploading to S3, content type: {content_type}')
+            try:
+                s3.put_object(
+                    Bucket='files',
+                    Key=key,
+                    Body=file_bytes,
+                    ContentType=content_type
+                )
+                print('>>> S3 upload successful')
+            except Exception as e:
+                print(f'>>> ERROR uploading to S3: {str(e)}')
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': f'Ошибка загрузки в S3: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
             
             # Формируем CDN URL
             cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"
+            print(f'>>> CDN URL: {cdn_url}')
             
             # Сохраняем URL в настройки
             cur.execute("""
