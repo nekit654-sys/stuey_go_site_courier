@@ -24,7 +24,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
-import MessengerSettings from '@/components/dashboard/MessengerSettings';
+import SettingsModal from '@/components/dashboard/SettingsModal';
 import TelegramConnectCard from '@/components/dashboard/TelegramConnectCard';
 
 interface Stats {
@@ -71,7 +71,8 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages'>('stats');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
@@ -306,7 +307,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
       <DashboardNav 
-        onSettings={() => setActiveTab('profile')}
+        onSettings={() => setShowSettingsModal(true)}
         onLogout={logout}
       />
 
@@ -343,7 +344,7 @@ export default function Dashboard() {
             {activeTab === 'stats' && (
               <div className="space-y-3 sm:space-y-4">
                 <TelegramConnectCard 
-                  onConnect={() => setActiveTab('settings')} 
+                  onConnect={() => setShowSettingsModal(true)} 
                   isConnected={telegramConnected}
                   onUnlink={handleTelegramUnlink}
                   telegramUsername={telegramUsername}
@@ -415,16 +416,18 @@ export default function Dashboard() {
                 <InviterCard />
               </div>
             )}
-
-            {activeTab === 'settings' && (
-              <MessengerSettings onConnectionChange={checkTelegramConnection} />
-            )}
           </div>
         </div>
       </div>
 
       <Footer />
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      <SettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={() => setShowSettingsModal(false)}
+        onConnectionChange={checkTelegramConnection}
+      />
 
       {showStartupPayoutModal && user?.id && (
         <StartupPayoutModal
