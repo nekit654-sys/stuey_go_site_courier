@@ -129,20 +129,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             existing_connection = cursor.fetchone()
             
-            if existing_connection:
-                cursor.execute("""
-                    UPDATE t_p25272970_courier_button_site.messenger_connections
-                    SET messenger_user_id = %s, is_verified = true, updated_at = NOW()
-                    WHERE courier_id = %s AND messenger_type = 'telegram'
-                    RETURNING id
-                """, (str(telegram_id), courier_id))
-            else:
-                cursor.execute("""
-                    INSERT INTO t_p25272970_courier_button_site.messenger_connections
-                    (courier_id, messenger_type, messenger_user_id, is_verified)
-                    VALUES (%s, 'telegram', %s, true)
-                    RETURNING id
-                """, (courier_id, str(telegram_id)))
+            # Используем UPSERT с ON CONFLICT (теперь работает с unique constraint)
+            cursor.execute("""
+                INSERT INTO t_p25272970_courier_button_site.messenger_connections
+                (courier_id, messenger_type, messenger_user_id, is_verified, created_at, updated_at)
+                VALUES (%s, 'telegram', %s, true, NOW(), NOW())
+                ON CONFLICT (courier_id, messenger_type) 
+                DO UPDATE SET 
+                    messenger_user_id = EXCLUDED.messenger_user_id,
+                    is_verified = true,
+                    updated_at = NOW()
+                RETURNING id
+            """, (courier_id, str(telegram_id)))
             
             conn.commit()
             
