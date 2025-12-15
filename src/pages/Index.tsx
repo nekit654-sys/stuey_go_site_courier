@@ -126,7 +126,7 @@ const Index = () => {
           href="https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 py-4 px-6 font-extrabold text-black text-lg"
+          className="flex-1 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 px-4 font-extrabold text-black text-base"
         >
           <svg
             viewBox="0 0 24 24"
