@@ -65,30 +65,67 @@ def get_courier_by_telegram(telegram_id: int) -> Optional[int]:
         conn.close()
 
 def get_courier_stats(courier_id: int, cursor) -> Dict[str, Any]:
-    """Получает статистику курьера"""
+    """Получает статистику курьера из реальных таблиц"""
     cursor.execute("""
-        SELECT c.name, c.city, cs.total_orders, cs.total_earned, 
-               cs.self_bonus_progress, cs.self_bonus_earned,
-               cs.invited_count, cs.active_referrals, cs.total_referral_earned
-        FROM t_p25272970_courier_button_site.couriers c
-        LEFT JOIN t_p25272970_courier_button_site.courier_stats cs ON c.id = cs.courier_id
-        WHERE c.id = %s
+        SELECT name, city, phone FROM t_p25272970_courier_button_site.couriers
+        WHERE id = %s
     """, (courier_id,))
     
-    row = cursor.fetchone()
-    if not row:
-        return {}
+    courier = cursor.fetchone()
+    if not courier:
+        return {
+            'name': 'Курьер',
+            'city': 'Не указан',
+            'total_orders': 0,
+            'total_earned': 0,
+            'self_bonus_progress': 0,
+            'invited_count': 0,
+            'active_referrals': 0,
+            'total_referral_earned': 0
+        }
+    
+    cursor.execute("""
+        SELECT SUM(amount) as total_earned
+        FROM t_p25272970_courier_button_site.courier_earnings
+        WHERE courier_id = %s
+    """, (courier_id,))
+    earnings = cursor.fetchone()
+    total_earned = float(earnings['total_earned']) if earnings and earnings['total_earned'] else 0
+    
+    cursor.execute("""
+        SELECT orders_completed
+        FROM t_p25272970_courier_button_site.courier_self_bonus_tracking
+        WHERE courier_id = %s
+    """, (courier_id,))
+    bonus_tracking = cursor.fetchone()
+    self_bonus_progress = bonus_tracking['orders_completed'] if bonus_tracking else 0
+    
+    cursor.execute("""
+        SELECT COUNT(*) as invited_count
+        FROM t_p25272970_courier_button_site.referrals
+        WHERE referrer_id = %s
+    """, (courier_id,))
+    referrals = cursor.fetchone()
+    invited_count = referrals['invited_count'] if referrals else 0
+    
+    cursor.execute("""
+        SELECT COUNT(*) as active_count, COALESCE(SUM(bonus_earned), 0) as total_referral_earned
+        FROM t_p25272970_courier_button_site.referrals
+        WHERE referrer_id = %s AND status = 'active'
+    """, (courier_id,))
+    active_refs = cursor.fetchone()
+    active_referrals = active_refs['active_count'] if active_refs else 0
+    total_referral_earned = float(active_refs['total_referral_earned']) if active_refs and active_refs['total_referral_earned'] else 0
     
     return {
-        'name': row['name'] or 'Курьер',
-        'city': row['city'] or 'Не указан',
-        'total_orders': row['total_orders'] or 0,
-        'total_earned': row['total_earned'] or 0,
-        'self_bonus_progress': row['self_bonus_progress'] or 0,
-        'self_bonus_earned': row['self_bonus_earned'] or 0,
-        'invited_count': row['invited_count'] or 0,
-        'active_referrals': row['active_referrals'] or 0,
-        'total_referral_earned': row['total_referral_earned'] or 0
+        'name': courier['name'] or 'Курьер',
+        'city': courier['city'] or 'Не указан',
+        'total_orders': 0,
+        'total_earned': total_earned,
+        'self_bonus_progress': self_bonus_progress,
+        'invited_count': invited_count,
+        'active_referrals': active_referrals,
+        'total_referral_earned': total_referral_earned
     }
 
 def ask_yandex_gpt(question: str, system_prompt: str) -> str:
