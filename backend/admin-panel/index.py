@@ -141,8 +141,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             payouts_referrers = cursor.fetchone()
             
             cursor.execute("""
-                SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE support_status != 'inactive') as active
-                FROM t_p25272970_courier_button_site.couriers
+                SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_active = true) as active
+                FROM t_p25272970_courier_button_site.users
             """)
             couriers = cursor.fetchone()
             
@@ -452,25 +452,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         if method == 'GET' and action == 'get_all_couriers':
-            # Получение всех курьеров из таблицы couriers
+            # Получение всех РЕАЛЬНЫХ курьеров из таблицы users
             cursor.execute("""
                 SELECT 
-                    c.id,
-                    COALESCE(c.first_name || ' ' || c.last_name, c.username, 'Без имени') as full_name,
-                    c.phone,
-                    c.city,
-                    c.current_vehicle,
-                    c.registration_source,
-                    c.created_at,
-                    c.total_deliveries,
-                    c.level,
+                    u.id,
+                    u.full_name,
+                    u.phone,
+                    u.city,
+                    u.vehicle_type,
+                    u.oauth_provider,
+                    u.created_at,
+                    u.total_orders,
+                    COALESCE(u.email, '') as email,
+                    u.referral_code,
+                    u.invited_by_user_id,
+                    u.external_id,
+                    u.is_active,
+                    u.avatar_url,
                     (
                         SELECT COUNT(*) 
-                        FROM t_p25272970_courier_button_site.couriers c2 
-                        WHERE c2.user_id = c.id
+                        FROM t_p25272970_courier_button_site.users u2 
+                        WHERE u2.invited_by_user_id = u.id
                     ) as referral_count
-                FROM t_p25272970_courier_button_site.couriers c
-                ORDER BY c.created_at DESC
+                FROM t_p25272970_courier_button_site.users u
+                ORDER BY u.created_at DESC
             """)
             
             rows = cursor.fetchall()
@@ -486,8 +491,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'oauth_provider': row[5],
                     'created_at': row[6].isoformat() if row[6] else None,
                     'total_orders': row[7] or 0,
-                    'level': row[8] or 1,
-                    'invited_count': row[9] or 0
+                    'email': row[8] or '',
+                    'referral_code': row[9],
+                    'invited_by_user_id': row[10],
+                    'external_id': row[11],
+                    'is_active': row[12],
+                    'avatar_url': row[13],
+                    'invited_count': row[14] or 0
                 })
             
             return {
@@ -563,17 +573,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         elif method == 'DELETE' and action == 'delete_all_users':
-            # Удаление всех курьеров и связанных данных
+            # Удаление всех РЕАЛЬНЫХ курьеров и связанных данных
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.messenger_connections")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_game_progress")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.leaderboard")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.withdrawal_requests")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings_snapshot")
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.bot_activity_log")
-            cursor.execute("DELETE FROM t_p25272970_courier_button_site.couriers")
+            # Удаляем реальных пользователей из users, НЕ игровые данные из couriers
+            cursor.execute("DELETE FROM t_p25272970_courier_button_site.users")
             
-            log_activity(cursor, 'all_users_deleted', 'Все курьеры и связанные данные удалены', {})
+            log_activity(cursor, 'all_users_deleted', 'Все курьеры сайта и связанные данные удалены', {})
             conn.commit()
             
             return {
