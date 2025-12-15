@@ -1,0 +1,1 @@
+UPDATE t_p25272970_courier_button_site.couriers SET total_deliveries = 0;

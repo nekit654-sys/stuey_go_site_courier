@@ -1,0 +1,1 @@
+UPDATE t_p25272970_courier_button_site.game_scores SET score = 0;
