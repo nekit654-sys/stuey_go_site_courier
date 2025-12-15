@@ -15,8 +15,18 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const { toast } = useToast();
 
   const loadRequests = async (token?: string, silent = false) => {
+    const useToken = token || authToken;
+    if (!useToken) {
+      console.error('Ошибка: нет токена авторизации');
+      return;
+    }
+    
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(`${ADMIN_PANEL_URL}`, {
+        headers: {
+          'X-Auth-Token': useToken
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         const newRequests = (data.requests || []).map((req: any) => ({
@@ -121,6 +131,11 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   };
 
   const loadReferralStats = async () => {
+    if (!authToken) {
+      console.error('Ошибка: нет токена авторизации для статистики рефералов');
+      return;
+    }
+    
     setIsLoadingReferrals(true);
     try {
       const response = await fetch(`${API_URL}?route=referrals&action=admin_stats`, {
@@ -142,6 +157,11 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   };
 
   const loadAllCouriers = async () => {
+    if (!authToken) {
+      console.error('Ошибка: нет токена авторизации для загрузки курьеров');
+      return;
+    }
+    
     setIsLoadingCouriers(true);
     console.log('📦 Загрузка курьеров из нового API, токен:', authToken ? 'есть' : 'НЕТ');
     try {
