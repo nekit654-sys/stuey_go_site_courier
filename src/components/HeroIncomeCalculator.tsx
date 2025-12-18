@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Icon from '@/components/ui/icon';
 import { useMagicEffect } from '@/hooks/useMagicEffect';
 import { useSound } from '@/hooks/useSound';
@@ -17,33 +17,19 @@ const HeroIncomeCalculator = () => {
   const [hours, setHours] = useState(8);
   const [referralBonus, setReferralBonus] = useState(false);
   const [courierType, setCourierType] = useState<CourierType>('walking');
-  const [settings, setSettings] = useState<ContentSettings>({
+  
+  // Хардкод значения - больше не загружаем из БД
+  const settings: ContentSettings = {
     max_income_walking: 50000,
     max_income_bicycle: 75000,
     max_income_car: 165000,
     referral_bonus_amount: 12000
-  });
+  };
+  
   const { triggerMagicEffect } = useMagicEffect();
   const { playSound } = useSound();
 
   const referralLink = "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank";
-
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        const response = await fetch('https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858?route=content');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.content?.calculator) {
-            setSettings(data.content.calculator);
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка загрузки настроек калькулятора:', error);
-      }
-    };
-    loadContent();
-  }, []);
 
   const handleMagicClick = (event: React.MouseEvent) => {
     playSound('success');
