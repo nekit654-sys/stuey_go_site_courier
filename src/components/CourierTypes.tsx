@@ -27,7 +27,7 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
       type: "Пеший курьер",
       icon: "User",
       description: "Лучший старт для новичков",
-      income: "От 2500₽/день",
+      income: "До 2500₽/день",
       benefits: [
         "Старт без вложений",
         "Работа рядом с домом",
