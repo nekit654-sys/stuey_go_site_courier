@@ -5818,21 +5818,46 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     query_params = event.get('queryStringParameters') or {}
     action = query_params.get('action', '')
     
+    print(f'>>> handle_content: action={action}, method={method}')
+    
     # Проверка admin токена для всех действий кроме get_music и пустого action (старый API)
     if action not in ['get_music', '']:
-        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        req_headers = event.get('headers', {})
+        print(f'>>> Заголовки запроса: {list(req_headers.keys())}')
+        
+        # Пробуем разные варианты заголовка
+        auth_token = (
+            req_headers.get('X-Auth-Token') or 
+            req_headers.get('x-auth-token') or
+            req_headers.get('X-AUTH-TOKEN') or
+            req_headers.get('authorization', '').replace('Bearer ', '')
+        )
+        
+        print(f'>>> Найден токен: {"Да" if auth_token else "Нет"}')
+        
         if not auth_token:
+            print('>>> ERROR: Токен не найден в заголовках')
             return {
                 'statusCode': 401,
                 'headers': headers,
-                'body': json.dumps({'success': False, 'error': 'Требуется авторизация'}),
+                'body': json.dumps({'success': False, 'error': 'Требуется авторизация', 'available_headers': list(req_headers.keys())}),
                 'isBase64Encoded': False
             }
         
         # Проверка токена админа
         try:
-            jwt.decode(auth_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        except:
+            payload = jwt.decode(auth_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            print(f'>>> Токен валиден, user_id={payload.get("user_id")}')
+        except jwt.ExpiredSignatureError:
+            print('>>> ERROR: Токен истёк')
+            return {
+                'statusCode': 403,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Токен истёк'}),
+                'isBase64Encoded': False
+            }
+        except jwt.InvalidTokenError as e:
+            print(f'>>> ERROR: Недействительный токен - {str(e)}')
             return {
                 'statusCode': 403,
                 'headers': headers,
