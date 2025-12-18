@@ -20,8 +20,8 @@ const HeroIncomeCalculator = () => {
   
   // Хардкод значения - больше не загружаем из БД
   const settings: ContentSettings = {
-    max_income_walking: 50000,
-    max_income_bicycle: 75000,
+    max_income_walking: 70000,
+    max_income_bicycle: 100000,
     max_income_car: 165000,
     referral_bonus_amount: 12000
   };
