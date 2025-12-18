@@ -1,5 +1,5 @@
 '''
-Business: Unified API endpoint - авторизация, заявки, реферальная программа
+Business: Unified API endpoint - авторизация, заявки, реферальная программа, контент
 Args: event - dict с httpMethod, body, queryStringParameters, headers, path
       context - объект с request_id, function_name
 Returns: HTTP response
@@ -5802,3 +5802,178 @@ def handle_bonus_users(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[s
         }),
         'isBase64Encoded': False
     }
+
+
+def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    """Управление контентом сайта (музыка, настройки)"""
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', '')
+    
+    # Проверка admin токена для всех действий кроме get_music
+    if action not in ['get_music']:
+        auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+        if not auth_token:
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Требуется авторизация'}),
+                'isBase64Encoded': False
+            }
+        
+        # Проверка токена админа
+        try:
+            jwt.decode(auth_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        except:
+            return {
+                'statusCode': 403,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Недействительный токен'}),
+                'isBase64Encoded': False
+            }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        # Получить настройки музыки (публичный доступ)
+        if action == 'get_music':
+            cur.execute(
+                "SELECT setting_value FROM t_p25272970_courier_button_site.site_settings WHERE setting_key = 'background_music'"
+            )
+            result = cur.fetchone()
+            settings = result['setting_value'] if result else {'url': '', 'enabled': False, 'volume': 0.3}
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'settings': settings}),
+                'isBase64Encoded': False
+            }
+        
+        # Сохранить настройки музыки
+        elif action == 'save_music' and method == 'POST':
+            body = json.loads(event.get('body', '{}'))
+            settings = body.get('settings', {})
+            
+            cur.execute("""
+                INSERT INTO t_p25272970_courier_button_site.site_settings (setting_key, setting_value, updated_at)
+                VALUES ('background_music', %s, NOW())
+                ON CONFLICT (setting_key) 
+                DO UPDATE SET setting_value = EXCLUDED.setting_value, updated_at = NOW()
+            """, (json.dumps(settings),))
+            
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Настройки сохранены'}),
+                'isBase64Encoded': False
+            }
+        
+        # Удалить музыку
+        elif action == 'delete_music' and method == 'POST':
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.site_settings 
+                SET setting_value = '{"url": "", "enabled": false, "volume": 0.3}'::jsonb, updated_at = NOW()
+                WHERE setting_key = 'background_music'
+            """)
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Музыка удалена'}),
+                'isBase64Encoded': False
+            }
+        
+        # Загрузить музыку в S3
+        elif action == 'upload_music' and method == 'POST':
+            import boto3
+            import base64
+            
+            body = json.loads(event.get('body', '{}'))
+            file_data = body.get('file', '')
+            filename = body.get('filename', 'music.mp3')
+            
+            if not file_data:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Нет данных файла'}),
+                    'isBase64Encoded': False
+                }
+            
+            # Убираем data URI prefix если есть
+            if ',' in file_data:
+                file_data = file_data.split(',', 1)[1]
+            
+            # Декодируем base64
+            file_bytes = base64.b64decode(file_data)
+            
+            # Загружаем в S3
+            s3 = boto3.client('s3',
+                endpoint_url='https://bucket.poehali.dev',
+                aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+            )
+            
+            # Генерируем уникальное имя файла
+            import uuid
+            ext = filename.split('.')[-1] if '.' in filename else 'mp3'
+            key = f'music/background-{uuid.uuid4()}.{ext}'
+            
+            # Определяем content type
+            content_type = 'audio/mpeg' if ext.lower() == 'mp3' else f'audio/{ext.lower()}'
+            
+            s3.put_object(
+                Bucket='files',
+                Key=key,
+                Body=file_bytes,
+                ContentType=content_type
+            )
+            
+            # Формируем CDN URL
+            cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"
+            
+            # Сохраняем URL в настройки
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.site_settings 
+                SET setting_value = jsonb_set(
+                    COALESCE(setting_value, '{}'::jsonb),
+                    '{url}',
+                    to_jsonb(%s::text)
+                ),
+                updated_at = NOW()
+                WHERE setting_key = 'background_music'
+            """, (cdn_url,))
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'url': cdn_url, 'message': 'Музыка загружена'}),
+                'isBase64Encoded': False
+            }
+        
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Неизвестное действие'}),
+                'isBase64Encoded': False
+            }
+    
+    except Exception as e:
+        conn.rollback()
+        print(f'>>> ERROR в handle_content: {str(e)}')
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': str(e)}),
+            'isBase64Encoded': False
+        }
+    finally:
+        cur.close()
+        conn.close()
