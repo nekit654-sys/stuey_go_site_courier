@@ -1,5 +1,5 @@
 '''
-Business: Unified API endpoint - авторизация, заявки, реферальная программа, контент, музыка
+Business: Unified API endpoint - авторизация, заявки, реферальная программа, контент
 Args: event - dict с httpMethod, body, queryStringParameters, headers, path
       context - объект с request_id, function_name
 Returns: HTTP response
@@ -23,7 +23,6 @@ JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 720
 
 login_attempts = {}
-# v1.1 - добавлена поддержка музыки
 
 def log_activity(conn, event_type: str, message: str, data: Dict = None):
     """Логирование события в таблицу activity_log"""
@@ -5806,13 +5805,13 @@ def handle_bonus_users(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[s
 
 
 def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
-    """Управление контентом сайта: калькулятор, музыка, настройки"""
+    """Управление контентом сайта (музыка, настройки)"""
     method = event.get('httpMethod', 'GET')
     query_params = event.get('queryStringParameters') or {}
     action = query_params.get('action', '')
     
-    # Проверка admin токена для всех действий кроме get_music и пустого action (старый API)
-    if action not in ['get_music', '']:
+    # Проверка admin токена для всех действий кроме get_music
+    if action not in ['get_music']:
         auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
         if not auth_token:
             return {
@@ -5837,27 +5836,8 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     try:
-        # Старый API для калькулятора (без action, публичный доступ)
-        if action == '' or action is None:
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': True,
-                    'content': {
-                        'calculator': {
-                            'max_income_walking': 60000,
-                            'max_income_bicycle': 80000,
-                            'max_income_car': 100000,
-                            'referral_bonus_amount': 12000
-                        }
-                    }
-                }),
-                'isBase64Encoded': False
-            }
-        
         # Получить настройки музыки (публичный доступ)
-        elif action == 'get_music':
+        if action == 'get_music':
             cur.execute(
                 "SELECT setting_value FROM t_p25272970_courier_button_site.site_settings WHERE setting_key = 'background_music'"
             )
