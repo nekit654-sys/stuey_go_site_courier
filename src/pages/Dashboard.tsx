@@ -24,8 +24,9 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import NewCourierNotification from '@/components/NewCourierNotification';
 import BottomNav from '@/components/dashboard/BottomNav';
-import MessengerSettings from '@/components/dashboard/MessengerSettings';
+import SettingsModal from '@/components/dashboard/SettingsModal';
 import TelegramConnectCard from '@/components/dashboard/TelegramConnectCard';
+import TelegramLinkModal from '@/components/dashboard/TelegramLinkModal';
 
 interface Stats {
   total_referrals: number;
@@ -71,13 +72,15 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages'>('stats');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
   const [showStartupPayoutModal, setShowStartupPayoutModal] = useState(false);
   const [showNewCourierNotification, setShowNewCourierNotification] = useState(false);
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramUsername, setTelegramUsername] = useState<string>('');
+  const [showTelegramLinkModal, setShowTelegramLinkModal] = useState(false);
 
   useEffect(() => {
     console.log('[Dashboard] Mount:', { isAuthenticated, userId: user?.id });
@@ -99,17 +102,24 @@ export default function Dashboard() {
   }, [isAuthenticated, navigate, user?.id]);
 
   const checkTelegramConnection = async () => {
+    if (!user?.id) return;
+    
     try {
-      const response = await fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=status', {
+      const response = await fetch('https://functions.poehali.dev/func2url.json');
+      const funcMap = await response.json();
+      const telegramLinkUrl = funcMap['telegram-link'];
+
+      const statusResponse = await fetch(telegramLinkUrl, {
+        method: 'GET',
         headers: {
-          'X-User-Id': user?.id?.toString() || ''
+          'X-User-Id': user.id.toString()
         }
       });
 
-      const data = await response.json();
-      if (data.success && data.connections?.telegram?.connected) {
+      const data = await statusResponse.json();
+      if (data.connected && data.verified) {
         setTelegramConnected(true);
-        setTelegramUsername(data.connections.telegram.username || '');
+        setTelegramUsername(data.telegram_id || '');
       } else {
         setTelegramConnected(false);
         setTelegramUsername('');
@@ -120,21 +130,25 @@ export default function Dashboard() {
   };
 
   const handleTelegramUnlink = async () => {
+    if (!user?.id) return;
+
     try {
-      const response = await fetch('https://functions.poehali.dev/b0d34a9d-f92c-4526-bfcf-c6dfa76dfb15?action=unlink', {
-        method: 'POST',
+      const response = await fetch('https://functions.poehali.dev/func2url.json');
+      const funcMap = await response.json();
+      const telegramLinkUrl = funcMap['telegram-link'];
+
+      const unlinkResponse = await fetch(telegramLinkUrl, {
+        method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': user?.id?.toString() || ''
-        },
-        body: JSON.stringify({ messenger_type: 'telegram' })
+          'X-User-Id': user.id.toString()
+        }
       });
 
-      const data = await response.json();
+      const data = await unlinkResponse.json();
       if (data.success) {
         setTelegramConnected(false);
         setTelegramUsername('');
-        toast.success('Telegram отключен');
+        toast.success('Telegram отвязан');
       } else {
         toast.error(data.error || 'Ошибка отключения');
       }
@@ -306,7 +320,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500">
       <DashboardNav 
-        onSettings={() => setActiveTab('profile')}
+        onSettings={() => setShowSettingsModal(true)}
         onLogout={logout}
       />
 
@@ -343,7 +357,7 @@ export default function Dashboard() {
             {activeTab === 'stats' && (
               <div className="space-y-3 sm:space-y-4">
                 <TelegramConnectCard 
-                  onConnect={() => setActiveTab('settings')} 
+                  onConnect={() => setShowTelegramLinkModal(true)} 
                   isConnected={telegramConnected}
                   onUnlink={handleTelegramUnlink}
                   telegramUsername={telegramUsername}
@@ -415,16 +429,28 @@ export default function Dashboard() {
                 <InviterCard />
               </div>
             )}
-
-            {activeTab === 'settings' && (
-              <MessengerSettings onConnectionChange={checkTelegramConnection} />
-            )}
           </div>
         </div>
       </div>
 
       <Footer />
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      <SettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={() => setShowSettingsModal(false)}
+        onConnectionChange={checkTelegramConnection}
+      />
+
+      <TelegramLinkModal
+        isOpen={showTelegramLinkModal}
+        onClose={() => setShowTelegramLinkModal(false)}
+        onSuccess={() => {
+          checkTelegramConnection();
+          toast.success('🎉 Telegram подключен! Напиши /start боту.');
+        }}
+        userId={user?.id || 0}
+      />
 
       {showStartupPayoutModal && user?.id && (
         <StartupPayoutModal

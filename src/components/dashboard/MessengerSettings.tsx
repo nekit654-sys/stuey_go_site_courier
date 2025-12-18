@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
@@ -27,7 +29,7 @@ interface MessengerSettingsProps {
 }
 
 export default function MessengerSettings({ onConnectionChange }: MessengerSettingsProps) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [connections, setConnections] = useState<ConnectionStatus>({
     telegram: null,
     whatsapp: null
@@ -37,10 +39,28 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [selectedMessenger, setSelectedMessenger] = useState<'telegram' | 'whatsapp' | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const [profileData, setProfileData] = useState({
+    full_name: user?.full_name || '',
+    phone: user?.phone || '',
+    city: user?.city || '',
+  });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   useEffect(() => {
     fetchConnectionStatus();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        full_name: user.full_name || '',
+        phone: formatPhoneInput(user.phone || ''),
+        city: user.city || '',
+      });
+    }
+  }, [user?.id, user?.full_name, user?.phone, user?.city]);
 
   // Проверка подключения каждые 3 секунды когда есть активный код
   useEffect(() => {
@@ -207,6 +227,101 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const formatPhoneInput = (value: string) => {
+    let digits = value.replace(/\D/g, '');
+    
+    if (digits.startsWith('8')) {
+      digits = '7' + digits.slice(1);
+    }
+    
+    if (digits.startsWith('7')) {
+      if (digits.length <= 1) return '+7';
+      if (digits.length <= 4) return `+7 (${digits.slice(1)}`;
+      if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4)}`;
+      if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+      return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
+    }
+    
+    if (digits.length === 0) return '+7';
+    if (digits.length <= 3) return `+7 (${digits}`;
+    if (digits.length <= 6) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    if (digits.length <= 8) return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  };
+
+  const handleProfileEdit = () => {
+    setProfileData({
+      full_name: user?.full_name || '',
+      phone: formatPhoneInput(user?.phone || ''),
+      city: user?.city || '',
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleProfileCancel = () => {
+    setIsEditingProfile(false);
+    setProfileData({
+      full_name: user?.full_name || '',
+      phone: formatPhoneInput(user?.phone || ''),
+      city: user?.city || '',
+    });
+  };
+
+  const handleProfileSave = async () => {
+    if (!profileData.full_name.trim()) {
+      toast.error('ФИО обязательно для заполнения');
+      return;
+    }
+
+    const phoneDigits = profileData.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 11) {
+      toast.error('Введите полный номер телефона');
+      return;
+    }
+
+    if (!profileData.city.trim()) {
+      toast.error('Город обязателен для заполнения');
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const response = await fetch(`${API_URL}?route=profile&action=update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': user?.id?.toString() || '',
+        },
+        body: JSON.stringify({
+          full_name: profileData.full_name.trim(),
+          phone: phoneDigits,
+          city: profileData.city.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Профиль успешно обновлен');
+        if (updateUser) {
+          updateUser({
+            full_name: profileData.full_name.trim(),
+            phone: phoneDigits,
+            city: profileData.city.trim(),
+          });
+        }
+        setIsEditingProfile(false);
+      } else {
+        toast.error(data.error || 'Ошибка обновления профиля');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Ошибка подключения к серверу');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card className="p-6">
@@ -219,6 +334,123 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      {/* Карточка редактирования профиля */}
+      <Card className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <Icon name="User" className="text-white" size={20} />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Личные данные</h3>
+              <p className="text-xs sm:text-sm text-gray-500">Управление информацией профиля</p>
+            </div>
+          </div>
+          {!isEditingProfile && (
+            <Button
+              onClick={handleProfileEdit}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Icon name="Edit" size={16} />
+              <span className="hidden sm:inline ml-2">Редактировать</span>
+            </Button>
+          )}
+        </div>
+
+        {isEditingProfile ? (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="full_name" className="text-sm font-medium text-gray-700">ФИО</Label>
+              <Input
+                id="full_name"
+                value={profileData.full_name}
+                onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                placeholder="Иванов Иван Иванович"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Телефон</Label>
+              <Input
+                id="phone"
+                value={profileData.phone}
+                onChange={(e) => setProfileData({ ...profileData, phone: formatPhoneInput(e.target.value) })}
+                placeholder="+7 (999) 999-99-99"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="city" className="text-sm font-medium text-gray-700">Город</Label>
+              <Input
+                id="city"
+                value={profileData.city}
+                onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
+                placeholder="Москва"
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={handleProfileSave}
+                disabled={isSavingProfile}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isSavingProfile ? (
+                  <>
+                    <Icon name="Loader2" className="animate-spin mr-2" size={16} />
+                    Сохранение...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="Check" size={16} className="mr-2" />
+                    Сохранить
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleProfileCancel}
+                variant="outline"
+                disabled={isSavingProfile}
+                className="flex-1"
+              >
+                <Icon name="X" size={16} className="mr-2" />
+                Отмена
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Icon name="User" size={18} className="text-gray-500" />
+              <div>
+                <p className="text-xs text-gray-500">ФИО</p>
+                <p className="text-sm font-medium text-gray-900">{user?.full_name || 'Не указано'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Icon name="Phone" size={18} className="text-gray-500" />
+              <div>
+                <p className="text-xs text-gray-500">Телефон</p>
+                <p className="text-sm font-medium text-gray-900">{user?.phone ? formatPhoneInput(user.phone) : 'Не указано'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Icon name="MapPin" size={18} className="text-gray-500" />
+              <div>
+                <p className="text-xs text-gray-500">Город</p>
+                <p className="text-sm font-medium text-gray-900">{user?.city || 'Не указано'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Информационная карточка */}
       <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-3 border-blue-200 rounded-2xl shadow-[0_5px_0_0_rgba(59,130,246,0.3)] p-3 sm:p-6">
         <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">

@@ -63,10 +63,10 @@ export default function MusicTab({ authToken }: MusicTabProps) {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: 'Ошибка',
-        description: 'Размер файла не должен превышать 2 МБ. Используйте сжатый MP3 файл.',
+        description: 'Размер файла не должен превышать 10 МБ',
         variant: 'destructive',
       });
       return;
@@ -80,8 +80,6 @@ export default function MusicTab({ authToken }: MusicTabProps) {
 
     setIsUploading(true);
     try {
-      console.log('🎵 Начинаем загрузку файла:', musicFile.name, 'размер:', musicFile.size);
-      
       // Конвертируем файл в base64
       const reader = new FileReader();
       reader.readAsDataURL(musicFile);
@@ -90,10 +88,8 @@ export default function MusicTab({ authToken }: MusicTabProps) {
         reader.onload = async () => {
           try {
             const base64Data = reader.result as string;
-            console.log('📦 Base64 данные готовы, размер:', base64Data.length);
             
             // Отправляем base64 через JSON
-            console.log('🚀 Отправляем запрос на сервер...');
             const response = await fetch(`${API_URL}?route=content&action=upload_music`, {
               method: 'POST',
               headers: {
@@ -106,16 +102,7 @@ export default function MusicTab({ authToken }: MusicTabProps) {
               }),
             });
 
-            console.log('✅ Ответ получен, status:', response.status);
-            
-            // Обработка ошибки 413 - файл слишком большой
-            if (response.status === 413) {
-              reject(new Error('Файл слишком большой. Используйте файл до 2 МБ или сожмите MP3.'));
-              return;
-            }
-            
             const data = await response.json();
-            console.log('📄 Данные ответа:', data);
 
             if (data.success && data.url) {
               setSettings({ ...settings, url: data.url });
@@ -130,17 +117,12 @@ export default function MusicTab({ authToken }: MusicTabProps) {
               reject(new Error(data.error || 'Ошибка загрузки'));
             }
           } catch (error) {
-            console.error('❌ Ошибка в обработчике:', error);
             reject(error);
           }
         };
-        reader.onerror = (error) => {
-          console.error('❌ Ошибка чтения файла:', error);
-          reject(error);
-        };
+        reader.onerror = reject;
       });
     } catch (error: any) {
-      console.error('❌ Общая ошибка загрузки:', error);
       toast({
         title: 'Ошибка',
         description: error.message || 'Не удалось загрузить музыку',
@@ -234,7 +216,7 @@ export default function MusicTab({ authToken }: MusicTabProps) {
         <CardContent className="space-y-4">
           {/* Загрузка файла */}
           <div className="space-y-2">
-            <Label htmlFor="music-file">Загрузить музыку (MP3, до 2 МБ)</Label>
+            <Label htmlFor="music-file">Загрузить музыку (MP3, до 10 МБ)</Label>
             <div className="flex gap-2">
               <Input
                 id="music-file"

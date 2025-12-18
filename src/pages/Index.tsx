@@ -119,36 +119,65 @@ const Index = () => {
       <FAQ />
       <Footer />
       
-      {/* Липкая кнопка поддержки на мобильных */}
-      <a
-        href="https://t.me/StueyGoBot"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 z-50 lg:hidden ${
-          isSupportPulsing ? 'animate-pulse scale-110' : 'scale-100'
-        }`}
-        title="Поддержка в Telegram"
-      >
-        {/* Анимированные кольца */}
-        <div className={`
-          absolute inset-0 rounded-full border-4 border-blue-300
-          ${isSupportPulsing ? 'animate-ping opacity-75' : 'opacity-0'}
-        `} />
-        <div className={`
-          absolute inset-0 rounded-full border-2 border-blue-200
-          ${isSupportPulsing ? 'animate-ping opacity-50' : 'opacity-0'}
-        `} style={{ animationDelay: '150ms' }} />
-        
-        <svg 
-          viewBox="0 0 24 24" 
-          width="24" 
-          height="24" 
-          className="text-white relative z-10"
-          fill="currentColor"
+      {/* Липкие кнопки внизу на мобильных */}
+      <div className="fixed bottom-6 left-6 right-6 flex gap-3 z-50 lg:hidden">
+        {/* Кнопка подачи заявки на всю ширину */}
+        <a
+          href="https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 px-4 font-extrabold text-black text-base"
         >
-          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-        </svg>
-      </a>
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            className="mr-2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+          </svg>
+          <span>Подать заявку</span>
+        </a>
+        
+        {/* Кнопка поддержки */}
+        <a
+          href="https://t.me/StueyGoBot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 flex-shrink-0 ${
+            isSupportPulsing ? 'animate-pulse scale-110' : 'scale-100'
+          }`}
+          title="Поддержка в Telegram"
+        >
+          {/* Анимированные кольца */}
+          <div className={`
+            absolute inset-0 rounded-full border-4 border-blue-300
+            ${isSupportPulsing ? 'animate-ping opacity-75' : 'opacity-0'}
+          `} />
+          <div className={`
+            absolute inset-0 rounded-full border-2 border-blue-200
+            ${isSupportPulsing ? 'animate-ping opacity-50' : 'opacity-0'}
+          `} style={{ animationDelay: '150ms' }} />
+          
+          <svg 
+            viewBox="0 0 24 24" 
+            width="24" 
+            height="24" 
+            className="text-white relative z-10"
+            fill="currentColor"
+          >
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+        </a>
+      </div>
       
       {showPayoutModal && (
         <StartupPayoutModal

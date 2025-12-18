@@ -1,8 +1,8 @@
 import Icon from '@/components/ui/icon';
 
 interface BottomNavProps {
-  activeTab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings';
-  onTabChange: (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages' | 'settings') => void;
+  activeTab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages';
+  onTabChange: (tab: 'stats' | 'referrals' | 'withdrawals' | 'game' | 'profile' | 'friends' | 'messages') => void;
 }
 
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
@@ -11,7 +11,6 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     { id: 'referrals' as const, icon: 'Users', label: 'Рефералы' },
     { id: 'withdrawals' as const, icon: 'Wallet', label: 'Выплаты' },
     { id: 'game' as const, icon: 'Gamepad2', label: 'Мини-игра' },
-    { id: 'settings' as const, icon: 'Settings', label: 'Настройки' },
   ];
 
   return (

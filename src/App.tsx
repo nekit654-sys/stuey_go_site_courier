@@ -9,6 +9,7 @@ import { GameProvider } from "@/contexts/GameContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FeedbackTab from "@/components/FeedbackTab";
 import VisitTracker from "@/components/VisitTracker";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 import Index from "./pages/Index";
 import Career from "./pages/Career";
@@ -76,7 +77,7 @@ const AppRoutes = () => {
           </Suspense>
         } />
 
-        <Route path="/login" element={<Login />} />
+        <Route path="/ask" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
@@ -85,11 +86,12 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {location.pathname !== '/login' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && (
+      {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && (
         <>
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />
           <FeedbackTab />
+          <BackgroundMusic />
         </>
       )}
     </>

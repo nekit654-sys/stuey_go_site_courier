@@ -80,12 +80,12 @@ export default function CompactAdminTabs({
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
-      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 bg-gray-100 p-1 rounded-lg border-2 border-black`}>
+      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200`}>
         <button
           onClick={() => onTabChange('activity')}
-          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-semibold transition-colors ${
             activeTab === 'activity'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
               : 'bg-transparent text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -94,9 +94,9 @@ export default function CompactAdminTabs({
         </button>
         <button
           onClick={() => onTabChange('people')}
-          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-bold transition-colors ${
+          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-semibold transition-colors ${
             activeTab === 'people'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
               : 'bg-transparent text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -110,9 +110,9 @@ export default function CompactAdminTabs({
         </button>
         <button
           onClick={() => onTabChange('finances')}
-          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-bold transition-colors ${
+          className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-semibold transition-colors ${
             activeTab === 'finances'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
               : 'bg-transparent text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -126,9 +126,9 @@ export default function CompactAdminTabs({
         </button>
         <button
           onClick={() => onTabChange('content')}
-          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-semibold transition-colors ${
             activeTab === 'content'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
               : 'bg-transparent text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -138,9 +138,9 @@ export default function CompactAdminTabs({
 
         <button
           onClick={() => onTabChange('visits')}
-          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-semibold transition-colors ${
             activeTab === 'visits'
-              ? 'bg-white text-black shadow-sm border-2 border-black'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
               : 'bg-transparent text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -150,9 +150,9 @@ export default function CompactAdminTabs({
         {isSuperAdmin && (
           <button
             onClick={() => onTabChange('settings')}
-            className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-bold transition-colors ${
+            className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-semibold transition-colors ${
               activeTab === 'settings'
-                ? 'bg-white text-black shadow-sm border-2 border-black'
+                ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
                 : 'bg-transparent text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -222,25 +222,25 @@ export default function CompactAdminTabs({
           />
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 sm:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 sm:hidden">
         <div className={`grid ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} h-16`}>
           <button
             onClick={() => onTabChange('activity')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'activity' 
-                ? 'bg-yellow-400 text-black' 
+                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             <Icon name="Newspaper" size={20} />
-            <span className="text-[10px] font-bold">Новости</span>
+            <span className="text-[10px] font-semibold">Новости</span>
           </button>
 
           <button
             onClick={() => onTabChange('people')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'people' 
-                ? 'bg-yellow-400 text-black' 
+                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
@@ -250,14 +250,14 @@ export default function CompactAdminTabs({
               </span>
             )}
             <Icon name="Users" size={20} />
-            <span className="text-[10px] font-bold">Люди</span>
+            <span className="text-[10px] font-semibold">Люди</span>
           </button>
 
           <button
             onClick={() => onTabChange('finances')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'finances' 
-                ? 'bg-yellow-400 text-black' 
+                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
@@ -267,31 +267,31 @@ export default function CompactAdminTabs({
               </span>
             )}
             <Icon name="DollarSign" size={20} />
-            <span className="text-[10px] font-bold">Финансы</span>
+            <span className="text-[10px] font-semibold">Финансы</span>
           </button>
 
           <button
             onClick={() => onTabChange('content')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'content' 
-                ? 'bg-yellow-400 text-black' 
+                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             <Icon name="Image" size={20} />
-            <span className="text-[10px] font-bold">Контент</span>
+            <span className="text-[10px] font-semibold">Контент</span>
           </button>
 
           <button
             onClick={() => onTabChange('visits')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
               activeTab === 'visits' 
-                ? 'bg-yellow-400 text-black' 
+                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
             <Icon name="Eye" size={20} />
-            <span className="text-[10px] font-bold">Визиты</span>
+            <span className="text-[10px] font-semibold">Визиты</span>
           </button>
 
           {isSuperAdmin && (
@@ -299,12 +299,12 @@ export default function CompactAdminTabs({
               onClick={() => onTabChange('settings')}
               className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
                 activeTab === 'settings' 
-                  ? 'bg-yellow-400 text-black' 
+                  ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
                   : 'bg-white text-gray-600 active:bg-gray-100'
               }`}
             >
               <Icon name="Settings" size={20} />
-              <span className="text-[10px] font-bold">Админы</span>
+              <span className="text-[10px] font-semibold">Админы</span>
             </button>
           )}
         </div>

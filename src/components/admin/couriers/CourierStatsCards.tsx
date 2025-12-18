@@ -21,7 +21,7 @@ export default function CourierStatsCards({
           <div className="flex items-center">
             <Icon name="Users" size={20} className="text-blue-600 mr-2" />
             <div>
-              <div className="text-xl font-bold">{totalCouriers}</div>
+              <div className="text-xl font-semibold">{totalCouriers}</div>
               <div className="text-sm text-gray-600">Всего курьеров</div>
             </div>
           </div>

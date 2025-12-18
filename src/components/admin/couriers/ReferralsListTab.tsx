@@ -58,7 +58,7 @@ export default function ReferralsListTab({ referrals, isLoading }: ReferralsList
                     <td className="py-3 px-4">{referral.referred_name}</td>
                     <td className="py-3 px-4 text-sm text-gray-600">{referral.referred_city}</td>
                     <td className="py-3 px-4 text-right">{referral.referred_orders}</td>
-                    <td className="py-3 px-4 text-right font-bold text-green-600">
+                    <td className="py-3 px-4 text-right font-semibold text-green-600">
                       {referral.bonus_amount.toLocaleString('ru-RU')}
                     </td>
                     <td className="py-3 px-4 text-center">

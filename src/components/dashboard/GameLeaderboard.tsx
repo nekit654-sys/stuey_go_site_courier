@@ -71,35 +71,35 @@ export default function GameLeaderboard() {
 
   if (isLoading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="text-3xl">🏆</div>
+      <Card className="p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-2xl sm:text-3xl">🏆</div>
             <div>
-              <h3 className="text-xl font-bold">Лидерборды игр</h3>
-              <p className="text-sm text-muted-foreground">Лучшие курьеры в играх</p>
+              <h3 className="text-base sm:text-xl font-bold">Топ игроков</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Лучшие курьеры в играх</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 sm:gap-2">
             <button
               onClick={() => setActiveGame('courier')}
-              className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 activeGame === 'courier'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted hover:bg-muted/80'
               }`}
             >
-              🏃 Приключения
+              🏃 <span className="hidden sm:inline">Приключения</span>
             </button>
             <button
               onClick={() => setActiveGame('city')}
-              className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 activeGame === 'city'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted hover:bg-muted/80'
               }`}
             >
-              🚗 Город
+              🚗 <span className="hidden sm:inline">Город</span>
             </button>
           </div>
         </div>
@@ -115,35 +115,35 @@ export default function GameLeaderboard() {
   const isCourier = activeGame === 'courier';
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl">🏆</div>
+    <Card className="p-3 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="text-2xl sm:text-3xl">🏆</div>
           <div>
-            <h3 className="text-xl font-bold">Лидерборды игр</h3>
-            <p className="text-sm text-muted-foreground">Лучшие курьеры в играх</p>
+            <h3 className="text-base sm:text-xl font-bold">Топ игроков</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Лучшие курьеры в играх</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveGame('courier')}
-            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
               activeGame === 'courier'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted hover:bg-muted/80'
             }`}
           >
-            🏃 Приключения
+            🏃 <span className="hidden sm:inline">Приключения</span>
           </button>
           <button
             onClick={() => setActiveGame('city')}
-            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
               activeGame === 'city'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted hover:bg-muted/80'
             }`}
           >
-            🚗 Город
+            🚗 <span className="hidden sm:inline">Город</span>
           </button>
         </div>
       </div>
@@ -154,41 +154,41 @@ export default function GameLeaderboard() {
           <p className="text-sm text-muted-foreground">Пока нет результатов</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {currentLeaderboard.map((entry: any, index: number) => (
             <div
               key={entry.user_id}
               className={`
-                p-4 rounded-lg border-2 transition-all hover:shadow-md
+                p-2 sm:p-4 rounded-lg border-2 transition-all hover:shadow-md
                 ${index === 0 ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-400' : ''}
                 ${index === 1 ? 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-400' : ''}
                 ${index === 2 ? 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-400' : ''}
                 ${index > 2 ? 'bg-card border-border' : ''}
               `}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 {/* Место */}
-                <div className="text-2xl font-bold w-10 text-center flex-shrink-0">
+                <div className="text-lg sm:text-2xl font-bold w-7 sm:w-10 text-center flex-shrink-0">
                   {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                 </div>
 
                 {/* Информация */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-lg truncate">
+                  <p className="font-bold text-sm sm:text-lg truncate">
                     {entry.username || `Игрок ${entry.user_id}`}
                   </p>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
-                    <span className="flex items-center gap-1">
-                      <Icon name="TrendingUp" size={14} />
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
+                    <span className="flex items-center gap-0.5 sm:gap-1">
+                      <Icon name="TrendingUp" size={12} className="sm:w-3.5 sm:h-3.5" />
                       Ур. {entry.level}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Icon name="Package" size={14} />
+                    <span className="flex items-center gap-0.5 sm:gap-1">
+                      <Icon name="Package" size={12} className="sm:w-3.5 sm:h-3.5" />
                       {isCourier ? entry.total_orders : entry.deliveries}
                     </span>
                     {isCourier && (
-                      <span className="flex items-center gap-1">
-                        <Icon name="DollarSign" size={14} />
+                      <span className="flex items-center gap-0.5 sm:gap-1">
+                        <Icon name="DollarSign" size={12} className="sm:w-3.5 sm:h-3.5" />
                         {entry.total_earnings}₽
                       </span>
                     )}
@@ -197,8 +197,8 @@ export default function GameLeaderboard() {
 
                 {/* Очки */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-2xl font-bold">{isCourier ? entry.best_score : entry.score}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-base sm:text-2xl font-bold">{isCourier ? entry.best_score : entry.score}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {isCourier ? getTransportEmoji(entry.transport) : '🪙'}
                   </p>
                 </div>

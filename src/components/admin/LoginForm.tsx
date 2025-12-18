@@ -22,21 +22,21 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 bg-white/95 backdrop-blur shadow-2xl">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 bg-white shadow-lg border border-gray-200">
         <CardHeader className="text-center pb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
             <Icon name="Shield" size={32} className="text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Админ-панель
+          <CardTitle className="text-3xl font-semibold text-gray-900">
+            Панель администратора
           </CardTitle>
-          <p className="text-gray-600 mt-2">Авторизация администратора</p>
+          <p className="text-gray-500 mt-2">Введите учетные данные для входа</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="username" className="text-sm font-medium">Логин</Label>
+              <Label htmlFor="username" className="text-sm font-medium text-gray-700">Логин</Label>
               <Input
                 id="username"
                 name="username"
@@ -49,7 +49,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
               />
             </div>
             <div>
-              <Label htmlFor="password" className="text-sm font-medium">Пароль</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700">Пароль</Label>
               <Input
                 id="password"
                 name="password"
@@ -63,7 +63,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </div>
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6"
               disabled={isLoading}
             >
               {isLoading ? (
