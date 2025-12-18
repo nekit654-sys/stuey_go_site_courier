@@ -9,7 +9,6 @@ import { GameProvider } from "@/contexts/GameContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FeedbackTab from "@/components/FeedbackTab";
 import VisitTracker from "@/components/VisitTracker";
-import BackgroundMusic from "@/components/BackgroundMusic";
 
 import Index from "./pages/Index";
 import Career from "./pages/Career";
@@ -91,7 +90,6 @@ const AppRoutes = () => {
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />
           <FeedbackTab />
-          <BackgroundMusic />
         </>
       )}
     </>
