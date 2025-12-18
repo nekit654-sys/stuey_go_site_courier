@@ -139,7 +139,7 @@ const CourierTypes = ({ onOpenPayoutModal }: CourierTypesProps) => {
           ))}
         </div>
 
-        <div className="hidden md:flex justify-center">
+        <div className="flex justify-center">
           <Button
             onClick={(e) => handleMagicClick(e, 'general')}
             size="lg"
