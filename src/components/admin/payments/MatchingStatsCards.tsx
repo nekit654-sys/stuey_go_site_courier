@@ -19,7 +19,7 @@ export default function MatchingStatsCards({ stats }: MatchingStatsCardsProps) {
           <div className="flex items-center">
             <Icon name="Users" size={20} className="text-blue-600 mr-2" />
             <div>
-              <div className="text-2xl font-semibold">{stats.total}</div>
+              <div className="text-2xl font-bold">{stats.total}</div>
               <div className="text-xs text-gray-600">Всего</div>
             </div>
           </div>
@@ -67,7 +67,7 @@ export default function MatchingStatsCards({ stats }: MatchingStatsCardsProps) {
           <div className="flex items-center">
             <Icon name="Wallet" size={20} className="text-green-600 mr-2" />
             <div>
-              <div className="text-xl font-semibold">{stats.totalPayout.toFixed(0)} ₽</div>
+              <div className="text-xl font-bold">{stats.totalPayout.toFixed(0)} ₽</div>
               <div className="text-xs text-gray-600">Сумма</div>
             </div>
           </div>

@@ -203,10 +203,10 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card className="border border-gray-200 shadow-sm">
+      <Card className="border-2 border-blue-200">
         <CardContent className="py-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <Icon name="Users" size={28} className="text-blue-600" />
               Курьеры и рефералы
             </h2>

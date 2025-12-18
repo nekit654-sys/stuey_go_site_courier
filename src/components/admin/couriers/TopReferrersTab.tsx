@@ -60,15 +60,15 @@ export default function TopReferrersTab({ topReferrers, isLoading }: TopReferrer
                         {referrer.rank === 3 && (
                           <Icon name="Medal" size={20} className="text-amber-700" />
                         )}
-                        <span className="font-semibold text-lg">#{referrer.rank}</span>
+                        <span className="font-bold text-lg">#{referrer.rank}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 font-medium">{referrer.name}</td>
                     <td className="py-3 px-4 text-sm text-gray-600">{referrer.phone}</td>
-                    <td className="py-3 px-4 text-right font-semibold text-blue-600">
+                    <td className="py-3 px-4 text-right font-bold text-blue-600">
                       {referrer.total_referrals}
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-green-600">
+                    <td className="py-3 px-4 text-right font-bold text-green-600">
                       {referrer.total_bonuses.toLocaleString('ru-RU')}
                     </td>
                   </tr>

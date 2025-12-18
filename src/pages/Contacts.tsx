@@ -194,6 +194,13 @@ const Contacts = () => {
                 </p>
               </div>
             </div>
+            <Button
+              onClick={handleApply}
+              className="bg-yellow-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-150 px-8 py-4 text-lg"
+            >
+              <Icon name="Send" size={20} className="mr-2" />
+              Подать заявку на работу
+            </Button>
           </div>
         </div>
       </div>

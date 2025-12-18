@@ -216,20 +216,20 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Icon name="Loader2" className="animate-spin text-blue-500 mb-4" size={48} />
-        <p className="text-lg font-semibold text-gray-700">Загрузка событий...</p>
+        <p className="text-lg font-bold text-gray-700">Загрузка событий...</p>
       </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <Card className="p-6 sm:p-8 text-center border border-gray-200 shadow-sm">
+      <Card className="p-6 sm:p-8 text-center border-3 border-black">
         <Icon name="Activity" size={48} className="mx-auto mb-4 text-gray-400" />
-        <p className="text-lg font-semibold text-gray-700 mb-2">Нет событий</p>
+        <p className="text-lg font-bold text-gray-700 mb-2">Нет событий</p>
         <p className="text-sm text-gray-500 mb-4">События будут появляться здесь автоматически</p>
         <button 
           onClick={fetchActivities}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
         >
           <Icon name="RefreshCw" size={16} />
           Обновить
@@ -292,7 +292,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
           <Icon name="Newspaper" size={24} />
           Лента событий
         </h2>
@@ -301,7 +301,7 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-xs sm:text-sm transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold text-xs sm:text-sm transition-colors disabled:opacity-50"
             >
               <Icon name={isDeleting ? "Loader2" : "Trash2"} size={16} className={isDeleting ? "animate-spin" : ""} />
               Удалить ({selectedIds.size})
@@ -332,8 +332,8 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
         {activities.map((activity) => (
           <Card
             key={activity.id}
-            className={`p-4 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all ${
-              selectedIds.has(activity.id) ? 'ring-2 ring-blue-500 border-blue-300' : ''
+            className={`p-4 sm:p-6 border-3 border-black shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,1)] transition-all ${
+              selectedIds.has(activity.id) ? 'ring-2 ring-blue-500' : ''
             }`}
           >
             <div className="flex items-start gap-2 sm:gap-4">
@@ -344,13 +344,13 @@ export default function ActivityTab({ authToken }: ActivityTabProps) {
                 className="mt-1 w-4 h-4 cursor-pointer flex-shrink-0"
                 onClick={(e) => e.stopPropagation()}
               />
-              <div className={`p-3 rounded-lg border ${getActivityColor(activity.event_type)}`}>
+              <div className={`p-3 rounded-lg border-2 ${getActivityColor(activity.event_type)}`}>
                 <Icon name={getActivityIcon(activity.event_type)} size={20} />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-900 break-words flex-1">{activity.message}</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 break-words flex-1">{activity.message}</p>
                   <div className="text-xs text-gray-600 whitespace-nowrap flex-shrink-0 text-right">
                     <div className="font-medium">
                       {new Date(activity.created_at).toLocaleDateString('ru-RU', {

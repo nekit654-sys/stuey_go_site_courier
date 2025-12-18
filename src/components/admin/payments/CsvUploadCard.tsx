@@ -17,8 +17,8 @@ export default function CsvUploadCard({
   onProcessCsv 
 }: CsvUploadCardProps) {
   return (
-    <Card className="border border-gray-200 shadow-sm">
-      <CardHeader className="bg-gray-50">
+    <Card className="border-2 border-blue-200">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
         <CardTitle className="flex items-center gap-2">
           <Icon name="Upload" className="h-6 w-6" />
           Загрузка CSV с заказами
@@ -28,7 +28,7 @@ export default function CsvUploadCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
           <Icon name="FileSpreadsheet" className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">Перетащите CSV файл сюда или выберите вручную</p>
           <input
@@ -50,14 +50,14 @@ export default function CsvUploadCard({
 
         {csvData.length > 0 && (
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-800">
                 <Icon name="CheckCircle" className="h-5 w-5" />
                 <p className="font-medium">Файл загружен: {csvData.length} строк</p>
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
               <h4 className="font-semibold text-blue-900 mb-2">Превью данных (первые 5 строк):</h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
@@ -91,7 +91,7 @@ export default function CsvUploadCard({
               onClick={onProcessCsv}
               disabled={uploading}
               size="lg"
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
             >
               {uploading ? (
                 <>

@@ -121,7 +121,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
         <div className="backdrop-blur-md bg-white/10 border-4 border-black rounded-2xl p-6 sm:p-10 shadow-[0_8px_0_0_rgba(0,0,0,0.8)] my-[27px] mx-2 sm:mx-4 py-[30px]">
           <h1 className="font-extrabold font-rubik leading-tight my-[15px] sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl text-3xl drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
             <span className="text-white">Твоя свобода, твой доход — </span>
-            <span className="text-yellow-400">становись курьером!</span>
+            <span className="text-yellow-400">работай курьером!</span>
           </h1>
 
           <p className="md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed font-extrabold text-white text-base drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
@@ -133,7 +133,7 @@ const HeroSection = ({ onStoryClick }: HeroSectionProps = {}) => {
             <HeroIncomeCalculator />
           </div>
 
-          <div className="hidden lg:flex flex-col sm:flex-row gap-4 items-center justify-center max-w-2xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center max-w-2xl mx-auto">
             <Button
               onClick={handleBecomeClick}
               className="bg-yellow-400 text-black font-extrabold py-6 px-8 sm:px-12 text-lg sm:text-xl rounded-2xl border-3 border-black shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] active:translate-y-[6px] active:shadow-none transition-all duration-150 w-full sm:w-auto"

@@ -108,7 +108,7 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 p-2 sm:p-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100 p-2 sm:p-4">
         <div className="max-w-7xl mx-auto pb-20 sm:pb-4">
           <AdminHeader
             onSettingsClick={() => setIsSettingsOpen(true)}

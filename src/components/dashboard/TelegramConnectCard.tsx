@@ -20,23 +20,12 @@ export default function TelegramConnectCard({ onConnect, isConnected = false, on
     }
   }, []);
 
-  // Автоматически скрываем уведомление после подключения
-  useEffect(() => {
-    if (isConnected) {
-      const timer = setTimeout(() => {
-        setDismissed(true);
-        localStorage.setItem('telegram_connect_dismissed', 'true');
-      }, 5000); // Скрываем через 5 секунд после подключения
-      return () => clearTimeout(timer);
-    }
-  }, [isConnected]);
-
   const handleDismiss = () => {
     setDismissed(true);
     localStorage.setItem('telegram_connect_dismissed', 'true');
   };
 
-  if (dismissed) return null;
+  if (dismissed && !isConnected) return null;
 
   // Если подключён - показываем статус
   if (isConnected) {
