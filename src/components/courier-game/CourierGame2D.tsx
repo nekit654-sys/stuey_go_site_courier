@@ -119,8 +119,8 @@ export function CourierGame2D() {
   
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
-    x: 150,
-    y: 150,
+    x: 1500,
+    y: 1000,
     speed: TRANSPORT_COSTS.walk.speed,
     angle: 0,
     transport: 'walk',
@@ -2007,33 +2007,7 @@ export function CourierGame2D() {
             </Button>
           </div>
 
-          {/* Как играть */}
-          <div className="mt-8 bg-blue-900/80 p-4 rounded-lg border-4 border-blue-400 max-w-md mx-auto">
-            <div className="text-white space-y-2">
-              <p className="font-bold text-lg mb-2 text-center text-blue-300">📋 КАК ИГРАТЬ</p>
-              <div className="text-sm text-left space-y-1.5 bg-black/30 p-3 rounded">
-                <p className="flex items-center gap-2">
-                  <span className="text-yellow-400 font-bold">1️⃣</span>
-                  <span>Подъезжай к <strong className="text-yellow-400">желтым маркерам</strong> 📦</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-yellow-400 font-bold">2️⃣</span>
-                  <span>Нажми <strong className="text-yellow-400">ПРОБЕЛ</strong> или <strong className="text-yellow-400">кнопку</strong> для взятия</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-green-400 font-bold">3️⃣</span>
-                  <span>Доставляй к <strong className="text-green-400">зелёному маркеру</strong> 🏠</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-green-400 font-bold">4️⃣</span>
-                  <span>Нажми <strong className="text-green-400">ПРОБЕЛ</strong> у клиента для доставки 💰</span>
-                </p>
-              </div>
-              <p className="text-xs text-center text-blue-200 mt-2">
-                🎮 Управление: WASD + ПРОБЕЛ или джойстик + кнопка
-              </p>
-            </div>
-          </div>
+
           
           {/* Предупреждение о регистрации */}
           {!isAuthenticated && (

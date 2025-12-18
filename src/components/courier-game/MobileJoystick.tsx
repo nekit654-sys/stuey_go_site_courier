@@ -49,6 +49,7 @@ export function MobileJoystick({ onMove }: JoystickProps) {
   };
 
   const handleEnd = () => {
+    console.log('[Joystick] End');
     setIsDragging(false);
     touchId.current = null;
     setPosition({ x: 0, y: 0 });
@@ -56,20 +57,15 @@ export function MobileJoystick({ onMove }: JoystickProps) {
   };
 
   useEffect(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+
     const handleTouchStart = (e: TouchEvent) => {
-      if (!containerRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
       const touch = e.touches[0];
-      const rect = containerRef.current.getBoundingClientRect();
-      
-      if (
-        touch.clientX >= rect.left &&
-        touch.clientX <= rect.right &&
-        touch.clientY >= rect.top &&
-        touch.clientY <= rect.bottom
-      ) {
-        e.preventDefault();
-        handleStart(touch.clientX, touch.clientY, touch.identifier);
-      }
+      console.log('[Joystick] Start', { x: touch.clientX, y: touch.clientY });
+      handleStart(touch.clientX, touch.clientY, touch.identifier);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -78,6 +74,7 @@ export function MobileJoystick({ onMove }: JoystickProps) {
       const touch = Array.from(e.touches).find(t => t.identifier === touchId.current);
       if (touch) {
         e.preventDefault();
+        e.stopPropagation();
         handleMove(touch.clientX, touch.clientY);
       }
     };
@@ -88,20 +85,23 @@ export function MobileJoystick({ onMove }: JoystickProps) {
       const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId.current);
       if (touch) {
         e.preventDefault();
+        e.stopPropagation();
         handleEnd();
       }
     };
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd, { passive: false });
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
     return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [isDragging]);
+  }, []);
 
   // Проверка мобильного устройства и ориентации
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
