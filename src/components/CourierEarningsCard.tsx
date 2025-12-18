@@ -147,7 +147,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">Самобонус 5к₽</h3>
-                  <p className="text-sm text-gray-600">За первые 50 заказов ваших рефералов</p>
+                  <p className="text-sm text-gray-600">За первые 150 заказов ваших рефералов</p>
                 </div>
               </div>
               <div className="text-right">

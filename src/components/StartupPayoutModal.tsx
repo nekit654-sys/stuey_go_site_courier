@@ -111,7 +111,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
               <ul className="space-y-2 text-xs sm:text-sm text-gray-800">
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={14} className="text-green-600 flex-shrink-0 mt-0.5 sm:w-4 sm:h-4" />
-                  <span className="leading-snug">Выполнить <strong>50 заказов</strong> в Яндекс Еде</span>
+                  <span className="leading-snug">Выполнить <strong>150 заказов</strong> в Яндекс Еде</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={14} className="text-green-600 flex-shrink-0 mt-0.5 sm:w-4 sm:h-4" />
@@ -133,7 +133,7 @@ const StartupPayoutModal = ({ isOpen, onClose }: StartupPayoutModalProps) => {
                 <li>Заполните форму ниже</li>
                 <li>Мы свяжемся с вами и предоставим реферальный код</li>
                 <li>Зарегистрируйтесь в Яндекс Еде по нашему коду</li>
-                <li>Выполните 50 заказов</li>
+                <li>Выполните 150 заказов</li>
                 <li>Получите 5000₽!</li>
               </ol>
             </div>

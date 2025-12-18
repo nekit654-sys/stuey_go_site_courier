@@ -2123,7 +2123,7 @@ def _distribute_to_admins(admin_share_total: float, original_total: float, cur) 
 def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, cur) -> list:
     '''
     Рассчитывает распределение выплат по правилам:
-    1. Курьер получает первые 5000₽ за 50 заказов (самобонус)
+    1. Курьер получает первые 5000₽ за 150 заказов (самобонус)
     2. После самобонуса: рефереру 60%, админам 40% пропорционально рекламным расходам
     3. Если нет реферера: все курьеру до завершения самобонуса, потом админам
     '''

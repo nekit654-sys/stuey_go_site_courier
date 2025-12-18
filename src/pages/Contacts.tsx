@@ -21,7 +21,7 @@ const Contacts = () => {
     },
     {
       title: "Telegram",
-      description: "Быстрые ответы на вопросы. Получай за друга от 12 тысяч!",
+      description: "Быстрые ответы на вопросы. Получай за друга 12 тысяч!",
       icon: "MessageCircle",
       contact: "@StueyGoBot",
       action: "https://t.me/StueyGoBot?start=support",
