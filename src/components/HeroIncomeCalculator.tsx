@@ -18,9 +18,9 @@ const HeroIncomeCalculator = () => {
   const [referralBonus, setReferralBonus] = useState(false);
   const [courierType, setCourierType] = useState<CourierType>('walking');
   const [settings, setSettings] = useState<ContentSettings>({
-    max_income_walking: 60000,
-    max_income_bicycle: 80000,
-    max_income_car: 100000,
+    max_income_walking: 50000,
+    max_income_bicycle: 75000,
+    max_income_car: 165000,
     referral_bonus_amount: 12000
   });
   const { triggerMagicEffect } = useMagicEffect();
@@ -162,7 +162,7 @@ const HeroIncomeCalculator = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <Icon name="UserPlus" size={20} className="text-black flex-shrink-0" />
             <span className="text-black font-extrabold">Приведи друга</span>
-            <span className="text-black font-extrabold whitespace-nowrap">18к</span>
+            <span className="text-black font-extrabold whitespace-nowrap">от 12к</span>
           </div>
         </label>
       </div>
