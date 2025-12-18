@@ -3,7 +3,13 @@ import os
 import psycopg2
 import bcrypt
 import secrets
+import jwt
+from datetime import datetime, timedelta
 from typing import Dict, Any
+
+JWT_SECRET = os.environ.get('JWT_SECRET', 'fallback-secret-key')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_HOURS = 720
 
 def log_activity(cursor, event_type: str, message: str, data: Dict = None):
     """Логирование события в таблицу activity_log"""
@@ -275,8 +281,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                token = secrets.token_urlsafe(32)
+                # Создаём JWT токен для совместимости с основным API
                 is_super_admin = admin[2] if len(admin) > 2 else False
+                payload = {
+                    'admin_id': admin[0],
+                    'username': username,
+                    'is_admin': True,
+                    'is_super_admin': is_super_admin,
+                    'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+                }
+                token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
                 
                 cursor.execute(
                     "UPDATE t_p25272970_courier_button_site.admins SET last_login = NOW() WHERE id = %s",
