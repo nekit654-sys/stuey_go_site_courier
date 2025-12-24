@@ -12,6 +12,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method = event.get('httpMethod', 'GET')
     
+    # Логирование ВСЕХ запросов
+    print(f"📥 Incoming request: method={method}, path={event.get('path', 'unknown')}")
+    if method == 'POST':
+        body_str = event.get('body', '{}')
+        print(f"📦 POST body: {body_str[:500]}")  # Первые 500 символов
+    
     if method == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -128,7 +134,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_str = event.get('body', '{}')
             body = json.loads(body_str)
             
+            print(f"💾 POST request body parsed: {json.dumps(body, ensure_ascii=False)}")
+            
             user_id = body.get('user_id')
+            print(f"🔑 user_id extracted: {user_id} (type: {type(user_id).__name__})")
+            
             if not user_id:
                 cur.close()
                 conn.close()
