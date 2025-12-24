@@ -730,34 +730,50 @@ export function CourierGame2D() {
   }, [isAuthenticated, userTelegramId]);
 
   // Сохранение прогресса
-  const saveProgress = useCallback(async () => {
-    if (!isAuthenticated || !userTelegramId) return;
+  const saveProgress = useCallback(async (overrideData?: Partial<{
+    level: number;
+    money: number;
+    experience: number;
+    total_orders: number;
+    total_distance: number;
+    total_earnings: number;
+    transport: string;
+  }>) => {
+    if (!isAuthenticated || !userTelegramId) {
+      console.log('❌ Сохранение пропущено: не авторизован');
+      return;
+    }
+
+    const dataToSave = {
+      user_id: userTelegramId,
+      level: overrideData?.level ?? level,
+      money: overrideData?.money ?? money,
+      experience: overrideData?.experience ?? experience,
+      transport: overrideData?.transport ?? player.transport,
+      total_orders: overrideData?.total_orders ?? totalOrders,
+      best_score: (overrideData?.money ?? money) + (overrideData?.experience ?? experience),
+      total_distance: overrideData?.total_distance ?? totalDistance,
+      total_earnings: overrideData?.total_earnings ?? totalEarnings
+    };
+
+    console.log('💾 Сохранение прогресса:', dataToSave);
 
     try {
       const response = await fetch(COURIER_GAME_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'save',
-          user_id: userTelegramId,
-          username: user?.full_name || user?.nickname || `Курьер ${userTelegramId}`,
-          level,
-          money,
-          experience,
-          total_orders: totalOrders,
-          total_distance: totalDistance,
-          total_earnings: totalEarnings,
-          transport: player.transport,
-          best_score: money + experience
-        })
+        body: JSON.stringify(dataToSave)
       });
       
       const data = await response.json();
       if (data.success) {
-        console.log('✅ Прогресс сохранён:', data);
+        console.log('✅ Прогресс сохранён успешно!', data);
+        toast.success('💾 Прогресс сохранён!', { duration: 2000 });
+      } else {
+        console.error('❌ Ошибка сохранения:', data);
       }
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('❌ Ошибка запроса сохранения:', error);
     }
   }, [isAuthenticated, userTelegramId, user, level, money, experience, totalOrders, totalDistance, totalEarnings, player.transport]);
 
@@ -1823,12 +1839,18 @@ export function CourierGame2D() {
       const exp = Math.floor(reward / 2);
       const distance = Math.floor(Math.hypot(order.deliveryX - order.pickupX, order.deliveryY - order.pickupY));
       
+      // Вычисляем новые значения
+      const newMoney = money + reward;
+      const newTotalOrders = totalOrders + 1;
+      const newTotalDistance = totalDistance + distance;
+      const newTotalEarnings = totalEarnings + reward;
+      const newExp = experience + exp;
+      
       // Начисляем награды
-      setMoney(m => m + reward);
-      setExperience(e => e + exp);
-      setTotalOrders(t => t + 1);
-      setTotalDistance(d => d + distance);
-      setTotalEarnings(e => e + reward);
+      setMoney(newMoney);
+      setTotalOrders(newTotalOrders);
+      setTotalDistance(newTotalDistance);
+      setTotalEarnings(newTotalEarnings);
       setCurrentOrder(null);
       
       // Помечаем заказ доставленным
@@ -1843,22 +1865,33 @@ export function CourierGame2D() {
       });
       
       // Проверка повышения уровня
-      const newExp = experience + exp;
       if (newExp >= level * 100) {
-        setLevel(l => l + 1);
+        const newLevel = level + 1;
+        setLevel(newLevel);
         setExperience(0);
         playLevelUpSound();
-        toast.success(`🎊 Уровень ${level + 1}! Новые возможности!`, { duration: 4000 });
+        toast.success(`🎊 Уровень ${newLevel}! Новые возможности!`, { duration: 4000 });
         
-        // Автосохранение при повышении уровня
-        saveProgress();
+        // Сохранение с новым уровнем и обнулённым опытом
+        saveProgress({
+          level: newLevel,
+          money: newMoney,
+          experience: 0,
+          total_orders: newTotalOrders,
+          total_distance: newTotalDistance,
+          total_earnings: newTotalEarnings
+        });
       } else {
         setExperience(newExp);
-      }
-      
-      // Автосохранение после каждых 3 заказов
-      if ((totalOrders + 1) % 3 === 0) {
-        saveProgress();
+        
+        // Сохранение после КАЖДОЙ доставки с актуальными значениями
+        saveProgress({
+          money: newMoney,
+          experience: newExp,
+          total_orders: newTotalOrders,
+          total_distance: newTotalDistance,
+          total_earnings: newTotalEarnings
+        });
       }
       
       setCanInteract({ type: null, orderId: null });
