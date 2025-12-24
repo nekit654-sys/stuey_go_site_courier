@@ -242,9 +242,15 @@ export default function GamesTab() {
       {/* HTML Game Tab - Приключения курьера */}
       {activeGame === 'html' && (
         <>
-          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-4 sm:p-8 text-center">
+          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 border-2 sm:border-3 border-black rounded-xl sm:rounded-2xl shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:shadow-[0_6px_0_0_rgba(0,0,0,1)] text-white p-4 sm:p-8 text-center overflow-hidden">
             <div className="mb-3 sm:mb-6">
-              <Icon name="Map" className="h-10 w-10 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-3" />
+              <div className="relative w-full aspect-video max-w-md mx-auto mb-3 sm:mb-4 rounded-lg sm:rounded-xl overflow-hidden border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
+                <img 
+                  src="https://cdn.poehali.dev/files/1000013458.jpg" 
+                  alt="Курьер: Город в движении"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <h2 className="text-lg sm:text-3xl font-extrabold mb-1 sm:mb-2">🚚 Курьер: Город в движении</h2>
               <p className="text-white/90 text-xs sm:text-lg font-bold">
                 2D симулятор с видом сверху!
