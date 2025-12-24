@@ -1281,41 +1281,131 @@ export function CourierGame2D() {
     ctx.fillStyle = '#90EE90';
     ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
     
-    // Визуальные границы карты (лес/стены по краям)
-    ctx.fillStyle = '#2d5016'; // Тёмно-зелёный лес
-    // Верхняя стена
+    // OCEAN - Вода за пределами карты (синий океан)
+    const BEACH_WIDTH = 60; // Ширина пляжа
+    
+    // Вода (анимированные волны)
+    const time = Date.now() / 1000;
+    const gradient = ctx.createLinearGradient(0, 0, 0, MAP_HEIGHT);
+    gradient.addColorStop(0, '#1e90ff');
+    gradient.addColorStop(0.5, '#4169e1');
+    gradient.addColorStop(1, '#0047ab');
+    ctx.fillStyle = gradient;
+    
+    // Верхняя вода
     ctx.fillRect(0, 0, MAP_WIDTH, WALL_THICKNESS);
-    // Нижняя стена
+    // Нижняя вода
     ctx.fillRect(0, MAP_HEIGHT - WALL_THICKNESS, MAP_WIDTH, WALL_THICKNESS);
-    // Левая стена
+    // Левая вода
     ctx.fillRect(0, 0, WALL_THICKNESS, MAP_HEIGHT);
-    // Правая стена
+    // Правая вода
     ctx.fillRect(MAP_WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, MAP_HEIGHT);
     
-    // Деревья на границах для красоты
-    ctx.fillStyle = '#1a3d0a';
-    for (let i = 0; i < MAP_WIDTH; i += 80) {
-      // Верхние деревья
-      ctx.fillRect(i, 10, 20, 80);
+    // Волны на воде (анимация)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 2;
+    
+    // Горизонтальные волны сверху и снизу
+    for (let x = 0; x < MAP_WIDTH; x += 40) {
+      const wave = Math.sin((x + time * 100) / 30) * 8;
+      // Верхние волны
       ctx.beginPath();
-      ctx.arc(i + 10, 30, 35, 0, Math.PI * 2);
-      ctx.fill();
-      // Нижние деревья
-      ctx.fillRect(i, MAP_HEIGHT - 90, 20, 80);
+      ctx.arc(x, WALL_THICKNESS / 2 + wave, 15, 0, Math.PI * 2);
+      ctx.stroke();
+      // Нижние волны
       ctx.beginPath();
-      ctx.arc(i + 10, MAP_HEIGHT - 60, 35, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(x, MAP_HEIGHT - WALL_THICKNESS / 2 + wave, 15, 0, Math.PI * 2);
+      ctx.stroke();
     }
-    for (let i = 0; i < MAP_HEIGHT; i += 80) {
-      // Левые деревья
-      ctx.fillRect(10, i, 80, 20);
+    
+    // Вертикальные волны слева и справа
+    for (let y = 0; y < MAP_HEIGHT; y += 40) {
+      const wave = Math.sin((y + time * 100) / 30) * 8;
+      // Левые волны
       ctx.beginPath();
-      ctx.arc(30, i + 10, 35, 0, Math.PI * 2);
-      ctx.fill();
-      // Правые деревья
-      ctx.fillRect(MAP_WIDTH - 90, i, 80, 20);
+      ctx.arc(WALL_THICKNESS / 2 + wave, y, 15, 0, Math.PI * 2);
+      ctx.stroke();
+      // Правые волны
       ctx.beginPath();
-      ctx.arc(MAP_WIDTH - 60, i + 10, 35, 0, Math.PI * 2);
+      ctx.arc(MAP_WIDTH - WALL_THICKNESS / 2 + wave, y, 15, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    // BEACH - Песчаный пляж (переход от травы к воде)
+    ctx.fillStyle = '#f4e4c1'; // Песочный цвет
+    
+    // Верхний пляж
+    ctx.fillRect(WALL_THICKNESS, WALL_THICKNESS, MAP_WIDTH - 2 * WALL_THICKNESS, BEACH_WIDTH);
+    // Нижний пляж
+    ctx.fillRect(WALL_THICKNESS, MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH, MAP_WIDTH - 2 * WALL_THICKNESS, BEACH_WIDTH);
+    // Левый пляж
+    ctx.fillRect(WALL_THICKNESS, WALL_THICKNESS, BEACH_WIDTH, MAP_HEIGHT - 2 * WALL_THICKNESS);
+    // Правый пляж
+    ctx.fillRect(MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH, WALL_THICKNESS, BEACH_WIDTH, MAP_HEIGHT - 2 * WALL_THICKNESS);
+    
+    // Текстура песка (точки)
+    ctx.fillStyle = 'rgba(210, 180, 140, 0.3)';
+    for (let i = 0; i < 200; i++) {
+      const x = WALL_THICKNESS + Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS);
+      const y = Math.random() < 0.5 
+        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH // Верхний пляж
+        : MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH; // Нижний
+      ctx.fillRect(x, y, 2, 2);
+    }
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() < 0.5
+        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH // Левый пляж
+        : MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH; // Правый
+      const y = WALL_THICKNESS + Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS);
+      ctx.fillRect(x, y, 2, 2);
+    }
+    
+    // Пальмы на пляже
+    const drawPalm = (x: number, y: number) => {
+      // Ствол
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(x - 4, y - 40, 8, 40);
+      
+      // Листья (зелёные линии)
+      ctx.strokeStyle = '#228B22';
+      ctx.lineWidth = 6;
+      
+      for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI * 2 * i) / 8;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 40);
+        ctx.lineTo(x + Math.cos(angle) * 25, y - 40 + Math.sin(angle) * 25);
+        ctx.stroke();
+      }
+    };
+    
+    // Пальмы сверху
+    for (let x = WALL_THICKNESS + 100; x < MAP_WIDTH - WALL_THICKNESS; x += 250) {
+      drawPalm(x, WALL_THICKNESS + BEACH_WIDTH - 10);
+    }
+    // Пальмы снизу
+    for (let x = WALL_THICKNESS + 150; x < MAP_WIDTH - WALL_THICKNESS; x += 250) {
+      drawPalm(x, MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH + 50);
+    }
+    // Пальмы слева
+    for (let y = WALL_THICKNESS + 100; y < MAP_HEIGHT - WALL_THICKNESS; y += 250) {
+      drawPalm(WALL_THICKNESS + BEACH_WIDTH - 10, y);
+    }
+    // Пальмы справа
+    for (let y = WALL_THICKNESS + 150; y < MAP_HEIGHT - WALL_THICKNESS; y += 250) {
+      drawPalm(MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH + 50, y);
+    }
+    
+    // Камни на пляже
+    ctx.fillStyle = '#696969';
+    for (let i = 0; i < 40; i++) {
+      const x = WALL_THICKNESS + Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS);
+      const y = Math.random() < 0.5
+        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH
+        : MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH;
+      const size = 5 + Math.random() * 10;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.fill();
     }
     
