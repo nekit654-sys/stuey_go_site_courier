@@ -696,16 +696,23 @@ export function CourierGame2D() {
   useEffect(() => {
     const loadProgress = async () => {
       if (!isAuthenticated || !userTelegramId) {
+        console.log('⚠️ Загрузка прогресса пропущена: не авторизован');
         setIsLoading(false);
         return;
       }
+
+      console.log('📥 Загрузка прогресса для user_id:', userTelegramId);
 
       try {
         const response = await fetch(`${COURIER_GAME_API}?action=load&user_id=${userTelegramId}`);
         const data = await response.json();
 
+        console.log('📦 Ответ сервера:', data);
+
         if (data.success && data.progress) {
           const p = data.progress;
+          console.log('✅ Прогресс загружен:', p);
+          
           setLevel(p.level);
           setMoney(p.money);
           setExperience(p.experience);
@@ -718,9 +725,15 @@ export function CourierGame2D() {
             transport: p.transport as any,
             speed: TRANSPORT_COSTS[p.transport as keyof typeof TRANSPORT_COSTS].speed
           }));
+          
+          toast.success(`✅ Прогресс загружен! Уровень ${p.level}, ${p.money}₽`, { duration: 3000 });
+        } else {
+          console.log('ℹ️ Прогресс не найден, начинаем с нуля');
+          toast.info('🎮 Добро пожаловать! Начинаем новую игру', { duration: 3000 });
         }
       } catch (error) {
-        console.error('Load error:', error);
+        console.error('❌ Ошибка загрузки прогресса:', error);
+        toast.error('⚠️ Ошибка загрузки прогресса', { duration: 3000 });
       } finally {
         setIsLoading(false);
       }
