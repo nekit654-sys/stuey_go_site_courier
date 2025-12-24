@@ -44,6 +44,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
   updateUser: (userData: Partial<User>) => void;
   refreshUserData: () => Promise<void>;
 }
@@ -53,6 +54,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log('[AuthContext] Initializing...');
@@ -74,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       verifyToken(savedToken);
     } else {
       console.log('[AuthContext] No saved session found');
+      setIsLoading(false);
     }
   }, []);
 
@@ -101,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Token verification failed:', error);
       logout();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -162,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         isAuthenticated: !!token && !!user,
+        isLoading,
         updateUser,
         refreshUserData
       }}
