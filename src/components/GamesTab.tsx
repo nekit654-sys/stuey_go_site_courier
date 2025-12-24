@@ -246,7 +246,7 @@ export default function GamesTab() {
             <div className="mb-3 sm:mb-6">
               <div className="relative w-full aspect-video max-w-md mx-auto mb-3 sm:mb-4 rounded-lg sm:rounded-xl overflow-hidden border-2 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
                 <img 
-                  src="https://cdn.poehali.dev/files/1000013458.jpg" 
+                  src="https://cdn.poehali.dev/files/1000013483.jpg" 
                   alt="Курьер: Город в движении"
                   className="w-full h-full object-cover"
                 />

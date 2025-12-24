@@ -1974,7 +1974,7 @@ export function CourierGame2D() {
       <div 
         className="fixed inset-0 w-screen h-screen flex items-center justify-center relative overflow-y-auto"
         style={{
-          backgroundImage: 'url(https://cdn.poehali.dev/files/1000013458.jpg)',
+          backgroundImage: 'url(https://cdn.poehali.dev/files/1000013483.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
