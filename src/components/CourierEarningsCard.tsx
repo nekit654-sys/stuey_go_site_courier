@@ -101,7 +101,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
 
   const getRecipientTypeLabel = (type: string) => {
     switch (type) {
-      case 'courier_self': return 'Самобонус';
+      case 'courier_self': return 'Бонус';
       case 'courier_referrer': return 'От рефералов';
       default: return type;
     }
@@ -137,7 +137,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
-        {/* Самобонус */}
+        {/* Бонус */}
         {selfBonus && !selfBonus.is_completed && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
             <div className="flex items-center justify-between mb-4">
@@ -146,7 +146,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                   <Icon name="Target" className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900">Самобонус 5к₽</h3>
+                  <h3 className="font-bold text-lg text-gray-900">Бонус 5к₽</h3>
                   <p className="text-sm text-gray-600">За первые 150 заказов ваших рефералов</p>
                 </div>
               </div>
@@ -168,7 +168,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                 <Icon name="TrendingUp" size={16} />
                 <span>
                   Осталось {(SELF_BONUS_TARGET - selfBonus.bonus_earned).toLocaleString('ru-RU')} ₽ 
-                  до завершения самобонуса!
+                  до завершения бонуса!
                 </span>
               </div>
             </div>
@@ -180,7 +180,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                   <p className="font-medium mb-1">Как это работает:</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
                     <li>Вы получаете 100% от доходов ваших рефералов</li>
-                    <li>После 5,000₽ самобонус завершается</li>
+                    <li>После 5,000₽ бонус завершается</li>
                     <li>Далее вы получаете % с каждого вашего реферала постоянно</li>
                   </ul>
                 </div>
@@ -196,7 +196,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
                 <Icon name="CheckCircle" className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-lg text-gray-900">Самобонус завершён!</h3>
+                <h3 className="font-bold text-lg text-gray-900">Бонус завершён!</h3>
                 <p className="text-sm text-gray-600">
                   Вы получили {selfBonus.bonus_earned.toLocaleString('ru-RU')} ₽
                 </p>
@@ -222,7 +222,7 @@ function CourierEarningsCard({ userId }: CourierEarningsCardProps) {
             <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
               <div className="flex items-center gap-2 mb-2">
                 <Icon name="Wallet" size={18} className="text-blue-600" />
-                <div className="text-sm font-medium text-gray-700">Самобонус</div>
+                <div className="text-sm font-medium text-gray-700">Бонус</div>
               </div>
               <div className="text-2xl font-bold text-blue-700">
                 {summary.self_total.toLocaleString('ru-RU')} ₽

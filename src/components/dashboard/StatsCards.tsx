@@ -60,7 +60,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       icon: 'Wallet',
       label: 'Доступно для вывода',
       value: `${stats.available_for_withdrawal?.toLocaleString('ru-RU') || '0'} ₽`,
-      subtext: stats.self_bonus_completed ? '✅ Самобонус получен' : '',
+      subtext: stats.self_bonus_completed ? '✅ Бонус получен' : '',
       gradient: 'from-green-500 to-emerald-600',
       iconBg: 'bg-green-400',
       delay: 0,
@@ -85,7 +85,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       icon: 'Gift',
-      label: 'Самобонус',
+      label: 'Бонус',
       value: stats.self_bonus_completed ? '✅ Получен' : `${stats.self_orders_count || 0}/${settings.self_bonus_orders}`,
       subtext: stats.self_bonus_completed ? `${settings.self_bonus_amount.toLocaleString('ru-RU')}₽ выполнено` : `Ещё ${Math.max(0, settings.self_bonus_orders - (stats.self_orders_count || 0))} заказов до ${settings.self_bonus_amount.toLocaleString('ru-RU')}₽`,
       gradient: 'from-orange-500 to-red-600',

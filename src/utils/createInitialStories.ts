@@ -1,7 +1,7 @@
 export async function createInitialStories() {
   const stories = [
     {
-      title: "Самобонус 5,000₽ 🎁",
+      title: "Бонус 5,000₽ 🎁",
       description: "Получи 5,000₽ за первые 50 заказов! Работаешь курьером — получаешь бонус от нас",
       imageUrl: "https://cdn.poehali.dev/files/da2d6308-de5f-45ad-ae8d-3ed07b41fcd9.jpg",
       buttonText: "Узнать условия",

@@ -687,7 +687,7 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
               </li>
               <li className="flex items-start gap-2">
                 <Icon name="Check" className="text-primary mt-0.5 flex-shrink-0" size={16} />
-                <span>🎁 Отслеживание прогресса самобонуса в реальном времени</span>
+                <span>🎁 Отслеживание прогресса бонуса в реальном времени</span>
               </li>
             </ul>
           </div>
