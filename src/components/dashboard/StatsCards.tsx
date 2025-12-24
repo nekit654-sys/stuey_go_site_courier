@@ -30,7 +30,7 @@ interface ContentSettings {
 export default function StatsCards({ stats }: StatsCardsProps) {
   const [settings, setSettings] = useState<ContentSettings>({
     self_bonus_amount: 5000,
-    self_bonus_orders: 50
+    self_bonus_orders: 150
   });
 
   useEffect(() => {
