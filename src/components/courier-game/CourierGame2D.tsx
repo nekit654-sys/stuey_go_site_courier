@@ -814,29 +814,23 @@ export function CourierGame2D() {
     }
   };
 
-  // Управление клавиатурой - ИСПРАВЛЕНО
+  // Управление клавиатурой - ПОЛНОСТЬЮ ПЕРЕРАБОТАНО
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Предотвращаем прокрутку страницы стрелками
+      // Предотвращаем прокрутку страницы
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
         e.preventDefault();
+        e.stopPropagation();
       }
       
       const key = e.key.toLowerCase();
       keys.current[key] = true;
       
-      // Логируем для отладки
-      console.log('Key pressed:', key, 'Keys state:', keys.current);
-      
       if (e.key === 'Escape') {
-        if (gameState === 'playing') {
-          setGameState('paused');
-        } else if (gameState === 'paused') {
-          setGameState('playing');
-        }
+        setGameState(prev => prev === 'playing' ? 'paused' : 'playing');
       }
       
-      if (e.key === ' ' && gameState === 'playing') {
+      if (e.key === ' ') {
         handleInteraction();
       }
     };
@@ -844,18 +838,17 @@ export function CourierGame2D() {
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
       keys.current[key] = false;
-      console.log('Key released:', key);
     };
 
-    // Слушаем события на document, а не на window
-    document.addEventListener('keydown', handleKeyDown, { capture: true });
-    document.addEventListener('keyup', handleKeyUp, { capture: true });
+    // Глобальные слушатели с высоким приоритетом
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    window.addEventListener('keyup', handleKeyUp, { capture: true });
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown, { capture: true });
-      document.removeEventListener('keyup', handleKeyUp, { capture: true });
+      window.removeEventListener('keydown', handleKeyDown, { capture: true });
+      window.removeEventListener('keyup', handleKeyUp, { capture: true });
     };
-  }, [gameState]);
+  }, []);
 
   // Система генерации новых заказов
   useEffect(() => {
@@ -1235,11 +1228,15 @@ export function CourierGame2D() {
       
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       
-      // Обновляем камеру СИНХРОННО с движением игрока (адаптивно)
-      const centerX = newX - viewportSize.width / 2;
-      const centerY = newY - viewportSize.height / 2;
-      const clampedCameraX = Math.max(0, Math.min(MAP_WIDTH - viewportSize.width, centerX));
-      const clampedCameraY = Math.max(0, Math.min(MAP_HEIGHT - viewportSize.height, centerY));
+      // Камера ВСЕГДА центрирует игрока (курьер в середине экрана)
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const centerX = newX - canvasWidth / 2;
+      const centerY = newY - canvasHeight / 2;
+      
+      // Ограничиваем камеру границами карты
+      const clampedCameraX = Math.max(0, Math.min(MAP_WIDTH - canvasWidth, centerX));
+      const clampedCameraY = Math.max(0, Math.min(MAP_HEIGHT - canvasHeight, centerY));
       setCamera({ x: clampedCameraX, y: clampedCameraY });
       
       // Очистка и фон
@@ -1281,55 +1278,24 @@ export function CourierGame2D() {
     ctx.fillStyle = '#90EE90';
     ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
     
-    // OCEAN - Вода за пределами карты (синий океан)
+    // OCEAN - Бесконечная вода за пределами карты
     const BEACH_WIDTH = 60; // Ширина пляжа
+    const OCEAN_EXTEND = 2000; // Насколько далеко рисуем океан
     
-    // Вода (анимированные волны)
-    const time = Date.now() / 1000;
+    // Вода (плавный градиент без анимации)
     const gradient = ctx.createLinearGradient(0, 0, 0, MAP_HEIGHT);
     gradient.addColorStop(0, '#1e90ff');
     gradient.addColorStop(0.5, '#4169e1');
     gradient.addColorStop(1, '#0047ab');
     ctx.fillStyle = gradient;
     
-    // Верхняя вода
-    ctx.fillRect(0, 0, MAP_WIDTH, WALL_THICKNESS);
-    // Нижняя вода
-    ctx.fillRect(0, MAP_HEIGHT - WALL_THICKNESS, MAP_WIDTH, WALL_THICKNESS);
-    // Левая вода
-    ctx.fillRect(0, 0, WALL_THICKNESS, MAP_HEIGHT);
-    // Правая вода
-    ctx.fillRect(MAP_WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, MAP_HEIGHT);
+    // Рисуем ОГРОМНЫЙ океан вокруг карты (бесконечный эффект)
+    ctx.fillRect(-OCEAN_EXTEND, -OCEAN_EXTEND, MAP_WIDTH + 2 * OCEAN_EXTEND, WALL_THICKNESS + OCEAN_EXTEND); // Верх
+    ctx.fillRect(-OCEAN_EXTEND, MAP_HEIGHT - WALL_THICKNESS, MAP_WIDTH + 2 * OCEAN_EXTEND, WALL_THICKNESS + OCEAN_EXTEND); // Низ
+    ctx.fillRect(-OCEAN_EXTEND, -OCEAN_EXTEND, WALL_THICKNESS + OCEAN_EXTEND, MAP_HEIGHT + 2 * OCEAN_EXTEND); // Лево
+    ctx.fillRect(MAP_WIDTH - WALL_THICKNESS, -OCEAN_EXTEND, WALL_THICKNESS + OCEAN_EXTEND, MAP_HEIGHT + 2 * OCEAN_EXTEND); // Право
     
-    // Волны на воде (анимация)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 2;
-    
-    // Горизонтальные волны сверху и снизу
-    for (let x = 0; x < MAP_WIDTH; x += 40) {
-      const wave = Math.sin((x + time * 100) / 30) * 8;
-      // Верхние волны
-      ctx.beginPath();
-      ctx.arc(x, WALL_THICKNESS / 2 + wave, 15, 0, Math.PI * 2);
-      ctx.stroke();
-      // Нижние волны
-      ctx.beginPath();
-      ctx.arc(x, MAP_HEIGHT - WALL_THICKNESS / 2 + wave, 15, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    
-    // Вертикальные волны слева и справа
-    for (let y = 0; y < MAP_HEIGHT; y += 40) {
-      const wave = Math.sin((y + time * 100) / 30) * 8;
-      // Левые волны
-      ctx.beginPath();
-      ctx.arc(WALL_THICKNESS / 2 + wave, y, 15, 0, Math.PI * 2);
-      ctx.stroke();
-      // Правые волны
-      ctx.beginPath();
-      ctx.arc(MAP_WIDTH - WALL_THICKNESS / 2 + wave, y, 15, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+    // Волны убраны (создавали эффект движущихся точек)
     
     // BEACH - Песчаный пляж (переход от травы к воде)
     ctx.fillStyle = '#f4e4c1'; // Песочный цвет
@@ -1343,22 +1309,7 @@ export function CourierGame2D() {
     // Правый пляж
     ctx.fillRect(MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH, WALL_THICKNESS, BEACH_WIDTH, MAP_HEIGHT - 2 * WALL_THICKNESS);
     
-    // Текстура песка (точки)
-    ctx.fillStyle = 'rgba(210, 180, 140, 0.3)';
-    for (let i = 0; i < 200; i++) {
-      const x = WALL_THICKNESS + Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS);
-      const y = Math.random() < 0.5 
-        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH // Верхний пляж
-        : MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH; // Нижний
-      ctx.fillRect(x, y, 2, 2);
-    }
-    for (let i = 0; i < 100; i++) {
-      const x = Math.random() < 0.5
-        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH // Левый пляж
-        : MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH; // Правый
-      const y = WALL_THICKNESS + Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS);
-      ctx.fillRect(x, y, 2, 2);
-    }
+    // Текстура песка убрана (было слишком много движущихся точек)
     
     // Пальмы на пляже
     const drawPalm = (x: number, y: number) => {
@@ -1396,18 +1347,7 @@ export function CourierGame2D() {
       drawPalm(MAP_WIDTH - WALL_THICKNESS - BEACH_WIDTH + 50, y);
     }
     
-    // Камни на пляже
-    ctx.fillStyle = '#696969';
-    for (let i = 0; i < 40; i++) {
-      const x = WALL_THICKNESS + Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS);
-      const y = Math.random() < 0.5
-        ? WALL_THICKNESS + Math.random() * BEACH_WIDTH
-        : MAP_HEIGHT - WALL_THICKNESS - BEACH_WIDTH + Math.random() * BEACH_WIDTH;
-      const size = 5 + Math.random() * 10;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // Камни убраны (было слишком много движущихся элементов)
     
     // Рисуем дороги БЕЗ серых полос на перекрёстках
     roads.forEach(road => {
