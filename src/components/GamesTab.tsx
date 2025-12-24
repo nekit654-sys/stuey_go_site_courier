@@ -252,7 +252,7 @@ export default function GamesTab() {
             </div>
             <div className="space-y-3">
               <Button
-                onClick={() => openGame('2d')}
+                onClick={() => window.location.href = '/courier-game'}
                 size="lg"
                 className="w-full bg-white text-blue-600 hover:bg-gray-100 font-extrabold text-sm sm:text-xl px-4 sm:px-8 py-3 sm:py-6 h-auto border-2 sm:border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)] sm:shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] transition-all"
               >

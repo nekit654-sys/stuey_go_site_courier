@@ -26,6 +26,7 @@ import GameSelect from "./pages/GameSelect";
 
 const Game = lazy(() => import("./pages/Game"));
 const Game3D = lazy(() => import("./pages/Game3D"));
+const CourierGamePage = lazy(() => import("./pages/CourierGamePage"));
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,15 @@ const AppRoutes = () => {
             <Game3D />
           </Suspense>
         } />
+        <Route path="/courier-game" element={
+          <Suspense fallback={
+            <div className="w-full h-screen bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+              <div className="text-white text-2xl">Загрузка игры...</div>
+            </div>
+          }>
+            <CourierGamePage />
+          </Suspense>
+        } />
 
         <Route path="/ask" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
@@ -86,7 +96,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && (
+      {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && location.pathname !== '/courier-game' && (
         <>
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />
