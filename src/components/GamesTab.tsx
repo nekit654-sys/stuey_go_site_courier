@@ -352,7 +352,6 @@ export default function GamesTab() {
           </div>
         </>
       )}
-
     </div>
   );
 }
