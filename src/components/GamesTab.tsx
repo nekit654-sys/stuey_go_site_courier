@@ -303,11 +303,13 @@ export default function GamesTab() {
               </p>
             ) : (
               <div className="space-y-2 sm:space-y-3">
-                {leaderboardHTML.map((player, index) => (
+                {leaderboardHTML.map((player, index) => {
+                  const isCurrentUser = player.user_id.toString() === (user?.oauth_id || user?.id?.toString());
+                  return (
                   <div
                     key={player.user_id}
                     className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
-                      player.user_id === user?.id
+                      isCurrentUser
                         ? 'bg-blue-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
                         : index === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-black'
                         : index === 1 ? 'bg-gradient-to-r from-gray-200 to-gray-300 border-black'
@@ -333,7 +335,7 @@ export default function GamesTab() {
                            player.transport === 'car' ? '🚗' : '🎮'}
                         </span>
                       </div>
-                      {player.user_id === user?.id && (
+                      {isCurrentUser && (
                         <div className="mt-0.5">
                           <span className="text-[10px] bg-black text-blue-400 px-1.5 py-0.5 rounded border border-black font-extrabold">Вы</span>
                         </div>
@@ -346,7 +348,8 @@ export default function GamesTab() {
                       <div className="text-[9px] sm:text-xs font-bold text-black/60">очков</div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
           </div>
