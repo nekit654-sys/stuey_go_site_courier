@@ -73,7 +73,33 @@ export default function GamesTab() {
         setStats2D(data2D.stats);
       }
 
-      setStatsHTML({ high_score: 0, total_plays: 0, rank: undefined });
+      // Загрузка статистики курьерской игры
+      const userTelegramId = user?.oauth_id || user?.id;
+      const responseHTML = await fetch(`https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e?action=load&user_id=${userTelegramId}`);
+      const dataHTML = await responseHTML.json();
+      
+      if (dataHTML.success && dataHTML.progress) {
+        const p = dataHTML.progress;
+        // Находим позицию игрока в лидерборде
+        const leaderboardResponse = await fetch('https://functions.poehali.dev/5e0b16d4-2a3a-46ee-a167-0b6712ac503e?action=leaderboard&limit=100');
+        const leaderboardData = await leaderboardResponse.json();
+        
+        let rank = undefined;
+        if (leaderboardData.success && leaderboardData.leaderboard) {
+          const playerIndex = leaderboardData.leaderboard.findIndex((entry: any) => entry.user_id.toString() === userTelegramId.toString());
+          if (playerIndex !== -1) {
+            rank = playerIndex + 1;
+          }
+        }
+        
+        setStatsHTML({ 
+          high_score: p.best_score || 0, 
+          total_plays: p.total_orders || 0, 
+          rank 
+        });
+      } else {
+        setStatsHTML({ high_score: 0, total_plays: 0, rank: undefined });
+      }
     } catch (error) {
       console.error('Error fetching game stats:', error);
     } finally {
