@@ -818,6 +818,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     elif text == '❓ Помощь':
                         response_text, keyboard = handle_registered_callbacks('help', telegram_id)
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
+                    elif text.isdigit() and len(text) == 6:
+                        # Пользователь ввел код привязки (может переподключать аккаунт)
+                        success = verify_and_link_account(telegram_id, text, username)
+                        if success:
+                            send_telegram_message(chat_id, "✅ <b>Успешно!</b>\n\nТвой Telegram привязан к аккаунту!\n\nНажми /start чтобы обновить меню 🎉")
+                        else:
+                            send_telegram_message(chat_id, "❌ <b>Код неверный или истёк</b>\n\nПопробуй сгенерировать новый код в личном кабинете.")
                     else:
                         # Любой другой текст = вопрос к AI
                         send_telegram_message(chat_id, "🤖 Думаю...")
