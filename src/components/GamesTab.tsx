@@ -346,7 +346,7 @@ export default function GamesTab() {
                       <div className="text-[9px] sm:text-xs font-bold text-black/60">очков</div>
                     </div>
                   </div>
-                ))
+                ))}
               </div>
             )}
           </div>
