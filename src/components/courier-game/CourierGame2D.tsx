@@ -119,8 +119,8 @@ export function CourierGame2D() {
   
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
-    x: 1500,
-    y: 1000,
+    x: 800, // Спавн на горизонтальной дороге
+    y: 30,  // В центре дороги
     speed: TRANSPORT_COSTS.walk.speed,
     angle: 0,
     transport: 'walk',
@@ -1931,6 +1931,13 @@ export function CourierGame2D() {
   };
 
   const startGame = () => {
+    // Сбрасываем позицию игрока на безопасную дорогу
+    setPlayer(prev => ({
+      ...prev,
+      x: 800, // Горизонтальная дорога
+      y: 30   // Центр дороги
+    }));
+    
     setGameState('playing');
     // Фокусируем canvas для получения клавиатурных событий
     if (canvasRef.current) {
