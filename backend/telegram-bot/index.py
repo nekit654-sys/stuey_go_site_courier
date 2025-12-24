@@ -226,25 +226,27 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
     cursor = conn.cursor()
     
     try:
-        # Проверяем код в таблице verification_codes
+        # Проверяем код в таблице messenger_link_codes (правильная таблица!)
         cursor.execute("""
-            SELECT courier_id FROM t_p25272970_courier_button_site.verification_codes
+            SELECT courier_id FROM t_p25272970_courier_button_site.messenger_link_codes
             WHERE code = %s 
               AND expires_at > NOW()
-              AND used = false
+              AND is_used = false
         """, (code,))
         
         result = cursor.fetchone()
         
         if not result:
+            print(f'❌ Код {code} не найден или истёк/использован')
             return False
         
         courier_id = result['courier_id']
+        print(f'✅ Найден courier_id: {courier_id} для кода {code}')
         
         # Помечаем код как использованный
         cursor.execute("""
-            UPDATE t_p25272970_courier_button_site.verification_codes
-            SET used = true
+            UPDATE t_p25272970_courier_button_site.messenger_link_codes
+            SET is_used = true, used_at = NOW()
             WHERE code = %s
         """, (code,))
         
