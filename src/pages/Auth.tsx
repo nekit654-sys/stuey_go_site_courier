@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ type AuthProvider = 'yandex' | 'vk' | 'telegram';
 export default function Auth() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -22,9 +23,12 @@ export default function Auth() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [manualRefCode, setManualRefCode] = useState('');
 
+  // Получаем returnTo из location.state
+  const returnTo = (location.state as any)?.returnTo || '/dashboard';
+
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate(returnTo);
       return;
     }
 
@@ -96,7 +100,7 @@ export default function Auth() {
           toast.success('Вход выполнен!');
         }
         
-        navigate('/dashboard');
+        navigate(returnTo);
       } else {
         const errorMsg = data.error || 'Ошибка авторизации';
         console.error('[Auth] Ошибка:', errorMsg);

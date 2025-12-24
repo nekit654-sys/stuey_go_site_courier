@@ -51,7 +51,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         cgp.total_earnings
                     FROM t_p25272970_courier_button_site.courier_game_progress cgp
                     LEFT JOIN t_p25272970_courier_button_site.users u ON cgp.user_id::text = u.oauth_id
-                    WHERE cgp.best_score > 0
+                    WHERE cgp.best_score > 0 AND cgp.user_id != 999
                     ORDER BY cgp.best_score DESC
                     LIMIT %s
                 """, (limit,))
