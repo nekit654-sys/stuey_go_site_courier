@@ -2123,11 +2123,20 @@ def _distribute_to_admins(admin_share_total: float, original_total: float, cur) 
 def calculate_payment_distribution(total_amount: float, courier_id: int, referrer_id: int, self_bonus_completed: bool, cur) -> list:
     '''
     Рассчитывает распределение выплат по правилам:
-    1. Курьер получает первые 5000₽ за 150 заказов (самобонус)
+    1. Курьер получает первые X₽ за Y заказов (самобонус из bot_content)
     2. После самобонуса: рефереру 60%, админам 40% пропорционально рекламным расходам
     3. Если нет реферера: все курьеру до завершения самобонуса, потом админам
     '''
     distributions = []
+    
+    # Получаем настройки самобонуса из базы
+    cur.execute("""
+        SELECT self_bonus_amount, self_bonus_orders
+        FROM t_p25272970_courier_button_site.bot_content
+        LIMIT 1
+    """)
+    content_settings = cur.fetchone()
+    self_bonus_limit = float(content_settings['self_bonus_amount']) if content_settings and content_settings['self_bonus_amount'] else 5000.0
     
     if not self_bonus_completed:
         # Получаем текущий прогресс самобонуса
@@ -2137,9 +2146,9 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
         """, (courier_id,))
         tracking = cur.fetchone()
         current_bonus = float(tracking['bonus_earned']) if tracking else 0.0
-        remaining_bonus = max(0, 5000 - current_bonus)
+        remaining_bonus = max(0, self_bonus_limit - current_bonus)
         
-        # Самобонус: только до 5000₽
+        # Самобонус: только до лимита из базы
         self_bonus_amount = min(total_amount, remaining_bonus)
         remaining_amount = total_amount - self_bonus_amount
         
@@ -2149,7 +2158,7 @@ def calculate_payment_distribution(total_amount: float, courier_id: int, referre
                 'recipient_id': courier_id,
                 'amount': self_bonus_amount,
                 'percentage': (self_bonus_amount / total_amount) * 100.0,
-                'description': f'Самобонус ({current_bonus:.0f}₽ → {current_bonus + self_bonus_amount:.0f}₽ из 5000₽)'
+                'description': f'Самобонус ({current_bonus:.0f}₽ → {current_bonus + self_bonus_amount:.0f}₽ из {self_bonus_limit:.0f}₽)'
             })
         
         # Остаток распределяем: 60% рефереру, 40% админам
@@ -2705,15 +2714,22 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     )
             
             if not self_bonus_completed:
+                # Получаем лимит самобонуса из настроек
+                cur.execute("""
+                    SELECT self_bonus_amount FROM t_p25272970_courier_button_site.bot_content LIMIT 1
+                """)
+                bonus_settings = cur.fetchone()
+                self_bonus_limit = float(bonus_settings['self_bonus_amount']) if bonus_settings else 5000.0
+                
                 cur.execute("""
                     UPDATE t_p25272970_courier_button_site.courier_self_bonus_tracking
                     SET orders_completed = orders_completed + %s,
                         bonus_earned = bonus_earned + %s,
-                        is_completed = (bonus_earned + %s >= 3000),
+                        is_completed = (bonus_earned + %s >= %s),
                         updated_at = NOW()
                     WHERE courier_id = %s
                     RETURNING bonus_earned + %s as new_bonus_total, is_completed
-                """, (actual_orders, actual_reward, actual_reward, courier_id, actual_reward))
+                """, (actual_orders, actual_reward, actual_reward, self_bonus_limit, courier_id, actual_reward))
                 
                 updated_tracking = cur.fetchone()
                 new_bonus_total = float(updated_tracking['new_bonus_total']) if updated_tracking else 0
