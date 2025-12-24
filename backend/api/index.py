@@ -6076,3 +6076,207 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     finally:
         cur.close()
         conn.close()
+
+
+def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Обработка игровых запросов для "Приключения курьера" (2D раннер)
+    GET ?action=leaderboard - топ игроков
+    GET ?action=my_stats - статистика текущего пользователя  
+    POST ?action=save_score - сохранение результата
+    '''
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'leaderboard')
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        if method == 'GET':
+            if action == 'leaderboard':
+                # Топ 10 игроков по очкам
+                limit = int(query_params.get('limit', '10'))
+                cur.execute("""
+                    SELECT 
+                        id,
+                        full_name,
+                        game_high_score as score,
+                        game_total_plays,
+                        avatar_url
+                    FROM t_p25272970_courier_button_site.users
+                    WHERE game_high_score > 0
+                    ORDER BY game_high_score DESC
+                    LIMIT %s
+                """, (limit,))
+                
+                leaderboard = cur.fetchall()
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': True,
+                        'leaderboard': convert_decimals([dict(row) for row in leaderboard])
+                    }),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'my_stats':
+                # Статистика конкретного игрока
+                user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+                
+                if not user_id_header:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 401,
+                        'headers': headers,
+                        'body': json.dumps({'success': False, 'error': 'User ID required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                user_id = int(user_id_header)
+                
+                cur.execute("""
+                    SELECT 
+                        game_high_score,
+                        game_total_plays,
+                        (
+                            SELECT COUNT(*) + 1 
+                            FROM t_p25272970_courier_button_site.users 
+                            WHERE game_high_score > u.game_high_score
+                        ) as rank
+                    FROM t_p25272970_courier_button_site.users u
+                    WHERE id = %s
+                """, (user_id,))
+                
+                stats = cur.fetchone()
+                cur.close()
+                conn.close()
+                
+                if not stats:
+                    return {
+                        'statusCode': 404,
+                        'headers': headers,
+                        'body': json.dumps({'success': False, 'error': 'User not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': True,
+                        'stats': convert_decimals(dict(stats))
+                    }),
+                    'isBase64Encoded': False
+                }
+        
+        elif method == 'POST':
+            if action == 'save_score':
+                # Сохранение результата игры
+                user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+                
+                if not user_id_header:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 401,
+                        'headers': headers,
+                        'body': json.dumps({'success': False, 'error': 'User ID required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                user_id = int(user_id_header)
+                body_data = json.loads(event.get('body', '{}'))
+                score = body_data.get('score', 0)
+                
+                # Получаем текущий рекорд
+                cur.execute("""
+                    SELECT game_high_score, game_total_plays
+                    FROM t_p25272970_courier_button_site.users
+                    WHERE id = %s
+                """, (user_id,))
+                
+                current = cur.fetchone()
+                
+                if not current:
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 404,
+                        'headers': headers,
+                        'body': json.dumps({'success': False, 'error': 'User not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                current_high_score = current['game_high_score'] or 0
+                current_plays = current['game_total_plays'] or 0
+                is_new_record = score > current_high_score
+                
+                # Обновляем статистику
+                if is_new_record:
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET game_high_score = %s,
+                            game_total_plays = %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                    """, (score, current_plays + 1, user_id))
+                else:
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET game_total_plays = %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                    """, (current_plays + 1, user_id))
+                
+                conn.commit()
+                
+                # Получаем новый ранг
+                cur.execute("""
+                    SELECT COUNT(*) + 1 as rank
+                    FROM t_p25272970_courier_button_site.users
+                    WHERE game_high_score > %s
+                """, (max(score, current_high_score),))
+                
+                rank = cur.fetchone()['rank']
+                
+                cur.close()
+                conn.close()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': True,
+                        'is_new_record': is_new_record,
+                        'rank': rank,
+                        'high_score': max(score, current_high_score)
+                    }),
+                    'isBase64Encoded': False
+                }
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Invalid action'}),
+            'isBase64Encoded': False
+        }
+    
+    except Exception as e:
+        print(f'>>> ERROR в handle_game: {str(e)}')
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': str(e)}),
+            'isBase64Encoded': False
+        }

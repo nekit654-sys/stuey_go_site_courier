@@ -206,6 +206,9 @@ export default function GamesTab() {
                     className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all ${
                       player.id === user?.id
                         ? 'bg-yellow-400 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]'
+                        : index === 0 ? 'bg-gradient-to-r from-yellow-200 to-yellow-300 border-black'
+                        : index === 1 ? 'bg-gradient-to-r from-gray-200 to-gray-300 border-black'
+                        : index === 2 ? 'bg-gradient-to-r from-orange-200 to-orange-300 border-black'
                         : 'bg-white border-black'
                     }`}
                   >
@@ -215,13 +218,18 @@ export default function GamesTab() {
                     <div className="flex-1 min-w-0">
                       <div className="font-extrabold text-black truncate text-sm sm:text-base">
                         {player.full_name}
-                        {player.id === user?.id && (
-                          <span className="ml-2 text-xs bg-black text-yellow-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
-                        )}
                       </div>
+                      {player.id === user?.id && (
+                        <div className="mt-0.5">
+                          <span className="text-xs bg-black text-yellow-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-lg sm:text-xl font-extrabold text-black flex-shrink-0">
-                      {player.score}
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg sm:text-xl font-extrabold text-black">
+                        {player.score}
+                      </div>
+                      <div className="text-[9px] sm:text-xs font-bold text-black/60">очков</div>
                     </div>
                   </div>
                 ))}
@@ -313,29 +321,32 @@ export default function GamesTab() {
                     <div className="flex-1 min-w-0">
                       <div className="font-extrabold text-black truncate text-sm sm:text-base">
                         {player.username || `Игрок ${player.user_id}`}
-                        {player.user_id === user?.id && (
-                          <span className="ml-2 text-xs bg-black text-blue-400 px-2 py-0.5 rounded-lg border border-black font-extrabold">Вы</span>
-                        )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-black/70 font-semibold">
-                        <span>Ур. {player.level}</span>
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-black/60 font-bold">
+                        <span>Ур.{player.level}</span>
                         <span>•</span>
-                        <span>{player.total_orders} зак.</span>
+                        <span>{player.total_orders}</span>
+                        <span className="text-xs">
+                          {player.transport === 'walk' ? '🚶' : 
+                           player.transport === 'bike' ? '🚴' :
+                           player.transport === 'moped' ? '🛵' :
+                           player.transport === 'car' ? '🚗' : '🎮'}
+                        </span>
                       </div>
+                      {player.user_id === user?.id && (
+                        <div className="mt-0.5">
+                          <span className="text-[10px] bg-black text-blue-400 px-1.5 py-0.5 rounded border border-black font-extrabold">Вы</span>
+                        </div>
+                      )}
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className="text-lg sm:text-xl font-extrabold text-black">
                         {player.best_score}
                       </div>
-                      <div className="text-sm">
-                        {player.transport === 'walk' ? '🚶' : 
-                         player.transport === 'bike' ? '🚴' :
-                         player.transport === 'moped' ? '🛵' :
-                         player.transport === 'car' ? '🚗' : '🎮'}
-                      </div>
+                      <div className="text-[9px] sm:text-xs font-bold text-black/60">очков</div>
                     </div>
                   </div>
-                ))}
+                ))
               </div>
             )}
           </div>
