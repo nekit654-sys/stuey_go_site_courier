@@ -42,14 +42,14 @@ def generate_link_code(courier_id: int) -> Dict[str, Any]:
     
     try:
         code = generate_unique_code(cursor)
-        expires_at = datetime.now() + timedelta(minutes=10)
         
+        # Используем NOW() самой БД для корректного времени (с timezone)
         cursor.execute("""
             INSERT INTO t_p25272970_courier_button_site.messenger_link_codes 
-            (courier_id, code, expires_at)
-            VALUES (%s, %s, %s)
+            (courier_id, code, expires_at, created_at)
+            VALUES (%s, %s, NOW() + INTERVAL '10 minutes', NOW())
             RETURNING id, code, expires_at
-        """, (courier_id, code, expires_at))
+        """, (courier_id, code))
         
         result = cursor.fetchone()
         conn.commit()
@@ -57,7 +57,7 @@ def generate_link_code(courier_id: int) -> Dict[str, Any]:
         return {
             'success': True,
             'code': result['code'],
-            'expires_at': result['expires_at'].isoformat() + 'Z'  # Явно указываем UTC
+            'expires_at': result['expires_at'].isoformat()
         }
     except Exception as e:
         conn.rollback()

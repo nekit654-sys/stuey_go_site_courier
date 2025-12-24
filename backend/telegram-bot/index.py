@@ -226,6 +226,25 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
     cursor = conn.cursor()
     
     try:
+        # Отладка: проверяем что есть в БД для этого кода
+        cursor.execute("""
+            SELECT code, courier_id, is_used, expires_at, NOW() as current_time
+            FROM t_p25272970_courier_button_site.messenger_link_codes
+            WHERE code = %s
+        """, (code,))
+        debug_info = cursor.fetchone()
+        
+        if debug_info:
+            print(f'🔍 DEBUG: Код найден в БД')
+            print(f'  - code: {debug_info["code"]}')
+            print(f'  - courier_id: {debug_info["courier_id"]}')
+            print(f'  - is_used: {debug_info["is_used"]}')
+            print(f'  - expires_at: {debug_info["expires_at"]}')
+            print(f'  - current_time: {debug_info["current_time"]}')
+            print(f'  - is_expired: {debug_info["expires_at"] <= debug_info["current_time"]}')
+        else:
+            print(f'❌ Код {code} вообще не найден в БД')
+        
         # Проверяем код в таблице messenger_link_codes (правильная таблица!)
         cursor.execute("""
             SELECT courier_id FROM t_p25272970_courier_button_site.messenger_link_codes
@@ -237,7 +256,7 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
         result = cursor.fetchone()
         
         if not result:
-            print(f'❌ Код {code} не найден или истёк/использован')
+            print(f'❌ Код {code} не прошёл проверку (истёк или использован или не найден)')
             return False
         
         courier_id = result['courier_id']
