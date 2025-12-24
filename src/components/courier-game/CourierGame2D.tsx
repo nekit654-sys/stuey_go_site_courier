@@ -2188,100 +2188,60 @@ export function CourierGame2D() {
         style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       />
 
-      {/* HUD - адаптивный для ориентации */}
-      <div className={`absolute bg-black/80 p-2 rounded-lg text-white border-2 border-yellow-400 ${
-        isPortrait 
-          ? 'top-2 left-2 space-y-0.5 text-[10px]' // Вертикальная: супер компактный
-          : 'top-2 left-2 space-y-1 text-xs sm:text-sm sm:p-4 sm:space-y-2 sm:top-4 sm:left-4'
-      }`}>
-        <div className="flex items-center gap-1">
-          <Icon name="User" size={16} className="text-yellow-400" />
-          <span className="font-bold">Ур. {level}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Icon name="DollarSign" size={16} className="text-green-400" />
-          <span className="font-bold">{money}₽</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Icon name="Package" size={16} className="text-blue-400" />
-          <span className="font-bold">{totalOrders}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Icon name="Star" size={16} className="text-purple-400" />
-          <span className="font-bold">{experience}/{level * 100}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Icon name="Truck" size={16} className="text-orange-400" />
-          <span className="font-bold capitalize text-[10px] sm:text-xs">{player.transport}</span>
-        </div>
-        {/* Индикатор джойстика для отладки */}
-        {isMobile && (joystickMove.current.x !== 0 || joystickMove.current.y !== 0) && (
-          <div className="flex items-center gap-1 text-[10px] text-cyan-400">
-            <Icon name="Gamepad2" size={12} />
-            <span>{joystickMove.current.x.toFixed(2)}, {joystickMove.current.y.toFixed(2)}</span>
+      {/* Верхняя панель - компактная */}
+      <div className="absolute top-2 left-2 right-2 flex items-start gap-2">
+        {/* Статистика */}
+        <div className="bg-black/80 px-3 py-1.5 rounded-lg text-white border-2 border-yellow-400 flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-1">
+            <Icon name="User" size={14} className="text-yellow-400" />
+            <span className="font-bold">{level}</span>
           </div>
-        )}
+          <div className="flex items-center gap-1">
+            <Icon name="DollarSign" size={14} className="text-green-400" />
+            <span className="font-bold">{money}₽</span>
+          </div>
+        </div>
       </div>
 
-      {/* Активный заказ - адаптивная панель */}
+      {/* Активный заказ - компактная панель слева */}
       {currentOrder && (
-        <div className={`absolute bg-gradient-to-br from-green-600 to-green-800 rounded-xl text-white border-3 border-green-400 shadow-lg ${
-          isPortrait
-            ? 'bottom-44 left-2 right-2 p-2 text-[10px]' // Вертикальная: над джойстиком
-            : 'top-2 right-2 p-3 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4'
-        }`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Icon name="TruckIcon" size={20} className="text-yellow-400 animate-pulse" />
-            <span className="font-extrabold text-lg">ВЕЗЁМ КЛИЕНТУ</span>
+        <div className="absolute top-14 left-2 bg-green-600/90 rounded-lg text-white border-2 border-green-400 p-2 text-xs max-w-[200px]">
+          <div className="flex items-center gap-1 mb-1">
+            <Icon name="TruckIcon" size={14} className="text-yellow-400" />
+            <span className="font-bold text-xs">Доставка</span>
           </div>
-          <div className="space-y-1.5 bg-black/30 p-2 rounded-lg">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                <Icon name="DollarSign" size={14} className="text-yellow-400" />
-                <span className="text-xs opacity-80">Награда:</span>
-              </div>
-              <p className="font-bold text-yellow-400">{currentOrder.reward}₽</p>
+          <div className="space-y-0.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80">💰</span>
+              <span className="font-bold text-yellow-300">{currentOrder.reward}₽</span>
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                <Icon name="Clock" size={14} className="text-red-400" />
-                <span className="text-xs opacity-80">Время:</span>
-              </div>
-              <p className="font-bold text-red-400">{currentOrder.timeLeft}с</p>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80">⏱️</span>
+              <span className="font-bold text-red-300">{currentOrder.timeLeft}с</span>
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                <Icon name="Navigation" size={14} className="text-cyan-400" />
-                <span className="text-xs opacity-80">До дома:</span>
-              </div>
-              <p className="font-bold text-cyan-400">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] opacity-80">📍</span>
+              <span className="font-bold text-cyan-300">
                 {Math.floor(Math.hypot(currentOrder.deliveryX - player.x, currentOrder.deliveryY - player.y))}м
-              </p>
+              </span>
             </div>
-          </div>
-          <div className="mt-2 text-center text-[10px] bg-white/20 rounded px-2 py-1">
-            🏠 Доставь заказ клиенту!
           </div>
           {canInteract.type === 'delivery' && (
-            <div className="mt-2 text-center text-[10px] text-white font-bold animate-pulse bg-white/30 rounded px-2 py-1">
-              ⌨️ ПРОБЕЛ для доставки!
+            <div className="mt-1 text-center text-[9px] bg-white/30 rounded px-1 py-0.5 animate-pulse">
+              ПРОБЕЛ
             </div>
           )}
         </div>
       )}
       
-      {/* Доступные заказы - адаптивная панель */}
+      {/* Доступные заказы - компактная панель слева */}
       {!currentOrder && orders.filter(o => o.status === 'available').length > 0 && (
-        <div className={`absolute bg-gradient-to-br from-yellow-600 to-orange-600 rounded-xl text-white border-3 border-yellow-400 shadow-lg ${
-          isPortrait
-            ? 'bottom-44 left-2 right-2 p-2 text-[10px]' // Вертикальная: над джойстиком
-            : 'top-2 right-2 p-3 text-xs sm:text-sm sm:p-4 sm:top-4 sm:right-4'
-        }`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Icon name="Package" size={20} className="text-white animate-bounce" />
-            <span className="font-extrabold text-lg">ЗАБРАТЬ ЗАКАЗ</span>
+        <div className="absolute top-14 left-2 bg-orange-600/90 rounded-lg text-white border-2 border-yellow-400 p-2 text-xs max-w-[200px]">
+          <div className="flex items-center gap-1 mb-1">
+            <Icon name="Package" size={14} className="text-white" />
+            <span className="font-bold text-xs">Забрать</span>
           </div>
-          <div className="space-y-1.5 bg-black/30 p-2 rounded-lg">
+          <div className="space-y-0.5">
             {(() => {
               const nearestOrder = orders
                 .filter(o => o.status === 'available')
@@ -2296,26 +2256,20 @@ export function CourierGame2D() {
               
               return (
                 <>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1">
-                      <span className="text-lg">{orderIcons[nearestOrder.type]}</span>
-                      <span className="text-xs opacity-80">Награда:</span>
-                    </div>
-                    <p className="font-bold text-yellow-300">{nearestOrder.reward}₽</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] opacity-80">{orderIcons[nearestOrder.type]}</span>
+                    <span className="font-bold text-yellow-300">{nearestOrder.reward}₽</span>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1">
-                      <Icon name="MapPin" size={14} className="text-cyan-400" />
-                      <span className="text-xs opacity-80">До точки:</span>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] opacity-80">📍</span>
                     <p className="font-bold text-cyan-400">{dist}м</p>
                   </div>
                   <div className="text-center text-[9px] bg-white/20 rounded px-2 py-1 mt-1">
                     📦 Всего заказов: {orders.filter(o => o.status === 'available').length}
                   </div>
-                  {dist < 50 && (
-                    <div className="text-center text-[10px] text-green-300 font-bold animate-pulse mt-2 bg-green-900/50 rounded px-2 py-1">
-                      ⌨️ Нажми ПРОБЕЛ для взятия!
+                  {canInteract.type === 'pickup' && (
+                    <div className="text-center text-[9px] bg-white/30 rounded px-1 py-0.5 animate-pulse mt-1">
+                      ПРОБЕЛ
                     </div>
                   )}
                 </>
@@ -2325,14 +2279,10 @@ export function CourierGame2D() {
         </div>
       )}
 
-      {/* Мини-карта - адаптивная позиция и размер */}
-      <div className={`absolute bg-black/90 p-2 rounded-lg border-2 border-cyan-400 shadow-xl ${
-        isPortrait 
-          ? 'top-16 right-2' // Вертикальная: сверху справа
-          : 'bottom-4 right-4' // Горизонтальная: внизу справа
-      }`}>
+      {/* Мини-карта - справа сверху рядом со статистикой */}
+      <div className="absolute top-2 right-2 bg-black/90 p-1.5 rounded-lg border-2 border-cyan-400">
         <div className={`relative bg-green-900 rounded overflow-hidden ${
-          isPortrait ? 'w-32 h-24' : 'w-52 h-36'
+          isPortrait ? 'w-24 h-20' : 'w-32 h-24'
         }`}>
           {/* Сетка дорог на мини-карте */}
           {roads.map((road, idx) => (
