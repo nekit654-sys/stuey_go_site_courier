@@ -348,8 +348,8 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.is_active,
             u.created_at,
             u.external_id,
-            u.deleted_at,
-            u.can_restore_until,
+            u.archived_at,
+            u.restore_until,
             inviter.full_name as inviter_name,
             inviter.referral_code as inviter_code,
             COALESCE(
@@ -371,7 +371,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             ) as referral_income
         FROM t_p25272970_courier_button_site.users u
         LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
-        WHERE u.deleted_at IS NULL
+        WHERE u.archived_at IS NULL
         ORDER BY u.created_at DESC
     """)
     
@@ -561,7 +561,7 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     
     # Проверяем существование курьера
     cur.execute("""
-        SELECT id, full_name, phone, deleted_at 
+        SELECT id, full_name, phone, archived_at 
         FROM t_p25272970_courier_button_site.users
         WHERE id = %s
     """, (courier_id,))
@@ -581,9 +581,9 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     cur.execute("""
         UPDATE t_p25272970_courier_button_site.users
         SET 
-            deleted_at = NOW(),
-            can_restore_until = NOW() + INTERVAL '14 days',
-            deleted_by = 'admin',
+            archived_at = NOW(),
+            restore_until = NOW() + INTERVAL '14 days',
+            archived_by = 'admin',
             is_active = false,
             updated_at = NOW()
         WHERE id = %s
@@ -634,9 +634,9 @@ def restore_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     cur.execute("""
-        SELECT id, full_name, phone, deleted_at, can_restore_until
+        SELECT id, full_name, phone, archived_at, restore_until
         FROM t_p25272970_courier_button_site.users
-        WHERE id = %s AND deleted_at IS NOT NULL
+        WHERE id = %s AND archived_at IS NOT NULL
     """, (courier_id,))
     
     user = cur.fetchone()
@@ -650,7 +650,7 @@ def restore_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
             'isBase64Encoded': False
         }
     
-    if user['can_restore_until'] and datetime.now() > user['can_restore_until']:
+    if user['restore_until'] and datetime.now() > user['restore_until']:
         cur.close()
         conn.close()
         return {
@@ -663,9 +663,9 @@ def restore_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
     cur.execute("""
         UPDATE t_p25272970_courier_button_site.users
         SET 
-            deleted_at = NULL,
-            can_restore_until = NULL,
-            deleted_by = NULL,
+            archived_at = NULL,
+            restore_until = NULL,
+            archived_by = NULL,
             is_active = true,
             updated_at = NOW()
         WHERE id = %s

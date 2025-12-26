@@ -1,0 +1,4 @@
+ALTER TABLE t_p25272970_courier_button_site.users 
+ADD COLUMN IF NOT EXISTS archived_at TIMESTAMP,
+ADD COLUMN IF NOT EXISTS restore_until TIMESTAMP,
+ADD COLUMN IF NOT EXISTS archived_by VARCHAR(50);
