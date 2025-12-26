@@ -464,16 +464,20 @@ def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         referrer_name = referrer['full_name'] if referrer['full_name'] else f'ID {referrer["id"]}'
         courier_name = courier_info['full_name'] if courier_info and courier_info['full_name'] else f'ID {courier_id}'
         
-        log_activity(
-            conn, 
-            'referral_assigned', 
-            f'Админ назначил реферера {referrer_name} курьеру {courier_name}',
-            {
-                'referrer_id': referrer['id'],
-                'courier_id': courier_id,
-                'referral_code': referral_code_input
-            }
-        )
+        # Логируем событие (опционально)
+        try:
+            log_activity(
+                conn, 
+                'referral_assigned', 
+                f'Админ назначил реферера {referrer_name} курьеру {courier_name}',
+                {
+                    'referrer_id': referrer['id'],
+                    'courier_id': courier_id,
+                    'referral_code': referral_code_input
+                }
+            )
+        except Exception as e:
+            print(f'>>> WARNING: Не удалось залогировать назначение реферера: {e}')
         
         print(f'>>> Установлен реферер {referrer["id"]} для курьера {courier_id}')
     
@@ -585,16 +589,20 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         WHERE id = %s
     """, (courier_id,))
     
-    # Логируем удаление
-    user_name = user['full_name'] if user['full_name'] else user['phone']
-    log_activity(
-        conn,
-        'courier_deleted',
-        f'Курьер {user_name} помечен как удалённый (восстановление до {datetime.now() + timedelta(days=14)})',
-        {'courier_id': courier_id, 'courier_name': user_name, 'restore_days': 14}
-    )
-    
     conn.commit()
+    
+    # Логируем удаление (опционально)
+    try:
+        user_name = user['full_name'] if user['full_name'] else user['phone']
+        log_activity(
+            conn,
+            'courier_deleted',
+            f'Курьер {user_name} помечен как удалённый (восстановление до {datetime.now() + timedelta(days=14)})',
+            {'courier_id': courier_id, 'courier_name': user_name, 'restore_days': 14}
+        )
+        conn.commit()
+    except Exception as e:
+        print(f'>>> WARNING: Не удалось залогировать удаление: {e}')
     cur.close()
     conn.close()
     
@@ -663,15 +671,20 @@ def restore_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
         WHERE id = %s
     """, (courier_id,))
     
-    user_name = user['full_name'] if user['full_name'] else user['phone']
-    log_activity(
-        conn,
-        'courier_restored',
-        f'Курьер {user_name} восстановлен',
-        {'courier_id': courier_id, 'courier_name': user_name}
-    )
-    
     conn.commit()
+    
+    # Логируем восстановление (опционально)
+    try:
+        user_name = user['full_name'] if user['full_name'] else user['phone']
+        log_activity(
+            conn,
+            'courier_restored',
+            f'Курьер {user_name} восстановлен',
+            {'courier_id': courier_id, 'courier_name': user_name}
+        )
+        conn.commit()
+    except Exception as e:
+        print(f'>>> WARNING: Не удалось залогировать восстановление: {e}')
     cur.close()
     conn.close()
     
