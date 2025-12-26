@@ -304,6 +304,20 @@ def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str,
                 'isBase64Encoded': False
             }
     
+    elif method == 'POST':
+        action = query_params.get('action', '')
+        if action == 'restore':
+            return restore_courier(event, headers)
+        elif action == 'permanent_delete':
+            return permanent_delete_expired_couriers(event, headers)
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Invalid action'}),
+                'isBase64Encoded': False
+            }
+    
     return {
         'statusCode': 405,
         'headers': headers,
@@ -334,6 +348,8 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             u.is_active,
             u.created_at,
             u.external_id,
+            u.deleted_at,
+            u.can_restore_until,
             inviter.full_name as inviter_name,
             inviter.referral_code as inviter_code,
             COALESCE(
@@ -355,6 +371,7 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             ) as referral_income
         FROM t_p25272970_courier_button_site.users u
         LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
+        WHERE u.deleted_at IS NULL
         ORDER BY u.created_at DESC
     """)
     
@@ -523,6 +540,7 @@ def update_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
 
 
 def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Мягкое удаление курьера с возможностью восстановления в течение 14 дней'''
     body_data = json.loads(event.get('body', '{}'))
     courier_id = body_data.get('courier_id')
     
@@ -535,22 +553,46 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         }
     
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Проверяем существование курьера
     cur.execute("""
-        DELETE FROM t_p25272970_courier_button_site.referrals
-        WHERE referrer_id = %s OR referee_id = %s
-    """, (courier_id, courier_id))
-    
-    cur.execute("""
-        DELETE FROM t_p25272970_courier_button_site.withdrawal_requests
-        WHERE user_id = %s
-    """, (courier_id,))
-    
-    cur.execute("""
-        DELETE FROM t_p25272970_courier_button_site.users
+        SELECT id, full_name, phone, deleted_at 
+        FROM t_p25272970_courier_button_site.users
         WHERE id = %s
     """, (courier_id,))
+    
+    user = cur.fetchone()
+    if not user:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Курьер не найден'}),
+            'isBase64Encoded': False
+        }
+    
+    # Мягкое удаление: помечаем аккаунт как удалённый + 14 дней на восстановление
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.users
+        SET 
+            deleted_at = NOW(),
+            can_restore_until = NOW() + INTERVAL '14 days',
+            deleted_by = 'admin',
+            is_active = false,
+            updated_at = NOW()
+        WHERE id = %s
+    """, (courier_id,))
+    
+    # Логируем удаление
+    user_name = user['full_name'] if user['full_name'] else user['phone']
+    log_activity(
+        conn,
+        'courier_deleted',
+        f'Курьер {user_name} помечен как удалённый (восстановление до {datetime.now() + timedelta(days=14)})',
+        {'courier_id': courier_id, 'courier_name': user_name, 'restore_days': 14}
+    )
     
     conn.commit()
     cur.close()
@@ -559,7 +601,142 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({'success': True, 'message': 'Курьер успешно удалён'}),
+        'body': json.dumps({
+            'success': True, 
+            'message': 'Курьер помечен как удалённый. Восстановление возможно в течение 14 дней.'
+        }),
+        'isBase64Encoded': False
+    }
+
+
+def restore_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Восстановление удалённого аккаунта курьера в течение 14 дней'''
+    body_data = json.loads(event.get('body', '{}'))
+    courier_id = body_data.get('courier_id')
+    
+    if not courier_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'courier_id обязателен'}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT id, full_name, phone, deleted_at, can_restore_until
+        FROM t_p25272970_courier_button_site.users
+        WHERE id = %s AND deleted_at IS NOT NULL
+    """, (courier_id,))
+    
+    user = cur.fetchone()
+    if not user:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 404,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Удалённый курьер не найден'}),
+            'isBase64Encoded': False
+        }
+    
+    if user['can_restore_until'] and datetime.now() > user['can_restore_until']:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Срок восстановления истёк (14 дней)'}),
+            'isBase64Encoded': False
+        }
+    
+    cur.execute("""
+        UPDATE t_p25272970_courier_button_site.users
+        SET 
+            deleted_at = NULL,
+            can_restore_until = NULL,
+            deleted_by = NULL,
+            is_active = true,
+            updated_at = NOW()
+        WHERE id = %s
+    """, (courier_id,))
+    
+    user_name = user['full_name'] if user['full_name'] else user['phone']
+    log_activity(
+        conn,
+        'courier_restored',
+        f'Курьер {user_name} восстановлен',
+        {'courier_id': courier_id, 'courier_name': user_name}
+    )
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({'success': True, 'message': 'Аккаунт курьера успешно восстановлен'}),
+        'isBase64Encoded': False
+    }
+
+
+def permanent_delete_expired_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Окончательное удаление курьеров у которых истёк срок восстановления (14 дней)'''
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT id, full_name, phone
+        FROM t_p25272970_courier_button_site.users
+        WHERE deleted_at IS NOT NULL 
+          AND can_restore_until IS NOT NULL 
+          AND can_restore_until < NOW()
+    """)
+    
+    expired_users = cur.fetchall()
+    
+    if not expired_users:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'message': 'Нет курьеров для окончательного удаления', 'deleted_count': 0}),
+            'isBase64Encoded': False
+        }
+    
+    deleted_count = 0
+    for user in expired_users:
+        user_id = user['id']
+        user_name = user['full_name'] if user['full_name'] else user['phone']
+        
+        cur.execute("UPDATE t_p25272970_courier_button_site.users SET invited_by_user_id = NULL WHERE invited_by_user_id = %s", (user_id,))
+        cur.execute("UPDATE t_p25272970_courier_button_site.withdrawal_requests SET user_id = NULL WHERE user_id = %s", (user_id,))
+        
+        log_activity(
+            conn,
+            'courier_permanent_delete',
+            f'Курьер {user_name} окончательно удалён (истёк срок восстановления)',
+            {'courier_id': user_id, 'courier_name': user_name}
+        )
+        
+        deleted_count += 1
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps({
+            'success': True, 
+            'message': f'Окончательно удалено курьеров: {deleted_count}',
+            'deleted_count': deleted_count
+        }),
         'isBase64Encoded': False
     }
 
