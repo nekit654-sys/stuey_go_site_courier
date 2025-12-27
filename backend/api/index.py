@@ -1813,21 +1813,61 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         
         existing_user = None
         
-        # Шаг 1: Ищем по oauth_id
+        # Шаг 1: Ищем по oauth_id (проверяем и активных, и архивированных)
         cur.execute("""
-            SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+            SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id, archived_at, restore_until
             FROM t_p25272970_courier_button_site.users
-            WHERE oauth_id = %s AND oauth_provider = %s AND is_active = true
+            WHERE oauth_id = %s AND oauth_provider = %s
         """, (oauth_id, provider))
         
         existing_user = cur.fetchone()
         
+        # Проверка на архивацию
+        if existing_user and existing_user.get('archived_at'):
+            restore_until = existing_user.get('restore_until')
+            if restore_until:
+                from datetime import datetime
+                if datetime.now() < restore_until:
+                    # Можно восстановить
+                    cur.close()
+                    conn.close()
+                    return {
+                        'statusCode': 403,
+                        'headers': headers,
+                        'body': json.dumps({
+                            'success': False,
+                            'error': 'account_archived',
+                            'message': f'Ваш аккаунт архивирован. Вы можете восстановить его до {restore_until.strftime("%d.%m.%Y")}. Обратитесь в поддержку.',
+                            'restore_until': restore_until.isoformat()
+                        }),
+                        'isBase64Encoded': False
+                    }
+            # Срок восстановления истёк
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 403,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'error': 'account_deleted',
+                    'message': 'Ваш аккаунт был удалён. Для создания нового аккаунта обратитесь в поддержку.'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        # Если нашли активного пользователя, но не архивированного - отлично
+        if existing_user and not existing_user.get('archived_at'):
+            pass  # Продолжаем обычную логику
+        else:
+            existing_user = None  # Считаем что не нашли
+        
         # Шаг 2: Если не нашли по oauth_id, но есть email - ищем по email
         if not existing_user and email:
             cur.execute("""
-                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id, archived_at
                 FROM t_p25272970_courier_button_site.users
-                WHERE email = %s AND oauth_provider = %s AND is_active = true
+                WHERE email = %s AND oauth_provider = %s AND archived_at IS NULL
                 ORDER BY created_at ASC
                 LIMIT 1
             """, (email, provider))
@@ -1847,9 +1887,9 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         # Шаг 3: Если не нашли по email, но есть телефон - ищем по телефону
         if not existing_user and phone:
             cur.execute("""
-                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id
+                SELECT id, full_name, email, phone, city, avatar_url, oauth_provider, referral_code, invited_by_user_id, oauth_id, archived_at
                 FROM t_p25272970_courier_button_site.users
-                WHERE phone = %s AND oauth_provider = %s AND is_active = true
+                WHERE phone = %s AND oauth_provider = %s AND archived_at IS NULL
                 ORDER BY created_at ASC
                 LIMIT 1
             """, (phone, provider))
