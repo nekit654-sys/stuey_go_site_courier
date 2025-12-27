@@ -23,6 +23,8 @@ interface Courier {
   created_at: string;
   invited_by_user_id?: number;
   external_id?: string;
+  archived_at?: string;
+  restore_until?: string;
 }
 
 interface CouriersListProps {
@@ -182,13 +184,22 @@ export default function CouriersList({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        courier.is_active 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {courier.is_active ? 'Активен' : 'Неактивен'}
-                      </span>
+                      {courier.archived_at ? (
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="destructive" className="text-xs">
+                            Архивирован
+                          </Badge>
+                          {courier.restore_until && (
+                            <span className="text-xs text-gray-500">
+                              До {new Date(courier.restore_until).toLocaleDateString('ru-RU')}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <Badge variant={courier.is_active ? "default" : "secondary"} className="text-xs">
+                          {courier.is_active ? 'Активен' : 'Неактивен'}
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(courier.created_at).toLocaleDateString('ru-RU')}

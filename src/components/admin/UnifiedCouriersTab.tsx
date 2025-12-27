@@ -30,6 +30,8 @@ interface Courier {
   created_at: string;
   invited_by_user_id?: number;
   external_id?: string;
+  archived_at?: string;
+  restore_until?: string;
 }
 
 interface OverallStats {

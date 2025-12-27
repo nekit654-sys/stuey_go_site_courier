@@ -371,8 +371,9 @@ def get_all_couriers(headers: Dict[str, str]) -> Dict[str, Any]:
             ) as referral_income
         FROM t_p25272970_courier_button_site.users u
         LEFT JOIN t_p25272970_courier_button_site.users inviter ON u.invited_by_user_id = inviter.id
-        WHERE u.archived_at IS NULL
-        ORDER BY u.created_at DESC
+        ORDER BY 
+            CASE WHEN u.archived_at IS NULL THEN 0 ELSE 1 END,
+            u.created_at DESC
     """)
     
     couriers = cur.fetchall()
