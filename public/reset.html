@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Сброс пароля</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; padding: 20px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #status { margin-top: 20px; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h2>Сброс пароля для nekit654</h2>
+    <button onclick="reset()">Сбросить пароль на nekit654654</button>
+    <div id="status"></div>
+    <script>
+        async function reset() {
+            const btn = document.querySelector('button');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            btn.textContent = 'Сброс...';
+            
+            try {
+                const res = await fetch('https://functions.poehali.dev/008bbae3-479b-42be-a3e1-a73f248eab03', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: 'nekit654', new_password: 'nekit654654'})
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    status.className = 'success';
+                    status.textContent = '✅ ' + data.message + '\n\nТеперь входите:\nЛогин: nekit654\nПароль: nekit654654';
+                } else {
+                    status.className = 'error';
+                    status.textContent = '❌ ' + (data.error || 'Ошибка');
+                }
+            } catch (e) {
+                status.className = 'error';
+                status.textContent = '❌ Ошибка: ' + e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Сбросить пароль на nekit654654';
+            }
+        }
+    </script>
+</body>
+</html>
