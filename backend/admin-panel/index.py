@@ -418,6 +418,57 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
+                # Проверяем токен и получаем username из JWT
+                try:
+                    decoded = jwt.decode(auth_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                    username = decoded.get('username')
+                except jwt.InvalidTokenError:
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Неверный токен'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Получаем текущий хеш пароля
+                cursor.execute(
+                    "SELECT password_hash FROM t_p25272970_courier_button_site.admins WHERE username = %s",
+                    (username,)
+                )
+                admin = cursor.fetchone()
+                
+                if not admin:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Администратор не найден'}),
+                        'isBase64Encoded': False
+                    }
+                
+                stored_hash = admin[0]
+                
+                # Проверяем текущий пароль
+                if not bcrypt.checkpw(current_password.encode('utf-8'), stored_hash.encode('utf-8')):
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': False, 'error': 'Неверный текущий пароль'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Хешируем новый пароль
+                new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                
+                # Обновляем пароль
+                cursor.execute(
+                    "UPDATE t_p25272970_courier_button_site.admins SET password_hash = %s WHERE username = %s",
+                    (new_hash, username)
+                )
+                conn.commit()
+                
+                log_activity(cursor, 'admin_security', f'Администратор {username} изменил свой пароль')
+                conn.commit()
+                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
