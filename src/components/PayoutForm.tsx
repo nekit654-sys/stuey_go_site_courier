@@ -119,7 +119,7 @@ export default function PayoutForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setMessage({ type: 'success', text: 'Заявка на стартовую выплату 3000₽ успешно отправлена! Ожидайте рассмотрения.' });
+        setMessage({ type: 'success', text: 'Заявка на стартовую выплату 5000₽ успешно отправлена! Ожидайте рассмотрения.' });
         setFormData({ ...formData, image: null });
         setTimeout(() => navigate('/dashboard'), 3000);
       } else {
@@ -155,7 +155,7 @@ export default function PayoutForm() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Заявка на стартовую выплату</h2>
-        <p className="text-center text-gray-600 mb-6">Получите <span className="font-bold text-green-600">3000₽</span> за первые 30 заказов!</p>
+        <p className="text-center text-gray-600 mb-6">Получите <span className="font-bold text-green-600">5000₽</span> за первые 30 заказов!</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <input

@@ -133,7 +133,7 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
 
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Пользователи с бонусом 3000₽</h3>
+          <h3 className="text-lg font-semibold">Пользователи с бонусом 5000₽</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon name="RefreshCw" size={14} className={isLoading ? 'animate-spin' : ''} />
             <span>
@@ -149,7 +149,7 @@ export default function BonusManagementTab({ authToken }: BonusManagementTabProp
         ) : bonusUsers.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Icon name="Gift" size={48} className="mx-auto mb-2 opacity-50" />
-            <p>Пока никто не получил бонус 3000₽</p>
+            <p>Пока никто не получил бонус 5000₽</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

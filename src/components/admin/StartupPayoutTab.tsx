@@ -172,7 +172,7 @@ export default function StartupPayoutTab({ authToken }: StartupPayoutTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Icon name="Gift" size={24} />
-            Заявки на стартовую выплату (3000₽)
+            Заявки на стартовую выплату (5000₽)
           </CardTitle>
         </CardHeader>
         <CardContent>

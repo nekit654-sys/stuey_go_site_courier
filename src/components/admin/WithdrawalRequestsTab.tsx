@@ -173,7 +173,7 @@ export default function WithdrawalRequestsTab({ authToken }: WithdrawalRequestsT
         </TabsTrigger>
         <TabsTrigger value="startup" className="flex items-center gap-2">
           <Icon name="Gift" size={16} />
-          Стартовые 3000₽
+          Стартовые 5000₽
         </TabsTrigger>
       </TabsList>
 
