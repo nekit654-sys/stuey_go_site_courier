@@ -13,14 +13,6 @@ import { Courier } from './payments/types';
 interface CompactAdminTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  requests: AdminRequest[];
-  stats: AdminStats;
-  autoRefresh: boolean;
-  lastUpdate: Date;
-  onToggleAutoRefresh: () => void;
-  onRefresh: () => void;
-  onUpdateStatus: (id: number, status: string) => void;
-  onDelete: (id: number) => void;
   allCouriers: Courier[];
   isLoadingCouriers: boolean;
   onRefreshCouriers: () => void;
@@ -29,8 +21,6 @@ interface CompactAdminTabsProps {
   isLoadingReferrals: boolean;
   onRefreshReferrals: () => void;
   onDeleteAllUsers?: () => void;
-  onViewImage?: (url: string) => void;
-  pendingRequestsCount?: number;
   pendingWithdrawalsCount?: number;
   passwordForm?: any;
   onPasswordFormChange?: any;
@@ -41,6 +31,7 @@ interface CompactAdminTabsProps {
   onDeleteAdmin?: any;
   onLoadAdmins?: any;
   admins?: any[];
+  lastUpdate: Date;
 }
 
 export default function CompactAdminTabs({
@@ -168,14 +159,6 @@ export default function CompactAdminTabs({
 
       {activeTab === 'people' && (
         <PeopleTab
-          requests={requests}
-          stats={stats}
-          autoRefresh={autoRefresh}
-          lastUpdate={lastUpdate}
-          onToggleAutoRefresh={onToggleAutoRefresh}
-          onRefresh={onRefresh}
-          onUpdateStatus={onUpdateStatus}
-          onDelete={onDelete}
           allCouriers={allCouriers}
           isLoadingCouriers={isLoadingCouriers}
           onRefreshCouriers={onRefreshCouriers}
@@ -183,7 +166,6 @@ export default function CompactAdminTabs({
           isLoadingReferrals={isLoadingReferrals}
           onRefreshReferrals={onRefreshReferrals}
           onDeleteAllUsers={onDeleteAllUsers}
-          onViewImage={onViewImage}
           authToken={authToken}
         />
       )}
