@@ -218,8 +218,11 @@ export function useAdminAuth() {
   };
 
   const deleteAdmin = async (adminId: number) => {
+    console.log('🗑️ Попытка удаления админа ID:', adminId);
+    
     if (confirm('Удалить администратора?')) {
       try {
+        console.log('📤 Отправка запроса на удаление...');
         const response = await fetch(ADMIN_PANEL_URL, {
           method: 'POST',
           headers: {
@@ -232,20 +235,35 @@ export function useAdminAuth() {
           })
         });
 
-        if (response.ok) {
-          loadAdmins();
+        console.log('📥 Статус ответа удаления:', response.status);
+        const data = await response.json();
+        console.log('📦 Данные ответа:', data);
+
+        if (response.ok && data.success) {
+          console.log('✅ Админ успешно удален, обновляем список...');
+          await loadAdmins();
           toast({
             title: 'Админ удален',
             description: 'Администратор успешно удален',
           });
+        } else {
+          console.error('❌ Ошибка при удалении:', data);
+          toast({
+            title: 'Ошибка',
+            description: data.error || data.message || 'Не удалось удалить админа',
+            variant: 'destructive',
+          });
         }
       } catch (error) {
+        console.error('❌ Ошибка сети при удалении админа:', error);
         toast({
           title: 'Ошибка',
           description: 'Не удалось удалить админа',
           variant: 'destructive',
         });
       }
+    } else {
+      console.log('❌ Пользователь отменил удаление');
     }
   };
 
