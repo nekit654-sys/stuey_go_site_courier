@@ -92,70 +92,104 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
-            telegram_id = body_data.get('telegram_id')
+            action = body_data.get('action', 'link')
             
-            if not telegram_id:
+            if action == 'generate_code':
+                # Генерация кода для привязки
+                import secrets
+                
+                # Генерируем 6-значный код
+                code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+                
+                # Сначала помечаем все старые коды этого курьера как использованные
+                cursor.execute("""
+                    UPDATE t_p25272970_courier_button_site.messenger_link_codes
+                    SET is_used = true
+                    WHERE courier_id = %s AND is_used = false
+                """, (courier_id,))
+                
+                # Создаем новый код
+                cursor.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.messenger_link_codes
+                    (code, courier_id, expires_at, is_used, created_at)
+                    VALUES (%s, %s, NOW() + INTERVAL '15 minutes', false, NOW())
+                    RETURNING code
+                """, (code, courier_id))
+                
+                conn.commit()
+                
                 return {
-                    'statusCode': 400,
+                    'statusCode': 200,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'Telegram ID обязателен'}),
+                    'body': json.dumps({
+                        'success': True,
+                        'code': code,
+                        'expires_in_minutes': 15
+                    }),
                     'isBase64Encoded': False
                 }
             
-            cursor.execute("""
-                SELECT courier_id FROM t_p25272970_courier_button_site.messenger_connections
-                WHERE messenger_type = 'telegram' AND messenger_user_id = %s AND is_verified = true
-            """, (str(telegram_id),))
-            
-            existing = cursor.fetchone()
-            if existing and existing['courier_id'] != courier_id:
+            else:
+                # Старая логика для совместимости (прямая привязка по telegram_id)
+                telegram_id = body_data.get('telegram_id')
+                
+                if not telegram_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({'error': 'Telegram ID обязателен'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute("""
+                    SELECT courier_id FROM t_p25272970_courier_button_site.messenger_connections
+                    WHERE messenger_type = 'telegram' AND messenger_user_id = %s AND is_verified = true
+                """, (str(telegram_id),))
+                
+                existing = cursor.fetchone()
+                if existing and existing['courier_id'] != courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({'error': 'Этот Telegram уже привязан к другому аккаунту'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cursor.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.messenger_connections
+                    (courier_id, messenger_type, messenger_user_id, is_verified, created_at, updated_at)
+                    VALUES (%s, 'telegram', %s, true, NOW(), NOW())
+                    ON CONFLICT (courier_id, messenger_type) 
+                    DO UPDATE SET 
+                        messenger_user_id = EXCLUDED.messenger_user_id,
+                        is_verified = true,
+                        updated_at = NOW()
+                    RETURNING id
+                """, (courier_id, str(telegram_id)))
+                
+                conn.commit()
+                
                 return {
-                    'statusCode': 400,
+                    'statusCode': 200,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': 'Этот Telegram уже привязан к другому аккаунту'}),
+                    'body': json.dumps({
+                        'success': True,
+                        'message': 'Telegram успешно привязан! Теперь напиши /start боту для активации.'
+                    }),
                     'isBase64Encoded': False
                 }
-            
-            cursor.execute("""
-                SELECT id FROM t_p25272970_courier_button_site.messenger_connections
-                WHERE courier_id = %s AND messenger_type = 'telegram'
-            """, (courier_id,))
-            
-            existing_connection = cursor.fetchone()
-            
-            # Используем UPSERT с ON CONFLICT (теперь работает с unique constraint)
-            cursor.execute("""
-                INSERT INTO t_p25272970_courier_button_site.messenger_connections
-                (courier_id, messenger_type, messenger_user_id, is_verified, created_at, updated_at)
-                VALUES (%s, 'telegram', %s, true, NOW(), NOW())
-                ON CONFLICT (courier_id, messenger_type) 
-                DO UPDATE SET 
-                    messenger_user_id = EXCLUDED.messenger_user_id,
-                    is_verified = true,
-                    updated_at = NOW()
-                RETURNING id
-            """, (courier_id, str(telegram_id)))
-            
-            conn.commit()
-            
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'success': True,
-                    'message': 'Telegram успешно привязан! Теперь напиши /start боту для активации.'
-                }),
-                'isBase64Encoded': False
-            }
         
         elif method == 'DELETE':
             cursor.execute("""

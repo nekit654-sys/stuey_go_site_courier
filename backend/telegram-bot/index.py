@@ -839,9 +839,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     elif text == '❓ Помощь':
                         response_text, keyboard = handle_registered_callbacks('help', telegram_id)
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
-                    elif text.strip().isalnum() and 5 <= len(text.strip()) <= 10:
-                        # Пользователь ввел код привязки (буквы + цифры, 5-10 символов)
-                        success = verify_and_link_account(telegram_id, text.strip().upper(), username)
+                    elif text.strip().isdigit() and len(text.strip()) == 6:
+                        # Пользователь ввел код привязки (6 цифр)
+                        success = verify_and_link_account(telegram_id, text.strip(), username)
                         if success:
                             send_telegram_message(chat_id, "✅ <b>Успешно!</b>\n\nТвой Telegram привязан к аккаунту!\n\nНажми /start чтобы обновить меню 🎉")
                         else:
@@ -904,9 +904,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     elif text == '❓ FAQ':
                         response_text, keyboard = handle_newbie_callbacks('faq')
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
-                    elif text.strip().isalnum() and 5 <= len(text.strip()) <= 10:
-                        # Пользователь ввел код привязки (буквы + цифры, 5-10 символов)
-                        success = verify_and_link_account(telegram_id, text.strip().upper(), username)
+                    elif text.strip().isdigit() and len(text.strip()) == 6:
+                        # Пользователь ввел код привязки (6 цифр)
+                        success = verify_and_link_account(telegram_id, text.strip(), username)
                         if success:
                             send_telegram_message(chat_id, "✅ <b>Успешно!</b>\n\nТвой Telegram привязан к аккаунту!\n\nНажми /start чтобы обновить меню 🎉")
                         else:

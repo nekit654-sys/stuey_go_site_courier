@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 
@@ -16,58 +15,64 @@ const BOT_USERNAME = 'StueyGoBot';
 const BOT_URL = `https://t.me/${BOT_USERNAME}`;
 
 export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }: TelegramLinkModalProps) {
-  const [telegramId, setTelegramId] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [generatingCode, setGeneratingCode] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
 
-  const handleSubmit = async () => {
-    if (!telegramId.trim()) {
-      toast.error('Введите Telegram ID');
-      return;
+  useEffect(() => {
+    if (isOpen && step === 2 && !verificationCode) {
+      generateCode();
     }
+  }, [isOpen, step]);
 
-    setLoading(true);
+  const generateCode = async () => {
+    setGeneratingCode(true);
 
     try {
       const response = await fetch('https://functions.poehali.dev/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
 
-      const linkResponse = await fetch(telegramLinkUrl, {
+      const codeResponse = await fetch(telegramLinkUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-User-Id': userId.toString()
         },
-        body: JSON.stringify({ telegram_id: telegramId })
+        body: JSON.stringify({ action: 'generate_code' })
       });
 
-      const data = await linkResponse.json();
+      const data = await codeResponse.json();
 
-      if (linkResponse.ok && data.success) {
-        toast.success('Telegram успешно привязан!');
-        onSuccess();
-        onClose();
-        setTelegramId('');
-        setStep(1);
+      if (codeResponse.ok && data.success) {
+        setVerificationCode(data.code);
       } else {
-        toast.error(data.error || 'Ошибка привязки Telegram');
+        toast.error(data.error || 'Ошибка генерации кода');
+        setStep(1);
       }
     } catch (error) {
-      console.error('Error linking telegram:', error);
-      toast.error('Не удалось привязать Telegram');
+      console.error('Error generating code:', error);
+      toast.error('Не удалось сгенерировать код');
+      setStep(1);
     } finally {
-      setLoading(false);
+      setGeneratingCode(false);
     }
   };
 
-  const copyTelegramId = (id: string) => {
-    navigator.clipboard.writeText(id);
-    toast.success('Telegram ID скопирован!');
+  const copyCode = () => {
+    navigator.clipboard.writeText(verificationCode);
+    toast.success('Код скопирован!');
+  };
+
+  const handleClose = () => {
+    setVerificationCode('');
+    setStep(1);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
@@ -80,7 +85,7 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border-2 border-blue-200">
               <p className="text-sm text-gray-700 mb-3 font-semibold">
-                <b>Шаг 1 из 2:</b> Найди свой Telegram ID
+                <b>Шаг 1 из 2:</b> Открой Telegram-бота
               </p>
               
               <div className="space-y-3">
@@ -117,14 +122,14 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
                     3
                   </div>
                   <p className="text-sm text-gray-700 flex-1">
-                    Скопируй свой <b>Telegram ID</b> из сообщения бота
+                    Получи и введи <b>код верификации</b> из следующего шага
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={onClose} variant="outline" className="flex-1">
+              <Button onClick={handleClose} variant="outline" className="flex-1">
                 Отмена
               </Button>
               <Button onClick={() => setStep(2)} className="flex-1 bg-blue-500 hover:bg-blue-600">
@@ -138,77 +143,90 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border-2 border-green-200">
               <p className="text-sm text-gray-700 mb-3 font-semibold">
-                <b>Шаг 2 из 2:</b> Введи свой Telegram ID
+                <b>Шаг 2 из 2:</b> Введи этот код в боте
               </p>
               
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Telegram ID
-                  </label>
-                  <Input
-                    type="text"
-                    value={telegramId}
-                    onChange={(e) => setTelegramId(e.target.value)}
-                    placeholder="Например: 123456789"
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    💡 Это цифры, которые ты скопировал из бота
-                  </p>
+              {generatingCode ? (
+                <div className="flex items-center justify-center py-8">
+                  <Icon name="Loader2" className="h-8 w-8 animate-spin text-blue-500" />
+                  <p className="ml-3 text-gray-600">Генерация кода...</p>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Код верификации */}
+                  <div className="bg-white rounded-xl p-6 border-3 border-green-400 shadow-lg">
+                    <p className="text-xs text-gray-600 mb-2 text-center font-semibold">
+                      Твой код верификации:
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-4xl font-black text-green-600 tracking-wider font-mono">
+                        {verificationCode}
+                      </span>
+                      <Button
+                        onClick={copyCode}
+                        size="sm"
+                        variant="outline"
+                        className="border-green-400 hover:bg-green-50"
+                      >
+                        <Icon name="Copy" size={16} />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3 text-center">
+                      ⏱ Код действителен 15 минут
+                    </p>
+                  </div>
 
-                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                  <p className="text-xs text-gray-600">
-                    <b>Где взять Telegram ID?</b><br />
-                    Открой бота @{BOT_USERNAME} и нажми "🔗 Привязать Telegram". Бот покажет твой ID.
-                  </p>
+                  {/* Инструкция */}
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <p className="text-sm text-gray-700 mb-2 font-semibold flex items-center gap-2">
+                      <Icon name="Info" size={16} className="text-blue-600" />
+                      Что делать дальше:
+                    </p>
+                    <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                      <li>Открой бота @{BOT_USERNAME} в Telegram</li>
+                      <li>Нажми кнопку "🔗 Привязать Telegram"</li>
+                      <li>Отправь боту код: <b className="font-mono text-green-600">{verificationCode}</b></li>
+                      <li>Дождись подтверждения от бота</li>
+                    </ol>
+                  </div>
+
+                  {/* Кнопки */}
+                  <div className="flex gap-2">
+                    <Button onClick={() => setStep(1)} variant="outline" className="flex-1">
+                      ← Назад
+                    </Button>
+                    <Button 
+                      onClick={() => window.open(BOT_URL, '_blank')}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                    >
+                      <Icon name="Send" size={16} className="mr-2" />
+                      Открыть бота
+                    </Button>
+                  </div>
+
+                  {/* Кнопка закрытия */}
+                  <Button
+                    onClick={handleClose}
+                    variant="ghost"
+                    className="w-full text-gray-600"
+                    size="sm"
+                  >
+                    Закрыть окно
+                  </Button>
                 </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={() => setStep(1)} variant="outline" className="flex-1">
-                ← Назад
-              </Button>
-              <Button 
-                onClick={handleSubmit} 
-                disabled={loading || !telegramId.trim()}
-                className="flex-1 bg-green-500 hover:bg-green-600"
-              >
-                {loading ? (
-                  <>
-                    <Icon name="Loader2" size={16} className="mr-2 animate-spin" />
-                    Подключаем...
-                  </>
-                ) : (
-                  <>
-                    <Icon name="CheckCircle" size={16} className="mr-2" />
-                    Подключить
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={() => window.open(BOT_URL, '_blank')}
-                className="text-sm text-blue-500 hover:text-blue-600 underline"
-              >
-                Открыть бота снова
-              </button>
+            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+              <p className="text-xs text-gray-600 flex items-start gap-2">
+                <Icon name="Info" size={14} className="mt-0.5 flex-shrink-0 text-yellow-600" />
+                <span>
+                  После успешной привязки бот автоматически подтвердит соединение. Окно можно закрыть, код действует 15 минут!
+                </span>
+              </p>
             </div>
           </div>
         )}
-
-        <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-          <p className="text-xs text-gray-600 flex items-start gap-2">
-            <Icon name="Info" size={14} className="mt-0.5 flex-shrink-0 text-yellow-600" />
-            <span>
-              После успешной привязки напиши <b>/start</b> боту, чтобы активировать все функции!
-            </span>
-          </p>
-        </div>
       </DialogContent>
     </Dialog>
   );
