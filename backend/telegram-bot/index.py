@@ -830,22 +830,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 # Обработка текстовых команд из reply keyboard
                 if courier:
                     if text == '📊 Статистика':
-                        response_text, keyboard = handle_registered_callbacks('stats', telegram_id)
+                        response_text, keyboard = handle_registered_callbacks('stats', courier['courier_id'])
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
                     elif text == '💰 Реферальная ссылка':
-                        response_text, keyboard = handle_registered_callbacks('referral', telegram_id)
+                        response_text, keyboard = handle_registered_callbacks('referral', courier['courier_id'])
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
                     elif text == '💸 Заработок':
-                        response_text, keyboard = handle_registered_callbacks('earnings_detail', telegram_id)
+                        response_text, keyboard = handle_registered_callbacks('earnings_detail', courier['courier_id'])
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
                     elif text == '🎮 Игры':
                         games_keyboard = {
                             'inline_keyboard': [
-                                [{'text': '🎮 Открыть игры', 'url': f'{WEBSITE_URL}/games'}],
+                                [{'text': '🎮 Открыть игры', 'url': f'{WEBSITE_URL}/dashboard?tab=game'}],
                                 [{'text': '◀️ Назад', 'callback_data': 'menu'}]
                             ]
                         }
-                        send_telegram_message(chat_id, "🎮 <b>ИГРЫ И РАЗВЛЕЧЕНИЯ</b>\n\nОткрой мини-игры и зарабатывай бонусы! 🎁", reply_markup=games_keyboard)
+                        send_telegram_message(chat_id, "🎮 <b>ИГРЫ И РАЗВЛЕЧЕНИЯ</b>\n\nОткрой мини-игры на сайте! 🎁", reply_markup=games_keyboard)
                     elif text == '⚙️ Настройки':
                         settings_text = f"""⚙️ <b>НАСТРОЙКИ</b>\n\n<b>Твой Telegram ID:</b> <code>{telegram_id}</code>\n\nЗдесь скоро появятся дополнительные настройки!"""
                         send_telegram_message(chat_id, settings_text)
