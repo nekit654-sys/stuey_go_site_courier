@@ -32,15 +32,33 @@ export default function TelegramLink() {
   }, [token, isAuthenticated, navigate]);
 
   const handleConfirm = async () => {
-    if (!user?.id || !token) return;
+    if (!user?.id || !token) {
+      console.error('Missing user or token:', { user: user?.id, token });
+      return;
+    }
 
+    console.log('🔗 Starting confirmation...', { userId: user.id, token });
     setStatus('loading');
 
     try {
+      console.log('📡 Fetching func2url.json...');
       const response = await fetch('/func2url.json');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to load func2url.json: ${response.status}`);
+      }
+      
       const funcMap = await response.json();
+      console.log('📋 Function map:', funcMap);
+      
       const confirmUrl = funcMap['telegram-confirm'];
-
+      
+      if (!confirmUrl) {
+        throw new Error('telegram-confirm URL not found in func2url.json');
+      }
+      
+      console.log('🌐 Calling telegram-confirm:', confirmUrl);
+      
       const confirmResponse = await fetch(`${confirmUrl}?token=${token}`, {
         method: 'POST',
         headers: {
@@ -48,7 +66,10 @@ export default function TelegramLink() {
         }
       });
 
+      console.log('📥 Response status:', confirmResponse.status);
+      
       const data = await confirmResponse.json();
+      console.log('📦 Response data:', data);
 
       if (confirmResponse.ok && data.success) {
         setStatus('success');
@@ -62,9 +83,9 @@ export default function TelegramLink() {
         toast.error(data.error || 'Ошибка привязки');
       }
     } catch (error) {
-      console.error('Error confirming link:', error);
+      console.error('❌ Error confirming link:', error);
       setStatus('error');
-      setErrorMessage('Ошибка подключения к серверу');
+      setErrorMessage(error instanceof Error ? error.message : 'Ошибка подключения к серверу');
       toast.error('Ошибка подключения к серверу');
     }
   };

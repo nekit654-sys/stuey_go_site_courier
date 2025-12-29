@@ -1,4 +1,5 @@
 {
+  "telegram-confirm": "https://functions.poehali.dev/159513ce-987a-4895-9e6c-e9ed9a00a035",
   "reset-admin-password": "https://functions.poehali.dev/008bbae3-479b-42be-a3e1-a73f248eab03",
   "telegram-link": "https://functions.poehali.dev/7f84d0b0-2999-48b6-a28a-985da3dcc39c",
   "send-daily-reminders": "https://functions.poehali.dev/09b793ba-9715-47d9-8958-2a6e96626901",
@@ -12,7 +13,7 @@
   "cleanup-visits": "https://functions.poehali.dev/12d56d01-19eb-4b20-9f70-7577f5547597",
   "visit-tracking": "https://functions.poehali.dev/f52e1a9a-d1cb-41bf-a68f-5a795c41833c",
   "hero": "https://functions.poehali.dev/a9101bf0-537a-4c04-833d-6ace7003a1ba",
-  "upload-image": "https://functions.poehali.dev/0f7e5013-5153-45a9-b6e6-b974b2006fda",
+  "upload-image": "https://functions.poehali.dev/0f7e5013-45a9-b6e6-b974b2006fda",
   "story-view": "https://functions.poehali.dev/85e177ef-1360-45f3-9937-be8f4d3af883",
   "stories": "https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e",
   "admin-finances": "https://functions.poehali.dev/034c46b8-1c81-490b-95eb-6348433770a8",
