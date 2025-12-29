@@ -61,7 +61,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
     if (!user?.id) return;
     
     try {
-      const response = await fetch('/backend/func2url.json');
+      const response = await fetch('/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
 
@@ -97,7 +97,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
     if (!confirmed) return;
 
     try {
-      const response = await fetch('/backend/func2url.json');
+      const response = await fetch('/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
 
