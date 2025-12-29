@@ -111,11 +111,11 @@ export default function TelegramLink() {
               <div className="space-y-2 text-xs text-gray-600">
                 <div className="flex items-start gap-2">
                   <span className="font-bold text-blue-600">1.</span>
-                  <span>Нажми кнопку <b>"🌐 Открыть в браузере"</b></span>
+                  <span>Скопируй ссылку ниже</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="font-bold text-blue-600">2.</span>
-                  <span>Войди в свой аккаунт (если не вошёл)</span>
+                  <span>Открой её в Chrome/Яндекс браузере</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="font-bold text-blue-600">3.</span>
@@ -124,17 +124,24 @@ export default function TelegramLink() {
               </div>
             </div>
 
-            <a
-              href={currentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button className="w-full bg-blue-500 hover:bg-blue-600" size="lg">
-                <Icon name="ExternalLink" size={20} className="mr-2" />
-                🌐 Открыть в браузере
-              </Button>
-            </a>
+            <div className="bg-gray-100 rounded-lg p-3 text-left">
+              <p className="text-xs text-gray-600 mb-2">Ссылка для привязки:</p>
+              <div className="flex items-center gap-2">
+                <code className="text-xs bg-white px-2 py-1 rounded flex-1 overflow-x-auto">
+                  {currentUrl}
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentUrl);
+                    toast.success('Ссылка скопирована!');
+                  }}
+                >
+                  <Icon name="Copy" size={14} />
+                </Button>
+              </div>
+            </div>
 
             <div className="pt-2 border-t">
               <p className="text-xs text-gray-500 mb-3">
