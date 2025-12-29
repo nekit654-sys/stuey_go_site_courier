@@ -18,6 +18,7 @@ import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import TelegramLink from "./pages/TelegramLink";
 
 import NotFound from "./pages/NotFound";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
@@ -89,6 +90,7 @@ const AppRoutes = () => {
 
         <Route path="/ask" element={<Login />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/telegram-link" element={<TelegramLink />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
         <Route path="/admin-reset" element={<ResetAdminPasswordPage />} />
