@@ -241,7 +241,6 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
             print(f'  - is_used: {debug_info["is_used"]}')
             print(f'  - expires_at: {debug_info["expires_at"]}')
             print(f'  - current_time: {debug_info["current_time"]}')
-            print(f'  - is_expired: {debug_info["expires_at"] <= debug_info["current_time"]}')
         else:
             print(f'❌ Код {code} вообще не найден в БД')
         
