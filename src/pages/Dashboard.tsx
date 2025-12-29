@@ -105,7 +105,7 @@ export default function Dashboard() {
     if (!user?.id) return;
     
     try {
-      const response = await fetch('https://functions.poehali.dev/func2url.json');
+      const response = await fetch('/backend/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
 
@@ -133,7 +133,7 @@ export default function Dashboard() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('https://functions.poehali.dev/func2url.json');
+      const response = await fetch('/backend/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
 
