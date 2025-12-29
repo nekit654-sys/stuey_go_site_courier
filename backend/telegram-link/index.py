@@ -98,8 +98,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 # Генерация кода для привязки
                 import secrets
                 
+                print(f'[generate_code] Starting for courier_id={courier_id}')
+                
                 # Генерируем 6-значный код
                 code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+                print(f'[generate_code] Generated code: {code}')
                 
                 # Сначала помечаем все старые коды этого курьера как использованные
                 cursor.execute("""
@@ -107,6 +110,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     SET is_used = true
                     WHERE courier_id = %s AND is_used = false
                 """, (courier_id,))
+                print(f'[generate_code] Marked old codes as used')
                 
                 # Создаем новый код
                 cursor.execute("""
@@ -115,8 +119,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     VALUES (%s, %s, NOW() + INTERVAL '15 minutes', false, NOW())
                     RETURNING code
                 """, (code, courier_id))
+                print(f'[generate_code] Inserted new code')
                 
                 conn.commit()
+                print(f'[generate_code] Committed to database')
                 
                 return {
                     'statusCode': 200,

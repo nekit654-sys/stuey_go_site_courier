@@ -45,10 +45,14 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
 
       const data = await codeResponse.json();
 
+      console.log('Generate code response:', { status: codeResponse.status, data });
+
       if (codeResponse.ok && data.success) {
         setVerificationCode(data.code);
       } else {
-        toast.error(data.error || 'Ошибка генерации кода');
+        const errorMsg = data.error || `Ошибка генерации кода (${codeResponse.status})`;
+        console.error('Code generation failed:', errorMsg, data);
+        toast.error(errorMsg);
         setStep(1);
       }
     } catch (error) {
