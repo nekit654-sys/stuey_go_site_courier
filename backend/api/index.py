@@ -801,33 +801,29 @@ def get_user_referral_stats(user_id: int, headers: Dict[str, str]) -> Dict[str, 
     total_bonus_earned = 0
     total_bonus_paid = 0
     
-    # ИСПРАВЛЕНО: Учитываем pending/approved заявки на вывод
+    # Получаем баланс курьера
     cur.execute("""
-        SELECT COALESCE(SUM(amount), 0) as reserved_amount
+        SELECT COALESCE(balance, 0) as balance
+        FROM t_p25272970_courier_button_site.users
+        WHERE id = %s
+    """, (user_id,))
+    
+    balance_row = cur.fetchone()
+    available = float(balance_row['balance'] or 0)
+    
+    # Получаем информацию о выплатах (для статистики)
+    cur.execute("""
+        SELECT COALESCE(SUM(amount), 0) as total_paid
         FROM t_p25272970_courier_button_site.withdrawal_requests
-        WHERE courier_id = %s AND status IN ('pending', 'approved')
+        WHERE courier_id = %s AND status = 'paid'
     """, (user_id,))
     
-    reserved = cur.fetchone()
-    reserved_amount = float(reserved['reserved_amount'] or 0)
+    paid_row = cur.fetchone()
+    total_paid = float(paid_row['total_paid'] or 0)
     
-    # Получаем доступную сумму для вывода из payment_distributions
-    cur.execute("""
-        SELECT 
-            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND amount > 0 THEN amount ELSE 0 END), 0) as total_pending,
-            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND recipient_type = 'courier_self' AND amount > 0 THEN amount ELSE 0 END), 0) as self_bonus_pending,
-            COALESCE(SUM(CASE WHEN payment_status = 'pending' AND recipient_type = 'courier_referrer' AND amount > 0 THEN amount ELSE 0 END), 0) as referral_income_pending,
-            COALESCE(SUM(CASE WHEN payment_status = 'paid' AND amount > 0 THEN amount ELSE 0 END), 0) as total_paid
-        FROM t_p25272970_courier_button_site.payment_distributions
-        WHERE recipient_id = %s
-    """, (user_id,))
-    
-    balance = cur.fetchone()
-    total_pending = float(balance['total_pending'] or 0)
-    available = max(0, total_pending - reserved_amount)
-    self_bonus_pending = float(balance['self_bonus_pending'] or 0)
-    referral_income_pending = float(balance['referral_income_pending'] or 0)
-    total_paid = float(balance['total_paid'] or 0)
+    # Для совместимости с фронтендом
+    self_bonus_pending = 0
+    referral_income_pending = 0
     
     # Получаем инфо о самобонусе
     cur.execute("""
@@ -2920,6 +2916,14 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                 """, (earning_id, dist['recipient_type'], dist['recipient_id'], 
                       dist['amount'], dist['percentage'], dist['description']))
                 
+                # Начисляем деньги на баланс курьера (courier_self) или реферера (courier_referrer)
+                if dist['recipient_type'] in ('courier_self', 'courier_referrer') and dist['recipient_id']:
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET balance = COALESCE(balance, 0) + %s, updated_at = NOW()
+                        WHERE id = %s
+                    """, (dist['amount'], dist['recipient_id']))
+                
                 # Логируем распределение выплаты
                 if dist['recipient_type'] == 'courier_referrer' and dist['recipient_id']:
                     cur.execute("""
@@ -2945,37 +2949,56 @@ def handle_csv_upload(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
                     )
             
             if not self_bonus_completed:
-                # Получаем лимит самобонуса из настроек
+                # Получаем настройки самобонуса
                 cur.execute("""
-                    SELECT self_bonus_amount FROM t_p25272970_courier_button_site.bot_content LIMIT 1
+                    SELECT self_bonus_amount, self_bonus_orders FROM t_p25272970_courier_button_site.bot_content LIMIT 1
                 """)
                 bonus_settings = cur.fetchone()
-                self_bonus_limit = float(bonus_settings['self_bonus_amount']) if bonus_settings else 5000.0
+                self_bonus_amount = float(bonus_settings['self_bonus_amount']) if bonus_settings else 5000.0
+                self_bonus_orders = int(bonus_settings['self_bonus_orders']) if bonus_settings else 150
                 
+                # Обновляем счётчики заказов
                 cur.execute("""
                     UPDATE t_p25272970_courier_button_site.courier_self_bonus_tracking
                     SET orders_completed = orders_completed + %s,
-                        bonus_earned = bonus_earned + %s,
-                        is_completed = (bonus_earned + %s >= %s),
                         updated_at = NOW()
                     WHERE courier_id = %s
-                    RETURNING bonus_earned + %s as new_bonus_total, is_completed
-                """, (actual_orders, actual_reward, actual_reward, self_bonus_limit, courier_id, actual_reward))
+                    RETURNING orders_completed, is_completed
+                """, (actual_orders, courier_id))
                 
                 updated_tracking = cur.fetchone()
-                new_bonus_total = float(updated_tracking['new_bonus_total']) if updated_tracking else 0
-                just_completed = updated_tracking['is_completed'] if updated_tracking else False
+                current_orders = int(updated_tracking['orders_completed']) if updated_tracking else 0
+                already_completed = updated_tracking['is_completed'] if updated_tracking else False
                 
-                # Если самобонус только что завершился
-                if just_completed and not self_bonus_completed:
+                # Проверяем достижение 150 заказов для начисления 5000₽
+                if current_orders >= self_bonus_orders and not already_completed:
+                    # Начисляем 5000₽ на баланс курьера
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.users
+                        SET balance = COALESCE(balance, 0) + %s,
+                            self_bonus_paid = TRUE,
+                            updated_at = NOW()
+                        WHERE id = %s
+                    """, (self_bonus_amount, courier_id))
+                    
+                    # Отмечаем самобонус как завершённый
+                    cur.execute("""
+                        UPDATE t_p25272970_courier_button_site.courier_self_bonus_tracking
+                        SET is_completed = TRUE,
+                            bonus_earned = %s,
+                            updated_at = NOW()
+                        WHERE courier_id = %s
+                    """, (self_bonus_amount, courier_id))
+                    
                     log_activity(
                         conn,
                         'self_bonus_completed',
-                        f'Курьер {courier_name} завершил самобонус: {new_bonus_total:.2f}₽',
+                        f'Курьер {courier_name} выполнил {current_orders} заказов! Начислено {self_bonus_amount:.0f}₽ на баланс',
                         {
                             'courier_id': courier_id,
                             'courier_name': courier_name,
-                            'total_bonus': new_bonus_total,
+                            'bonus_amount': float(self_bonus_amount),
+                            'orders_completed': current_orders,
                             'external_id': external_id
                         }
                     )
@@ -3648,29 +3671,15 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # ИСПРАВЛЕНО: Проверяем pending заявки на вывод
+        # Проверяем текущий баланс курьера
         cur.execute("""
-            SELECT COALESCE(SUM(amount), 0) as pending_amount
-            FROM t_p25272970_courier_button_site.withdrawal_requests
-            WHERE courier_id = %s AND status IN ('pending', 'approved')
+            SELECT COALESCE(balance, 0) as balance
+            FROM t_p25272970_courier_button_site.users
+            WHERE id = %s
         """, (user_id,))
         
-        pending_withdrawals = float(cur.fetchone()['pending_amount'])
-        
-        # Проверяем доступный баланс (pending - уже зарезервированные средства)
-        cur.execute("""
-            SELECT 
-                COALESCE(SUM(CASE WHEN pd.payment_status = 'pending' AND pd.recipient_type IN ('courier_self', 'courier_referrer') THEN pd.amount ELSE 0 END), 0) as total_pending
-            FROM t_p25272970_courier_button_site.payment_distributions pd
-            WHERE pd.recipient_id = %s
-        """, (user_id,))
-        
-        balance = cur.fetchone()
-        total_pending = float(balance['total_pending'])
-        available = total_pending - pending_withdrawals
-        
-        if available < 0:
-            available = 0
+        user_balance = cur.fetchone()
+        available = float(user_balance['balance']) if user_balance else 0
         
         if amount > available:
             cur.close()
@@ -3678,7 +3687,7 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             return {
                 'statusCode': 400,
                 'headers': headers,
-                'body': json.dumps({'error': f'Недостаточно средств. Доступно: {available:.2f}₽ (уже зарезервировано в заявках: {pending_withdrawals:.2f}₽)'}),
+                'body': json.dumps({'error': f'Недостаточно средств. Доступно: {available:.2f}₽'}),
                 'isBase64Encoded': False
             }
         
@@ -3688,6 +3697,13 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             SET sbp_phone = %s, sbp_bank_name = %s, updated_at = NOW()
             WHERE id = %s
         """, (sbp_phone, sbp_bank_name, user_id))
+        
+        # Списываем сумму с баланса курьера
+        cur.execute("""
+            UPDATE t_p25272970_courier_button_site.users
+            SET balance = balance - %s, updated_at = NOW()
+            WHERE id = %s
+        """, (amount, user_id))
         
         # Создаём заявку
         cur.execute("""
@@ -3862,9 +3878,8 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # ИСПРАВЛЕНО: При статусе 'paid' обновляем payment_distributions
-        if new_status == 'paid':
-            # Получаем информацию о заявке
+        # При отклонении заявки - возвращаем деньги на баланс
+        if new_status == 'rejected':
             cur.execute("""
                 SELECT courier_id, amount
                 FROM t_p25272970_courier_button_site.withdrawal_requests
@@ -3872,61 +3887,43 @@ def handle_withdrawal(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[st
             """, (request_id,))
             
             request_info = cur.fetchone()
-            if not request_info:
-                cur.close()
-                conn.close()
-                return {
-                    'statusCode': 404,
-                    'headers': headers,
-                    'body': json.dumps({'error': 'Заявка не найдена'}),
-                    'isBase64Encoded': False
-                }
-            
-            courier_id = request_info['courier_id']
-            withdrawal_amount = float(request_info['amount'])
-            
-            # Обновляем payment_distributions: списываем сумму с pending баланса
-            # Сначала берём из courier_self, потом из courier_referrer
+            if request_info:
+                courier_id = request_info['courier_id']
+                amount_to_return = float(request_info['amount'])
+                
+                # Возвращаем деньги на баланс
+                cur.execute("""
+                    UPDATE t_p25272970_courier_button_site.users
+                    SET balance = balance + %s, updated_at = NOW()
+                    WHERE id = %s
+                """, (amount_to_return, courier_id))
+                
+                log_activity(
+                    conn,
+                    'withdrawal_rejected',
+                    f'Заявка на вывод отклонена: {amount_to_return}₽ возвращено на баланс курьера ID {courier_id}',
+                    {'request_id': request_id, 'courier_id': courier_id, 'amount': amount_to_return}
+                )
+        
+        # При статусе 'paid' - просто логируем (деньги уже списаны с balance)
+        if new_status == 'paid':
             cur.execute("""
-                WITH pending_payments AS (
-                    SELECT id, amount, recipient_type
-                    FROM t_p25272970_courier_button_site.payment_distributions
-                    WHERE recipient_id = %s 
-                      AND payment_status = 'pending'
-                      AND recipient_type IN ('courier_self', 'courier_referrer')
-                      AND amount > 0
-                    ORDER BY 
-                        CASE recipient_type 
-                            WHEN 'courier_self' THEN 1 
-                            WHEN 'courier_referrer' THEN 2 
-                        END,
-                        created_at ASC
-                )
-                UPDATE t_p25272970_courier_button_site.payment_distributions pd
-                SET payment_status = 'paid', paid_at = NOW()
-                WHERE pd.id IN (
-                    SELECT pp.id FROM pending_payments pp
-                    WHERE pp.amount <= %s - COALESCE(
-                        (SELECT SUM(pp2.amount) 
-                         FROM pending_payments pp2 
-                         WHERE pp2.id < pp.id), 0
-                    )
-                )
-            """, (courier_id, withdrawal_amount, withdrawal_amount))
+                SELECT courier_id, amount
+                FROM t_p25272970_courier_button_site.withdrawal_requests
+                WHERE id = %s
+            """, (request_id,))
             
-            # Логируем списание
-            rows_affected = cur.rowcount
-            log_activity(
-                conn, 
-                'withdrawal_paid', 
-                f'Выплата {withdrawal_amount}₽ курьеру ID {courier_id} (списано {rows_affected} записей)',
-                {
-                    'request_id': request_id,
-                    'courier_id': courier_id,
-                    'amount': withdrawal_amount,
-                    'distributions_updated': rows_affected
-                }
-            )
+            request_info = cur.fetchone()
+            if request_info:
+                courier_id = request_info['courier_id']
+                withdrawal_amount = float(request_info['amount'])
+                
+                log_activity(
+                    conn,
+                    'withdrawal_paid',
+                    f'Выплата {withdrawal_amount}₽ курьеру ID {courier_id} выполнена',
+                    {'request_id': request_id, 'courier_id': courier_id, 'amount': withdrawal_amount}
+                )
         
         # Получаем информацию о курьере для отправки уведомления
         cur.execute("""

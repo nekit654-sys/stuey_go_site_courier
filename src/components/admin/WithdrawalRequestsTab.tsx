@@ -3,11 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
-import StartupPayoutTab from './StartupPayoutTab';
 
 interface WithdrawalRequest {
   id: number;
@@ -165,19 +163,7 @@ export default function WithdrawalRequestsTab({ authToken }: WithdrawalRequestsT
   }
 
   return (
-    <Tabs defaultValue="withdrawals" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="withdrawals" className="flex items-center gap-2">
-          <Icon name="Wallet" size={16} />
-          Вывод средств
-        </TabsTrigger>
-        <TabsTrigger value="startup" className="flex items-center gap-2">
-          <Icon name="Gift" size={16} />
-          Стартовые 5000₽
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="withdrawals" className="space-y-6">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -398,11 +384,6 @@ export default function WithdrawalRequestsTab({ authToken }: WithdrawalRequestsT
           )}
         </CardContent>
       </Card>
-      </TabsContent>
-
-      <TabsContent value="startup" className="space-y-6">
-        <StartupPayoutTab authToken={authToken} />
-      </TabsContent>
-    </Tabs>
+    </div>
   );
 }
