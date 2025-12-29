@@ -135,6 +135,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        # Сначала удаляем старую привязку этого Telegram ID (если есть)
+        cursor.execute("""
+            DELETE FROM t_p25272970_courier_button_site.messenger_connections
+            WHERE messenger_type = 'telegram' 
+              AND messenger_user_id = %s
+        """, (telegram_id,))
+        
         # Привязываем Telegram к курьеру
         cursor.execute("""
             INSERT INTO t_p25272970_courier_button_site.messenger_connections
@@ -175,6 +182,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         import traceback
         traceback.print_exc()
         conn.rollback()
+        
+        error_msg = str(e).lower()
+        if 'unique constraint' in error_msg or 'duplicate' in error_msg:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': 'Этот Telegram уже привязан'}),
+                'isBase64Encoded': False
+            }
+        
         return {
             'statusCode': 500,
             'headers': {
