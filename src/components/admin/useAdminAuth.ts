@@ -101,6 +101,9 @@ export function useAdminAuth() {
 
   const loadAdmins = async (token?: string) => {
     const tokenToUse = token || authToken;
+    console.log('🔄 Загрузка админов... Токен:', tokenToUse ? 'Есть' : 'Отсутствует');
+    console.log('📡 URL:', ADMIN_PANEL_URL);
+    
     try {
       const response = await fetch(ADMIN_PANEL_URL, {
         method: 'POST',
@@ -110,15 +113,19 @@ export function useAdminAuth() {
         },
         body: JSON.stringify({ action: 'get_admins' })
       });
+      
+      console.log('📥 Статус ответа:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        console.log('Ответ от API get_admins:', data);
+        console.log('✅ Ответ от API get_admins:', data);
         setAdmins(data.admins || []);
       } else {
-        console.error('Ошибка загрузки админов, статус:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Ошибка загрузки админов, статус:', response.status, 'текст:', errorText);
       }
     } catch (error) {
-      console.error('Ошибка загрузки админов:', error);
+      console.error('❌ Ошибка сети при загрузке админов:', error);
     }
   };
 
