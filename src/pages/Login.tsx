@@ -60,6 +60,7 @@ const Login: React.FC = () => {
     loadAllCouriers();
     loadReferralStats();
     loadWithdrawalsCount();
+    loadAdmins();
 
     const interval = setInterval(() => {
       loadRequests();
