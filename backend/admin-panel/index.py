@@ -392,6 +392,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 username = admin[0] if admin else 'Неизвестно'
                 
                 cursor.execute(
+                    "DELETE FROM t_p25272970_courier_button_site.admin_ad_spend_history WHERE admin_id = %s",
+                    (admin_id,)
+                )
+                
+                cursor.execute(
                     "DELETE FROM t_p25272970_courier_button_site.admins WHERE id = %s",
                     (admin_id,)
                 )
