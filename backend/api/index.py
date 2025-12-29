@@ -1823,7 +1823,6 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         if existing_user and existing_user.get('archived_at'):
             restore_until = existing_user.get('restore_until')
             if restore_until:
-                from datetime import datetime
                 if datetime.now() < restore_until:
                     # Можно восстановить
                     cur.close()
