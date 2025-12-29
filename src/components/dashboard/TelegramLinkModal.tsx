@@ -27,13 +27,25 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
   }, [isOpen, step]);
 
   const generateCode = async () => {
+    console.log('[TelegramLinkModal] generateCode called with userId:', userId);
+    
+    if (!userId || userId === 0) {
+      console.error('[TelegramLinkModal] Invalid userId:', userId);
+      toast.error('Ошибка: не удалось определить ID пользователя');
+      setStep(1);
+      return;
+    }
+
     setGeneratingCode(true);
 
     try {
+      console.log('[TelegramLinkModal] Fetching func2url.json...');
       const response = await fetch('https://functions.poehali.dev/func2url.json');
       const funcMap = await response.json();
       const telegramLinkUrl = funcMap['telegram-link'];
+      console.log('[TelegramLinkModal] telegram-link URL:', telegramLinkUrl);
 
+      console.log('[TelegramLinkModal] Calling generate_code API...');
       const codeResponse = await fetch(telegramLinkUrl, {
         method: 'POST',
         headers: {
@@ -43,21 +55,22 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
         body: JSON.stringify({ action: 'generate_code' })
       });
 
+      console.log('[TelegramLinkModal] Response status:', codeResponse.status);
       const data = await codeResponse.json();
-
-      console.log('Generate code response:', { status: codeResponse.status, data });
+      console.log('[TelegramLinkModal] Response data:', data);
 
       if (codeResponse.ok && data.success) {
         setVerificationCode(data.code);
+        console.log('[TelegramLinkModal] Code generated successfully:', data.code);
       } else {
         const errorMsg = data.error || `Ошибка генерации кода (${codeResponse.status})`;
-        console.error('Code generation failed:', errorMsg, data);
+        console.error('[TelegramLinkModal] Code generation failed:', { errorMsg, data, status: codeResponse.status });
         toast.error(errorMsg);
         setStep(1);
       }
     } catch (error) {
-      console.error('Error generating code:', error);
-      toast.error('Не удалось сгенерировать код');
+      console.error('[TelegramLinkModal] Exception in generateCode:', error);
+      toast.error(`Ошибка: ${error instanceof Error ? error.message : 'Не удалось сгенерировать код'}`);
       setStep(1);
     } finally {
       setGeneratingCode(false);
