@@ -10,7 +10,7 @@ export default function TelegramLink() {
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'confirm' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'login_required' | 'confirm' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const token = searchParams.get('token');
 
@@ -22,9 +22,8 @@ export default function TelegramLink() {
     }
 
     if (!isAuthenticated) {
-      // Сохраняем токен и редиректим на авторизацию
-      sessionStorage.setItem('telegram_link_token', token);
-      navigate('/auth');
+      // Показываем экран логина с кнопкой "Открыть в браузере"
+      setStatus('login_required');
       return;
     }
 
@@ -77,6 +76,75 @@ export default function TelegramLink() {
           <div className="flex flex-col items-center gap-4">
             <Icon name="Loader2" className="h-12 w-12 animate-spin text-blue-500" />
             <p className="text-gray-600">Загрузка...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (status === 'login_required') {
+    const currentUrl = window.location.href;
+    
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 via-orange-400 to-yellow-500 p-4">
+        <Card className="max-w-md w-full p-8">
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto">
+              <Icon name="AlertCircle" size={32} className="text-white" />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Требуется авторизация</h1>
+              <p className="text-gray-600 text-sm">
+                Для привязки Telegram нужно войти в аккаунт
+              </p>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 text-left">
+              <p className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <Icon name="Info" size={16} className="text-blue-600" />
+                Важно!
+              </p>
+              <p className="text-xs text-gray-700 mb-3">
+                Telegram открыл ссылку в своём встроенном браузере, где нет твоей авторизации.
+              </p>
+              <div className="space-y-2 text-xs text-gray-600">
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">1.</span>
+                  <span>Нажми кнопку <b>"🌐 Открыть в браузере"</b></span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">2.</span>
+                  <span>Войди в свой аккаунт (если не вошёл)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">3.</span>
+                  <span>Подтверди привязку</span>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={currentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Button className="w-full bg-blue-500 hover:bg-blue-600" size="lg">
+                <Icon name="ExternalLink" size={20} className="mr-2" />
+                🌐 Открыть в браузере
+              </Button>
+            </a>
+
+            <div className="pt-2 border-t">
+              <p className="text-xs text-gray-500 mb-3">
+                Уже вошёл в аккаунт в этом браузере?
+              </p>
+              <Button onClick={() => window.location.reload()} variant="outline" className="w-full">
+                <Icon name="RefreshCw" size={16} className="mr-2" />
+                Обновить страницу
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
