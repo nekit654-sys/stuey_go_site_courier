@@ -275,14 +275,14 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
         # Привязываем Telegram к курьеру
         cursor.execute("""
             INSERT INTO t_p25272970_courier_button_site.messenger_connections
-            (courier_id, messenger_type, messenger_user_id, messenger_username, is_verified)
-            VALUES (%s, 'telegram', %s, %s, true)
+            (courier_id, messenger_type, messenger_user_id, messenger_username, is_verified, created_at, updated_at)
+            VALUES (%s, 'telegram', %s, %s, true, NOW(), NOW())
             ON CONFLICT (courier_id, messenger_type)
             DO UPDATE SET 
                 messenger_user_id = EXCLUDED.messenger_user_id,
                 messenger_username = EXCLUDED.messenger_username,
                 is_verified = true,
-                connected_at = NOW()
+                updated_at = NOW()
         """, (courier_id, str(telegram_id), username))
         
         conn.commit()
