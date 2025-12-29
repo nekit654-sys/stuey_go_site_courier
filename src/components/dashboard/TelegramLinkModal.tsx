@@ -194,32 +194,42 @@ export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }
                   </div>
 
                   {/* Инструкция */}
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <p className="text-sm text-gray-700 mb-2 font-semibold flex items-center gap-2">
-                      <Icon name="Info" size={16} className="text-blue-600" />
-                      Что делать дальше:
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-300">
+                    <p className="text-sm text-gray-700 mb-3 font-bold flex items-center gap-2">
+                      <Icon name="Zap" size={16} className="text-blue-600" />
+                      Быстрая привязка в 1 клик:
                     </p>
-                    <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
-                      <li>Открой бота @{BOT_USERNAME} в Telegram</li>
-                      <li>Нажми кнопку "🔗 Привязать Telegram"</li>
-                      <li>Отправь боту код: <b className="font-mono text-green-600">{verificationCode}</b></li>
-                      <li>Дождись подтверждения от бота</li>
+                    <ol className="text-xs text-gray-700 space-y-2">
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        <span>Нажми кнопку <b>"Отправить код в бота"</b> ниже</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                        <span>Бот откроется автоматически с кодом</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                        <span>Отправь код боту — готово! ✅</span>
+                      </li>
                     </ol>
                   </div>
 
                   {/* Кнопки */}
                   <div className="flex gap-2">
-                    <Button onClick={() => setStep(1)} variant="outline" className="flex-1">
-                      ← Назад
-                    </Button>
                     <Button 
-                      onClick={() => window.open(BOT_URL, '_blank')}
-                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                      onClick={() => window.open(`${BOT_URL}?start=link_${verificationCode}`, '_blank')}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold shadow-lg"
+                      size="lg"
                     >
-                      <Icon name="Send" size={16} className="mr-2" />
-                      Открыть бота
+                      <Icon name="Send" size={18} className="mr-2" />
+                      Отправить код в бота
                     </Button>
                   </div>
+
+                  <Button onClick={() => setStep(1)} variant="ghost" size="sm" className="w-full text-gray-500">
+                    ← Назад
+                  </Button>
 
                   {/* Кнопка закрытия */}
                   <Button

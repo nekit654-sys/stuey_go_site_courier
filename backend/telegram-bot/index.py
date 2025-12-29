@@ -226,23 +226,27 @@ def verify_and_link_account(telegram_id: int, code: str, username: str = None) -
     cursor = conn.cursor()
     
     try:
-        # Отладка: проверяем что есть в БД для этого кода
+        print(f'\n🔍 [verify_and_link_account] Начало проверки')
+        print(f'  - telegram_id: {telegram_id}')
+        print(f'  - code: {code}')
+        print(f'  - username: {username}')
+        
+        # Проверяем что код есть в БД
         cursor.execute("""
-            SELECT code, courier_id, is_used, expires_at, NOW() as current_time
+            SELECT code, courier_id, is_used, expires_at
             FROM t_p25272970_courier_button_site.messenger_link_codes
             WHERE code = %s
         """, (code,))
         debug_info = cursor.fetchone()
         
         if debug_info:
-            print(f'🔍 DEBUG: Код найден в БД')
-            print(f'  - code: {debug_info["code"]}')
+            print(f'✅ Код найден в БД:')
             print(f'  - courier_id: {debug_info["courier_id"]}')
             print(f'  - is_used: {debug_info["is_used"]}')
             print(f'  - expires_at: {debug_info["expires_at"]}')
-            print(f'  - current_time: {debug_info["current_time"]}')
         else:
-            print(f'❌ Код {code} вообще не найден в БД')
+            print(f'❌ Код {code} НЕ НАЙДЕН в БД')
+            return False
         
         # Проверяем код в таблице messenger_link_codes (правильная таблица!)
         cursor.execute("""
@@ -783,6 +787,34 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             text = message.get('text', '')
             
             if text.startswith('/start'):
+                # Проверяем есть ли deep link с кодом
+                if ' link_' in text:
+                    # Извлекаем код из /start link_123456
+                    parts = text.split('link_')
+                    if len(parts) == 2:
+                        code = parts[1].strip().replace(' ', '').replace('-', '')
+                        print(f'\n🔗 [deep_link] Получен deep link с кодом: {code}')
+                        
+                        if code.isdigit() and len(code) == 6:
+                            # Отправляем сообщение с кодом и инструкцией
+                            link_message = f"""🔗 <b>ПРИВЯЗКА TELEGRAM</b>
+
+Отлично! Твой код верификации:
+
+<code>{code}</code>
+
+👉 <b>Отправь этот код мне сообщением</b> (скопируй и отправь)
+
+После отправки я сразу привяжу твой аккаунт! ✅"""
+                            send_telegram_message(chat_id, link_message)
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json'},
+                                'body': json.dumps({'ok': True}),
+                                'isBase64Encoded': False
+                            }
+                
+                # Обычный /start
                 response_text, inline_keyboard = handle_start_command(telegram_id, username, first_name)
                 courier = get_courier_by_telegram(telegram_id)
                 reply_keyboard = get_reply_keyboard(is_registered=bool(courier))
@@ -838,9 +870,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     elif text == '❓ Помощь':
                         response_text, keyboard = handle_registered_callbacks('help', telegram_id)
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
-                    elif text.strip().isdigit() and len(text.strip()) == 6:
-                        # Пользователь ввел код привязки (6 цифр)
-                        success = verify_and_link_account(telegram_id, text.strip(), username)
+                    elif text.strip().replace(' ', '').replace('-', '').isdigit() and len(text.strip().replace(' ', '').replace('-', '')) == 6:
+                        # Пользователь ввел код привязки (6 цифр, можем игнорировать пробелы/дефисы)
+                        clean_code = text.strip().replace(' ', '').replace('-', '')
+                        print(f'\n📥 [message_handler] Получен код от зарегистрированного пользователя')
+                        print(f'  - telegram_id: {telegram_id}')
+                        print(f'  - original_text: {text}')
+                        print(f'  - clean_code: {clean_code}')
+                        
+                        success = verify_and_link_account(telegram_id, clean_code, username)
                         if success:
                             send_telegram_message(chat_id, "✅ <b>Успешно!</b>\n\nТвой Telegram привязан к аккаунту!\n\nНажми /start чтобы обновить меню 🎉")
                         else:
@@ -903,9 +941,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     elif text == '❓ FAQ':
                         response_text, keyboard = handle_newbie_callbacks('faq')
                         send_telegram_message(chat_id, response_text, reply_markup=keyboard)
-                    elif text.strip().isdigit() and len(text.strip()) == 6:
-                        # Пользователь ввел код привязки (6 цифр)
-                        success = verify_and_link_account(telegram_id, text.strip(), username)
+                    elif text.strip().replace(' ', '').replace('-', '').isdigit() and len(text.strip().replace(' ', '').replace('-', '')) == 6:
+                        # Пользователь ввел код привязки (6 цифр, можем игнорировать пробелы/дефисы)
+                        clean_code = text.strip().replace(' ', '').replace('-', '')
+                        print(f'\n📥 [message_handler] Получен код от НЕзарегистрированного пользователя')
+                        print(f'  - telegram_id: {telegram_id}')
+                        print(f'  - original_text: {text}')
+                        print(f'  - clean_code: {clean_code}')
+                        
+                        success = verify_and_link_account(telegram_id, clean_code, username)
                         if success:
                             send_telegram_message(chat_id, "✅ <b>Успешно!</b>\n\nТвой Telegram привязан к аккаунту!\n\nНажми /start чтобы обновить меню 🎉")
                         else:
