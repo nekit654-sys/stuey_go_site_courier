@@ -560,9 +560,9 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Проверяем существование курьера
+    # Проверяем существование курьера и получаем telegram_id
     cur.execute("""
-        SELECT id, full_name, phone, archived_at 
+        SELECT id, full_name, phone, archived_at, telegram_id
         FROM t_p25272970_courier_button_site.users
         WHERE id = %s
     """, (courier_id,))
@@ -588,22 +588,42 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
             is_active = false,
             updated_at = NOW()
         WHERE id = %s
+        RETURNING restore_until
     """, (courier_id,))
+    
+    result = cur.fetchone()
+    restore_until_formatted = result['restore_until'].strftime('%d.%m.%Y в %H:%M')
     
     conn.commit()
     
-    # Логируем удаление (опционально)
+    # Отправляем уведомление в Telegram (если есть telegram_id)
+    if user.get('telegram_id'):
+        try:
+            message = f"""⚠️ <b>Ваш аккаунт был архивирован</b>
+
+Ваш аккаунт курьера временно заморожен администратором.
+
+📅 <b>Окончательное удаление:</b> {restore_until_formatted}
+
+Если вы считаете, что это ошибка, свяжитесь с поддержкой до указанной даты для восстановления аккаунта."""
+            
+            send_telegram_notification(user['telegram_id'], message)
+        except Exception as e:
+            print(f'>>> WARNING: Не удалось отправить Telegram уведомление: {e}')
+    
+    # Логируем удаление
     try:
         user_name = user['full_name'] if user['full_name'] else user['phone']
         log_activity(
             conn,
             'courier_deleted',
-            f'Курьер {user_name} помечен как удалённый (восстановление до {datetime.now() + timedelta(days=14)})',
+            f'Курьер {user_name} помечен как удалённый (восстановление до {restore_until_formatted})',
             {'courier_id': courier_id, 'courier_name': user_name, 'restore_days': 14}
         )
         conn.commit()
     except Exception as e:
         print(f'>>> WARNING: Не удалось залогировать удаление: {e}')
+    
     cur.close()
     conn.close()
     
@@ -612,7 +632,7 @@ def delete_courier(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         'headers': headers,
         'body': json.dumps({
             'success': True, 
-            'message': 'Курьер помечен как удалённый. Восстановление возможно в течение 14 дней.'
+            'message': f'Курьер архивирован. Аккаунт будет удалён {restore_until_formatted}'
         }),
         'isBase64Encoded': False
     }
