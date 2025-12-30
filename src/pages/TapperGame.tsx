@@ -264,16 +264,15 @@ export default function TapperGame() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-center mb-4 relative">
             <Button
               onClick={() => window.location.href = '/dashboard'}
               variant="outline"
-              className="bg-white/20 hover:bg-white/30 text-white border-white/40 backdrop-blur-sm"
+              className="absolute left-0 bg-white/20 hover:bg-white/30 text-white border-white/40 backdrop-blur-sm"
             >
               <Icon name="ArrowLeft" size={18} className="mr-2" />
               Выход
             </Button>
-            <div className="flex-1" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
             🚴 Courier Tapper

@@ -194,12 +194,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 ? 'bg-black'
                 : 'bg-white rounded-2xl shadow-2xl'
             }`}>
-              {/* 3D кнопка закрытия игры (скрыта для 3D на мобильных) */}
+              {/* Кнопка закрытия игры (скрыта для 3D на мобильных) */}
               {!(currentGame === '3d' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) && (
                 <button
                   onClick={() => {
                     playSound('click');
                     closeGame();
+                    navigate('/dashboard');
                   }}
                   onMouseEnter={() => playSound('hover')}
                   className="absolute top-4 right-4 z-[100] 
@@ -215,7 +216,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                            active:translate-y-[4px] 
                            active:shadow-none"
                 >
-                  <Icon name="X" size={24} />
+                  <Icon name="ArrowLeft" size={24} />
                 </button>
               )}
 

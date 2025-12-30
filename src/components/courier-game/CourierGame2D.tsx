@@ -2449,6 +2449,17 @@ export function CourierGame2D() {
       {/* Кнопки управления - компактные для мобильных */}
       <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-2 sm:top-4">
         <Button
+          onClick={() => {
+            saveProgress();
+            navigate('/dashboard');
+          }}
+          className="bg-red-500 hover:bg-red-400 text-white font-bold text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2 h-auto"
+        >
+          <Icon name="ArrowLeft" size={16} />
+          <span className="hidden sm:inline ml-1">Выход</span>
+        </Button>
+        
+        <Button
           onClick={() => setGameState('paused')}
           className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2 h-auto"
         >
@@ -2483,12 +2494,12 @@ export function CourierGame2D() {
               <Button
                 onClick={() => {
                   saveProgress();
-                  setGameState('menu');
+                  navigate('/dashboard');
                 }}
                 className="w-64 h-14 text-xl font-bold bg-red-500 hover:bg-red-400 text-black"
               >
-                <Icon name="Home" className="mr-2" />
-                В меню
+                <Icon name="ArrowLeft" className="mr-2" />
+                Выход
               </Button>
             </div>
           </div>
