@@ -119,8 +119,8 @@ export function CourierGame2D() {
   
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused'>('menu');
   const [player, setPlayer] = useState<Player>({
-    x: 800, // Спавн на горизонтальной дороге
-    y: 30,  // В центре дороги
+    x: WALL_THICKNESS + 120, // Спавн ВНУТРИ игровой зоны на дороге
+    y: WALL_THICKNESS + 90,  // В центре первой дороги
     speed: TRANSPORT_COSTS.walk.speed,
     angle: 0,
     transport: 'walk',
@@ -377,30 +377,32 @@ export function CourierGame2D() {
     const newRoads: Road[] = [];
     const newBuildings: Building[] = [];
     
-    // Создаём сетку дорог
-    for (let y = 0; y < MAP_HEIGHT; y += 400) {
+    // Создаём сетку дорог (ТОЛЬКО ВНУТРИ ИГРОВОЙ ЗОНЫ, НЕ В ОКЕАНЕ)
+    // Горизонтальные дороги - начинаем после пляжа и заканчиваем до пляжа
+    for (let y = WALL_THICKNESS + 60; y < MAP_HEIGHT - WALL_THICKNESS - 60; y += 400) {
       newRoads.push({
-        x: 0,
+        x: WALL_THICKNESS + 60,
         y: y,
-        width: MAP_WIDTH,
+        width: MAP_WIDTH - 2 * (WALL_THICKNESS + 60),
         height: 60,
         type: 'horizontal'
       });
     }
     
-    for (let x = 0; x < MAP_WIDTH; x += 400) {
+    // Вертикальные дороги - начинаем после пляжа и заканчиваем до пляжа
+    for (let x = WALL_THICKNESS + 60; x < MAP_WIDTH - WALL_THICKNESS - 60; x += 400) {
       newRoads.push({
         x: x,
-        y: 0,
+        y: WALL_THICKNESS + 60,
         width: 60,
-        height: MAP_HEIGHT,
+        height: MAP_HEIGHT - 2 * (WALL_THICKNESS + 60),
         type: 'vertical'
       });
     }
     
     setRoads(newRoads);
     
-    // Создаём здания между дорогами (БЕЗ НАЛОЖЕНИЯ)
+    // Создаём здания между дорогами (БЕЗ НАЛОЖЕНИЯ, ВНУТРИ ИГРОВОЙ ЗОНЫ)
     const buildingTypes: Array<Building['type']> = ['house', 'office', 'shop', 'cafe'];
     const buildingColors = {
       house: '#FF6B6B',
@@ -419,8 +421,9 @@ export function CourierGame2D() {
       return false;
     };
     
-    for (let y = 90; y < MAP_HEIGHT; y += 400) {
-      for (let x = 90; x < MAP_WIDTH; x += 400) {
+    // Размещаем здания ТОЛЬКО в игровой зоне (не на пляже)
+    for (let y = WALL_THICKNESS + 120; y < MAP_HEIGHT - WALL_THICKNESS - 120; y += 400) {
+      for (let x = WALL_THICKNESS + 120; x < MAP_WIDTH - WALL_THICKNESS - 120; x += 400) {
         // 2-3 здания в каждом квартале
         const numBuildings = 2 + Math.floor(Math.random() * 2);
         
@@ -571,27 +574,27 @@ export function CourierGame2D() {
         deliveryBuilding = newBuildings[Math.floor(Math.random() * newBuildings.length)];
       }
       
-      // Размещаем точки У ВХОДА В ЗДАНИЕ (на ближайшей дороге)
+      // Размещаем точки НА ДОРОГЕ РЯДОМ С ВХОДОМ В ЗДАНИЕ (НЕ ВНУТРИ ЗДАНИЯ)
       // Находим ближайшую точку на дороге к зданию
       const getEntrancePoint = (building: Building) => {
         const centerX = building.x + building.width / 2;
         const centerY = building.y + building.height / 2;
         
-        // Определяем, к какой дороге ближе здание
-        const nearestRoadX = Math.round(centerX / 400) * 400;
-        const nearestRoadY = Math.round(centerY / 400) * 400;
+        // Определяем ближайшие дороги с учетом смещения
+        const nearestRoadX = Math.round((centerX - WALL_THICKNESS - 60) / 400) * 400 + WALL_THICKNESS + 60;
+        const nearestRoadY = Math.round((centerY - WALL_THICKNESS - 60) / 400) * 400 + WALL_THICKNESS + 60;
         
         const distToVerticalRoad = Math.abs(centerX - nearestRoadX);
         const distToHorizontalRoad = Math.abs(centerY - nearestRoadY);
         
         if (distToVerticalRoad < distToHorizontalRoad) {
-          // Ближе к вертикальной дороге
-          const roadX = centerX < nearestRoadX ? nearestRoadX - 30 : nearestRoadX + 30;
-          return { x: roadX, y: centerY };
+          // Размещаем НА вертикальной дороге (не внутри здания)
+          const roadX = centerX < nearestRoadX ? nearestRoadX + 10 : nearestRoadX + 50;
+          return { x: roadX, y: Math.max(WALL_THICKNESS + 100, Math.min(MAP_HEIGHT - WALL_THICKNESS - 100, centerY)) };
         } else {
-          // Ближе к горизонтальной дороге
-          const roadY = centerY < nearestRoadY ? nearestRoadY - 30 : nearestRoadY + 30;
-          return { x: centerX, y: roadY };
+          // Размещаем НА горизонтальной дороге (не внутри здания)
+          const roadY = centerY < nearestRoadY ? nearestRoadY + 10 : nearestRoadY + 50;
+          return { x: Math.max(WALL_THICKNESS + 100, Math.min(MAP_WIDTH - WALL_THICKNESS - 100, centerX)), y: roadY };
         }
       };
       
@@ -872,23 +875,26 @@ export function CourierGame2D() {
           attempts++;
         }
         
-        // Функция для получения входа в здание (на дороге)
+        // Функция для получения входа в здание (НА ДОРОГЕ, НЕ В ЗДАНИИ)
         const getEntrancePoint = (building: Building) => {
           const centerX = building.x + building.width / 2;
           const centerY = building.y + building.height / 2;
           
-          const nearestRoadX = Math.round(centerX / 400) * 400;
-          const nearestRoadY = Math.round(centerY / 400) * 400;
+          // Определяем ближайшие дороги с учетом смещения
+          const nearestRoadX = Math.round((centerX - WALL_THICKNESS - 60) / 400) * 400 + WALL_THICKNESS + 60;
+          const nearestRoadY = Math.round((centerY - WALL_THICKNESS - 60) / 400) * 400 + WALL_THICKNESS + 60;
           
           const distToVerticalRoad = Math.abs(centerX - nearestRoadX);
           const distToHorizontalRoad = Math.abs(centerY - nearestRoadY);
           
           if (distToVerticalRoad < distToHorizontalRoad) {
-            const roadX = centerX < nearestRoadX ? nearestRoadX - 30 : nearestRoadX + 30;
-            return { x: roadX, y: centerY };
+            // Размещаем НА вертикальной дороге (не внутри здания)
+            const roadX = centerX < nearestRoadX ? nearestRoadX + 10 : nearestRoadX + 50;
+            return { x: roadX, y: Math.max(WALL_THICKNESS + 100, Math.min(MAP_HEIGHT - WALL_THICKNESS - 100, centerY)) };
           } else {
-            const roadY = centerY < nearestRoadY ? nearestRoadY - 30 : nearestRoadY + 30;
-            return { x: centerX, y: roadY };
+            // Размещаем НА горизонтальной дороге (не внутри здания)
+            const roadY = centerY < nearestRoadY ? nearestRoadY + 10 : nearestRoadY + 50;
+            return { x: Math.max(WALL_THICKNESS + 100, Math.min(MAP_WIDTH - WALL_THICKNESS - 100, centerX)), y: roadY };
           }
         };
         
@@ -1961,11 +1967,11 @@ export function CourierGame2D() {
   };
 
   const startGame = () => {
-    // Сбрасываем позицию игрока на безопасную дорогу
+    // Сбрасываем позицию игрока на безопасную дорогу (ВНУТРИ ИГРОВОЙ ЗОНЫ)
     setPlayer(prev => ({
       ...prev,
-      x: 800, // Горизонтальная дорога
-      y: 30   // Центр дороги
+      x: WALL_THICKNESS + 120, // Начало игровой зоны
+      y: WALL_THICKNESS + 90   // Центр первой дороги
     }));
     
     setGameState('playing');
