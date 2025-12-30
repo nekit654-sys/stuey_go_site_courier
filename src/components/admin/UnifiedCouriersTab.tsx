@@ -164,7 +164,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         throw new Error(result.error || 'Ошибка удаления');
       }
 
-      toast.success('Курьер успешно удалён');
+      toast.success(result.message || 'Курьер архивирован');
       onRefresh();
     } catch (error: any) {
       toast.error(error.message || 'Ошибка при удалении');

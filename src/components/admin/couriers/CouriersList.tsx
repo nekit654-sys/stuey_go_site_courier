@@ -190,9 +190,23 @@ export default function CouriersList({
                             Архивирован
                           </Badge>
                           {courier.restore_until && (
-                            <span className="text-xs text-gray-500">
-                              До {new Date(courier.restore_until).toLocaleDateString('ru-RU')}
-                            </span>
+                            <div className="text-xs space-y-0.5">
+                              <div className="text-gray-500">
+                                Восстановить до:
+                              </div>
+                              <div className="font-medium text-red-600">
+                                {new Date(courier.restore_until).toLocaleDateString('ru-RU', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                              <div className="text-gray-400 text-xs">
+                                Затем удалится навсегда
+                              </div>
+                            </div>
                           )}
                         </div>
                       ) : (
@@ -217,19 +231,19 @@ export default function CouriersList({
                             Изменить
                           </Button>
                         )}
-                        {onDeleteCourier && (
+                        {onDeleteCourier && !courier.archived_at && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              if (confirm(`Удалить курьера ${courier.full_name}?`)) {
+                              if (confirm(`Архивировать курьера ${courier.full_name}? Аккаунт будет заморожен на 14 дней, после чего удалится окончательно.`)) {
                                 onDeleteCourier(courier.id);
                               }
                             }}
                             className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <Icon name="Trash2" size={14} className="mr-1" />
-                            Удалить
+                            <Icon name="Archive" size={14} className="mr-1" />
+                            Архивировать
                           </Button>
                         )}
                       </div>

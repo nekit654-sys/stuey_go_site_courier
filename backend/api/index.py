@@ -2042,6 +2042,194 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         }
 
 
+def handle_couriers(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''
+    Обработка маршрута couriers для управления курьерами админом
+    '''
+    method = event.get('httpMethod', 'PUT')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', '')
+    
+    # Проверка авторизации админа
+    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    if not auth_token:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Unauthorized'}),
+            'isBase64Encoded': False
+        }
+    
+    token_data = verify_token(auth_token)
+    if not token_data['valid']:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': token_data.get('error', 'Invalid token')}),
+            'isBase64Encoded': False
+        }
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        body_data = json.loads(event.get('body', '{}'))
+        courier_id = body_data.get('courier_id')
+        
+        if not courier_id:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'courier_id обязателен'}),
+                'isBase64Encoded': False
+            }
+        
+        if method == 'PUT' and action == 'update':
+            # Обновление данных курьера админом
+            full_name = body_data.get('full_name')
+            phone = body_data.get('phone')
+            city = body_data.get('city')
+            email = body_data.get('email')
+            
+            update_fields = []
+            update_values = []
+            
+            if full_name is not None:
+                update_fields.append('full_name = %s')
+                update_values.append(full_name)
+            if phone is not None:
+                update_fields.append('phone = %s')
+                update_values.append(phone)
+            if city is not None:
+                update_fields.append('city = %s')
+                update_values.append(city)
+            if email is not None:
+                update_fields.append('email = %s')
+                update_values.append(email)
+            
+            if not update_fields:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Нет данных для обновления'}),
+                    'isBase64Encoded': False
+                }
+            
+            update_values.append(courier_id)
+            update_query = f"""
+                UPDATE t_p25272970_courier_button_site.users
+                SET {', '.join(update_fields)}, updated_at = NOW()
+                WHERE id = %s
+            """
+            
+            cur.execute(update_query, tuple(update_values))
+            conn.commit()
+            
+            log_activity(conn, 'courier_updated', f'Админ обновил данные курьера ID {courier_id}', {
+                'courier_id': courier_id,
+                'updated_fields': update_fields
+            })
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Данные курьера обновлены'}),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE' and action == 'delete':
+            # Soft delete - архивация на 2 недели
+            cur.execute("""
+                SELECT full_name, phone FROM t_p25272970_courier_button_site.users
+                WHERE id = %s
+            """, (courier_id,))
+            
+            courier = cur.fetchone()
+            if not courier:
+                return {
+                    'statusCode': 404,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Курьер не найден'}),
+                    'isBase64Encoded': False
+                }
+            
+            # Устанавливаем archived_at и restore_until (2 недели)
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET 
+                    archived_at = NOW(),
+                    restore_until = NOW() + INTERVAL '14 days',
+                    archived_by = 'admin',
+                    updated_at = NOW()
+                WHERE id = %s
+                RETURNING archived_at, restore_until
+            """, (courier_id,))
+            
+            result = cur.fetchone()
+            conn.commit()
+            
+            restore_until_formatted = result['restore_until'].strftime('%d.%m.%Y в %H:%M')
+            
+            log_activity(conn, 'courier_archived', 
+                f'Админ архивировал курьера {courier["full_name"]} (ID {courier_id})', {
+                'courier_id': courier_id,
+                'courier_name': courier['full_name'],
+                'restore_until': result['restore_until'].isoformat()
+            })
+            
+            # Отправляем уведомление курьеру в Telegram (если привязан)
+            cur.execute("""
+                SELECT messenger_user_id FROM t_p25272970_courier_button_site.messenger_connections
+                WHERE courier_id = %s AND messenger_type = 'telegram' AND is_verified = true
+            """, (courier_id,))
+            
+            telegram = cur.fetchone()
+            if telegram:
+                message = f"""⚠️ <b>Ваш аккаунт был архивирован</b>
+
+Ваш аккаунт курьера временно заморожен.
+
+📅 <b>Окончательное удаление:</b> {restore_until_formatted}
+
+Если вы считаете, что это ошибка, свяжитесь с поддержкой до указанной даты для восстановления аккаунта."""
+                
+                send_telegram_notification(telegram['messenger_user_id'], message)
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True, 
+                    'message': f'Курьер архивирован до {restore_until_formatted}',
+                    'restore_until': result['restore_until'].isoformat()
+                }),
+                'isBase64Encoded': False
+            }
+        
+        else:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'error': 'Неизвестное действие'}),
+                'isBase64Encoded': False
+            }
+    
+    except Exception as e:
+        conn.rollback()
+        print(f'>>> ERROR in handle_couriers: {str(e)}')
+        import traceback
+        print(f'>>> Traceback: {traceback.format_exc()}')
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': f'Ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
+        }
+    finally:
+        cur.close()
+        conn.close()
+
+
 def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     method = event.get('httpMethod', 'POST')
     
