@@ -463,11 +463,8 @@ export function CourierGame2D() {
     
     // Создаём светофоры НА УГЛАХ перекрёстков (по краям дорог)
     const lights: TrafficLight[] = [];
-    for (let y = 0; y < MAP_HEIGHT; y += 400) {
-      for (let x = 0; x < MAP_WIDTH; x += 400) {
-        // Пропускаем если это край карты
-        if (x === 0 || y === 0) continue;
-        
+    for (let y = WALL_THICKNESS + 60; y < MAP_HEIGHT - WALL_THICKNESS; y += 400) {
+      for (let x = WALL_THICKNESS + 60; x < MAP_WIDTH - WALL_THICKNESS; x += 400) {
         // 4 светофора на углах каждого перекрёстка
         // Верхний левый угол
         lights.push({
@@ -512,10 +509,11 @@ export function CourierGame2D() {
     const newTrees: Tree[] = [];
     
     // Деревья вдоль горизонтальных дорог
-    for (let y = 0; y < MAP_HEIGHT; y += 400) {
-      for (let x = 70; x < MAP_WIDTH - 70; x += 80 + Math.random() * 40) {
-        // Пропускаем перекрёстки
-        const nearIntersection = (x % 400) < 100;
+    for (let y = WALL_THICKNESS + 60; y < MAP_HEIGHT - WALL_THICKNESS; y += 400) {
+      for (let x = WALL_THICKNESS + 120; x < MAP_WIDTH - WALL_THICKNESS - 120; x += 80 + Math.random() * 40) {
+        // Пропускаем перекрёстки (проверяем относительно новой сетки)
+        const relativeX = x - WALL_THICKNESS - 60;
+        const nearIntersection = (relativeX % 400) < 100;
         if (nearIntersection) continue;
         
         // Деревья сверху дороги
@@ -537,10 +535,11 @@ export function CourierGame2D() {
     }
     
     // Деревья вдоль вертикальных дорог
-    for (let x = 0; x < MAP_WIDTH; x += 400) {
-      for (let y = 70; y < MAP_HEIGHT - 70; y += 80 + Math.random() * 40) {
-        // Пропускаем перекрёстки
-        const nearIntersection = (y % 400) < 100;
+    for (let x = WALL_THICKNESS + 60; x < MAP_WIDTH - WALL_THICKNESS; x += 400) {
+      for (let y = WALL_THICKNESS + 120; y < MAP_HEIGHT - WALL_THICKNESS - 120; y += 80 + Math.random() * 40) {
+        // Пропускаем перекрёстки (проверяем относительно новой сетки)
+        const relativeY = y - WALL_THICKNESS - 60;
+        const nearIntersection = (relativeY % 400) < 100;
         if (nearIntersection) continue;
         
         // Деревья слева от дороги
@@ -629,14 +628,26 @@ export function CourierGame2D() {
     const initialVehicles: Vehicle[] = [];
     const colors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
     
+    // Горизонтальные дороги с новой сеткой
+    const horizontalRoads = [];
+    for (let y = WALL_THICKNESS + 60; y < MAP_HEIGHT - WALL_THICKNESS; y += 400) {
+      horizontalRoads.push(y);
+    }
+    
+    // Вертикальные дороги с новой сеткой
+    const verticalRoads = [];
+    for (let x = WALL_THICKNESS + 60; x < MAP_WIDTH - WALL_THICKNESS; x += 400) {
+      verticalRoads.push(x);
+    }
+    
     for (let i = 0; i < 20; i++) {
       const isHorizontal = Math.random() > 0.5;
       
-      if (isHorizontal) {
+      if (isHorizontal && horizontalRoads.length > 0) {
         // Горизонтальные дороги: движение вправо по нижней полосе
-        const roadY = Math.floor(Math.random() * 5) * 400;
+        const roadY = horizontalRoads[Math.floor(Math.random() * horizontalRoads.length)];
         initialVehicles.push({
-          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 50, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
+          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 120, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
           y: roadY + 35, // Нижняя полоса (правостороннее движение)
           speed: 2 + Math.random() * 2,
           angle: 0, // Движение вправо
@@ -644,12 +655,12 @@ export function CourierGame2D() {
           color: colors[Math.floor(Math.random() * colors.length)],
           lane: 1 // Всегда движемся вправо
         });
-      } else {
+      } else if (verticalRoads.length > 0) {
         // Вертикальные дороги: движение вниз по правой полосе
-        const roadX = Math.floor(Math.random() * 7) * 400;
+        const roadX = verticalRoads[Math.floor(Math.random() * verticalRoads.length)];
         initialVehicles.push({
           x: roadX + 35, // Правая полоса (правостороннее движение)
-          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 50, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
+          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 50, Math.max(WALL_THICKNESS + 120, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
           speed: 2 + Math.random() * 2,
           angle: 90, // Движение вниз
           direction: 'vertical',
@@ -669,22 +680,22 @@ export function CourierGame2D() {
       // Размещаем на тротуарах (по краям дорог)
       const isOnHorizontalRoad = Math.random() > 0.5;
       
-      if (isOnHorizontalRoad) {
-        const roadY = Math.floor(Math.random() * 5) * 400;
+      if (isOnHorizontalRoad && horizontalRoads.length > 0) {
+        const roadY = horizontalRoads[Math.floor(Math.random() * horizontalRoads.length)];
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
-          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 30, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
+          x: Math.min(MAP_WIDTH - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 120, Math.random() * (MAP_WIDTH - 2 * WALL_THICKNESS))),
           y: roadY + (side > 0 ? 5 : 55),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
           color: colors[Math.floor(Math.random() * colors.length)]
         });
-      } else {
-        const roadX = Math.floor(Math.random() * 7) * 400;
+      } else if (verticalRoads.length > 0) {
+        const roadX = verticalRoads[Math.floor(Math.random() * verticalRoads.length)];
         const side = Math.random() > 0.5 ? -1 : 1;
         initialPedestrians.push({
           x: roadX + (side > 0 ? 5 : 55),
-          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 30, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
+          y: Math.min(MAP_HEIGHT - WALL_THICKNESS - 30, Math.max(WALL_THICKNESS + 120, Math.random() * (MAP_HEIGHT - 2 * WALL_THICKNESS))),
           speed: 0.5 + Math.random() * 0.5,
           direction: Math.random() > 0.5 ? 1 : -1,
           color: colors[Math.floor(Math.random() * colors.length)]
@@ -990,30 +1001,34 @@ export function CourierGame2D() {
     
     const interval = setInterval(() => {
       setVehicles(prev => prev.map(vehicle => {
-        // Проверяем перекрёстки для поворотов
-        const atIntersectionX = Math.abs(vehicle.x % 400) < 60;
-        const atIntersectionY = Math.abs(vehicle.y % 400) < 60;
+        // Проверяем перекрёстки для поворотов (НОВАЯ СЕТКА с offset)
+        const relativeX = vehicle.x - WALL_THICKNESS - 60;
+        const relativeY = vehicle.y - WALL_THICKNESS - 60;
+        const atIntersectionX = Math.abs(relativeX % 400) < 60;
+        const atIntersectionY = Math.abs(relativeY % 400) < 60;
         
         // Случайный поворот направо на перекрёстке (15% шанс, правостороннее движение)
         if (atIntersectionX && atIntersectionY && Math.random() < 0.15 && !vehicle.turningAtIntersection) {
           if (vehicle.direction === 'horizontal') {
             // Движемся вправо → поворачиваем направо (вниз)
+            const nearestRoadY = Math.round(relativeY / 400) * 400 + WALL_THICKNESS + 60;
             return {
               ...vehicle,
               direction: 'vertical',
               lane: 1,
               angle: 90,
-              y: Math.floor(vehicle.y / 400) * 400 + 35,
+              y: nearestRoadY + 35,
               turningAtIntersection: true
             };
           } else {
             // Движемся вниз → поворачиваем направо (влево по карте)
+            const nearestRoadX = Math.round(relativeX / 400) * 400 + WALL_THICKNESS + 60;
             return {
               ...vehicle,
               direction: 'horizontal',
               lane: 1,
               angle: 0,
-              x: Math.floor(vehicle.x / 400) * 400 + 35,
+              x: nearestRoadX + 35,
               turningAtIntersection: true
             };
           }
@@ -1044,9 +1059,11 @@ export function CourierGame2D() {
         // Проверяем пешеходов на зебре впереди
         if (!shouldStop) {
           for (const ped of pedestrians) {
-            // Определяем, находится ли пешеход на перекрёстке
-            const pedAtIntersectionX = Math.abs(ped.x % 400) < 60;
-            const pedAtIntersectionY = Math.abs(ped.y % 400) < 60;
+            // Определяем, находится ли пешеход на перекрёстке (НОВАЯ СЕТКА)
+            const pedRelativeX = ped.x - WALL_THICKNESS - 60;
+            const pedRelativeY = ped.y - WALL_THICKNESS - 60;
+            const pedAtIntersectionX = Math.abs(pedRelativeX % 400) < 60;
+            const pedAtIntersectionY = Math.abs(pedRelativeY % 400) < 60;
             
             if (pedAtIntersectionX && pedAtIntersectionY) {
               // Пешеход на перекрёстке (на зебре)
@@ -1083,18 +1100,22 @@ export function CourierGame2D() {
         if (vehicle.direction === 'horizontal') {
           // Движение только вправо (правостороннее)
           newX += vehicle.speed;
-          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы
+          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы (НОВАЯ СЕТКА)
           if (newX > MAP_WIDTH - WALL_THICKNESS) {
-            newX = WALL_THICKNESS + 50;
-            newY = Math.floor(vehicle.y / 400) * 400 + 35;
+            newX = WALL_THICKNESS + 120;
+            const relativeY = vehicle.y - WALL_THICKNESS - 60;
+            const nearestRoadY = Math.round(relativeY / 400) * 400 + WALL_THICKNESS + 60;
+            newY = nearestRoadY + 35;
           }
         } else {
           // Движение только вниз (правостороннее)
           newY += vehicle.speed;
-          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы
+          // Телепорт машин на противоположный край ВНУТРИ стен с сохранением полосы (НОВАЯ СЕТКА)
           if (newY > MAP_HEIGHT - WALL_THICKNESS) {
-            newY = WALL_THICKNESS + 50;
-            newX = Math.floor(vehicle.x / 400) * 400 + 35;
+            newY = WALL_THICKNESS + 120;
+            const relativeX = vehicle.x - WALL_THICKNESS - 60;
+            const nearestRoadX = Math.round(relativeX / 400) * 400 + WALL_THICKNESS + 60;
+            newX = nearestRoadX + 35;
           }
         }
         
@@ -1417,10 +1438,10 @@ export function CourierGame2D() {
     
     ctx.setLineDash([]);
     
-    // Пешеходные переходы (зебры) на перекрёстках
+    // Пешеходные переходы (зебры) на перекрёстках (новая сетка)
     ctx.fillStyle = '#FFF';
-    for (let y = 0; y < MAP_HEIGHT; y += 400) {
-      for (let x = 0; x < MAP_WIDTH; x += 400) {
+    for (let y = WALL_THICKNESS + 60; y < MAP_HEIGHT - WALL_THICKNESS; y += 400) {
+      for (let x = WALL_THICKNESS + 60; x < MAP_WIDTH - WALL_THICKNESS; x += 400) {
         // Зебра сверху перекрёстка (горизонтальная)
         for (let i = 0; i < 6; i++) {
           ctx.fillRect(x + 10 + i * 8, y + 8, 6, 10);
