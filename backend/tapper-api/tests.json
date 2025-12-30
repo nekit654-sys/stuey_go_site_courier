@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Missing user_id header",
+      "method": "GET",
+      "path": "/?action=profile",
+      "expectedStatus": 401,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get leaderboard",
+      "method": "GET",
+      "path": "/?action=leaderboard",
+      "headers": {
+        "X-User-Id": "1"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

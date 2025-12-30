@@ -28,6 +28,7 @@ import GameSelect from "./pages/GameSelect";
 const Game = lazy(() => import("./pages/Game"));
 const Game3D = lazy(() => import("./pages/Game3D"));
 const CourierGamePage = lazy(() => import("./pages/CourierGamePage"));
+const TapperGame = lazy(() => import("./pages/TapperGame"));
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,15 @@ const AppRoutes = () => {
             </div>
           }>
             <CourierGamePage />
+          </Suspense>
+        } />
+        <Route path="/tapper-game" element={
+          <Suspense fallback={
+            <div className="w-full h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="text-white text-2xl">Загрузка игры...</div>
+            </div>
+          }>
+            <TapperGame />
           </Suspense>
         } />
 
