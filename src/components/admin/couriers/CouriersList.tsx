@@ -236,14 +236,14 @@ export default function CouriersList({
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              if (confirm(`Архивировать курьера ${courier.full_name}? Аккаунт будет заморожен на 14 дней, после чего удалится окончательно.`)) {
+                              if (confirm(`Удалить курьера ${courier.full_name}?\n\nПрофиль будет архивирован и окончательно удалён через 14 дней.\nКурьер получит уведомление в Telegram (если подключён).`)) {
                                 onDeleteCourier(courier.id);
                               }
                             }}
                             className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <Icon name="Archive" size={14} className="mr-1" />
-                            Архивировать
+                            <Icon name="Trash2" size={14} className="mr-1" />
+                            Удалить
                           </Button>
                         )}
                       </div>

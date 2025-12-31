@@ -1,5 +1,5 @@
 '''
-Business: Clean up old page visits (older than 90 days) to optimize database
+Business: Clean up old data - page visits (older than 90 days) and archived users
 Args: event with httpMethod; context with request_id
 Returns: HTTP response with cleanup statistics
 '''
@@ -7,6 +7,7 @@ Returns: HTTP response with cleanup statistics
 import json
 import os
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
 from typing import Dict, Any
 
@@ -75,6 +76,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'body': json.dumps({'error': 'Invalid token'})
         }
     
+    # 1. Cleanup старых визитов (старше 90 дней)
     cutoff_date = datetime.now() - timedelta(days=90)
     
     cur.execute('''
@@ -89,13 +91,52 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         WHERE created_at < %s
     ''', (cutoff_date,))
     
-    deleted_count = cur.rowcount
+    deleted_visits = cur.rowcount
     conn.commit()
     
     cur.execute('''
         SELECT COUNT(*) FROM t_p25272970_courier_button_site.page_visits
     ''')
-    remaining_count = cur.fetchone()[0]
+    remaining_visits = cur.fetchone()[0]
+    
+    # 2. Cleanup архивированных пользователей с истёкшим сроком
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute('''
+        SELECT id, full_name, email, archived_at, restore_until
+        FROM t_p25272970_courier_button_site.users
+        WHERE archived_at IS NOT NULL 
+        AND restore_until IS NOT NULL 
+        AND restore_until < NOW()
+    ''')
+    
+    expired_users = cur.fetchall()
+    deleted_users_count = len(expired_users)
+    
+    if deleted_users_count > 0:
+        for user in expired_users:
+            # Удаляем связанные данные
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.messenger_connections WHERE courier_id = %s', (user['id'],))
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.courier_game_leaderboard WHERE user_id = %s', (user['id'],))
+            cur.execute('UPDATE t_p25272970_courier_button_site.users SET invited_by_user_id = NULL WHERE invited_by_user_id = %s', (user['id'],))
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.referrals WHERE referrer_id = %s OR referee_id = %s', (user['id'], user['id']))
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.withdrawal_requests WHERE user_id = %s', (user['id'],))
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.story_views WHERE user_id = %s', (user['id'],))
+            cur.execute('DELETE FROM t_p25272970_courier_button_site.users WHERE id = %s', (user['id'],))
+        
+        conn.commit()
+        
+        # Логируем удаление
+        cur.execute('''
+            INSERT INTO t_p25272970_courier_button_site.activity_log 
+            (event_type, message, data)
+            VALUES (%s, %s, %s)
+        ''', (
+            'archived_users_deleted',
+            f'Автоматически удалено {deleted_users_count} архивированных профилей',
+            json.dumps({'count': deleted_users_count})
+        ))
+        conn.commit()
     
     cur.close()
     conn.close()
@@ -109,9 +150,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         'isBase64Encoded': False,
         'body': json.dumps({
             'success': True,
-            'deleted_count': deleted_count,
-            'remaining_count': remaining_count,
-            'cutoff_date': cutoff_date.isoformat(),
-            'days_kept': 90
+            'visits': {
+                'deleted_count': deleted_visits,
+                'remaining_count': remaining_visits,
+                'cutoff_date': cutoff_date.isoformat(),
+                'days_kept': 90
+            },
+            'users': {
+                'deleted_archived_count': deleted_users_count
+            }
         })
     }
