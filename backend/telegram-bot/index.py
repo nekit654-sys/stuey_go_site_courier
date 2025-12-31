@@ -256,24 +256,28 @@ def get_faq_answer(question: str) -> Optional[str]:
     
     return None
 
-def search_web(query: str) -> str:
-    """Поиск в интернете через Yandex Search API"""
+def search_web(query: str, chat_id: int) -> tuple[str, Dict]:
+    """Поиск в интернете через Yandex с красивой кнопкой"""
     try:
-        url = 'https://yandex.ru/search/xml'
-        params = {
-            'query': query,
-            'l10n': 'ru',
-            'sortby': 'rlv',
-            'filter': 'none',
-            'maxpassages': 2,
-            'groupby': 'attr=d.mode=deep.groups-on-page=5'
+        # Яндекс поиск
+        search_url = f'https://yandex.ru/search/?text={urllib.parse.quote(query)}'
+        
+        # Создаём inline кнопку для поиска
+        keyboard = {
+            'inline_keyboard': [
+                [{'text': '🔍 Найти в Яндексе', 'url': search_url}]
+            ]
         }
         
-        search_url = f'https://www.google.com/search?q={urllib.parse.quote(query)}&hl=ru'
+        text = f"""🔍 <b>Результаты поиска</b>
+
+Ищу для тебя: <i>"{query}"</i>
+
+Нажми кнопку ниже, чтобы увидеть результаты! 👇"""
         
-        return f"Вот что нашёл по запросу '{query}': {search_url}\n\nИспользуй эту ссылку для поиска! 🔍"
+        return text, keyboard
     except:
-        return "Не могу выполнить поиск, попробуй загуглить самостоятельно 🙏"
+        return "Не могу выполнить поиск, попробуй загуглить самостоятельно 🙏", {}
 
 def detect_city_in_text(text: str) -> Optional[str]:
     """Определяет название города в тексте"""
@@ -303,12 +307,12 @@ def detect_city_in_text(text: str) -> Optional[str]:
     
     return None
 
-def ask_ai_assistant(question: str, is_registered: bool = False, user_city: str = None, telegram_id: int = None) -> tuple[str, Optional[str]]:
-    """AI помощник на основе YandexGPT с FAQ и веб-поиском. Возвращает (ответ, новый_город)"""
+def ask_ai_assistant(question: str, is_registered: bool = False, user_city: str = None, telegram_id: int = None, chat_id: int = None) -> tuple[str, Optional[str], Optional[Dict]]:
+    """AI помощник на основе YandexGPT с FAQ и веб-поиском. Возвращает (ответ, новый_город, keyboard)"""
     
     faq_answer = get_faq_answer(question)
     if faq_answer:
-        return faq_answer, None
+        return faq_answer, None, None
     
     q_lower = question.lower()
     needs_search = any(word in q_lower for word in ['где', 'аренд', 'найти', 'купить', 'магазин', 'адрес', 'телефон', 'контакт'])
@@ -317,14 +321,15 @@ def ask_ai_assistant(question: str, is_registered: bool = False, user_city: str 
     detected_city = detect_city_in_text(question)
     if detected_city and not needs_search:
         # Пользователь назвал город (отвечает на наш вопрос)
-        return f"👍 Отлично, запомнил! Ты из города <b>{detected_city}</b>.\n\nТеперь задавай свой вопрос, и я помогу найти информацию! 🔍", detected_city
+        return f"👍 Отлично, запомнил! Ты из города <b>{detected_city}</b>.\n\nТеперь задавай свой вопрос, и я помогу найти информацию! 🔍", detected_city, None
     
     if needs_search and not user_city:
-        return "📍 Из какого ты города? Напиши название, и я помогу найти то, что нужно!", None
+        return "📍 Из какого ты города? Напиши название, и я помогу найти то, что нужно!", None, None
     
     if needs_search and user_city:
         search_query = f"{question} {user_city}"
-        return search_web(search_query), None
+        text, keyboard = search_web(search_query, chat_id)
+        return text, None, keyboard
     
     try:
         system_prompt = f"""Ты AI-помощник курьерского сервиса Stuey.Go для курьеров Яндекс.Еды.
@@ -399,12 +404,12 @@ def ask_ai_assistant(question: str, is_registered: bool = False, user_city: str 
         with urllib.request.urlopen(req, timeout=30) as response:
             result = json.loads(response.read().decode('utf-8'))
             answer = result['result']['alternatives'][0]['message']['text']
-            return answer, None
+            return answer, None, None
     except Exception as e:
         print(f'AI Assistant error: {e}')
         import traceback
         traceback.print_exc()
-        return "Извини, сейчас не могу ответить. Попробуй позже или задай вопрос в поддержке на сайте! 🙏", None
+        return "Извини, сейчас не могу ответить. Попробуй позже или задай вопрос в поддержке на сайте! 🙏", None, None
 
 def start_linking_process(telegram_id: int, username: str = None) -> str:
     """Создаёт временную запись для привязки и возвращает уникальный link_token"""
@@ -1049,7 +1054,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         if not user_city:
                             user_city = get_user_city(telegram_id)
                         
-                        answer, new_city = ask_ai_assistant(text, is_registered=True, user_city=user_city, telegram_id=telegram_id)
+                        answer, new_city, keyboard = ask_ai_assistant(text, is_registered=True, user_city=user_city, telegram_id=telegram_id, chat_id=chat_id)
                         
                         # Сохраняем новый город если определили
                         if new_city:
@@ -1057,9 +1062,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         
                         # Редактируем сообщение "Думаю..." вместо отправки нового
                         if thinking_msg_id:
-                            edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}")
+                            edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                         else:
-                            send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}")
+                            send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                 else:
                     # Незарегистрированные
                     if text == '🚀 Зарегистрироваться':
@@ -1163,7 +1168,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         # Получаем город из контекста
                         user_city = get_user_city(telegram_id)
                         
-                        answer, new_city = ask_ai_assistant(text, is_registered=False, user_city=user_city, telegram_id=telegram_id)
+                        answer, new_city, keyboard = ask_ai_assistant(text, is_registered=False, user_city=user_city, telegram_id=telegram_id, chat_id=chat_id)
                         
                         # Сохраняем новый город если определили
                         if new_city:
@@ -1171,9 +1176,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         
                         # Редактируем сообщение "Думаю..." вместо отправки нового
                         if thinking_msg_id:
-                            edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}")
+                            edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                         else:
-                            send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}")
+                            send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
         
         elif 'callback_query' in body:
             callback_query = body['callback_query']
