@@ -946,6 +946,28 @@ def handle_registered_callbacks(callback_data: str, courier_id: int) -> tuple[st
         
         return text, get_back_keyboard(is_registered=True)
     
+    elif callback_data == 'settings':
+        courier = get_courier_by_id(courier_id)
+        
+        text = f"""⚙️ <b>НАСТРОЙКИ ПРОФИЛЯ</b>
+
+<b>📝 Твои данные:</b>
+• Имя: {courier['full_name'] or 'Не указано'}
+• Телефон: {courier['phone'] or 'Не указано'}
+• Город: {courier['city'] or 'Не указано'}
+
+<b>💡 Как изменить данные?</b>
+Напиши боту своё <b>новое ФИО</b>, и я обновлю твой профиль!
+
+Например: <code>Иванов Иван Иванович</code>"""
+        
+        keyboard = {
+            'inline_keyboard': [
+                [{'text': '◀️ Назад в меню', 'callback_data': 'menu'}]
+            ]
+        }
+        return text, keyboard
+    
     return "", {}
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -1062,8 +1084,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         }
                         send_telegram_message(chat_id, "🎮 <b>ИГРЫ И РАЗВЛЕЧЕНИЯ</b>\n\nОткрой мини-игры на сайте! 🎁", reply_markup=games_keyboard)
                     elif text == '⚙️ Настройки':
-                        settings_text = f"""⚙️ <b>НАСТРОЙКИ</b>\n\n<b>Твой Telegram ID:</b> <code>{telegram_id}</code>\n\nЗдесь скоро появятся дополнительные настройки!"""
-                        send_telegram_message(chat_id, settings_text)
+                        response_text, keyboard = handle_registered_callbacks('settings', courier['courier_id'])
+                        send_telegram_message(chat_id, response_text, reply_markup=keyboard)
                     elif text == '🤖 AI Помощник':
                         ai_text = """🤖 <b>AI ПОМОЩНИК</b>
 
@@ -1091,29 +1113,85 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         send_telegram_message(chat_id, "⚠️ Эта кнопка в разработке. Попробуй другие функции!")
 
                     else:
-                        # Любой другой текст (НЕ кнопка меню) = вопрос к AI
-                        thinking_msg = send_telegram_message(chat_id, "🤖 Думаю...")
-                        thinking_msg_id = thinking_msg.get('result', {}).get('message_id') if thinking_msg else None
+                        # Проверка на обновление профиля (ФИО из 3 слов)
+                        words = text.strip().split()
+                        if len(words) >= 2 and all(word[0].isupper() for word in words if word):
+                            # Похоже на ФИО - обновляем профиль
+                            full_name = ' '.join(words)
+                            
+                            try:
+                                # Обновляем профиль через API
+                                conn = psycopg2.connect(os.environ['DATABASE_URL'])
+                                cursor = conn.cursor()
+                                
+                                cursor.execute("""
+                                    UPDATE t_p25272970_courier_button_site.users
+                                    SET full_name = %s
+                                    WHERE id = %s
+                                    RETURNING full_name, phone, city
+                                """, (full_name, courier['courier_id']))
+                                
+                                updated = cursor.fetchone()
+                                
+                                # Обновляем имя в лидерборде игр
+                                cursor.execute("""
+                                    UPDATE t_p25272970_courier_button_site.courier_game_leaderboard
+                                    SET player_name = %s
+                                    WHERE user_id = %s
+                                """, (full_name, courier['courier_id']))
+                                
+                                conn.commit()
+                                cursor.close()
+                                conn.close()
+                                
+                                if updated:
+                                    success_text = f"""✅ <b>ПРОФИЛЬ ОБНОВЛЁН!</b>
+
+<b>📝 Новые данные:</b>
+• Имя: {updated[0]}
+• Телефон: {updated[1] or 'Не указано'}
+• Город: {updated[2] or 'Не указано'}
+
+<b>💡 Чтобы изменить телефон или город:</b>
+Зайди в личный кабинет на сайте!"""
+                                    
+                                    keyboard = {
+                                        'inline_keyboard': [
+                                            [{'text': '📱 Личный кабинет', 'url': f'{WEBSITE_URL}/dashboard'}],
+                                            [{'text': '⚙️ Настройки', 'callback_data': 'settings'}]
+                                        ]
+                                    }
+                                    send_telegram_message(chat_id, success_text, reply_markup=keyboard)
+                                else:
+                                    send_telegram_message(chat_id, "❌ Ошибка обновления профиля. Попробуй ещё раз!")
+                            except Exception as e:
+                                print(f'Error updating profile: {e}')
+                                send_telegram_message(chat_id, "❌ Ошибка обновления профиля. Попробуй ещё раз!")
                         
-                        # Получаем город курьера из БД
-                        stats = get_courier_stats(courier['courier_id'])
-                        user_city = stats.get('city') if stats.get('city') != 'Не указан' else None
-                        
-                        # Если нет города из профиля, пытаемся взять из контекста
-                        if not user_city:
-                            user_city = get_user_city(telegram_id)
-                        
-                        answer, new_city, keyboard = ask_ai_assistant(text, is_registered=True, user_city=user_city, telegram_id=telegram_id, chat_id=chat_id)
-                        
-                        # Сохраняем новый город если определили
-                        if new_city:
-                            save_user_city(telegram_id, new_city)
-                        
-                        # Редактируем сообщение "Думаю..." вместо отправки нового
-                        if thinking_msg_id:
-                            edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                         else:
-                            send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
+                            # Любой другой текст (НЕ кнопка меню, НЕ ФИО) = вопрос к AI
+                            thinking_msg = send_telegram_message(chat_id, "🤖 Думаю...")
+                            thinking_msg_id = thinking_msg.get('result', {}).get('message_id') if thinking_msg else None
+                            
+                            # Получаем город курьера из БД
+                            stats = get_courier_stats(courier['courier_id'])
+                            user_city = stats.get('city') if stats.get('city') != 'Не указан' else None
+                            
+                            # Если нет города из профиля, пытаемся взять из контекста
+                            if not user_city:
+                                user_city = get_user_city(telegram_id)
+                            
+                            answer, new_city, keyboard = ask_ai_assistant(text, is_registered=True, user_city=user_city, telegram_id=telegram_id, chat_id=chat_id)
+                            
+                            # Сохраняем новый город если определили
+                            if new_city:
+                                save_user_city(telegram_id, new_city)
+                            
+                            # Редактируем сообщение "Думаю..." вместо отправки нового
+                            if thinking_msg_id:
+                                edit_telegram_message(chat_id, thinking_msg_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
+                            else:
+                                send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                 else:
                     # Незарегистрированные - обработка кнопок меню
                     # Список кнопок меню, которые НЕ должны идти в AI

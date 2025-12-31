@@ -6513,6 +6513,122 @@ def handle_content(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         conn.close()
 
 
+def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+    '''Обработка запросов профиля пользователя'''
+    method = event.get('httpMethod', 'GET')
+    query_params = event.get('queryStringParameters') or {}
+    action = query_params.get('action', 'get')
+    
+    # Получаем user_id из заголовка
+    user_id_header = event.get('headers', {}).get('X-User-Id') or event.get('headers', {}).get('x-user-id')
+    
+    if not user_id_header:
+        return {
+            'statusCode': 401,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': 'Требуется авторизация'}),
+            'isBase64Encoded': False
+        }
+    
+    user_id = int(user_id_header)
+    
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        if action == 'update':
+            # Обновление профиля
+            body = json.loads(event.get('body', '{}'))
+            
+            full_name = body.get('full_name', '').strip()
+            phone = body.get('phone', '').strip()
+            city = body.get('city', '').strip()
+            
+            if not full_name:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'ФИО обязательно для заполнения'}),
+                    'isBase64Encoded': False
+                }
+            
+            # Обновляем данные пользователя
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET full_name = %s,
+                    phone = %s,
+                    city = %s
+                WHERE id = %s
+                RETURNING id, full_name, phone, city
+            """, (full_name, phone, city, user_id))
+            
+            updated_user = cur.fetchone()
+            conn.commit()
+            
+            # Обновляем имя в таблице лидерборда игр (если есть записи)
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.courier_game_leaderboard
+                SET player_name = %s
+                WHERE user_id = %s
+            """, (full_name, user_id))
+            conn.commit()
+            
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': True,
+                    'user': dict(updated_user),
+                    'message': 'Профиль успешно обновлён'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        else:
+            # Получение профиля
+            cur.execute("""
+                SELECT id, full_name, email, phone, city, avatar_url, referral_code
+                FROM t_p25272970_courier_button_site.users
+                WHERE id = %s
+            """, (user_id,))
+            
+            user = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if not user:
+                return {
+                    'statusCode': 404,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Пользователь не найден'}),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'user': dict(user)}),
+                'isBase64Encoded': False
+            }
+    
+    except Exception as e:
+        conn.rollback()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'error': str(e)}),
+            'isBase64Encoded': False
+        }
+
+
 def handle_game(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
     '''
     Обработка игровых запросов для "Приключения курьера" (2D раннер)
