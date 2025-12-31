@@ -104,28 +104,29 @@ export default function StatsCards({ stats }: StatsCardsProps) {
           transition={{ delay: card.delay, duration: 0.4 }}
           className="h-full"
         >
-          <Card className={`bg-gradient-to-br ${card.gradient} border-4 border-black rounded-2xl shadow-[0_6px_0_0_rgba(0,0,0,1)] hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[3px] transition-all duration-200 overflow-hidden relative group h-full`}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.3),transparent_50%)]"></div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+          <Card className={`cyber-card bg-gradient-to-br ${card.gradient} rounded-2xl overflow-hidden relative group h-full transform-gpu hover:scale-[1.02] transition-all duration-300`}>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,240,255,0.2),transparent_50%)]"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyber-cyan/20 rounded-full blur-2xl group-hover:bg-cyber-cyan/30 transition-all"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_48%,rgba(0,240,255,0.1)_50%,transparent_52%)] bg-[length:20px_20px]"></div>
             
             <div className="relative p-5 h-full flex flex-col">
               <div className="flex items-start justify-between mb-4">
-                <div className={`${card.iconBg} border-3 border-black rounded-xl p-3 shadow-[0_4px_0_0_rgba(0,0,0,1)] group-hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] group-hover:translate-y-[2px] transition-all`}>
+                <div className={`${card.iconBg} neon-border rounded-xl p-3 cyber-glow transform-gpu group-hover:rotate-6 transition-transform duration-300`}>
                   <Icon name={card.icon as any} className="h-6 w-6 text-black" />
                 </div>
-                <div className="bg-red-500 px-3 py-1 rounded-full border-3 border-black shadow-[0_3px_0_0_rgba(0,0,0,1)]">
-                  <span className="text-xs font-black text-white uppercase tracking-wide">🔥 Live</span>
+                <div className="bg-gradient-to-r from-cyber-pink to-cyber-purple px-3 py-1 rounded-full border border-cyber-cyan/50 shadow-[0_0_10px_rgba(0,240,255,0.5)]">
+                  <span className="text-xs font-black text-white uppercase tracking-wide neon-text">🔥 Live</span>
                 </div>
               </div>
               
               <div className="flex-1 flex flex-col justify-end">
-                <p className="text-sm font-bold text-white/90 mb-2 min-h-[40px] flex items-center">{card.label}</p>
-                <div className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mb-1">
+                <p className="text-sm font-bold text-cyber-cyan mb-2 min-h-[40px] flex items-center neon-text">{card.label}</p>
+                <div className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(0,240,255,0.8)] mb-1">
                   {card.value}
                 </div>
                 <div className="min-h-[20px]">
                   {card.subtext && (
-                    <p className="text-xs font-bold text-white/80">{card.subtext}</p>
+                    <p className="text-xs font-bold text-cyber-cyan/80">{card.subtext}</p>
                   )}
                 </div>
               </div>

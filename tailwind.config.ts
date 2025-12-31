@@ -32,8 +32,8 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#facc15",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#00f0ff",
+          foreground: "#0a0a0f",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -58,6 +58,14 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        cyber: {
+          pink: "#ff006e",
+          cyan: "#00f0ff",
+          purple: "#8b5cf6",
+          blue: "#3b82f6",
+          dark: "#0a0a0f",
+          darker: "#050507",
         },
       },
       borderRadius: {
@@ -87,6 +95,24 @@ const config: Config = {
             transform: "scale(1.3)",
           },
         },
+        "neon-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 5px #00f0ff, 0 0 10px #00f0ff, 0 0 15px #00f0ff, 0 0 20px #00f0ff",
+          },
+          "50%": {
+            boxShadow: "0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px #00f0ff, 0 0 40px #00f0ff, 0 0 50px #00f0ff",
+          },
+        },
+        "glow-float": {
+          "0%, 100%": {
+            transform: "translateY(0) translateZ(0)",
+            filter: "brightness(1)",
+          },
+          "50%": {
+            transform: "translateY(-10px) translateZ(20px)",
+            filter: "brightness(1.2)",
+          },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -111,6 +137,8 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "gentle-bounce": "gentle-bounce 4s ease-in-out infinite",
         "fall": "fall 10s linear infinite",
+        "neon-pulse": "neon-pulse 2s ease-in-out infinite",
+        "glow-float": "glow-float 3s ease-in-out infinite",
       },
     },
   },
