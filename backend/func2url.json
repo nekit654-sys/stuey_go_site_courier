@@ -1,4 +1,5 @@
 {
+  "telegram-register": "https://functions.poehali.dev/bb079cfc-5092-48f0-ab91-a0bf64d96c10",
   "tapper-api": "https://functions.poehali.dev/c28393b1-a89b-4ce1-8fd8-8e9e4838a8e2",
   "telegram-confirm": "https://functions.poehali.dev/159513ce-987a-4895-9e6c-e9ed9a00a035",
   "reset-admin-password": "https://functions.poehali.dev/008bbae3-479b-42be-a3e1-a73f248eab03",

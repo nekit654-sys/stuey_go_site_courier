@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "Reject registration without telegram_id",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "first_name": "Тест"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "OPTIONS request returns 200",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

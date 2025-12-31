@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { API_URL } from '@/config/api';
 import TelegramLinkModal from './TelegramLinkModal';
+import TelegramLoginWidget from './TelegramLoginWidget';
 
 interface TelegramConnection {
   connected: boolean;
@@ -387,20 +388,19 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
                       <Icon name="Unlink" size={13} className="mr-1" />
                       Отвязать
                     </Button>
-                  ) : (
-                    <Button onClick={handleTelegramConnect} size="sm" className="flex-shrink-0 h-7 text-xs px-3">
-                      <Icon name="Link" size={13} className="mr-1" />
-                      Подключить
-                    </Button>
-                  )}
+                  ) : null}
                 </div>
 
-                {telegramConnection?.connected && telegramConnection.telegram_id && (
+                {telegramConnection?.connected && telegramConnection.telegram_id ? (
                   <div className="mt-1.5 p-2 bg-green-50 rounded-lg">
                     <p className="text-xs text-green-800 flex items-center gap-1">
                       <Icon name="Check" size={12} className="flex-shrink-0" />
                       <span className="truncate">ID: {telegramConnection.telegram_id}</span>
                     </p>
+                  </div>
+                ) : (
+                  <div className="mt-3">
+                    <TelegramLoginWidget onSuccess={handleTelegramLinkSuccess} />
                   </div>
                 )}
               </Card>

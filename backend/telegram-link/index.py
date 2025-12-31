@@ -94,6 +94,63 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             action = body_data.get('action', 'link')
             
+            # Проверка Telegram Login Widget данных
+            telegram_id = body_data.get('telegram_id')
+            telegram_username = body_data.get('telegram_username')
+            auth_date = body_data.get('auth_date')
+            hash_value = body_data.get('hash')
+            
+            # Если есть данные от Telegram Login Widget - привязываем
+            if telegram_id and auth_date and hash_value:
+                print(f'[telegram_widget] Linking Telegram ID {telegram_id} to courier {courier_id}')
+                
+                # Проверяем, не привязан ли этот Telegram к другому аккаунту
+                cursor.execute("""
+                    SELECT courier_id FROM t_p25272970_courier_button_site.messenger_connections
+                    WHERE messenger_type = 'telegram' AND messenger_user_id = %s AND is_verified = true
+                """, (str(telegram_id),))
+                
+                existing = cursor.fetchone()
+                if existing and existing['courier_id'] != courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({'error': 'Этот Telegram уже привязан к другому аккаунту'}),
+                        'isBase64Encoded': False
+                    }
+                
+                # Привязываем Telegram
+                cursor.execute("""
+                    INSERT INTO t_p25272970_courier_button_site.messenger_connections
+                    (courier_id, messenger_type, messenger_user_id, is_verified, created_at, updated_at)
+                    VALUES (%s, 'telegram', %s, true, NOW(), NOW())
+                    ON CONFLICT (courier_id, messenger_type) 
+                    DO UPDATE SET 
+                        messenger_user_id = EXCLUDED.messenger_user_id,
+                        is_verified = true,
+                        updated_at = NOW()
+                    RETURNING id
+                """, (courier_id, str(telegram_id)))
+                
+                conn.commit()
+                print(f'[telegram_widget] Successfully linked Telegram {telegram_id} to courier {courier_id}')
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({
+                        'success': True,
+                        'message': 'Telegram успешно привязан! Теперь напиши /start боту @StueyGoBot для активации.'
+                    }),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'generate_code':
                 # Генерация кода для привязки
                 import secrets

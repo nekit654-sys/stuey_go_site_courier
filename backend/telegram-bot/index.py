@@ -527,6 +527,39 @@ def get_courier_stats(courier_id: int) -> Dict[str, Any]:
         cursor.close()
         conn.close()
 
+def register_via_bot(telegram_id: int, username: str = None, first_name: str = None, last_name: str = None, referral_code: str = None) -> Dict[str, Any]:
+    """Регистрация нового курьера через бота"""
+    import urllib.request
+    import urllib.parse
+    
+    try:
+        # Формируем данные для регистрации
+        data = {
+            'telegram_id': telegram_id,
+            'telegram_username': username,
+            'first_name': first_name or 'Курьер',
+            'last_name': last_name
+        }
+        
+        if referral_code:
+            data['referral_code'] = referral_code
+        
+        # Отправляем запрос на регистрацию
+        req = urllib.request.Request(
+            'https://functions.poehali.dev/bb079cfc-5092-48f0-ab91-a0bf64d96c10',
+            data=json.dumps(data).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return result
+    except Exception as e:
+        print(f'Error registering via bot: {e}')
+        import traceback
+        traceback.print_exc()
+        return {'success': False, 'error': str(e)}
+
 def get_reply_keyboard(is_registered: bool = False):
     """Постоянная клавиатура внизу экрана (reply keyboard)"""
     if is_registered:
@@ -542,7 +575,7 @@ def get_reply_keyboard(is_registered: bool = False):
     else:
         return {
             'keyboard': [
-                ['🚀 Зарегистрироваться'],
+                ['🚀 Быстрая регистрация в боте'],
                 ['💰 Сколько можно заработать?', '📋 Требования'],
                 ['🎁 Реферальная программа', '🎮 Игры и бонусы'],
                 ['🤖 AI Помощник', '❓ FAQ']
@@ -1067,7 +1100,63 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             send_telegram_message(chat_id, f"🤖 <b>AI Помощник:</b>\n\n{answer}", reply_markup=keyboard)
                 else:
                     # Незарегистрированные
-                    if text == '🚀 Зарегистрироваться':
+                    if text == '🚀 Быстрая регистрация в боте':
+                        # Регистрация прямо в боте
+                        reg_msg = send_telegram_message(chat_id, "⏳ Создаю твой аккаунт...")
+                        
+                        result = register_via_bot(telegram_id, username, first_name)
+                        
+                        if result.get('success'):
+                            success_text = f"""🎉 <b>РЕГИСТРАЦИЯ ЗАВЕРШЕНА!</b>
+
+Добро пожаловать в Stuey.Go, {result.get('full_name')}!
+
+📊 <b>Твой аккаунт:</b>
+🆔 ID: {result.get('user_id')}
+🔗 Реферальный код: <code>{result.get('referral_code')}</code>
+
+<b>🎁 ЧТО ДАЛЬШЕ:</b>
+
+1️⃣ <b>Подай заявку в Яндекс.Еду</b>
+   Используй ссылку ниже для быстрой регистрации
+
+2️⃣ <b>Приглашай друзей</b>
+   Отправь им свой реферальный код и получай 12,000₽ за каждого!
+
+3️⃣ <b>Начинай зарабатывать</b>
+   40,000-165,000₽/месяц + бонусы от рефералов
+
+<b>💡 Используй меню бота для управления аккаунтом!</b>"""
+                            
+                            success_keyboard = {
+                                'inline_keyboard': [
+                                    [{'text': '🚀 Подать заявку в Яндекс.Еду', 'url': 'https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=f123426cfad648a1afadad700e3a6b6b&utm_content=blank'}],
+                                    [{'text': '📱 Личный кабинет', 'url': f'{WEBSITE_URL}/dashboard'}]
+                                ]
+                            }
+                            send_telegram_message(chat_id, success_text, reply_markup=success_keyboard)
+                            
+                            # Обновляем клавиатуру на зарегистрированную
+                            reply_keyboard = get_reply_keyboard(is_registered=True)
+                            send_telegram_message(chat_id, "Теперь используй меню ниже! 👇", reply_markup=reply_keyboard)
+                        else:
+                            error_text = f"""❌ <b>Ошибка регистрации</b>
+
+{result.get('error', 'Неизвестная ошибка')}
+
+<b>💡 Что делать:</b>
+• Если ты уже зарегистрирован - нажми /start
+• Попробуй зарегистрироваться на сайте
+• Напиши в поддержку @StueyGoBot"""
+                            
+                            error_keyboard = {
+                                'inline_keyboard': [
+                                    [{'text': '🌐 Регистрация на сайте', 'url': WEBSITE_URL}]
+                                ]
+                            }
+                            send_telegram_message(chat_id, error_text, reply_markup=error_keyboard)
+                    
+                    elif text == '🚀 Зарегистрироваться':
                         reg_keyboard = {'inline_keyboard': [[{'text': '🚀 Перейти на сайт', 'url': WEBSITE_URL}]]}
                         reg_text = f"""🚀 <b>РЕГИСТРАЦИЯ КУРЬЕРА</b>
 
