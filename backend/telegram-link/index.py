@@ -59,7 +59,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cursor.execute("""
                 SELECT messenger_user_id, is_verified, created_at
                 FROM t_p25272970_courier_button_site.messenger_connections
-                WHERE courier_id = %s AND messenger_type = 'telegram'
+                WHERE courier_id = %s AND messenger_type = 'telegram' AND is_verified = true
             """, (courier_id,))
             
             connection = cursor.fetchone()
