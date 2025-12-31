@@ -33,6 +33,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
     full_name: user?.full_name || '',
     phone: user?.phone || '',
     city: user?.city || '',
+    email: user?.email || '',
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -54,9 +55,10 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
         full_name: user.full_name || '',
         phone: formatPhoneInput(user.phone || ''),
         city: user.city || '',
+        email: user.email || '',
       });
     }
-  }, [user?.id, user?.full_name, user?.phone, user?.city]);
+  }, [user?.id, user?.full_name, user?.phone, user?.city, user?.email]);
 
   const fetchTelegramConnection = async () => {
     if (!user?.id) return;
@@ -158,6 +160,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
       full_name: user?.full_name || '',
       phone: formatPhoneInput(user?.phone || ''),
       city: user?.city || '',
+      email: user?.email || '',
     });
     setIsEditingProfile(true);
   };
@@ -168,6 +171,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
       full_name: user?.full_name || '',
       phone: formatPhoneInput(user?.phone || ''),
       city: user?.city || '',
+      email: user?.email || '',
     });
   };
 
@@ -200,6 +204,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
           full_name: profileData.full_name.trim(),
           phone: phoneDigits,
           city: profileData.city.trim(),
+          email: profileData.email.trim(),
         }),
       });
 
@@ -211,6 +216,7 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
           full_name: profileData.full_name.trim(),
           phone: phoneDigits,
           city: profileData.city.trim(),
+          email: profileData.email.trim(),
         });
         toast.success('Профиль обновлён');
         setIsEditingProfile(false);
@@ -267,6 +273,12 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
                         placeholder="Иванов Иван"
                         className="mt-0.5 h-9 text-sm"
                       />
+                      {profileData.full_name !== user?.full_name && (
+                        <p className="text-[10px] sm:text-xs text-amber-600 mt-1 flex items-center gap-1">
+                          <Icon name="AlertCircle" size={11} />
+                          <span>Имя можно менять раз в 2 недели</span>
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -288,6 +300,18 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
                         value={profileData.city}
                         onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
                         placeholder="Москва"
+                        className="mt-0.5 h-9 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email" className="text-xs">Email (необязательно)</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                        placeholder="email@example.com"
                         className="mt-0.5 h-9 text-sm"
                       />
                     </div>
@@ -336,6 +360,14 @@ export default function SettingsModal({ isOpen, onClose, onConnectionChange }: S
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-gray-500">Город</p>
                         <p className="text-xs sm:text-sm font-medium truncate">{user?.city || 'Не указано'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                      <Icon name="Mail" size={14} className="text-gray-500 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-gray-500">Email</p>
+                        <p className="text-xs sm:text-sm font-medium truncate">{user?.email || 'Не указано'}</p>
                       </div>
                     </div>
                   </div>

@@ -2284,6 +2284,7 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
         full_name = body_data.get('full_name')
         phone = body_data.get('phone')
         city = body_data.get('city')
+        email = body_data.get('email')
         referral_code_input = body_data.get('referral_code_input', '').strip()
         
         if not full_name or not phone or not city:
@@ -2296,13 +2297,32 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
                 'isBase64Encoded': False
             }
         
-        # Проверяем текущего пользователя
+        # Проверяем текущего пользователя и время последнего изменения имени
         cur.execute("""
-            SELECT invited_by_user_id FROM t_p25272970_courier_button_site.users
+            SELECT invited_by_user_id, full_name, last_name_change_at 
+            FROM t_p25272970_courier_button_site.users
             WHERE id = %s
         """, (user_id,))
         
         current_user = cur.fetchone()
+        
+        # Проверяем, можно ли менять имя (раз в 2 недели)
+        name_changed = full_name != current_user['full_name']
+        if name_changed and current_user.get('last_name_change_at'):
+            from datetime import datetime, timedelta
+            last_change = current_user['last_name_change_at']
+            days_since_change = (datetime.now() - last_change).days
+            
+            if days_since_change < 14:
+                days_left = 14 - days_since_change
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Имя можно менять раз в 2 недели. Осталось: {days_left} дней'}),
+                    'isBase64Encoded': False
+                }
         
         # Если введён реферальный код и у пользователя нет реферера
         if referral_code_input and not current_user['invited_by_user_id']:
@@ -2330,12 +2350,29 @@ def handle_profile(event: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, 
                     ON CONFLICT (referrer_id, referee_id) DO NOTHING
                 """, (referrer['id'], user_id, full_name, city))
         
-        # Просто обновляем текущего пользователя
-        cur.execute("""
-            UPDATE t_p25272970_courier_button_site.users
-            SET full_name = %s, phone = %s, city = %s, updated_at = NOW()
-            WHERE id = %s
-        """, (full_name, phone, city, user_id))
+        # Обновляем текущего пользователя (с email и отслеживанием изменения имени)
+        if name_changed:
+            # Обновляем имя в лидерборде игр
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.courier_game_leaderboard
+                SET player_name = %s
+                WHERE user_id = %s
+            """, (full_name, user_id))
+            
+            # Обновляем профиль с меткой времени изменения имени
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET full_name = %s, phone = %s, city = %s, email = %s, 
+                    last_name_change_at = NOW(), updated_at = NOW()
+                WHERE id = %s
+            """, (full_name, phone, city, email, user_id))
+        else:
+            # Обычное обновление без изменения имени
+            cur.execute("""
+                UPDATE t_p25272970_courier_button_site.users
+                SET phone = %s, city = %s, email = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (phone, city, email, user_id))
         
         conn.commit()
         
