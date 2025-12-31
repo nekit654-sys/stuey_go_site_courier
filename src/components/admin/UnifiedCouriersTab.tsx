@@ -247,6 +247,23 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
             totalOrders={totalOrders}
           />
 
+          {couriers.some(c => c.archived_at) && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-start gap-3">
+                  <Icon name="Info" size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-amber-900 font-medium">Автоматическое удаление архивированных профилей</p>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Архивированные профили автоматически удаляются через 14 дней после архивации. 
+                      Для ручного запуска очистки перейдите в раздел "Аналитика" → кнопка "Очистить старые данные".
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <CouriersList
             couriers={filteredCouriers}
             isLoading={isLoading}

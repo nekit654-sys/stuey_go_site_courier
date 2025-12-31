@@ -121,22 +121,23 @@ const Navigation = () => {
                     </button>
 
                     {/* Курьер: Город в движении - /game */}
-                    <button
-                      onClick={() => {
-                        playSound('whoosh');
-                        openGame('2d');
-                        setIsGameMenuOpen(false);
-                      }}
-                      className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className="text-2xl">🚚</div>
-                        <div className="flex-1">
-                          <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
-                          <div className="text-xs text-gray-700 font-semibold">2D симулятор</div>
+                    <Link to="/game" state={{ from: location.pathname }}>
+                      <button
+                        onClick={() => {
+                          playSound('whoosh');
+                          setIsGameMenuOpen(false);
+                        }}
+                        className="w-full text-left bg-gradient-to-br from-blue-100 to-cyan-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="text-2xl">🚚</div>
+                          <div className="flex-1">
+                            <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
+                            <div className="text-xs text-gray-700 font-semibold">2D симулятор</div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    </Link>
                   </div>
                 </div>
               )}

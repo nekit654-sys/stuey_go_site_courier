@@ -1,5 +1,7 @@
 import { CourierGame2D } from '@/components/courier-game/CourierGame2D';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useLocation } from 'react-router-dom';
+import { useFullscreen } from '@/hooks/useFullscreen';
 
 function ErrorFallback({ error }: { error: Error }) {
   return (
@@ -20,6 +22,14 @@ function ErrorFallback({ error }: { error: Error }) {
 }
 
 export default function Game() {
+  const location = useLocation();
+  
+  // Определяем откуда пришёл пользователь
+  const returnTo = (location.state as any)?.from || '/';
+  
+  // Автоматический полноэкранный режим
+  useFullscreen({ returnTo });
+  
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <CourierGame2D />

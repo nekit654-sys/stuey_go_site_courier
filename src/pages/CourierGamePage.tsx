@@ -1,7 +1,8 @@
 import { CourierGame2D } from '@/components/courier-game/CourierGame2D';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useFullscreen } from '@/hooks/useFullscreen';
 
 // Telegram Web App SDK types
 declare global {
@@ -27,7 +28,14 @@ declare global {
 export default function CourierGamePage() {
   const { isAuthenticated, user, isLoading, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  
+  // Определяем откуда пришёл пользователь
+  const returnTo = (location.state as any)?.from || '/dashboard';
+  
+  // Автоматический полноэкранный режим
+  useFullscreen({ returnTo });
 
   useEffect(() => {
     const authenticateFromTelegram = async () => {

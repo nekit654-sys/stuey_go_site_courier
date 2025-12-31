@@ -9,6 +9,8 @@ import { LeaderboardModal } from '@/components/tapper-game/LeaderboardModal';
 import { AchievementsModal } from '@/components/tapper-game/AchievementsModal';
 import Icon from '@/components/ui/icon';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import { useFullscreen } from '@/hooks/useFullscreen';
 
 const API_URL = 'https://functions.poehali.dev/c28393b1-a89b-4ce1-8fd8-8e9e4838a8e2';
 
@@ -55,6 +57,7 @@ interface LeaderboardEntry {
 
 export default function TapperGame() {
   const { user } = useAuth();
+  const location = useLocation();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -63,6 +66,12 @@ export default function TapperGame() {
   const [showUpgrades, setShowUpgrades] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  
+  // Определяем откуда пришёл пользователь
+  const returnTo = (location.state as any)?.from || '/dashboard';
+  
+  // Автоматический полноэкранный режим
+  useFullscreen({ returnTo });
 
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;

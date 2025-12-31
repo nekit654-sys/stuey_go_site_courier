@@ -94,7 +94,7 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
   };
 
   const handleCleanup = async () => {
-    if (!confirm('Удалить все визиты старше 90 дней? Это действие нельзя отменить.')) {
+    if (!confirm('Выполнить очистку данных?\n\n• Визиты старше 90 дней будут удалены\n• Архивированные профили с истёкшим сроком восстановления будут удалены окончательно\n\nЭто действие нельзя отменить.')) {
       return;
     }
 
@@ -115,9 +115,18 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
 
       const result = await response.json();
       
+      const visitsDeleted = result.visits?.deleted_count || 0;
+      const visitsRemaining = result.visits?.remaining_count || 0;
+      const usersDeleted = result.users?.deleted_archived_count || 0;
+      
+      let description = `Удалено визитов: ${visitsDeleted}. Осталось: ${visitsRemaining}`;
+      if (usersDeleted > 0) {
+        description += `\nУдалено архивированных профилей: ${usersDeleted}`;
+      }
+      
       toast({
         title: 'Очистка завершена',
-        description: `Удалено записей: ${result.deleted_count}. Осталось: ${result.remaining_count}`,
+        description: description,
       });
 
       fetchAnalytics();
@@ -201,7 +210,8 @@ export default function VisitAnalytics({ authToken }: VisitAnalyticsProps) {
             ) : (
               <>
                 <Icon name="Trash2" className="mr-2" size={16} />
-                Очистить старые
+                <span className="hidden sm:inline">Очистить старые данные</span>
+                <span className="sm:hidden">Очистка</span>
               </>
             )}
           </Button>
