@@ -245,21 +245,19 @@ const Navigation = () => {
                 </div>
               </Button>
 
-              <Button
-                onClick={() => {
-                  playSound('whoosh');
-                  openGame('2d');
-                  handleMenuItemClick();
-                }}
-                variant="ghost"
-                className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
-              >
-                <span className="text-2xl mr-3">🚚</span>
-                <div className="text-left">
-                  <div className="font-extrabold">Курьер: Город в движении</div>
-                  <div className="text-xs font-semibold opacity-90">2D симулятор</div>
-                </div>
-              </Button>
+              <Link to="/game" state={{ from: location.pathname }} onClick={handleMenuItemClick}>
+                <Button
+                  onClick={() => playSound('whoosh')}
+                  variant="ghost"
+                  className="w-full justify-start bg-gradient-to-b from-cyan-400 to-cyan-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-cyan-500 hover:to-cyan-600"
+                >
+                  <span className="text-2xl mr-3">🚚</span>
+                  <div className="text-left">
+                    <div className="font-extrabold">Курьер: Город в движении</div>
+                    <div className="text-xs font-semibold opacity-90">2D симулятор</div>
+                  </div>
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Login/Profile Button */}
