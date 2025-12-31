@@ -95,25 +95,44 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             elif action == 'leaderboard':
                 limit = int(params.get('limit', 100))
+                
                 cur.execute("""
                     SELECT 
-                        tp.id,
-                        tp.coins,
-                        tp.level,
-                        tp.total_taps,
-                        u.username,
-                        ROW_NUMBER() OVER (ORDER BY tp.coins DESC) as rank
-                    FROM t_p25272970_courier_button_site.tapper_profiles tp
-                    JOIN t_p25272970_courier_button_site.users u ON tp.user_id = u.id
-                    ORDER BY tp.coins DESC
+                        user_id,
+                        coins,
+                        level
+                    FROM tapper_profiles
+                    ORDER BY coins DESC
                     LIMIT %s
                 """, (limit,))
-                leaderboard = cur.fetchall()
+                profiles = cur.fetchall()
+                
+                leaderboard = []
+                for idx, profile in enumerate(profiles, 1):
+                    try:
+                        cur.execute("""
+                            SELECT username, first_name 
+                            FROM users 
+                            WHERE id = %s
+                        """, (profile['user_id'],))
+                        user = cur.fetchone()
+                        username = 'Игрок ' + str(profile['user_id'])
+                        if user:
+                            username = user.get('username') or user.get('first_name') or username
+                    except:
+                        username = 'Игрок ' + str(profile['user_id'])
+                    
+                    leaderboard.append({
+                        'rank': idx,
+                        'username': username,
+                        'coins': profile['coins'],
+                        'level': profile['level']
+                    })
                 
                 return {
                     'statusCode': 200,
                     'headers': headers,
-                    'body': json.dumps([dict(row) for row in leaderboard], default=json_serial),
+                    'body': json.dumps(leaderboard, default=json_serial),
                     'isBase64Encoded': False
                 }
             

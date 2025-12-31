@@ -275,7 +275,7 @@ export default function TapperGame() {
         >
           <div className="flex items-center justify-center mb-4 relative">
             <Button
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={() => window.location.href = returnTo}
               variant="outline"
               className="absolute left-0 bg-white/20 hover:bg-white/30 text-white border-white/40 backdrop-blur-sm"
             >

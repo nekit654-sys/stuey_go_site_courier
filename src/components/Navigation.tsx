@@ -120,8 +120,8 @@ const Navigation = () => {
                       </div>
                     </button>
 
-                    {/* Курьер: Город в движении - /game */}
-                    <Link to="/game" state={{ from: location.pathname }}>
+                    {/* Курьер: Город в движении - /courier-game */}
+                    <Link to="/courier-game" state={{ from: location.pathname }}>
                       <button
                         onClick={() => {
                           playSound('whoosh');
@@ -134,6 +134,25 @@ const Navigation = () => {
                           <div className="flex-1">
                             <div className="font-extrabold text-black text-sm mb-1">Курьер: Город в движении</div>
                             <div className="text-xs text-gray-700 font-semibold">2D симулятор</div>
+                          </div>
+                        </div>
+                      </button>
+                    </Link>
+
+                    {/* Courier Tapper - /tapper-game */}
+                    <Link to="/tapper-game" state={{ from: location.pathname }}>
+                      <button
+                        onClick={() => {
+                          playSound('whoosh');
+                          setIsGameMenuOpen(false);
+                        }}
+                        className="w-full text-left bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-black rounded-lg p-3 hover:shadow-[0_3px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="text-2xl">🚴</div>
+                          <div className="flex-1">
+                            <div className="font-extrabold text-black text-sm mb-1">Courier Tapper</div>
+                            <div className="text-xs text-gray-700 font-semibold">Кликер</div>
                           </div>
                         </div>
                       </button>
@@ -228,7 +247,7 @@ const Navigation = () => {
               </Link>
             ))}
             
-            {/* Mobile Games - 2 игры */}
+            {/* Mobile Games - 3 игры */}
             <div className="space-y-2">
               <Button
                 onClick={() => {
@@ -245,7 +264,7 @@ const Navigation = () => {
                 </div>
               </Button>
 
-              <Link to="/game" state={{ from: location.pathname }} onClick={handleMenuItemClick}>
+              <Link to="/courier-game" state={{ from: location.pathname }} onClick={handleMenuItemClick}>
                 <Button
                   onClick={() => playSound('whoosh')}
                   variant="ghost"
@@ -255,6 +274,20 @@ const Navigation = () => {
                   <div className="text-left">
                     <div className="font-extrabold">Курьер: Город в движении</div>
                     <div className="text-xs font-semibold opacity-90">2D симулятор</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link to="/tapper-game" state={{ from: location.pathname }} onClick={handleMenuItemClick}>
+                <Button
+                  onClick={() => playSound('whoosh')}
+                  variant="ghost"
+                  className="w-full justify-start bg-gradient-to-b from-purple-400 to-pink-500 text-white font-extrabold transition-all duration-150 shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px] py-6 text-base rounded-xl border-3 border-black hover:from-purple-500 hover:to-pink-600"
+                >
+                  <span className="text-2xl mr-3">🚴</span>
+                  <div className="text-left">
+                    <div className="font-extrabold">Courier Tapper</div>
+                    <div className="text-xs font-semibold opacity-90">Кликер</div>
                   </div>
                 </Button>
               </Link>

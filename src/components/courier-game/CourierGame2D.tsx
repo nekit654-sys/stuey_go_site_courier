@@ -111,7 +111,11 @@ const TRANSPORT_COSTS = {
   car: { cost: 800, speed: 8 }      // Машина - очень быстро
 };
 
-export function CourierGame2D() {
+interface CourierGame2DProps {
+  returnTo?: string;
+}
+
+export function CourierGame2D({ returnTo = '/dashboard' }: CourierGame2DProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -2021,7 +2025,7 @@ export function CourierGame2D() {
       await saveProgress();
       toast.success('✅ Прогресс сохранён!', { duration: 2000 });
     }
-    setTimeout(() => navigate('/'), 500);
+    setTimeout(() => navigate(returnTo), 500);
   };
 
   if (isLoading) {
@@ -2136,7 +2140,7 @@ export function CourierGame2D() {
 
           {/* Статистика игрока */}
           {isAuthenticated && (
-            <div className="mt-8 bg-black/80 p-6 rounded-lg border-4 border-yellow-400 max-w-md mx-auto">
+            <div className="mt-8 bg-gradient-to-br from-blue-600 to-cyan-600 p-6 rounded-lg border-4 border-yellow-400 max-w-md mx-auto">
             <div className="grid grid-cols-2 gap-4 text-white font-bold">
               <div>
                 <p className="text-yellow-400 text-sm">УРОВЕНЬ</p>

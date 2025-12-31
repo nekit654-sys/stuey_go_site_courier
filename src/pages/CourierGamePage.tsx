@@ -109,5 +109,5 @@ export default function CourierGamePage() {
     );
   }
 
-  return <CourierGame2D />;
+  return <CourierGame2D returnTo={returnTo} />;
 }

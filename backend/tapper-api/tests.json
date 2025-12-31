@@ -8,14 +8,15 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Get leaderboard",
+      "name": "Get leaderboard returns array",
       "method": "GET",
       "path": "/?action=leaderboard",
       "headers": {
         "X-User-Id": "1"
       },
       "expectedStatus": 200,
-      "bodyMatcher": "partial"
+      "expectedBody": [],
+      "bodyMatcher": "type"
     }
   ]
 }

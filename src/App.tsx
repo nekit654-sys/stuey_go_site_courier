@@ -108,7 +108,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && location.pathname !== '/courier-game' && (
+      {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && location.pathname !== '/courier-game' && location.pathname !== '/tapper-game' && (
         <>
           <VisitTracker cooldownMinutes={30} />
           <WhatsAppButton />

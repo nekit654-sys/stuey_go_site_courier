@@ -2487,9 +2487,26 @@
   }
 
   // Обработчики меню
-  playBtn.addEventListener('click', () => {
+  playBtn.addEventListener('click', async () => {
     playBackgroundMusic();
     mainMenu.style.display = 'none';
+    
+    // Входим в полноэкранный режим
+    try {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        await elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        await elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        await elem.msRequestFullscreen();
+      }
+    } catch (e) {
+      console.log('Не удалось войти в полноэкранный режим:', e);
+    }
+    
     startGame();
   });
   
@@ -2552,9 +2569,51 @@
     }
   });
   
-  document.getElementById('exitGameBtn').addEventListener('click', () => {
-    window.location.href = '/';
+  document.getElementById('exitGameBtn').addEventListener('click', async () => {
+    // Выходим из полноэкранного режима
+    try {
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+      }
+    } catch (e) {
+      console.log('Ошибка выхода из полноэкранного режима:', e);
+    }
+    
+    // Возвращаемся на страницу откуда пришли или на главную
+    const returnTo = document.referrer && document.referrer.includes(window.location.origin) 
+      ? document.referrer 
+      : '/dashboard';
+    window.location.href = returnTo;
   });
+  
+  // Обработчик выхода из полноэкранного режима (ESC или системная кнопка)
+  function handleFullscreenChange() {
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+      // Если игра активна и вышли из полноэкранного режима - возвращаемся назад
+      if (mainMenu.style.display === 'none' && !gameOverFlag) {
+        const returnTo = document.referrer && document.referrer.includes(window.location.origin) 
+          ? document.referrer 
+          : '/dashboard';
+        window.location.href = returnTo;
+      }
+    }
+  }
+  
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
   
   toggleMusicBtn.addEventListener('click', () => {
     toggleMusic();
