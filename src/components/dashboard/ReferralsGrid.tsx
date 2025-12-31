@@ -109,12 +109,12 @@ export default function ReferralsGrid({ referrals }: ReferralsGridProps) {
                   </div>
                 </div>
 
-                <div className="glass-effect border border-cyber-pink/30 rounded-xl p-3">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Icon name="Coins" className="h-4 w-4 text-cyber-pink cyber-glow" />
-                    <span className="text-xs font-bold text-cyber-pink">Бонус</span>
+                    <Icon name="Coins" className="h-4 w-4 text-green-600" />
+                    <span className="text-xs font-bold text-green-900">Бонус</span>
                   </div>
-                  <div className="text-2xl font-black text-cyber-pink neon-text">
+                  <div className="text-2xl font-black text-green-600">
                     {referral.bonus_amount}₽
                   </div>
                 </div>
