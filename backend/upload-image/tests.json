@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Upload valid image",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        "filename": "test.png"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "url": "string",
+        "filename": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Missing image data",
+      "method": "POST",
+      "path": "/",
+      "body": {},
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

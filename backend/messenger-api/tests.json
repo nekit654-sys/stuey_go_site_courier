@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Generate link code",
+      "method": "POST",
+      "path": "/?action=generate_code",
+      "headers": {
+        "X-User-Id": "1"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "code": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get messenger status",
+      "method": "GET",
+      "path": "/?action=status",
+      "headers": {
+        "X-User-Id": "1"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "connections": "object"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

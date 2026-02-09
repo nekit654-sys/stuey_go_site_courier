@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "WhatsApp webhook test",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "entry": [{
+          "changes": [{
+            "value": {
+              "messages": [{
+                "from": "79991234567",
+                "text": {
+                  "body": "help"
+                }
+              }]
+            }
+          }]
+        }]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "ok"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
