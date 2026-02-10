@@ -138,6 +138,8 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
   const handleDeleteCourier = async (courierId: number) => {
     const token = localStorage.getItem('auth_token');
+    console.log('🔑 Token from localStorage:', token);
+    
     if (!token) {
       toast.error('Необходима авторизация');
       return;
@@ -152,6 +154,10 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         throw new Error('URL для удаления курьеров не найден');
       }
 
+      console.log('🌐 Sending DELETE request to:', deleteUrl);
+      console.log('📋 Headers:', { 'X-Auth-Token': token });
+      console.log('📦 Body:', { courier_id: courierId });
+
       const response = await fetch(deleteUrl, {
         method: 'DELETE',
         headers: {
@@ -163,7 +169,9 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         }),
       });
 
+      console.log('📥 Response status:', response.status);
       const result = await response.json();
+      console.log('📥 Response body:', result);
 
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Ошибка удаления');
@@ -172,6 +180,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
       toast.success(result.message || 'Курьер архивирован');
       onRefresh();
     } catch (error: any) {
+      console.error('❌ Delete error:', error);
       toast.error(error.message || 'Ошибка при удалении');
       throw error;
     }

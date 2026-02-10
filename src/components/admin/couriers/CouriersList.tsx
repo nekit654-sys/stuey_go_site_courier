@@ -246,6 +246,21 @@ export default function CouriersList({
                             Удалить
                           </Button>
                         )}
+                        {courier.archived_at && new Date(courier.restore_until || '') < new Date() && onDeleteCourier && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (confirm(`Удалить ${courier.full_name} окончательно?\n\nЭто действие НЕОБРАТИМО!`)) {
+                                onDeleteCourier(courier.id);
+                              }
+                            }}
+                            className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Icon name="Trash2" size={14} className="mr-1" />
+                            Удалить навсегда
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
