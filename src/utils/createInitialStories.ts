@@ -66,7 +66,7 @@ export async function createInitialStories() {
     }
   ];
 
-  const url = 'https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e';
+  const url = 'https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3';
 
   for (const story of stories) {
     try {

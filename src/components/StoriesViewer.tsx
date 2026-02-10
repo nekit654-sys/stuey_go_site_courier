@@ -66,7 +66,7 @@ export default function StoriesViewer({ stories, initialStoryId, onClose }: Stor
     const userId = localStorage.getItem('story_user_id') || `guest_${Date.now()}`;
 
     try {
-      await fetch('https://functions.poehali.dev/85e177ef-1360-45f3-9937-be8f4d3af883', {
+      await fetch('https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ storyId, userId }),

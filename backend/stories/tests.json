@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Get active stories",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "stories": []
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get all stories (admin)",
+      "method": "GET",
+      "path": "/?admin=true",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "stories": []
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}

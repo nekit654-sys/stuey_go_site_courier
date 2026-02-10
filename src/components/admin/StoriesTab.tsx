@@ -64,7 +64,7 @@ export default function StoriesTab() {
   const fetchStories = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?admin=true');
+      const response = await fetch('https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3?admin=true');
       const data = await response.json();
       
       const allStories = data.stories || [];
@@ -85,7 +85,7 @@ export default function StoriesTab() {
     }
 
     try {
-      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e', {
+      const response = await fetch('https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ export default function StoriesTab() {
     if (!confirm('Удалить историю?')) return;
 
     try {
-      const response = await fetch(`https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?id=${id}`, {
+      const response = await fetch(`https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3?id=${id}`, {
         method: 'DELETE',
       });
 

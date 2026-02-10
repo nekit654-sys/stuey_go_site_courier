@@ -105,7 +105,7 @@ export default function StoriesCarousel({ onStoryClick }: StoriesCarouselProps) 
       console.log('📡 Fetching stories for user:', userId);
 
       const response = await fetch(
-        `https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e?user_id=${userId}`,
+        `https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3?userId=${userId}`,
         { priority: 'high' } as RequestInit
       );
       const data = await response.json();
