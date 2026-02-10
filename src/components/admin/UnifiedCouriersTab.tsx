@@ -156,7 +156,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'X-Auth-Token': token,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           courier_id: courierId

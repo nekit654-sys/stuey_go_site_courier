@@ -17,7 +17,7 @@ def handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Auth-Token, X-Authorization',
         'Access-Control-Max-Age': '86400'
     }
     
@@ -39,8 +39,11 @@ def handler(event, context):
             'isBase64Encoded': False
         }
     
-    # Проверка авторизации админа
-    auth_token = event.get('headers', {}).get('X-Auth-Token') or event.get('headers', {}).get('x-auth-token')
+    # Проверка авторизации админа (прокси конвертирует Authorization → X-Authorization)
+    auth_token = (event.get('headers', {}).get('X-Authorization') or 
+                  event.get('headers', {}).get('x-authorization') or
+                  event.get('headers', {}).get('X-Auth-Token') or 
+                  event.get('headers', {}).get('x-auth-token'))
     
     if not auth_token:
         return {
@@ -50,7 +53,11 @@ def handler(event, context):
             'isBase64Encoded': False
         }
     
-    # Простая проверка токена (можно улучшить)
+    # Убираем префикс Bearer если есть
+    if auth_token.startswith('Bearer '):
+        auth_token = auth_token[7:]
+    
+    # Простая проверка токена
     if not auth_token or len(auth_token) < 10:
         return {
             'statusCode': 401,
