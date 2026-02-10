@@ -21,5 +21,6 @@
   "proxy": "https://functions.poehali.dev/81ff3563-33bf-443d-ad8e-e4ac8b1a59b1",
   "payout": "https://functions.poehali.dev/259dc130-b8d1-42f7-86b2-5277c0b5582a",
   "api": "https://functions.poehali.dev/5f6f6889-3ab3-49f0-865b-fcffd245d858",
-  "admin-panel": "https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559"
+  "admin-panel": "https://functions.poehali.dev/11e2050a-12a1-4797-9ba5-1f3b27437559",
+  "courier-delete": "https://functions.poehali.dev/db323664-d80a-438e-a125-7e96fd7acf64"
 }
