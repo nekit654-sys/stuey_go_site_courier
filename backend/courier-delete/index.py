@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 import requests
 
 def handler(event, context):
+    print(f'🔍 INCOMING EVENT: {json.dumps(event, default=str)}')
+    
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -22,6 +24,7 @@ def handler(event, context):
     }
     
     method = event.get('httpMethod', 'DELETE')
+    print(f'📌 Method: {method}')
     
     if method == 'OPTIONS':
         return {
@@ -40,10 +43,15 @@ def handler(event, context):
         }
     
     # Проверка авторизации админа (прокси конвертирует Authorization → X-Authorization)
-    auth_token = (event.get('headers', {}).get('X-Authorization') or 
-                  event.get('headers', {}).get('x-authorization') or
-                  event.get('headers', {}).get('X-Auth-Token') or 
-                  event.get('headers', {}).get('x-auth-token'))
+    request_headers = event.get('headers', {})
+    print(f'📋 All headers: {json.dumps(request_headers, default=str)}')
+    
+    auth_token = (request_headers.get('X-Authorization') or 
+                  request_headers.get('x-authorization') or
+                  request_headers.get('X-Auth-Token') or 
+                  request_headers.get('x-auth-token'))
+    
+    print(f'🔑 Auth token found: {auth_token[:20] if auth_token else "NONE"}...')
     
     if not auth_token:
         return {
