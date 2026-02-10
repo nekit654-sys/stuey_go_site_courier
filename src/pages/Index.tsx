@@ -55,7 +55,7 @@ const Index = () => {
 
   useEffect(() => {
     document.title =
-      "Stuey.Go — свобода выбора, стабильность заработка. Присоединяйся! 🚀";
+      "YaHub.Go — свобода выбора, стабильность заработка. Присоединяйся! 🚀";
     
     const ref = searchParams.get('ref');
     if (ref) {
@@ -149,7 +149,7 @@ const Index = () => {
         
         {/* Кнопка поддержки */}
         <a
-          href="https://t.me/StueyGoBot"
+          href="https://t.me/YaHubGoBot"
           target="_blank"
           rel="noopener noreferrer"
           className={`w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-[0_2px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] flex items-center justify-center transition-all duration-150 flex-shrink-0 ${

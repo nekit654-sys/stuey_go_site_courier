@@ -23,8 +23,8 @@ const Contacts = () => {
       title: "Telegram",
       description: "Быстрые ответы на вопросы. Получай за друга 12 тысяч!",
       icon: "MessageCircle",
-      contact: "@StueyGoBot",
-      action: "https://t.me/StueyGoBot?start=support",
+      contact: "@YaHubGoBot",
+      action: "https://t.me/YaHubGoBot?start=support",
     },
     {
       title: "Центры поддержки",

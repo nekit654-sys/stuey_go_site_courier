@@ -76,7 +76,7 @@ export default function TelegramConnectCard({ onConnect, isConnected = false, on
           {/* Кнопки */}
           <div className="flex gap-3">
             <Button
-              onClick={() => window.open('https://t.me/StueyGoBot', '_blank')}
+              onClick={() => window.open('https://t.me/YaHubGoBot', '_blank')}
               className="flex-1 bg-white hover:bg-gray-100 text-green-600 font-black border-3 border-green-700 shadow-[0_5px_0_0_rgba(22,163,74,1)] hover:shadow-[0_2px_0_0_rgba(22,163,74,1)] hover:translate-y-[3px] transition-all"
             >
               <Icon name="Send" size={18} className="mr-2" />

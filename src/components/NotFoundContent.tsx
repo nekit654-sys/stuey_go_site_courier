@@ -8,7 +8,7 @@ const NotFoundContent = () => {
 
   useEffect(() => {
     // Устанавливаем правильный заголовок и мета-теги для SEO
-    document.title = "404 - Страница не найдена | Stuey.Go";
+    document.title = "404 - Страница не найдена | YaHub.Go";
     
     // Добавляем мета-тег для индикации 404 статуса
     const metaRobots = document.createElement('meta');

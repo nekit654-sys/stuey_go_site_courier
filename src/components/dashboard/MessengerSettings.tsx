@@ -210,7 +210,7 @@ export default function MessengerSettings({ onConnectionChange }: MessengerSetti
 
   const openBot = (messenger: 'telegram' | 'whatsapp') => {
     if (messenger === 'telegram') {
-      window.open('https://t.me/StueyGoBot', '_blank');
+      window.open('https://t.me/YaHubGoBot', '_blank');
     } else {
       window.open('https://wa.me/YOUR_WHATSAPP_NUMBER', '_blank');
     }

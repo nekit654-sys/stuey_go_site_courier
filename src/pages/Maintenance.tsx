@@ -141,7 +141,7 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
   };
 
   const handleTelegramClick = () => {
-    const telegramUrl = 'https://t.me/Stueygo_bot';
+    const telegramUrl = 'https://t.me/YaHubGoBot';
     window.open(telegramUrl, '_blank');
     setShowSupportMenu(false);
   };
@@ -181,12 +181,12 @@ export default function Maintenance({ onUnlock }: MaintenanceProps) {
             <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white rounded-2xl border-3 border-black shadow-lg flex items-center justify-center flex-shrink-0">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png"
-                alt="Stuey.Go"
+                alt="YaHub.Go"
                 className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 object-contain"
               />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black gradient-text">
-              Stuey.Go | Яндекс Еда
+              YaHub.Go | Яндекс Еда
             </h1>
           </div>
           <p className="text-lg sm:text-xl md:text-2xl text-orange-800 font-medium tracking-wide">

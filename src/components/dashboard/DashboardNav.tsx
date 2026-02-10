@@ -17,15 +17,15 @@ export default function DashboardNav({ onSettings, onLogout }: DashboardNavProps
             <div className="w-12 h-12 bg-white rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] flex items-center justify-center">
               <img 
                 src="https://cdn.poehali.dev/files/b80ff2c7-bdf2-45f1-bd01-9d786ad0c249.png" 
-                alt="Stuey Go Logo" 
+                alt="YaHub Go Logo" 
                 className="w-9 h-9 rounded object-cover"
               />
             </div>
             <span className="text-black font-rubik text-lg sm:text-xl font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)] hidden sm:block">
-              Stuey.Go | Личный кабинет
+              YaHub.Go | Личный кабинет
             </span>
             <span className="text-black font-rubik text-lg font-black drop-shadow-[3px_3px_0_rgba(255,255,255,0.6)] sm:hidden">
-              Stuey.Go
+              YaHub.Go
             </span>
           </Link>
 

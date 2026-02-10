@@ -54,7 +54,7 @@ export default function NewCourierNotification({ onDismiss }: NewCourierNotifica
                   Зарегистрируйся по нашей реферальной ссылке
                 </p>
                 <p className="text-black/60 text-xs">
-                  Только так ты получишь бонусы от Stuey.Go
+                  Только так ты получишь бонусы от YaHub.Go
                 </p>
               </div>
             </div>

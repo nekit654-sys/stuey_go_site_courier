@@ -20,7 +20,7 @@ const WhatsAppButton: React.FC = () => {
   // Прямой переход в Telegram без меню
   const handleSupportClickNew = () => {
     playSound('notification');
-    const telegramUrl = 'https://t.me/StueyGoBot';
+    const telegramUrl = 'https://t.me/YaHubGoBot';
     window.open(telegramUrl, '_blank');
   };
 
