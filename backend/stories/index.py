@@ -73,7 +73,25 @@ def handler(event: dict, context) -> dict:
                 else:
                     story_dict['isViewed'] = False
                 
-                stories_list.append(story_dict)
+                camel_story = {
+                    'id': story_dict['id'],
+                    'title': story_dict['title'],
+                    'description': story_dict['description'],
+                    'imageUrl': story_dict['image_url'],
+                    'buttonText': story_dict.get('button_text'),
+                    'buttonLink': story_dict.get('button_link'),
+                    'isActive': story_dict['is_active'],
+                    'position': story_dict['position'],
+                    'isViewed': story_dict['isViewed'],
+                    'animationType': story_dict.get('animation_type'),
+                    'animationConfig': story_dict.get('animation_config')
+                }
+                
+                if is_admin:
+                    camel_story['createdAt'] = story_dict.get('created_at')
+                    camel_story['updatedAt'] = story_dict.get('updated_at')
+                
+                stories_list.append(camel_story)
             
             return {
                 'statusCode': 200,
