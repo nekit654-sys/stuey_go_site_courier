@@ -25,7 +25,7 @@ declare global {
   }
 }
 
-export default function TelegramLoginWidget({ onSuccess, botUsername = 'StueyGoBot' }: TelegramLoginWidgetProps) {
+export default function TelegramLoginWidget({ onSuccess, botUsername = 'YaHubGoBot' }: TelegramLoginWidgetProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -62,7 +62,7 @@ export default function Auth() {
   const handleOAuthCallback = async (provider: string, code: string) => {
     setLoading(true);
     try {
-      const isProd = window.location.hostname === 'stuey-go.ru' || window.location.hostname === 'yahub-go.ru';
+      const isProd = window.location.hostname === 'yahub-go.ru';
       const redirectUri = isProd ? `https://${window.location.hostname}/auth` : `${window.location.origin}/auth`;
       
       const requestBody = {

@@ -11,7 +11,7 @@ interface TelegramLinkModalProps {
   userId: number;
 }
 
-const BOT_USERNAME = 'StueyGoBot';
+const BOT_USERNAME = 'YaHubGoBot';
 const BOT_URL = `https://t.me/${BOT_USERNAME}?start=link`;
 
 export default function TelegramLinkModal({ isOpen, onClose, onSuccess, userId }: TelegramLinkModalProps) {
