@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Test unauthorized access",
+      "method": "DELETE",
+      "path": "/",
+      "headers": {},
+      "body": {"courier_id": 1},
+      "expectedStatus": 401,
+      "expectedBody": {
+        "success": false,
+        "error": "Требуется авторизация"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test missing courier_id",
+      "method": "DELETE",
+      "path": "/",
+      "headers": {
+        "X-Auth-Token": "test-token-123"
+      },
+      "body": {},
+      "expectedStatus": 400,
+      "expectedBody": {
+        "success": false,
+        "error": "courier_id обязателен"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

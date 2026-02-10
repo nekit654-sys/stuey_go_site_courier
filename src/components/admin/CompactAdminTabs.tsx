@@ -7,7 +7,7 @@ import ActivityTab from './ActivityTab';
 import AdminsTab from './AdminsTab';
 import VisitAnalytics from './VisitAnalytics';
 
-import { AdminRequest, AdminStats, ReferralStats } from './types';
+import { ReferralStats } from './types';
 import { Courier } from './payments/types';
 
 interface CompactAdminTabsProps {
@@ -37,14 +37,6 @@ interface CompactAdminTabsProps {
 export default function CompactAdminTabs({
   activeTab,
   onTabChange,
-  requests,
-  stats,
-  autoRefresh,
-  lastUpdate,
-  onToggleAutoRefresh,
-  onRefresh,
-  onUpdateStatus,
-  onDelete,
   allCouriers,
   isLoadingCouriers,
   onRefreshCouriers,
@@ -53,8 +45,6 @@ export default function CompactAdminTabs({
   isLoadingReferrals,
   onRefreshReferrals,
   onDeleteAllUsers,
-  onViewImage,
-  pendingRequestsCount = 0,
   pendingWithdrawalsCount = 0,
   passwordForm,
   onPasswordFormChange,
@@ -65,6 +55,7 @@ export default function CompactAdminTabs({
   onDeleteAdmin,
   onLoadAdmins,
   admins = [],
+  lastUpdate,
 }: CompactAdminTabsProps) {
   const currentUsername = localStorage.getItem('adminUsername') || '';
   const isSuperAdmin = currentUsername === 'nekit654';
@@ -93,11 +84,7 @@ export default function CompactAdminTabs({
         >
           <Icon name="Users" size={16} />
           <span>Люди</span>
-          {pendingRequestsCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white">
-              {pendingRequestsCount}
-            </span>
-          )}
+
         </button>
         <button
           onClick={() => onTabChange('finances')}
@@ -226,11 +213,7 @@ export default function CompactAdminTabs({
                 : 'bg-white text-gray-600 active:bg-gray-100'
             }`}
           >
-            {pendingRequestsCount > 0 && (
-              <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {pendingRequestsCount}
-              </span>
-            )}
+
             <Icon name="Users" size={20} />
             <span className="text-[10px] font-semibold">Люди</span>
           </button>

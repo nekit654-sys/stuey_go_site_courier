@@ -144,19 +144,24 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
     }
 
     try {
-      const response = await fetch(
-        `${ADMIN_API.LEGACY_API}?route=couriers&action=delete`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Auth-Token': token,
-          },
-          body: JSON.stringify({
-            courier_id: courierId
-          }),
-        }
-      );
+      const funcMapResponse = await fetch('/func2url.json');
+      const funcMap = await funcMapResponse.json();
+      const deleteUrl = funcMap['courier-delete'];
+
+      if (!deleteUrl) {
+        throw new Error('URL для удаления курьеров не найден');
+      }
+
+      const response = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': token,
+        },
+        body: JSON.stringify({
+          courier_id: courierId
+        }),
+      });
 
       const result = await response.json();
 

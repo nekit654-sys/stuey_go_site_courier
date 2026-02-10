@@ -13,7 +13,7 @@ import { useBotProtection } from '@/hooks/useBotProtection';
 const Login: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('activity');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
 
   const {
@@ -36,18 +36,11 @@ const Login: React.FC = () => {
   } = useAdminAuth();
 
   const {
-    requests,
-    stats,
-    autoRefresh,
     lastUpdate,
     referralStats,
     isLoadingReferrals,
     allCouriers,
     isLoadingCouriers,
-    setAutoRefresh,
-    loadRequests,
-    updateRequestStatus,
-    deleteRequest,
     loadReferralStats,
     loadAllCouriers,
     deleteAllUsers,
@@ -56,14 +49,12 @@ const Login: React.FC = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    loadRequests();
     loadAllCouriers();
     loadReferralStats();
     loadWithdrawalsCount();
     loadAdmins();
 
     const interval = setInterval(() => {
-      loadRequests();
       loadAllCouriers();
       loadReferralStats();
       loadWithdrawalsCount();
@@ -90,10 +81,7 @@ const Login: React.FC = () => {
   };
 
   const handleLoginSuccess = async (token: string) => {
-    await Promise.all([
-      loadRequests(token, true),
-      loadAdmins(token)
-    ]);
+    await loadAdmins(token);
   };
 
   if (!isAuthenticated) {
@@ -119,14 +107,6 @@ const Login: React.FC = () => {
           <CompactAdminTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            requests={requests}
-            stats={stats}
-            autoRefresh={autoRefresh}
-            lastUpdate={lastUpdate}
-            onToggleAutoRefresh={() => setAutoRefresh(!autoRefresh)}
-            onRefresh={() => loadRequests()}
-            onUpdateStatus={updateRequestStatus}
-            onDelete={deleteRequest}
             allCouriers={allCouriers}
             isLoadingCouriers={isLoadingCouriers}
             onRefreshCouriers={loadAllCouriers}
@@ -135,8 +115,6 @@ const Login: React.FC = () => {
             isLoadingReferrals={isLoadingReferrals}
             onRefreshReferrals={loadReferralStats}
             onDeleteAllUsers={deleteAllUsers}
-            onViewImage={setSelectedImage}
-            pendingRequestsCount={stats.new}
             pendingWithdrawalsCount={pendingWithdrawals}
             passwordForm={passwordForm}
             onPasswordFormChange={setPasswordForm}
@@ -147,6 +125,7 @@ const Login: React.FC = () => {
             onDeleteAdmin={deleteAdmin}
             onLoadAdmins={loadAdmins}
             admins={admins}
+            lastUpdate={lastUpdate}
           />
         </div>
 
@@ -165,26 +144,7 @@ const Login: React.FC = () => {
         />
       </div>
 
-      {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-4xl w-full">
-            <Button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white rounded-full p-2"
-            >
-              <Icon name="X" size={24} />
-            </Button>
-            <img
-              src={selectedImage}
-              alt="Скриншот"
-              className="w-full h-auto rounded-lg border-4 border-white"
-            />
-          </div>
-        </div>
-      )}
+
     </>
   );
 };
