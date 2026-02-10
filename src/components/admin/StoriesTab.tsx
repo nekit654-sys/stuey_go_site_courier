@@ -112,7 +112,7 @@ export default function StoriesTab() {
     if (!editingStory) return;
 
     try {
-      const response = await fetch('https://functions.poehali.dev/f225856e-0853-4f67-92e5-4ff2a716193e', {
+      const response = await fetch('https://functions.poehali.dev/687c4b0c-583b-4365-9d89-755ef27059e3', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
