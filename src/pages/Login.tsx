@@ -11,7 +11,7 @@ import { API_URL } from '@/config/api';
 import { useBotProtection } from '@/hooks/useBotProtection';
 
 const Login: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('activity');
+  const [activeTab, setActiveTab] = useState<string>('people');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const [pendingWithdrawals, setPendingWithdrawals] = useState(0);

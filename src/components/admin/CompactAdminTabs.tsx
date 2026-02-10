@@ -3,7 +3,6 @@ import Icon from '@/components/ui/icon';
 import PeopleTab from './PeopleTab';
 import FinancesTab from './FinancesTab';
 import ContentTab from './ContentTab';
-import ActivityTab from './ActivityTab';
 import AdminsTab from './AdminsTab';
 import VisitAnalytics from './VisitAnalytics';
 
@@ -62,18 +61,7 @@ export default function CompactAdminTabs({
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
-      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200`}>
-        <button
-          onClick={() => onTabChange('activity')}
-          className={`flex flex-row items-center justify-center gap-2 py-3 px-4 rounded-md font-semibold transition-colors ${
-            activeTab === 'activity'
-              ? 'bg-white text-gray-900 shadow-sm border border-gray-300'
-              : 'bg-transparent text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          <Icon name="Newspaper" size={16} />
-          <span>Новости</span>
-        </button>
+      <div className={`hidden sm:grid w-full ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200`}>
         <button
           onClick={() => onTabChange('people')}
           className={`flex flex-row items-center justify-center gap-2 relative py-3 px-4 rounded-md font-semibold transition-colors ${
@@ -140,10 +128,6 @@ export default function CompactAdminTabs({
         )}
       </div>
 
-      {activeTab === 'activity' && (
-        <ActivityTab authToken={authToken} />
-      )}
-
       {activeTab === 'people' && (
         <PeopleTab
           allCouriers={allCouriers}
@@ -192,19 +176,7 @@ export default function CompactAdminTabs({
       )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 sm:hidden">
-        <div className={`grid ${isSuperAdmin ? 'grid-cols-6' : 'grid-cols-5'} h-16`}>
-          <button
-            onClick={() => onTabChange('activity')}
-            className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
-              activeTab === 'activity' 
-                ? 'bg-blue-50 text-blue-600 border-t-2 border-blue-600' 
-                : 'bg-white text-gray-600 active:bg-gray-100'
-            }`}
-          >
-            <Icon name="Newspaper" size={20} />
-            <span className="text-[10px] font-semibold">Новости</span>
-          </button>
-
+        <div className={`grid ${isSuperAdmin ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
           <button
             onClick={() => onTabChange('people')}
             className={`flex flex-col items-center justify-center gap-1 relative transition-colors ${
