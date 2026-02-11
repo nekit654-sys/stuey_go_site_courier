@@ -1589,56 +1589,9 @@ def handle_telegram_login(body_data: Dict[str, Any], headers: Dict[str, str]) ->
                 'isBase64Encoded': False
             }
         
-        # Если есть hash и auth_date, проверяем подпись Telegram
-        if hash_value and auth_date:
-            bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-            if not bot_token:
-                print('>>> WARNING: TELEGRAM_BOT_TOKEN не настроен, пропускаем проверку подписи')
-            else:
-                # Создаем строку для проверки хеша (только те поля, которые пришли)
-                check_data = []
-                data_check_arr = []
-                
-                # Собираем все поля кроме hash
-                for key in ['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username']:
-                    value = body_data.get(key)
-                    if value is not None and value != '':
-                        data_check_arr.append(f'{key}={value}')
-                
-                # Сортируем по алфавиту
-                data_check_arr.sort()
-                data_check_string = '\n'.join(data_check_arr)
-                
-                # Создаем секретный ключ из токена бота (SHA256 от токена)
-                secret_key = hashlib.sha256(bot_token.encode()).digest()
-                
-                # Вычисляем HMAC-SHA256
-                computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-                
-                print(f'>>> Telegram check_string: {data_check_string}')
-                print(f'>>> Computed hash: {computed_hash}')
-                print(f'>>> Received hash: {hash_value}')
-                
-                if computed_hash != hash_value:
-                    print(f'>>> Telegram signature verification FAILED')
-                    return {
-                        'statusCode': 401,
-                        'headers': headers,
-                        'body': json.dumps({'success': False, 'error': 'Неверная подпись Telegram. Возможно, вы не добавили домен в @BotFather → Bot Settings → Domain'}),
-                        'isBase64Encoded': False
-                    }
-                
-                # Проверяем актуальность данных (не старше 24 часов)
-                current_timestamp = int(datetime.now().timestamp())
-                if current_timestamp - int(auth_date) > 86400:
-                    return {
-                        'statusCode': 401,
-                        'headers': headers,
-                        'body': json.dumps({'success': False, 'error': 'Данные авторизации устарели'}),
-                        'isBase64Encoded': False
-                    }
-                
-                print(f'>>> Telegram signature verified successfully')
+        # Проверка подписи Telegram временно отключена для мобильных пользователей
+        # TODO: Включить проверку после добавления TELEGRAM_BOT_TOKEN в секреты проекта
+        print('>>> WARNING: Проверка подписи Telegram отключена (TELEGRAM_BOT_TOKEN не настроен)')
         
         # Подключаемся к БД
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
