@@ -554,72 +554,97 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         if method == 'GET' and action == 'get_all_couriers':
-            # Получение всех РЕАЛЬНЫХ курьеров из таблицы users (включая архивированных для админки)
-            cursor.execute("""
-                SELECT 
-                    u.id,
-                    u.full_name,
-                    u.phone,
-                    u.city,
-                    u.vehicle_type,
-                    u.oauth_provider,
-                    u.created_at,
-                    u.total_orders,
-                    COALESCE(u.email, '') as email,
-                    u.referral_code,
-                    u.invited_by_user_id,
-                    u.external_id,
-                    u.is_active,
-                    u.avatar_url,
-                    (
-                        SELECT COUNT(*) 
-                        FROM t_p25272970_courier_button_site.users u2 
-                        WHERE u2.invited_by_user_id = u.id
-                    ) as referral_count,
-                    u.archived_at,
-                    u.restore_until
-                FROM t_p25272970_courier_button_site.users u
-                ORDER BY 
-                    CASE WHEN u.archived_at IS NULL THEN 0 ELSE 1 END,
-                    u.created_at DESC
-            """)
-            
-            rows = cursor.fetchall()
-            couriers = []
-            
-            for row in rows:
-                couriers.append({
-                    'id': row[0],
-                    'full_name': row[1],
-                    'phone': row[2],
-                    'city': row[3],
-                    'vehicle_type': row[4],
-                    'oauth_provider': row[5],
-                    'created_at': row[6].isoformat() if row[6] else None,
-                    'total_orders': row[7] or 0,
-                    'email': row[8] or '',
-                    'referral_code': row[9],
-                    'invited_by_user_id': row[10],
-                    'external_id': row[11],
-                    'is_active': row[12],
-                    'avatar_url': row[13],
-                    'invited_count': row[14] or 0,
-                    'archived_at': row[15].isoformat() if row[15] else None,
-                    'restore_until': row[16].isoformat() if row[16] else None
-                })
-            
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'success': True,
-                    'couriers': couriers
-                }),
-                'isBase64Encoded': False
-            }
+            print(f'📥 [get_all_couriers] Запрос получен')
+            try:
+                # Получение всех РЕАЛЬНЫХ курьеров из таблицы users (включая архивированных для админки)
+                cursor.execute("""
+                    SELECT 
+                        u.id, u.full_name, u.email, u.phone, u.city, u.referral_code,
+                        u.is_active, u.oauth_provider, u.avatar_url, u.created_at,
+                        u.invited_by_user_id, u.external_id, u.archived_at, u.restore_until,
+                        inviter.full_name as inviter_name,
+                        inviter.referral_code as inviter_code,
+                        COALESCE(earnings.total_orders, 0) as total_orders,
+                        COALESCE(self_payouts.self_bonus, 0) as self_bonus_amount,
+                        COALESCE(ref_payouts.ref_income, 0) as referral_income
+                    FROM t_p25272970_courier_button_site.users u
+                    LEFT JOIN t_p25272970_courier_button_site.users inviter 
+                        ON u.invited_by_user_id = inviter.id
+                    LEFT JOIN (
+                        SELECT user_id, SUM(orders_count) as total_orders
+                        FROM t_p25272970_courier_button_site.courier_earnings
+                        GROUP BY user_id
+                    ) earnings ON u.id = earnings.user_id
+                    LEFT JOIN (
+                        SELECT user_id, SUM(amount) as self_bonus
+                        FROM t_p25272970_courier_button_site.payment_distributions
+                        WHERE recipient_type = 'courier_self'
+                        GROUP BY user_id
+                    ) self_payouts ON u.id = self_payouts.user_id
+                    LEFT JOIN (
+                        SELECT referrer_user_id, SUM(amount) as ref_income
+                        FROM t_p25272970_courier_button_site.payment_distributions
+                        WHERE recipient_type = 'courier_referrer'
+                        GROUP BY referrer_user_id
+                    ) ref_payouts ON u.id = ref_payouts.referrer_user_id
+                    ORDER BY 
+                        CASE WHEN u.archived_at IS NULL THEN 0 ELSE 1 END,
+                        u.created_at DESC
+                """)
+                
+                rows = cursor.fetchall()
+                print(f'✅ [get_all_couriers] Получено {len(rows)} строк из БД')
+                couriers = []
+                
+                for row in rows:
+                    couriers.append({
+                        'id': row[0],
+                        'full_name': row[1],
+                        'email': row[2],
+                        'phone': row[3],
+                        'city': row[4],
+                        'referral_code': row[5],
+                        'is_active': row[6],
+                        'oauth_provider': row[7],
+                        'avatar_url': row[8],
+                        'created_at': row[9].isoformat() if row[9] else None,
+                        'invited_by_user_id': row[10],
+                        'external_id': row[11],
+                        'archived_at': row[12].isoformat() if row[12] else None,
+                        'restore_until': row[13].isoformat() if row[13] else None,
+                        'inviter_name': row[14],
+                        'inviter_code': row[15],
+                        'total_orders': int(row[16]) if row[16] else 0,
+                        'self_bonus_amount': float(row[17]) if row[17] else 0,
+                        'referral_income': float(row[18]) if row[18] else 0,
+                    })
+                
+                print(f'🎉 [get_all_couriers] Возвращаем {len(couriers)} курьеров')
+                return {
+                    'statusCode': 200,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({
+                        'success': True,
+                        'couriers': couriers
+                    }),
+                    'isBase64Encoded': False
+                }
+            except Exception as e:
+                print(f'❌ [get_all_couriers] ОШИБКА: {str(e)}')
+                import traceback
+                traceback.print_exc()
+                return {
+                    'statusCode': 500,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({'error': f'Ошибка получения курьеров: {str(e)}'}),
+                    'isBase64Encoded': False
+                }
         
         # Получение списка администраторов
         if method == 'POST' and body_data.get('action') == 'get_admins':
@@ -677,74 +702,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'success': True,
                     'requests': requests
                 }),
-                'isBase64Encoded': False
-            }
-        
-        elif method == 'GET' and action == 'get_all_couriers':
-            # Получение всех курьеров с полными данными
-            cursor.execute("""
-                SELECT 
-                    u.id, u.full_name, u.email, u.phone, u.city, u.referral_code,
-                    u.is_active, u.oauth_provider, u.avatar_url, u.created_at,
-                    u.invited_by_user_id, u.external_id, u.archived_at, u.restore_until,
-                    inviter.full_name as inviter_name,
-                    inviter.referral_code as inviter_code,
-                    COALESCE(earnings.total_orders, 0) as total_orders,
-                    COALESCE(self_payouts.self_bonus, 0) as self_bonus_amount,
-                    COALESCE(ref_payouts.ref_income, 0) as referral_income
-                FROM t_p25272970_courier_button_site.users u
-                LEFT JOIN t_p25272970_courier_button_site.users inviter 
-                    ON u.invited_by_user_id = inviter.id
-                LEFT JOIN (
-                    SELECT user_id, SUM(orders_count) as total_orders
-                    FROM t_p25272970_courier_button_site.courier_earnings
-                    GROUP BY user_id
-                ) earnings ON u.id = earnings.user_id
-                LEFT JOIN (
-                    SELECT user_id, SUM(amount) as self_bonus
-                    FROM t_p25272970_courier_button_site.payment_distributions
-                    WHERE recipient_type = 'courier_self'
-                    GROUP BY user_id
-                ) self_payouts ON u.id = self_payouts.user_id
-                LEFT JOIN (
-                    SELECT referrer_user_id, SUM(amount) as ref_income
-                    FROM t_p25272970_courier_button_site.payment_distributions
-                    WHERE recipient_type = 'courier_referrer'
-                    GROUP BY referrer_user_id
-                ) ref_payouts ON u.id = ref_payouts.referrer_user_id
-                ORDER BY u.created_at DESC
-            """)
-            
-            rows = cursor.fetchall()
-            couriers = []
-            
-            for row in rows:
-                couriers.append({
-                    'id': row[0],
-                    'full_name': row[1],
-                    'email': row[2],
-                    'phone': row[3],
-                    'city': row[4],
-                    'referral_code': row[5],
-                    'is_active': row[6],
-                    'oauth_provider': row[7],
-                    'avatar_url': row[8],
-                    'created_at': row[9].isoformat() if row[9] else None,
-                    'invited_by_user_id': row[10],
-                    'external_id': row[11],
-                    'archived_at': row[12].isoformat() if row[12] else None,
-                    'restore_until': row[13].isoformat() if row[13] else None,
-                    'inviter_name': row[14],
-                    'inviter_code': row[15],
-                    'total_orders': int(row[16]) if row[16] else 0,
-                    'self_bonus_amount': float(row[17]) if row[17] else 0,
-                    'referral_income': float(row[18]) if row[18] else 0,
-                })
-            
-            return {
-                'statusCode': 200,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'success': True, 'couriers': couriers}),
                 'isBase64Encoded': False
             }
         
