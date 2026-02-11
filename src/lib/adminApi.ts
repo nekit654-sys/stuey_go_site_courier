@@ -279,18 +279,27 @@ class AdminApiClient {
 
   // Все курьеры
   async getAllCouriers() {
+    const token = this.getAuthToken();
+    console.log('🔑 [getAllCouriers] Токен:', token ? `${token.substring(0, 20)}...` : 'НЕТ ТОКЕНА');
+    console.log('📍 [getAllCouriers] URL:', `${ADMIN_PANEL_URL}?action=get_all_couriers`);
+    
     const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
       method: 'GET',
       headers: {
-        'X-Auth-Token': this.getAuthToken(),
+        'X-Auth-Token': token,
       },
     });
 
+    console.log('📥 [getAllCouriers] HTTP статус:', response.status);
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ [getAllCouriers] Ошибка:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('✅ [getAllCouriers] Получено курьеров:', data.couriers?.length || 0);
     return { couriers: data.couriers || [] };
   }
 
