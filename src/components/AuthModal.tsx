@@ -233,7 +233,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {/* Telegram Auth */}
               <div className="bg-[#0088cc] hover:bg-[#0077bb] text-white font-extrabold py-4 px-6 rounded-xl border-3 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all duration-150">
                 <TelegramLoginButton
-                  botName="StueyGoBot"
+                  botName="YaHubGo_bot"
                   onAuth={handleTelegramAuth}
                   buttonSize="large"
                   cornerRadius={12}

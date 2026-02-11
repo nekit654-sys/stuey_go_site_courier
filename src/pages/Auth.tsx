@@ -436,7 +436,7 @@ export default function Auth() {
                           Нажмите кнопку ниже для быстрого и безопасного входа
                         </p>
                         <TelegramLoginButton
-                          botName="StueyGoBot"
+                          botName="YaHubGo_bot"
                           onAuth={handleTelegramAuth}
                           buttonSize="large"
                           cornerRadius={20}
