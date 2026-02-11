@@ -116,6 +116,11 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const loadAllCouriers = async () => {
     if (!authToken) {
       console.error('Ошибка: нет токена авторизации для загрузки курьеров');
+      toast({
+        title: '❌ Нет токена',
+        description: 'Токен авторизации отсутствует',
+        variant: 'destructive',
+      });
       return;
     }
     
@@ -124,9 +129,28 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
       console.log('📥 Загружаем курьеров...');
       const data = await adminApi.getAllCouriers();
       console.log(`✅ Получено ${data.couriers.length} курьеров`, data.couriers.slice(0, 3));
+      
+      if (data.couriers.length === 0) {
+        toast({
+          title: '⚠️ Курьеры не найдены',
+          description: 'API вернул пустой массив курьеров',
+        });
+      } else {
+        toast({
+          title: '✅ Курьеры загружены',
+          description: `Получено ${data.couriers.length} курьеров`,
+        });
+      }
+      
       setAllCouriers(data.couriers);
     } catch (error) {
       console.error('❌ Исключение при загрузке курьеров:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      toast({
+        title: '❌ Ошибка загрузки',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setIsLoadingCouriers(false);
     }
