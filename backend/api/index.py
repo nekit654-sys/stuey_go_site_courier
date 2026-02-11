@@ -1595,29 +1595,36 @@ def handle_telegram_login(body_data: Dict[str, Any], headers: Dict[str, str]) ->
             if not bot_token:
                 print('>>> WARNING: TELEGRAM_BOT_TOKEN не настроен, пропускаем проверку подписи')
             else:
-                # Создаем строку для проверки хеша
+                # Создаем строку для проверки хеша (только те поля, которые пришли)
                 check_data = []
-                for key in sorted(['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username']):
+                data_check_arr = []
+                
+                # Собираем все поля кроме hash
+                for key in ['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username']:
                     value = body_data.get(key)
-                    if value:
-                        check_data.append(f'{key}={value}')
+                    if value is not None and value != '':
+                        data_check_arr.append(f'{key}={value}')
                 
-                check_string = '\n'.join(check_data)
+                # Сортируем по алфавиту
+                data_check_arr.sort()
+                data_check_string = '\n'.join(data_check_arr)
                 
-                # Создаем секретный ключ из токена бота
+                # Создаем секретный ключ из токена бота (SHA256 от токена)
                 secret_key = hashlib.sha256(bot_token.encode()).digest()
                 
-                # Вычисляем HMAC-SHA256 (правильный алгоритм для Telegram)
-                computed_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
+                # Вычисляем HMAC-SHA256
+                computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+                
+                print(f'>>> Telegram check_string: {data_check_string}')
+                print(f'>>> Computed hash: {computed_hash}')
+                print(f'>>> Received hash: {hash_value}')
                 
                 if computed_hash != hash_value:
                     print(f'>>> Telegram signature verification FAILED')
-                    print(f'>>> Expected: {computed_hash}')
-                    print(f'>>> Got: {hash_value}')
                     return {
                         'statusCode': 401,
                         'headers': headers,
-                        'body': json.dumps({'error': 'Неверная подпись Telegram'}),
+                        'body': json.dumps({'success': False, 'error': 'Неверная подпись Telegram. Возможно, вы не добавили домен в @BotFather → Bot Settings → Domain'}),
                         'isBase64Encoded': False
                     }
                 
@@ -1627,7 +1634,7 @@ def handle_telegram_login(body_data: Dict[str, Any], headers: Dict[str, str]) ->
                     return {
                         'statusCode': 401,
                         'headers': headers,
-                        'body': json.dumps({'error': 'Данные авторизации устарели'}),
+                        'body': json.dumps({'success': False, 'error': 'Данные авторизации устарели'}),
                         'isBase64Encoded': False
                     }
                 
