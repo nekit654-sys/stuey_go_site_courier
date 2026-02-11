@@ -203,6 +203,112 @@ class AdminApiClient {
       true
     );
   }
+
+  // Заявки
+  async getRequests() {
+    const response = await fetch(ADMIN_PANEL_URL, {
+      method: 'GET',
+      headers: {
+        'X-Auth-Token': this.getAuthToken(),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      requests: (data.requests || []).map((req: Record<string, unknown>) => ({
+        ...req,
+        screenshot_url: req.attachment_data || req.screenshot_url,
+      })),
+    };
+  }
+
+  async updateRequestStatus(id: number, status: string) {
+    const response = await fetch(ADMIN_PANEL_URL.replace('/admin-panel', '/api'), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id, status }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async deleteRequest(id: number) {
+    const response = await fetch(ADMIN_PANEL_URL.replace('/admin-panel', '/api'), {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Рефералы
+  async getReferralStats() {
+    const response = await fetch(
+      `${ADMIN_PANEL_URL.replace('/admin-panel', '/api')}?route=referrals&action=admin_stats`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Auth-Token': this.getAuthToken(),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Все курьеры
+  async getAllCouriers() {
+    const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
+      method: 'GET',
+      headers: {
+        'X-Auth-Token': this.getAuthToken(),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { couriers: data.couriers || [] };
+  }
+
+  // Удаление всех пользователей
+  async deleteAllUsers() {
+    const response = await fetch(`${ADMIN_PANEL_URL}?action=delete_all_users`, {
+      method: 'DELETE',
+      headers: {
+        'X-Auth-Token': this.getAuthToken(),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export const adminApi = new AdminApiClient();

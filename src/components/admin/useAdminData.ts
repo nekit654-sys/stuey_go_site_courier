@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { API_URL, ADMIN_PANEL_URL } from './constants';
+import { adminApi } from '@/lib/adminApi';
 import { AdminRequest, AdminStats, ReferralStats } from './types';
 
 export function useAdminData(authToken: string, isAuthenticated: boolean) {
@@ -10,59 +10,47 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
-  const [allCouriers, setAllCouriers] = useState<any[]>([]);
+  const [allCouriers, setAllCouriers] = useState<Record<string, unknown>[]>([]);
   const [isLoadingCouriers, setIsLoadingCouriers] = useState(false);
   const { toast } = useToast();
 
-  const loadRequests = async (token?: string, silent = false) => {
-    const useToken = token || authToken;
-    if (!useToken) {
+  const loadRequests = async (_token?: string, silent = false) => {
+    if (!authToken) {
       console.error('Ошибка: нет токена авторизации');
       return;
     }
     
     try {
-      const response = await fetch(`${ADMIN_PANEL_URL}`, {
-        headers: {
-          'X-Auth-Token': useToken
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const newRequests = (data.requests || []).map((req: any) => ({
-          ...req,
-          screenshot_url: req.attachment_data || req.screenshot_url
-        }));
+      const data = await adminApi.getRequests();
+      const newRequests = data.requests as AdminRequest[];
+      
+      const newStats = {
+        total: newRequests.length,
+        new: newRequests.filter((r) => r.status === 'new').length,
+        approved: newRequests.filter((r) => r.status === 'approved').length,
+        rejected: newRequests.filter((r) => r.status === 'rejected').length
+      };
+      
+      if (!silent && requests.length > 0 && newRequests.length > requests.length) {
+        const newCount = newRequests.length - requests.length;
         
-        const newStats = {
-          total: newRequests.length,
-          new: newRequests.filter((r: any) => r.status === 'new').length,
-          approved: newRequests.filter((r: any) => r.status === 'approved').length,
-          rejected: newRequests.filter((r: any) => r.status === 'rejected').length
-        };
-        
-        if (!silent && requests.length > 0 && newRequests.length > requests.length) {
-          const newCount = newRequests.length - requests.length;
-          
-          try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAziR2e3Meg0AAABQiN/y36AVChZdpe7rpVYOC0Kk5fyWQQsLU6fQv2AcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAzh1');
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
-          } catch (e) {
-          }
-          
-          toast({
-            title: '🔔 Новые заявки!',
-            description: `Поступило ${newCount} новых заявок`,
-          });
+        try {
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAziR2e3Meg0AAABQiN/y36AVChZdpe7rpVYOC0Kk5fyWQQsLU6fQv2AcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAcAzh1');
+          audio.volume = 0.3;
+          audio.play().catch(() => {});
+        } catch (e) {
+          // ignore
         }
         
-        setRequests(newRequests);
-        setStats(newStats);
-        setLastUpdate(new Date());
-      } else {
-        console.error('Ошибка загрузки заявок:', response.status);
+        toast({
+          title: '🔔 Новые заявки!',
+          description: `Поступило ${newCount} новых заявок`,
+        });
       }
+      
+      setRequests(newRequests);
+      setStats(newStats);
+      setLastUpdate(new Date());
     } catch (error) {
       console.error('Ошибка загрузки заявок:', error);
     }
@@ -70,25 +58,17 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
 
   const updateRequestStatus = async (id: number, status: string) => {
     try {
-      const response = await fetch(API_URL, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, status })
+      await adminApi.updateRequestStatus(id, status);
+      loadRequests();
+      toast({
+        title: 'Статус обновлен',
+        description: `Заявка ${status === 'approved' ? 'одобрена' : status === 'paid' ? 'выплачена' : 'отклонена'}`,
       });
-
-      if (response.ok) {
-        loadRequests();
-        toast({
-          title: 'Статус обновлен',
-          description: `Заявка ${status === 'approved' ? 'одобрена' : status === 'paid' ? 'выплачена' : 'отклонена'}`,
-        });
-      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось обновить статус';
       toast({
         title: 'Ошибка',
-        description: 'Не удалось обновить статус',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -100,31 +80,17 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id })
+      await adminApi.deleteRequest(id);
+      loadRequests();
+      toast({
+        title: 'Удалено',
+        description: 'Заявка успешно удалена',
       });
-
-      if (response.ok) {
-        loadRequests();
-        toast({
-          title: 'Удалено',
-          description: 'Заявка успешно удалена',
-        });
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось удалить заявку',
-          variant: 'destructive',
-        });
-      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось удалить заявку';
       toast({
         title: 'Ошибка',
-        description: 'Не удалось удалить заявку',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -138,17 +104,8 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     
     setIsLoadingReferrals(true);
     try {
-      const response = await fetch(`${API_URL}?route=referrals&action=admin_stats`, {
-        headers: {
-          'X-Auth-Token': authToken
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setReferralStats(data);
-      } else {
-        console.error('Ошибка загрузки статистики рефералов:', response.status);
-      }
+      const data = await adminApi.getReferralStats();
+      setReferralStats(data as ReferralStats);
     } catch (error) {
       console.error('Ошибка загрузки статистики рефералов:', error);
     } finally {
@@ -163,22 +120,9 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }
     
     setIsLoadingCouriers(true);
-    console.log('📦 Загрузка курьеров из нового API, токен:', authToken ? 'есть' : 'НЕТ');
     try {
-      const response = await fetch(`${ADMIN_PANEL_URL}?action=get_all_couriers`, {
-        headers: {
-          'X-Auth-Token': authToken
-        }
-      });
-      console.log('✅ Ответ от API курьеров:', response.status);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('📊 Курьеры получены:', data.couriers?.length || 0, data);
-        setAllCouriers(data.couriers || []);
-      } else {
-        const errorData = await response.json();
-        console.error('❌ Ошибка загрузки курьеров:', response.status, errorData);
-      }
+      const data = await adminApi.getAllCouriers();
+      setAllCouriers(data.couriers);
     } catch (error) {
       console.error('❌ Исключение при загрузке курьеров:', error);
     } finally {
@@ -192,31 +136,17 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }
     
     try {
-      const response = await fetch(`${ADMIN_PANEL_URL}?action=delete_all_users`, {
-        method: 'DELETE',
-        headers: {
-          'X-Auth-Token': authToken
-        }
+      const data = await adminApi.deleteAllUsers();
+      toast({
+        title: '✅ Успешно',
+        description: (data as { message?: string }).message || 'Все пользователи удалены',
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: '✅ Успешно',
-          description: data.message || 'Все пользователи удалены',
-        });
-        loadAllCouriers();
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось удалить пользователей',
-          variant: 'destructive',
-        });
-      }
+      loadAllCouriers();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось выполнить запрос';
       toast({
         title: 'Ошибка',
-        description: 'Не удалось выполнить запрос',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -226,7 +156,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     if (isAuthenticated && authToken) {
       loadRequests(authToken, true);
     }
-  }, [isAuthenticated, authToken]);
+  }, [isAuthenticated, authToken, loadRequests]);
 
   useEffect(() => {
     if (!isAuthenticated || !autoRefresh) return;
@@ -236,7 +166,7 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, autoRefresh, authToken]);
+  }, [isAuthenticated, autoRefresh, authToken, loadRequests]);
 
   return {
     requests,
