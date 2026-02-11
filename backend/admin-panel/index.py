@@ -642,7 +642,56 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        elif method == 'DELETE' and action == 'delete_all_users':
+        elif method == 'POST' and action == 'delete_courier':
+            user_id = body_data.get('user_id')
+            if not user_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ID курьера обязателен'}),
+                    'isBase64Encoded': False
+                }
+            
+            # Получаем данные курьера
+            cursor.execute("""
+                SELECT full_name, external_id 
+                FROM t_p25272970_courier_button_site.users 
+                WHERE id = %s
+            """, (user_id,))
+            user = cursor.fetchone()
+            
+            if not user:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Курьер не найден'}),
+                    'isBase64Encoded': False
+                }
+            
+            full_name, telegram_id = user[0], user[1]
+            
+            # Архивируем курьера на 14 дней
+            cursor.execute("""
+                UPDATE t_p25272970_courier_button_site.users 
+                SET archived_at = NOW(), 
+                    restore_until = NOW() + INTERVAL '14 days'
+                WHERE id = %s
+            """, (user_id,))
+            
+            log_activity(cursor, 'courier_deleted', f'Курьер {full_name} архивирован', {'user_id': user_id, 'telegram_id': telegram_id})
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'success': True, 
+                    'message': f'Курьер {full_name} архивирован. Удаление через 14 дней.'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'POST' and action == 'delete_all_users':
             # Удаление всех РЕАЛЬНЫХ курьеров и связанных данных
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.messenger_connections")
             cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores")
