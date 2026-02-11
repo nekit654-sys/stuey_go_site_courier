@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSound } from '@/hooks/useSound';
 
-const WhatsAppButton: React.FC = () => {
+const TelegramButton: React.FC = () => {
   const location = useLocation();
   const [isPulsing, setIsPulsing] = useState(false);
   const { playSound } = useSound();
@@ -73,4 +73,4 @@ const WhatsAppButton: React.FC = () => {
   );
 };
 
-export default WhatsAppButton;
+export default TelegramButton;

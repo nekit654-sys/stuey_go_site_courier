@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GameProvider } from "@/contexts/GameContext";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import TelegramButton from "@/components/TelegramButton";
 import FeedbackTab from "@/components/FeedbackTab";
 import VisitTracker from "@/components/VisitTracker";
 import BackgroundMusic from "@/components/BackgroundMusic";
@@ -34,7 +34,7 @@ const queryClient = new QueryClient();
 
 declare global {
   interface Window {
-    ym?: (id: number, action: string, ...args: any[]) => void;
+    ym?: (id: number, action: string, ...args: unknown[]) => void;
   }
 }
 
@@ -111,7 +111,7 @@ const AppRoutes = () => {
       {location.pathname !== '/ask' && location.pathname !== '/game' && location.pathname !== '/game-3d' && location.pathname !== '/games' && location.pathname !== '/courier-game' && location.pathname !== '/tapper-game' && (
         <>
           <VisitTracker cooldownMinutes={30} />
-          <WhatsAppButton />
+          <TelegramButton />
           <FeedbackTab />
           <BackgroundMusic />
         </>
