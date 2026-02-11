@@ -102,6 +102,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         query_params = event.get('queryStringParameters') or {}
         action = query_params.get('action', 'payouts')
         
+        print(f'🔍 Запрос: method={method}, action={action}, has_token={bool(auth_token)}')
+        
         # Получение ленты активности
         if method == 'GET' and action == 'activity':
             cursor.execute("""
