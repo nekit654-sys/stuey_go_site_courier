@@ -64,6 +64,7 @@ def send_telegram_notification(telegram_id: str, message: str) -> bool:
         return False
 
 def convert_decimals(obj: Any) -> Any:
+    from datetime import date, time
     if isinstance(obj, dict):
         return {key: convert_decimals(value) for key, value in obj.items()}
     elif isinstance(obj, list):
@@ -71,6 +72,10 @@ def convert_decimals(obj: Any) -> Any:
     elif isinstance(obj, Decimal):
         return float(obj)
     elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, date):
+        return obj.isoformat()
+    elif isinstance(obj, time):
         return obj.isoformat()
     return obj
 
