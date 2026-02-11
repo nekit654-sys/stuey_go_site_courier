@@ -70,34 +70,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cursor = conn.cursor()
         
         # Автоматическая очистка просроченных архивов (выполняется при каждом запросе)
-        cursor.execute("""
-            SELECT id, full_name, external_id 
-            FROM t_p25272970_courier_button_site.users 
-            WHERE archived_at IS NOT NULL 
-            AND restore_until < NOW()
-        """)
-        expired_users = cursor.fetchall()
-        
-        if expired_users:
-            for user in expired_users:
-                user_id, full_name, telegram_id = user[0], user[1], user[2]
-                
-                # Удаляем все связанные данные
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.messenger_connections WHERE user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores WHERE user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.withdrawal_requests WHERE user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings WHERE user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions WHERE user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions WHERE referrer_user_id = %s", (user_id,))
-                cursor.execute("DELETE FROM t_p25272970_courier_button_site.users WHERE id = %s", (user_id,))
-                
-                log_activity(cursor, 'courier_deleted_permanently', f'Курьер {full_name} окончательно удалён после истечения срока восстановления', {
-                    'user_id': user_id,
-                    'telegram_id': telegram_id
-                })
+        try:
+            cursor.execute("""
+                SELECT id, full_name, external_id 
+                FROM t_p25272970_courier_button_site.users 
+                WHERE archived_at IS NOT NULL 
+                AND restore_until < NOW()
+            """)
+            expired_users = cursor.fetchall()
             
-            conn.commit()
-            print(f'🗑️ Автоочистка: удалено {len(expired_users)} просроченных курьеров')
+            if expired_users:
+                for user in expired_users:
+                    user_id, full_name, telegram_id = user[0], user[1], user[2]
+                    
+                    # Удаляем все связанные данные
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.messenger_connections WHERE user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.game_scores WHERE user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.withdrawal_requests WHERE user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.courier_earnings WHERE user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions WHERE user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.payment_distributions WHERE referrer_user_id = %s", (user_id,))
+                    cursor.execute("DELETE FROM t_p25272970_courier_button_site.users WHERE id = %s", (user_id,))
+                    
+                    log_activity(cursor, 'courier_deleted_permanently', f'Курьер {full_name} окончательно удалён после истечения срока восстановления', {
+                        'user_id': user_id,
+                        'telegram_id': telegram_id
+                    })
+                
+                conn.commit()
+                print(f'🗑️ Автоочистка: удалено {len(expired_users)} просроченных курьеров')
+        except Exception as cleanup_error:
+            print(f'⚠️ Ошибка автоочистки (не критично): {str(cleanup_error)}')
+            conn.rollback()
         
         query_params = event.get('queryStringParameters') or {}
         action = query_params.get('action', 'payouts')
