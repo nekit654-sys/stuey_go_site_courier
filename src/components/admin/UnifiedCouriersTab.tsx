@@ -12,6 +12,7 @@ import TopReferrersTab from './couriers/TopReferrersTab';
 import EditCourierModal from './EditCourierModal';
 import { toast } from 'sonner';
 import { ADMIN_API, AUTO_REFRESH_INTERVALS } from '@/config/admin-api';
+import { adminApi } from '@/lib/adminApi';
 
 interface Courier {
   id: number;
@@ -130,58 +131,22 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
       toast.success('Данные курьера успешно обновлены');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Ошибка при обновлении данных');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при обновлении данных';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
   const handleDeleteCourier = async (courierId: number) => {
-    const token = localStorage.getItem('auth_token');
-    console.log('🔑 Token from localStorage:', token);
-    
-    if (!token) {
-      toast.error('Необходима авторизация');
-      return;
-    }
-
     try {
-      const funcMapResponse = await fetch('/func2url.json');
-      const funcMap = await funcMapResponse.json();
-      const deleteUrl = funcMap['courier-delete'];
-
-      if (!deleteUrl) {
-        throw new Error('URL для удаления курьеров не найден');
-      }
-
-      console.log('🌐 Sending DELETE request to:', deleteUrl);
-      console.log('📋 Headers:', { 'X-Auth-Token': token });
-      console.log('📦 Body:', { courier_id: courierId });
-
-      const response = await fetch(deleteUrl, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth-Token': token,
-        },
-        body: JSON.stringify({
-          courier_id: courierId
-        }),
-      });
-
-      console.log('📥 Response status:', response.status);
-      const result = await response.json();
-      console.log('📥 Response body:', result);
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Ошибка удаления');
-      }
-
-      toast.success(result.message || 'Курьер архивирован');
+      const result = await adminApi.deleteCourier(courierId);
+      toast.success(result.message || 'Курьер успешно удалён');
       onRefresh();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при удалении';
       console.error('❌ Delete error:', error);
-      toast.error(error.message || 'Ошибка при удалении');
+      toast.error(errorMessage);
       throw error;
     }
   };
