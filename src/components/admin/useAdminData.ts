@@ -121,7 +121,9 @@ export function useAdminData(authToken: string, isAuthenticated: boolean) {
     
     setIsLoadingCouriers(true);
     try {
+      console.log('📥 Загружаем курьеров...');
       const data = await adminApi.getAllCouriers();
+      console.log(`✅ Получено ${data.couriers.length} курьеров`, data.couriers.slice(0, 3));
       setAllCouriers(data.couriers);
     } catch (error) {
       console.error('❌ Исключение при загрузке курьеров:', error);

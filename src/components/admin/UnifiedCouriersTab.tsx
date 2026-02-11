@@ -140,9 +140,14 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
   const handleDeleteCourier = async (courierId: number) => {
     try {
+      console.log('🗑️ Удаление курьера ID:', courierId);
       const result = await adminApi.deleteCourier(courierId);
+      console.log('✅ Результат удаления:', result);
       toast.success(result.message || 'Курьер успешно удалён');
-      onRefresh();
+      
+      // Принудительное обновление списка
+      await onRefresh();
+      console.log('🔄 Список курьеров обновлён');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Ошибка при удалении';
       console.error('❌ Delete error:', error);
