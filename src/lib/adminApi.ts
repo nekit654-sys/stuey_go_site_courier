@@ -296,18 +296,9 @@ class AdminApiClient {
 
   // Удаление всех пользователей
   async deleteAllUsers() {
-    const response = await fetch(`${ADMIN_PANEL_URL}?action=delete_all_users`, {
-      method: 'DELETE',
-      headers: {
-        'X-Auth-Token': this.getAuthToken(),
-      },
+    return this.request<{ success: boolean; message?: string }>({
+      action: 'delete_all_users',
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    return response.json();
   }
 }
 
