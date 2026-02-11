@@ -1753,11 +1753,16 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
         
         if provider == 'yandex':
             # Обмен code на access_token
+            yandex_client_id = os.environ.get('YANDEX_CLIENT_ID', '97aff4efd9cd4403854397576fed94d5')
+            yandex_client_secret = os.environ.get('YANDEX_CLIENT_SECRET', '')
+            
+            print(f'>>> Yandex OAuth: client_id={yandex_client_id[:10]}..., redirect_uri={redirect_uri}')
+            
             token_response = requests.post('https://oauth.yandex.ru/token', data={
                 'grant_type': 'authorization_code',
                 'code': code,
-                'client_id': '97aff4efd9cd4403854397576fed94d5',
-                'client_secret': os.environ.get('YANDEX_CLIENT_SECRET', ''),
+                'client_id': yandex_client_id,
+                'client_secret': yandex_client_secret,
                 'redirect_uri': redirect_uri
             })
             

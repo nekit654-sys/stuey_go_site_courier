@@ -184,7 +184,10 @@ export default function Auth() {
     const yandexClientId = '97aff4efd9cd4403854397576fed94d5';
     const isProd = window.location.hostname === 'yecurierhub.ru' || window.location.hostname === 'stuey-go.ru';
     const redirectUri = isProd ? `https://${window.location.hostname}/auth` : `${window.location.origin}/auth`;
-    const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandexClientId}&redirect_uri=${redirectUri}&state=provider=yandex`;
+    const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandexClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=provider=yandex`;
+    
+    console.log('[Yandex OAuth] Redirect URI:', redirectUri);
+    console.log('[Yandex OAuth] Full URL:', yandexAuthUrl);
     
     window.location.href = yandexAuthUrl;
   };
