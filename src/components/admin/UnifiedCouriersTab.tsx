@@ -8,7 +8,7 @@ import CourierStatsCards from './couriers/CourierStatsCards';
 import CouriersList from './couriers/CouriersList';
 import ReferralStatsTab from './couriers/ReferralStatsTab';
 import ReferralsListTab from './couriers/ReferralsListTab';
-import TopReferrersTab from './couriers/TopReferrersTab';
+
 import EditCourierModal from './EditCourierModal';
 import { toast } from 'sonner';
 import { ADMIN_API, AUTO_REFRESH_INTERVALS } from '@/config/admin-api';
@@ -43,13 +43,7 @@ interface OverallStats {
   total_referred_orders: number;
 }
 
-interface TopReferrer {
-  name: string;
-  phone: string;
-  total_referrals: number;
-  total_bonuses: number;
-  rank: number;
-}
+
 
 interface Referral {
   referrer_name: string;
@@ -68,7 +62,6 @@ interface UnifiedCouriersTabProps {
   onDeleteAllUsers?: () => void;
   referralStats: {
     overall_stats: OverallStats | null;
-    top_referrers: TopReferrer[];
     all_referrals: Referral[];
   } | null;
   isLoadingReferrals: boolean;
@@ -184,7 +177,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
   const totalOrders = couriers.reduce((sum, c) => sum + c.total_orders, 0);
 
   const overallStats = referralStats?.overall_stats || null;
-  const topReferrers = referralStats?.top_referrers || [];
   const referrals = referralStats?.all_referrals || [];
 
   return (
@@ -204,7 +196,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
       </Card>
 
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="couriers">
             <Icon name="Users" size={16} className="mr-2" />
             Все курьеры
@@ -216,10 +208,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
           <TabsTrigger value="referrals">
             <Icon name="UserPlus" size={16} className="mr-2" />
             Рефералы
-          </TabsTrigger>
-          <TabsTrigger value="top">
-            <Icon name="Award" size={16} className="mr-2" />
-            Топ
           </TabsTrigger>
         </TabsList>
 
@@ -266,10 +254,6 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
 
         <TabsContent value="referrals" className="space-y-6 mt-6">
           <ReferralsListTab referrals={referrals} isLoading={isLoadingReferrals} />
-        </TabsContent>
-
-        <TabsContent value="top" className="space-y-6 mt-6">
-          <TopReferrersTab topReferrers={topReferrers} isLoading={isLoadingReferrals} />
         </TabsContent>
       </Tabs>
 
