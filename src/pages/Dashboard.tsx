@@ -27,6 +27,7 @@ import BottomNav from '@/components/dashboard/BottomNav';
 import SettingsModal from '@/components/dashboard/SettingsModal';
 import TelegramConnectCard from '@/components/dashboard/TelegramConnectCard';
 import TelegramLinkModal from '@/components/dashboard/TelegramLinkModal';
+import EarningsChart from '@/components/dashboard/EarningsChart';
 
 interface Stats {
   total_referrals: number;
@@ -375,6 +376,11 @@ export default function Dashboard() {
                 {stats ? (
                   <>
                     <StatsCards stats={stats} />
+                    <EarningsChart stats={{
+                      self_bonus_amount: stats.self_bonus_amount || 0,
+                      referral_income: stats.referral_income || 0,
+                      total_paid: stats.total_paid || 0
+                    }} />
                     <ReferralMotivation 
                       totalReferrals={stats.total_referrals || 0}
                       onShowReferrals={() => setActiveTab('referrals')}
