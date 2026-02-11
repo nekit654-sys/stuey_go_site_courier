@@ -199,7 +199,7 @@ const UnifiedCouriersTab: React.FC<UnifiedCouriersTabProps> = ({
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="couriers">
             <Icon name="Users" size={16} className="mr-2" />
-            Все курьеры
+            Курьеры
           </TabsTrigger>
           <TabsTrigger value="stats">
             <Icon name="TrendingUp" size={16} className="mr-2" />
