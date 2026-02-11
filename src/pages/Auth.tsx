@@ -62,7 +62,7 @@ export default function Auth() {
   const handleOAuthCallback = async (provider: string, code: string) => {
     setLoading(true);
     try {
-      const isProd = window.location.hostname === 'yahub-go.ru';
+      const isProd = window.location.hostname === 'yecurierhub.ru' || window.location.hostname === 'stuey-go.ru';
       const redirectUri = isProd ? `https://${window.location.hostname}/auth` : `${window.location.origin}/auth`;
       
       const requestBody = {
@@ -173,8 +173,8 @@ export default function Auth() {
 
   const handleVKAuth = () => {
     const vkAppId = '52854627';
-    const isProd = window.location.hostname === 'stuey-go.ru';
-    const redirectUri = isProd ? 'https://stuey-go.ru/auth' : `${window.location.origin}/auth`;
+    const isProd = window.location.hostname === 'yecurierhub.ru' || window.location.hostname === 'stuey-go.ru';
+    const redirectUri = isProd ? `https://${window.location.hostname}/auth` : `${window.location.origin}/auth`;
     const vkAuthUrl = `https://oauth.vk.com/authorize?client_id=${vkAppId}&redirect_uri=${redirectUri}&display=page&scope=email&response_type=code&v=5.131&state=provider=vk`;
     
     window.location.href = vkAuthUrl;
@@ -182,8 +182,8 @@ export default function Auth() {
 
   const handleYandexAuth = () => {
     const yandexClientId = '97aff4efd9cd4403854397576fed94d5';
-    const isProd = window.location.hostname === 'stuey-go.ru';
-    const redirectUri = isProd ? 'https://stuey-go.ru/auth' : `${window.location.origin}/auth`;
+    const isProd = window.location.hostname === 'yecurierhub.ru' || window.location.hostname === 'stuey-go.ru';
+    const redirectUri = isProd ? `https://${window.location.hostname}/auth` : `${window.location.origin}/auth`;
     const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${yandexClientId}&redirect_uri=${redirectUri}&state=provider=yandex`;
     
     window.location.href = yandexAuthUrl;
