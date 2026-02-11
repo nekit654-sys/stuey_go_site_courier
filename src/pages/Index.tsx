@@ -59,7 +59,10 @@ const Index = () => {
     
     const ref = searchParams.get('ref');
     if (ref) {
-      navigate(`/auth?ref=${ref}`, { replace: true });
+      // Сохраняем реферальный код в localStorage для AuthModal
+      localStorage.setItem('referral_code', ref);
+      // Убираем ?ref= из URL, но не переходим на /auth
+      navigate('/', { replace: true });
     }
 
     fetchStories();

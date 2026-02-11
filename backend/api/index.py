@@ -1808,12 +1808,71 @@ def handle_oauth_login(provider: str, body_data: Dict[str, Any], headers: Dict[s
                 avatar_url = f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
         
         elif provider == 'vk':
-            # Для VK - используем существующую логику (временно)
-            oauth_id = body_data.get('code', str(uuid.uuid4())).replace("'", "''")
-            full_name = (body_data.get('name', 'Пользователь') or 'Пользователь').replace("'", "''")
-            email = (body_data.get('email') or '').replace("'", "''")
-            phone = (body_data.get('phone') or '').replace("'", "''")
-            avatar_url = (body_data.get('avatar') or '').replace("'", "''")
+            # Обмен code на access_token для VK
+            vk_app_id = '52854627'
+            vk_secret = os.environ.get('VK_CLIENT_SECRET', '')
+            
+            print(f'>>> VK OAuth: app_id={vk_app_id}, redirect_uri={redirect_uri}')
+            
+            token_response = requests.post('https://oauth.vk.com/access_token', params={
+                'client_id': vk_app_id,
+                'client_secret': vk_secret,
+                'redirect_uri': redirect_uri,
+                'code': code
+            })
+            
+            print(f'>>> VK token response: status={token_response.status_code}')
+            
+            if token_response.status_code != 200:
+                error_detail = token_response.text
+                print(f'>>> VK token error: {error_detail}')
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': f'Failed to exchange code for token: {error_detail}'}),
+                    'isBase64Encoded': False
+                }
+            
+            token_data = token_response.json()
+            access_token = token_data.get('access_token')
+            vk_user_id = token_data.get('user_id')
+            vk_email = token_data.get('email', '')
+            
+            # Получаем данные пользователя
+            user_info_response = requests.get('https://api.vk.com/method/users.get', params={
+                'user_ids': vk_user_id,
+                'fields': 'photo_200,screen_name',
+                'access_token': access_token,
+                'v': '5.131'
+            })
+            
+            if user_info_response.status_code != 200:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': 'Failed to get user info from VK'}),
+                    'isBase64Encoded': False
+                }
+            
+            vk_response_data = user_info_response.json()
+            
+            if 'error' in vk_response_data:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'success': False, 'error': f'VK API error: {vk_response_data["error"].get("error_msg", "Unknown error")}'}),
+                    'isBase64Encoded': False
+                }
+            
+            vk_user = vk_response_data.get('response', [{}])[0]
+            
+            print(f'>>> VK user info: {vk_user}')
+            
+            oauth_id = str(vk_user_id).replace("'", "''")
+            full_name = f"{vk_user.get('first_name', '')} {vk_user.get('last_name', '')}".strip().replace("'", "''") or 'Пользователь'
+            email = vk_email.replace("'", "''")
+            phone = ''
+            avatar_url = vk_user.get('photo_200', '').replace("'", "''")
         
         else:
             # Для других провайдеров - используем существующую логику

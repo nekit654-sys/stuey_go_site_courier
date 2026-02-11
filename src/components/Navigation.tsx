@@ -1,20 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGame } from "@/contexts/GameContext";
 import { useSound } from "@/hooks/useSound";
+import AuthModal from "@/components/AuthModal";
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { playSound } = useSound();
   const { isAuthenticated } = useAuth();
   const { openGame } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGameMenuOpen, setIsGameMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
 
   const menuItems = [
@@ -163,14 +166,30 @@ const Navigation = () => {
             </div>
 
             {/* Login/Profile Button */}
-            <Link 
-              to={isAuthenticated ? "/dashboard" : "/auth"}
-              onClick={(e) => {
-                console.log('[Navigation] Button clicked:', { isAuthenticated, target: isAuthenticated ? '/dashboard' : '/auth' });
-                playSound('click');
-              }}
-            >
+            {isAuthenticated ? (
+              <Link to="/dashboard" onClick={() => playSound('click')}>
+                <Button
+                  onMouseEnter={() => playSound('hover')}
+                  className="
+                    bg-gradient-to-b from-blue-400 to-blue-500
+                    text-white font-extrabold px-5 py-2.5 rounded-xl
+                    shadow-[0_4px_0_0_rgba(0,0,0,1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,1)]
+                    hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none
+                    transition-all duration-150
+                    border-3 border-black
+                    flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]
+                  "
+                >
+                  <Icon name="User" size={18} />
+                  <span className="hidden lg:inline">Кабинет</span>
+                </Button>
+              </Link>
+            ) : (
               <Button
+                onClick={() => {
+                  playSound('click');
+                  setShowAuthModal(true);
+                }}
                 onMouseEnter={() => playSound('hover')}
                 className="
                   bg-gradient-to-b from-blue-400 to-blue-500
@@ -183,9 +202,9 @@ const Navigation = () => {
                 "
               >
                 <Icon name="User" size={18} />
-                <span className="hidden lg:inline">{isAuthenticated ? 'Кабинет' : 'Войти'}</span>
+                <span className="hidden lg:inline">Войти</span>
               </Button>
-            </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -294,8 +313,29 @@ const Navigation = () => {
             </div>
 
             {/* Mobile Login/Profile Button */}
-            <Link to={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleMenuItemClick}>
+            {isAuthenticated ? (
+              <Link to="/dashboard" onClick={handleMenuItemClick}>
+                <Button
+                  onMouseEnter={() => playSound('hover')}
+                  className="
+                    w-full justify-start bg-gradient-to-b from-blue-400 to-blue-500
+                    text-white font-extrabold transition-all duration-150
+                    shadow-[0_4px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[4px]
+                    py-6 text-base rounded-xl border-3 border-black
+                    hover:from-blue-500 hover:to-blue-600
+                  "
+                >
+                  <Icon name="User" size={20} className="mr-3 text-white" />
+                  Личный кабинет
+                </Button>
+              </Link>
+            ) : (
               <Button
+                onClick={() => {
+                  playSound('click');
+                  setShowAuthModal(true);
+                  handleMenuItemClick();
+                }}
                 onMouseEnter={() => playSound('hover')}
                 className="
                   w-full justify-start bg-gradient-to-b from-blue-400 to-blue-500
@@ -306,12 +346,15 @@ const Navigation = () => {
                 "
               >
                 <Icon name="User" size={20} className="mr-3 text-white" />
-                {isAuthenticated ? 'Личный кабинет' : 'Войти'}
+                Войти
               </Button>
-            </Link>
+            )}
           </div>
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </nav>
   );
 };
