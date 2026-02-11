@@ -552,7 +552,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         if method == 'GET' and action == 'get_all_couriers':
-            # Получение всех РЕАЛЬНЫХ курьеров из таблицы users
+            # Получение всех РЕАЛЬНЫХ курьеров из таблицы users (включая архивированных для админки)
             cursor.execute("""
                 SELECT 
                     u.id,
@@ -573,9 +573,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         SELECT COUNT(*) 
                         FROM t_p25272970_courier_button_site.users u2 
                         WHERE u2.invited_by_user_id = u.id
-                    ) as referral_count
+                    ) as referral_count,
+                    u.archived_at,
+                    u.restore_until
                 FROM t_p25272970_courier_button_site.users u
-                ORDER BY u.created_at DESC
+                ORDER BY 
+                    CASE WHEN u.archived_at IS NULL THEN 0 ELSE 1 END,
+                    u.created_at DESC
             """)
             
             rows = cursor.fetchall()
@@ -597,7 +601,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'external_id': row[11],
                     'is_active': row[12],
                     'avatar_url': row[13],
-                    'invited_count': row[14] or 0
+                    'invited_count': row[14] or 0,
+                    'archived_at': row[15].isoformat() if row[15] else None,
+                    'restore_until': row[16].isoformat() if row[16] else None
                 })
             
             return {
